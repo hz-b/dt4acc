@@ -1,0 +1,122 @@
+#------------------------------------------------------------------------------
+# Implementation of a muxer for the digital twin
+# Works together with the pydevice implementation of the muxer
+
+# muxer powerconverter part
+record(ao, "$(PREFIX):QSPAZR:set")
+{
+	field(DESC, "Sim. mux. power converter: setpoint")
+	field(VAL, 0)
+	# field(TPRO, 1)
+	field(PREC, 5)
+	field(FLNK, "$(PREFIX):mux:im:set")
+}
+
+record(fanout, "$(PREFIX):mux:im:set")
+{
+	field(LNK0, "$(PREFIX):mux:out")
+	field(LNK1, "$(PREFIX):QSPAZR:rdbk")
+}
+
+record(ai, "$(PREFIX):QSPAZR:rdbk")
+{
+	field(DESC, "Sim. mux. power converter: readback")
+	field(VAL, 0)
+	field(PREC, 5)
+	# field(TPRO, 1)
+	field(INP, "$(PREFIX):QSPAZR:set")
+}
+
+record(bo, "$(PREFIX):QSPAZR:cmd1")
+{
+	field(DESC, "Simulated muxer power converter")
+	field(VAL, 0)
+	field(ZNAM, "ON")
+	field(ONAM, "set")
+	# field(TPRO, 1)
+}
+
+record(bo, "$(PREFIX):QSPAZR:stat1")
+{
+	field(DESC, "Simulated muxer power converter")
+	field(VAL, 0)
+	field(ZNAM, "OFF")
+	field(ZNAM, "ON")
+	# field(TPRO, 1)
+}
+
+
+record(bo, "$(PREFIX):QSPAZR:stat2")
+{
+	field(DESC, "Simulated muxer power converter")
+	field(VAL, 0)
+	field(ZNAM, "Sum Error")
+	field(ONAM, "No Error")
+	# field(TPRO, 1)
+}
+
+# Multiplexer check
+#
+record(calcout, "$(PREFIX):mux:out")
+{
+	field(DESC, "Forward mux pc to approp. magnet")
+	field(INPA, "$(PREFIX):QSPAZR:ps CPP")
+	# just used to send the input to some out link
+	field(CALC, "A")
+	field(OCAL, "A")
+	# field(TPRO, 1)
+}
+
+
+record(stringout, "$(PREFIX):mux:im:selected")
+{
+    field(DESC, "Mux dt: sel mag. full string")
+    field(DTYP, "pydev")
+    field(OUT,  "@pydev.iointr('mux:im:selected')")
+    field(SCAN, "I/O Intr")
+}
+
+# Muxer part
+record(stringin, "$(PREFIX):PMUXZR:name")
+{
+    field(DESC, "Mux dt: select magnet to relay to")
+    field(DTYP, "pydev")
+    field(INP,  "@pydev.iointr('muxer_selected_magnet')")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "Mux OFF")
+    field(PINI, "YES")
+    #field(TPRO, 1)
+}
+
+record(bo, "$(PREFIX):PMUXZR:off")
+{
+    field(DESC, "Mux dt: off or on?")
+    field(ZNAM, "Off")
+    field(ONAM, "set")
+    field(VAL,  0)
+    field(PINI, "YES")
+    field(DTYP, "pydev")
+    field(OUT,  "@mux.off(%VAL%)")
+    field(TPRO, 1)
+}
+
+record(bo, "$(PREFIX):PMUXZR:relay_ps")
+{
+    field(DESC, "Mux dt: off or on?")
+    field(ZNAM, "Off")
+    field(ONAM, "On")
+    field(VAL,  0)
+    field(PINI, "YES")
+    # field(TPRO, 1)
+}
+
+record(bo, "$(PREFIX):PMUXZR:disable")
+{
+    field(DESC, "Mux dt: off or on?")
+    field(ZNAM, "disabled")
+    field(ONAM, "enabled")
+    field(VAL,  0)
+    field(PINI, "YES")
+    # field(TPRO, 1)
+}
+# EOF

@@ -1,0 +1,87 @@
+#------------------------------------------------------------------------------
+# Are the double records necessary ...
+# offsets
+record(ao,  "$(PREFIX):$(ELEMENT):x:set")
+{
+
+     field(DESC, "Pushing x-offset to element")
+     field(DTYP, "pydev")
+     field(OUT,  "@vacc.set_property_and_readback(element_name='$(ELEMENT)', element_index=0, method_names=['set_dx'], value=%VAL%, readback_method='get_dx', readback_label='$(PREFIX):$(ELEMENT)-getDx', twiss=True, orbit=True)")
+     field(PREC, 6)
+     field(MDEL, 1e-5)
+     field(VAL, 0)
+     field(PINI, "YES")
+     field(EGU, "m")
+     field(TPRO, 0)
+}
+
+record(ao,  "$(PREFIX):$(ELEMENT):y:set")
+{
+
+     field(DESC, "Pushing y-offset to element")
+     field(DTYP, "pydev")
+     field(OUT,  "@vacc.set_property_and_readback(element_name='$(ELEMENT)', element_index=0, method_names=['set_dy'], value=%VAL%, readback_method='get_dy', readback_label='$(PREFIX):$(ELEMENT)-getDy', twiss=True, orbit=True)")
+     field(PREC, 6)
+     field(MDEL, 1e-5)
+     field(VAL, 0)
+     field(EGU, "m")
+     field(PINI, "YES")
+     field(TPRO, 0)
+}
+
+record(ao,  "$(PREFIX):$(ELEMENT):roll:set")
+{
+
+     field(DESC, "Pushing roll-offset to element")
+     field(DTYP, "pydev")
+     field(OUT,  "@vacc.set_property_and_readback(element_name='$(ELEMENT)', element_index=0, method_names=['set_roll'], value=%VAL%, readback_method='get_roll', readback_label='$(PREFIX):$(ELEMENT)-getRoll', twiss=True, orbit=True)")
+     field(PREC, 6)
+     field(MDEL, 1e-5)
+     field(VAL, 0)
+     field(PINI, "YES")
+     field(EGU, "m")
+     field(TPRO, 0)
+}
+
+record(ai,  "$(PREFIX):$(ELEMENT):x:rdbk")
+{
+
+     field(DESC, "x-offset of element")
+     field(DTYP, "pydev")
+     field(INP,  "@pydev.iointr('$(PREFIX):$(ELEMENT)-getDx')")
+     field(SCAN, "I/O Intr")
+     field(VAL,  "1000")
+     field(PREC, 6)
+     field(EGU,  "m")
+     field(PINI, "YES")
+     field(TPRO, 0)
+}
+
+record(ai,  "$(PREFIX):$(ELEMENT):y:rdbk")
+{
+
+     field(DESC, "y-offset of element")
+     field(DTYP, "pydev")
+     field(INP,  "@pydev.iointr('$(PREFIX):$(ELEMENT)-getDy')")
+     field(SCAN, "I/O Intr")
+     field(VAL,  "1000")
+     field(PREC, 6)
+     field(EGU, "m")
+     field(TPRO, 0)
+     field(PINI, "YES")
+}
+
+
+record(ai,  "$(PREFIX):$(ELEMENT):roll:rdbk")
+{
+
+     field(DESC, "roll of element")
+     field(DTYP, "pydev")
+     field(INP,  "@pydev.iointr('$(PREFIX):$(ELEMENT)-getRoll')")
+     field(SCAN, "I/O Intr")
+     field(VAL,  "1000")
+     field(PREC, 6)
+     field(EGU, "m")
+     field(TPRO, 0)
+     field(PINI, "YES")
+}

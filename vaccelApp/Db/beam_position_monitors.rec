@@ -1,0 +1,147 @@
+record(waveform, "$(PREFIX):BPM:dx")
+{
+    field(DESC, "BPM: dx")
+    field(EGU, "m")
+    field(DTYP, "pydev")
+    field(INP,  "@pydev.iointr('$(PREFIX)-bpm.dx')")
+    field(SCAN, "I/O Intr")
+    field(NELM, 2048)
+    field(FTVL, "DOUBLE")
+    field(TPRO, 1)
+}
+
+record(waveform, "$(PREFIX):BPM:dy")
+{
+    field(DESC, "BPM: dy")
+    field(EGU, "m")
+    field(DTYP, "pydev")
+    field(INP,  "@pydev.iointr('$(PREFIX)-bpm.dy')")
+    field(SCAN, "I/O Intr")
+    field(NELM, 2048)
+    field(FTVL, "DOUBLE")
+    field(TPRO, 1)
+
+}
+
+record(waveform, "$(PREFIX):BPM:names")
+{
+    field(DESC, "BPM: element names")
+    field(DTYP, "pydev")
+    field(INP,  "@pydev.iointr('$(PREFIX)-bpm-names')")
+    field(SCAN, "I/O Intr")
+    field(NELM, 2048)
+    field(FTVL, "STRING")
+    field(TPRO, 1)
+}
+
+record(waveform, "$(PREFIX):bpm:bdata")
+{
+    field(DESC, "BPM packed data")
+    field(DTYP, "pydev")
+    field(NELM, 2048)
+    # So that hopefully further processing works ...
+    # in bluesky scripts
+    field(INP,  "@pydev.iointr('$(PREFIX)-bpm-bdata')")
+    field(SCAN, "I/O Intr")
+    field(FTVL, "DOUBLE")
+    #    field(TPRO, 1)
+
+}
+
+# Ensure that bpm data are only periodically updated if
+# no calculation is pending ...
+# here out is used to inform a record if new data are
+# there. The ":cnt" record will then use the forward link
+#
+record(calcout, "$(PREFIX):bpm:im:bdata:trigger")
+{
+    field(DESC, "BPM packed data: trigger update")
+    field(INPA, "$(PREFIX):dt:delayed-calcs PP")
+    field(VAL, 0)
+    field(CALC, "A")
+    field(OCAL, "1")
+    field(DOPT, "Use OCAL")
+    field(OUT, "$(PREFIX):bpm:im:bdata:trigger:pass PP")
+    field(PINI, "YES")
+    field(TPRO, 0)
+    field(OOPT, "When Zero")
+    field(SCAN, ".1 second")
+    # field(SCAN, "2 second")
+
+}
+
+
+# Wanted to implement it as a counter ... failed
+record(bi, "$(PREFIX):bpm:im:bdata:trigger:pass")
+{
+   field(DESC, "BPM packed data: trigger pass")
+   field(INP, "$(PREFIX):bpm:im:bdata:trigger")
+   field(ZNAM, "active")
+   field(ONAM, "inactive")
+   field(VAL, 1)
+   field(PINI, "YES")
+   field(FLNK, "$(PREFIX):MDIZ2T5G:bdata")
+
+}
+
+record(waveform, "$(PREFIX):MDIZ2T5G:bdata")
+{
+    field(DESC, "BPM packed data:  periodically updated")
+    field(INP, "$(PREFIX):bpm:bdata")
+    field(NELM, 2048)
+    # So that hopefully further processing works ...
+    # in bluesky scripts
+    field(PINI, "YES")
+    field(TPRO, 0)
+    field(FTVL, "DOUBLE")
+    field(FLNK, "$(PREFIX):MDIZ2T5G:count")
+
+}
+
+record(bo, "$(PREFIX):MDIZ2T5G:ready")
+{
+	field(VAL, 0)
+	field(ZNAM, "ready")
+	field(ONAM, "busy")
+	field(PINI, "YES")
+}
+
+record(calc, "$(PREFIX):MDIZ2T5G:count")
+{
+
+	field(INPA, "$(PREFIX):MDIZ2T5G:count")
+	field(VAL, 0)
+	field(CALC, "A+1")
+	field(TPRO, 0)
+	field(PINI, "YES")
+}
+
+
+record(ai, "$(PREFIX):BPMZR:avgH")
+{
+	field(DESC, "Providing empty value for stats")
+	field(VAL, 0)
+	field(PINI, "YES")
+}
+
+record(ai, "$(PREFIX):BPMZR:avgV")
+{
+	field(DESC, "Providing empty value for stats")
+	field(VAL, 0)
+	field(PINI, "YES")
+}
+
+record(ai, "$(PREFIX):BPMZR:rmsH")
+{
+	field(DESC, "Providing empty value for stats")
+	field(VAL, 0)
+	field(PINI, "YES")
+}
+
+
+record(ai, "$(PREFIX):BPMZR:rmsV")
+{
+	field(DESC, "Providing empty value for stats")
+	field(VAL, 0)
+	field(PINI, "YES")
+}

@@ -1,0 +1,22 @@
+file db/power_converter_relay.rec
+{
+        pattern{ PC,     ELEMENT }
+               { Q1PDR,  q1m1d1r }
+               { Q1PDR,  q1m1d2r }
+               { Q1PDR,  q1m1d3r }
+               { Q1PDR,  q1m1d4r }
+               { Q1PDR,  q1m1d5r }
+               { Q1PDR,  q1m1d6r }
+               { Q1PDR,  q1m1d7r }
+               { Q1PDR,  q1m1d8r }
+
+               { Q1PTR,  q1m1t1r }
+               { Q1PTR,  q1m1t2r }
+               { Q1PTR,  q1m1t3r }
+               { Q1PTR,  q1m1t4r }
+               { Q1PTR,  q1m1t5r }
+               { Q1PTR,  q1m1t6r }
+               { Q1PTR,  q1m1t7r }
+               { Q1PTR,  q1m1t8r }
+
+}

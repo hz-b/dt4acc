@@ -1,0 +1,79 @@
+record(bo, "$(PREFIX):dt:active")
+{
+     field(DESC, "digital twin activated?")
+     field(VAL, 1)
+     field(ZNAM, "OFF")
+     field(ONAM, "ON")
+     field(PINI, "YES")
+}
+
+record(bo, "$(PREFIX):dt:do_calc")
+{
+     field(DESC, "calculations active?")
+     field(DTYP, "pydev")
+     field(OUT, "@vacc.executeCalculations(active=%VAL%)")
+     field(ZNAM, "OFF")
+     field(ONAM, "ON")
+     field(TPRO, 0)
+}
+
+record(bi, "$(PREFIX):dt:calcs")
+{
+     field(DESC, "delayed calc. actual executed")
+     field(DTYP, "pydev")
+     field(INP,  "@pydev.iointr('$(PREFIX)-dt-calcs')")
+     field(SCAN, "I/O Intr")
+     field(ZNAM, "finished")
+     field(ONAM, "calculating")
+     field(TPRO, 0)
+     field(VAL, 1)
+     field(PINI, "YES")
+     field(FLNK, "$(PREFIX):dt:calcs:fanout")
+}
+
+# For internal reasons of the accelerator some results are
+# published before calcs singlas done
+# these can be republished after calcs goes to z
+record(fanout, "$(PREFIX):dt:calcs:fanout")
+{
+    field(DESC, "Pushing calcs finished")
+    # INformation to bpm
+    field(TPRO, 1)
+    # currently deactivated
+    #     field(LNK9, "$(PREFIX):bpm:im:bdata:trigger:pass")
+}
+
+record(bi, "$(PREFIX):dt:delayed-calcs")
+{
+     field(DESC, "delayed calc. pending")
+     field(DTYP, "pydev")
+     field(INP,  "@pydev.iointr('$(PREFIX)-dt-delayed-calcs')")
+     field(SCAN, "I/O Intr")
+     field(ZNAM, "OFF")
+     field(ONAM, "ON")
+     field(TPRO, 0)
+     field(VAL, 1)
+     field(PINI, "YES")
+}
+
+
+record(bi, "$(PREFIX):dt:found_closed_orbit")
+{
+     field(DTYP, "pydev")
+     field(ZNAM, "OFF")
+     field(ONAM, "ON")
+     field(VAL, 1)
+     field(PINI, "YES")
+}
+
+record(bo, "$(PREFIX):dt:do_calc_start:0")
+{
+
+     field(DESC, "Start: tigger vacc calc (step 0)")
+     field(DTYP, "pydev")
+     field(ZNAM, "OFF")
+     field(ONAM, "ON")
+     field(OUT, "@vacc.executeCalculationsAtStartup(active=%VAL%)")
+     field(VAL, 1)
+     field(PINI, "YES")
+}

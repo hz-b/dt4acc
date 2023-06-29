@@ -1,0 +1,10 @@
+# Template file that includes the different records. Thus only
+# one dbLoadRecord needs to be issued during start
+
+include "muxer.db"
+
+include "quadrupole_power_converter_fanout.inc"
+include "beam_position_monitors.rec"
+include "dt.rec"
+include "beam.rec"
+include "accelerator.rec"

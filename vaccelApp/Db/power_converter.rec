@@ -1,0 +1,23 @@
+
+record(ao, "$(PREFIX):$(PC):set")
+{
+    field(EGU, "A")
+    field(VAL,  "$(DEFAULT_CURRENT)")
+    field(PINI, "YES")
+    field(PREC, 8)
+    field(FLNK, "$(PREFIX):$(PC):im:fanout")
+}
+
+record(fanout, "$(PREFIX):$(PC):im:fanout")
+{
+    field(LNK0, "$(PREFIX):$(PC):dt:fanout")
+    field(LNK1, "$(PREFIX):$(PC):rdbk")
+}
+
+record(ai, "$(PREFIX):$(PC):rdbk")
+{
+    field(EGU, "A")
+    field(INP, "$(PREFIX):$(PC):set")
+    field(PINI, "YES")
+    field(PREC, 8)
+}
