@@ -1,0 +1,234 @@
+file db/power_converter.rec
+{
+	pattern {PC, DEFAULT_CURRENT}
+#start of horizontal correctors
+		{ HS1PD1R, 0.0 } 
+		{ HS1PD2R, 0.0 } 
+		{ HS1PD3R, 0.0 } 
+		{ HS1PD4R, 0.0 } 
+		{ HS1PD5R, 0.0 } 
+		{ HS1PD6R, 0.0 } 
+		{ HS1PD7R, 0.0 } 
+		{ HS1PD8R, 0.0 } 
+
+		{ HS1PT1R, 0.0 } 
+		{ HS1PT2R, 0.0 } 
+		{ HS1PT3R, 0.0 } 
+		{ HS1PT4R, 0.0 } 
+		{ HS1PT5R, 0.0 } 
+		{ HS1PT6R, 0.0 } 
+		{ HS1PT7R, 0.0 } 
+		{ HS1PT8R, 0.0 } 
+
+
+
+# hs4m1d
+		{ HS4P1D1R, 0.0 } 
+		{ HS4P1D2R, 0.0 } 
+		{ HS4P1D3R, 0.0 } 
+		{ HS4P1D4R, 0.0 } 
+		{ HS4P1D5R, 0.0 } 
+		{ HS4P1D6R, 0.0 } 
+		{ HS4P1D7R, 0.0 } 
+		{ HS4P1D8R, 0.0 } 
+
+		{ HS4P1T1R, 0.0 } 
+		{ HS4P1T2R, 0.0 } 
+		{ HS4P1T3R, 0.0 } 
+		{ HS4P1T4R, 0.0 } 
+		{ HS4P1T5R, 0.0 } 
+		{ HS4P1T6R, 0.0 } 
+		{ HS4P1T7R, 0.0 } 
+		{ HS4P1T8R, 0.0 } 
+
+
+# hs4m2d
+		{ HS4P2D1R, 0.0 } 
+		{ HS4P2D2R, 0.0 } 
+		{ HS4P2D3R, 0.0 } 
+		{ HS4P2D4R, 0.0 } 
+		{ HS4P2D5R, 0.0 } 
+		{ HS4P2D6R, 0.0 } 
+		{ HS4P2D7R, 0.0 } 
+		{ HS4P2D8R, 0.0 } 
+
+		{ HS4P2T1R, 0.0 } 
+		{ HS4P2T2R, 0.0 } 
+		{ HS4P2T3R, 0.0 } 
+		{ HS4P2T4R, 0.0 } 
+		{ HS4P2T5R, 0.0 } 
+		{ HS4P2T6R, 0.0 } 
+		{ HS4P2T7R, 0.0 } 
+		{ HS4P2T8R, 0.0 } 
+# end of horizontal correctors
+
+
+#start of vertical correctors
+		{ VS2P1D1R, 0.0 } 
+		{ VS2P1D2R, 0.0 } 
+		{ VS2P1D3R, 0.0 } 
+		{ VS2P1D4R, 0.0 } 
+		{ VS2P1D5R, 0.0 } 
+		{ VS2P1D6R, 0.0 } 
+		{ VS2P1D7R, 0.0 } 
+		{ VS2P1D8R, 0.0 } 
+
+		{ VS2P1T1R, 0.0 } 
+		{ VS2P1T2R, 0.0 } 
+		{ VS2P1T3R, 0.0 } 
+		{ VS2P1T4R, 0.0 } 
+		{ VS2P1T5R, 0.0 } 
+		{ VS2P1T6R, 0.0 } 
+		{ VS2P1T7R, 0.0 } 
+		{ VS2P1T8R, 0.0 } 
+
+
+# vs2m2d
+		{ VS2P2D1R, 0.0 } 
+		{ VS2P2D2R, 0.0 } 
+		{ VS2P2D3R, 0.0 } 
+		{ VS2P2D4R, 0.0 } 
+		{ VS2P2D5R, 0.0 } 
+		{ VS2P2D6R, 0.0 } 
+		{ VS2P2D7R, 0.0 } 
+		{ VS2P2D8R, 0.0 } 
+
+		{ VS2P2T1R, 0.0 } 
+		{ VS2P2T2R, 0.0 } 
+		{ VS2P2T3R, 0.0 } 
+		{ VS2P2T4R, 0.0 } 
+		{ VS2P2T5R, 0.0 } 
+		{ VS2P2T6R, 0.0 } 
+		{ VS2P2T7R, 0.0 } 
+		{ VS2P2T8R, 0.0 } 
+
+
+
+# vs3m1d
+		{ VS3P1D1R, 0.0 } 
+		{ VS3P1D2R, 0.0 } 
+		{ VS3P1D3R, 0.0 } 
+		{ VS3P1D4R, 0.0 } 
+		{ VS3P1D5R, 0.0 } 
+		{ VS3P1D6R, 0.0 } 
+		{ VS3P1D7R, 0.0 } 
+		{ VS3P1D8R, 0.0 } 
+
+		{ VS3P1T1R, 0.0 } 
+		{ VS3P1T2R, 0.0 } 
+		{ VS3P1T3R, 0.0 } 
+		{ VS3P1T4R, 0.0 } 
+		{ VS3P1T5R, 0.0 } 
+		{ VS3P1T6R, 0.0 } 
+		{ VS3P1T7R, 0.0 } 
+		{ VS3P1T8R, 0.0 } 
+
+
+# vs3m2d
+		{ VS3P2D1R, 0.0 } 
+		{ VS3P2D2R, 0.0 } 
+		{ VS3P2D3R, 0.0 } 
+		{ VS3P2D4R, 0.0 } 
+		{ VS3P2D5R, 0.0 } 
+		{ VS3P2D6R, 0.0 } 
+		{ VS3P2D7R, 0.0 } 
+		{ VS3P2D8R, 0.0 } 
+
+		{ VS3P2T1R, 0.0 } 
+		{ VS3P2T2R, 0.0 } 
+		{ VS3P2T3R, 0.0 } 
+		{ VS3P2T4R, 0.0 } 
+		{ VS3P2T5R, 0.0 } 
+		{ VS3P2T6R, 0.0 } 
+		{ VS3P2T7R, 0.0 } 
+		{ VS3P2T8R, 0.0 } 
+# end of vertical correctors
+
+
+#start of quadrupoles
+		{ Q1PDR, 216.0197917196 } 
+		{ Q1PTR, 216.0584709877 } 
+
+		{ Q2PDR, 161.6454183454 } 
+		{ Q2PTR, 158.9014431614 } 
+
+
+
+# .1T
+		{ Q3P1T1R, 226.5352312644 } 
+		{ Q3P1T6R, 240.6043044855 } 
+		{ Q3P1T8R, 223.161505159 } 
+
+# .2T
+		{ Q3P2T1R, 224.3976218215 } 
+		{ Q3P2T6R, 206.9629334967 } 
+		{ Q3P2T8R, 225.8072237986 } 
+
+
+
+# Q3PD
+		{ Q3PD1R, 181.0755739772 } 
+		{ Q3PD2R, 188.5479693696 } 
+		{ Q3PD3R, 189.063242226 } 
+		{ Q3PD4R, 188.8991901512 } 
+		{ Q3PD5R, 188.8339538533 } 
+		{ Q3PD6R, 187.5916919849 } 
+		{ Q3PD7R, 188.4022496334 } 
+		{ Q3PD8R, 188.8150402453 } 
+
+		{ Q3PT2R, 221.386772921 } 
+		{ Q3PT3R, 221.591034981 } 
+		{ Q3PT4R, 220.850590646 } 
+		{ Q3PT5R, 221.5978392103 } 
+		{ Q3PT7R, 222.5735025952 } 
+
+
+# .1T
+		{ Q4P1T1R, 252.1458368759 } 
+		{ Q4P1T6R, 214.9455152839 } 
+		{ Q4P1T8R, 245.518585628 } 
+
+# .2T
+		{ Q4P2T1R, 246.0947145678 } 
+		{ Q4P2T6R, 245.1416690177 } 
+		{ Q4P2T8R, 252.7411796729 } 
+
+
+
+# Q4PD
+		{ Q4PD1R, 131.448415171 } 
+		{ Q4PD2R, 138.552932139 } 
+		{ Q4PD3R, 138.7664629022 } 
+		{ Q4PD4R, 139.617872968 } 
+		{ Q4PD5R, 138.6146759741 } 
+		{ Q4PD6R, 138.9477184788 } 
+		{ Q4PD7R, 138.7124370464 } 
+		{ Q4PD8R, 138.998236162 } 
+
+		{ Q4PT2R, 247.0338037839 } 
+		{ Q4PT3R, 246.6886234949 } 
+		{ Q4PT4R, 246.8219256032 } 
+		{ Q4PT5R, 246.8365510765 } 
+		{ Q4PT7R, 247.6835380471 } 
+
+
+# .1T
+		{ Q5P1T1R, 220.8288478886 } 
+		{ Q5P1T6R, 90.96820378460001 } 
+		{ Q5P1T8R, 219.8752512046 } 
+
+# .2T
+		{ Q5P2T1R, 220.476753345 } 
+		{ Q5P2T6R, 219.6149008384 } 
+		{ Q5P2T8R, 220.530766854 } 
+
+
+# Q5PT
+		{ Q5PT2R, 227.0768627359 } 
+		{ Q5PT3R, 227.6504827003 } 
+		{ Q5PT4R, 226.7549264644 } 
+		{ Q5PT5R, 226.4376299271 } 
+		{ Q5PT7R, 227.6746443348 } 
+# end of quadrupoles
+}
+# EOF
