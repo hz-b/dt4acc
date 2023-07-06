@@ -9,6 +9,7 @@ import gtpsa
     # extract_orbit_from_accelerator_with_standard_observers,
 # )
 from python.calculator import TwissCalculator, OrbitCalculator
+import pandas as pd
 
 logger = logging.getLogger("thor-scsi-lib")
 
@@ -58,8 +59,9 @@ class AcceleratorFacade:
                 raise ValueError("No observed bpm data")
             return a_tpsa.x, a_tpsa.y
         orbit_offsets = np.array([extract_orbit_offset(bpm) for bpm in bpms])
-        names = [bpm.name for bpm in bpms]
-        return orbit_offsets, names
+        names = [bpm.name.upper() for bpm in bpms]
+        bpm_offsets = pd.DataFrame(index=names, columns=["x", "y"], data=orbit_offsets)
+        return bpm_offsets
 
     def find_element(self, element_name: str = None, element_index: int = None) -> tslib.ElemType:
         """

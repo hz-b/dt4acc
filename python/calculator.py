@@ -42,6 +42,8 @@ class OrbitCalculator(Calculator):
         eps = float(eps)
         threshold = 1e-17
         if eps > threshold:
+            pass
+        else:
             raise ValueError(f"{eps=} must be > {threshold}")
 
         self.eps = eps

@@ -2,8 +2,13 @@ import logging
 
 import numpy as np
 import pydev
+import pydev
+import pandas as pd
 
 logger = logging.getLogger("thor-scsi-lib")
+
+#: todo: needs to be imported from database
+from bact2.ophyd.devices.process import bpm_parameters
 
 class BPMMimikry:
     """
@@ -22,6 +27,25 @@ class BPMMimikry:
         """
         self.prefix = prefix
         self.parent = parent
+        # bpm_offsets= self.parent.accelerator_facade.get_bpm_data()
+        self.bpm_config = bpm_parameters.create_bpm_config()
+        indices = self.bpm_config['idx']
+        n_channels = 128
+        df =pd.DataFrame(
+            columns=["name", "idx",  "x", "y", "intensity_z", "intensity_s", "stat", "gain_raw", "x_rms", "y_rms"],
+            index=np.arange(n_channels)
+            )
+
+        # a few lions all over Africa but none as the other
+        df.idx = np.arange(n_channels) * -1000 - 1
+        df.name = [f"not_set_value_{cnt}_XXX" for cnt in range(n_channels)]
+        df.name[indices] = self.bpm_config['name']
+        # todo: check that I am currently guessing (think how I am thinking)
+        df.idx[indices] = indices
+        df = df.set_index("name")
+        self.bpm_prep = df
+
+
 
     def publish_bpm_data(self, orbit_result):
         """
@@ -40,37 +64,52 @@ class BPMMimikry:
             logger.warning("No valid orbit!")
             return
 
-        bpm_data, names = self.parent.accelerator_facade.get_bpm_data()
-        logger.warning("BPM data shape: %s", bpm_data.shape)
+        bpm_offsets= self.parent.accelerator_facade.get_bpm_data()
+        logger.debug("BPM data shape: %s, %s", bpm_offsets.shape, bpm_offsets.index)
 
         # Publish BPM names
         label = f"{self.prefix}-bpm-names"
-        names_as_bytes = [name.encode() for name in names]
+        names_as_bytes = [name.encode() for name in bpm_offsets.index.values]
         pydev.iointr(label, names_as_bytes)
 
         # Publish BPM data for each plane
-        for data, plane in zip(bpm_data.T, ["x", "y"]):
+        for data, plane in zip(bpm_offsets.T, ["x", "y"]):
             label = f"{self.prefix}-bpm.d{plane}"
             logger.debug("BPM data for plane %s: %s", plane, list(data))
             pydev.iointr(label, list(data))
 
         # Build BPM data together
-        n_channels = 128
-        n_used, _ = bpm_data.shape
-        bdata_prepare = np.zeros((8, n_channels), dtype=np.float)
-        # x plane .. simulated position
-        bdata_prepare[0, :n_used] = bpm_data[:, 0]
-        # y plane .. simulated position
-        bdata_prepare[1, :n_used] = bpm_data[:, 1]
-        # x rms ... next vector ?
-        # todo: what is a reasonable value
-        bdata_prepare[6, :n_used] = 1
-        # y rms ... next vector ?
-        # todo: what is a reasonable value
-        bdata_prepare[7, :n_used] = 1
-        # todo: find good default values for intensity (z, s) stat and gain raw
-        bdata = bdata_prepare.reshape(-1)
+        n_used, _ = bpm_offsets.shape
 
+        df = self.bpm_prep.copy()
+
+        # select only the ones that are marked as valid ... so there must be an index
+        # set to them
+        machine_bpm_not_in_model = set(df.index[df.idx>=0]).difference(bpm_offsets.index)
+        if len(machine_bpm_not_in_model):
+            logger.warning("Bpms in machine but not in model: %s", machine_bpm_not_in_model)
+        else:
+            logger.debug("All bpm's of machine are also in model")
+        # todo:  check that name sorting is not making an issue
+        common_names = set(bpm_offsets.index).intersection(df.index)
+        common_names = list(common_names)
+        common_names.sort()
+        df.loc[:, ["x", "y"]] = bpm_offsets.loc[common_names, ["x", "y"]]
+        df.x_rms = .6
+        df.y_rms = .7
+        df.stat = 0
+        df.loc[df.idx > 0, "stat"] = 1.0
+        df.loc[:, "gain_raw"] = .5
+        # todo: find good default values for intensity (z, s) stat and gain raw
+        df.loc[:, "intensity_z"] = .2
+        df.loc[:, "intensity_s"] = .3
+
+        bdata_prepare = df.loc[:,  df.columns[1:]].values
+        bdata_prepare = np.array(bdata_prepare, dtype=np.float)
+
+        # prepare the data to be compatible in vector to what
+        # the control system exports
+        bdata = bdata_prepare.transpose().ravel()
         bdata_all = np.zeros((2048,), dtype=np.float)
         bdata_all[:len(bdata)] = bdata
 
