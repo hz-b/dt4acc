@@ -33,16 +33,31 @@ record(bo, "$(PREFIX):PMUXZR:$(ELEMENT)")
 
 record(calcout, "$(PREFIX):$(ELEMENT):im:Imux")
 {
-    field(DESC, "Current applied by muxer")
+    field(DESC, "Mux current applied and scaled")
     # Muxer power converter
     #	field(INPA, "QSPAZR:set CPP")
     field(INPA, "$(PREFIX):QSPAZR:set CPP")
     # Implemented as pydev in muxer_quad.template
     field(INPB,  "$(PREFIX):$(ELEMENT):im:mux:active")
-    field(CALC, "B == 1 ? A : 0")
+    field(INPC,  "$(PREFIX):$(ELEMENT):par:muxscale")
+    field(CALC, "B == 1 ? A * C : 0")
     field(OOPT, "On Change")
     field(EGU, "A")
     field(VAL, "0")
     field(PINI,  "YES")
     field(FLNK, "$(PREFIX):$(ELEMENT):im:I")
+}
+
+# the muxer typically uses an other coil than the main
+# power converter. this has more windings. so the
+# current of the muxer has to scaled up to match the main
+# magnet windings so that the forecasted K value matches
+# the expectation
+record(ao, "$(PREFIX):$(ELEMENT):par:muxscale") {
+  field(DESC, "muxer cur. to main winding scale")
+  field(EGU, "")
+  field(PINI, "YES")
+  field(PREC, "4")
+  field(VAL, "$(MUXSCALE)")
+  field(FLNK, "$(PREFIX):$(ELEMENT):im:Imux")
 }
