@@ -9,7 +9,7 @@ record(ao, "$(PREFIX):beam:orbit:eps")
 	field(VAL,  1e-7)
 	field(PREC, 12)
 	field(PINI, "YES")
-	field(TPRO, 1)
+	field(TPRO, 0)
 	field(OUT, "$(PREFIX):beam:orbit:im:eps PP")
 	# field(FLNK, "$(PREFIX):beam:orbit:im:eps")
 }
@@ -22,9 +22,63 @@ record(ao, "$(PREFIX):beam:orbit:im:eps")
 	field(DTYP, "pydev")
 	field(PREC, 12)
 	field(OUT,  "@vacc.accelerator_facade.orbit.set_epsilon(VAL)")
-	field(TPRO, 1)
+	field(TPRO, 0)
 }
 
+record(bi, "$(PREFIX):beam:orbit:found")
+{
+	field(DESC, "Closed orbit: fixed point found?")
+	field(ZNAM, "particle lost")
+	field(ONAM, "found")
+
+	field(DTYP, "pydev")
+	field(INP,  "@pydev.iointr('$(PREFIX):beam:orbit:found')")
+	field(SCAN, "I/O Intr")
+
+	field(VAL, 0)
+	# field(TPRO, 1)
+	field(PINI, "YES")
+
+}
+
+record(ai, "$(PREFIX):beam:orbit:calc_time")
+{
+	field(DESC, "Closed orbit: calculation time?")
+	field(DTYP, "pydev")
+	field(INP,  "@pydev.iointr('$(PREFIX):beam:orbit:calc_time')")
+	field(SCAN, "I/O Intr")
+	field(VAL, 0)
+	field(PREC, 3)
+	# field(TPRO, 1)
+	field(PINI, "YES")
+
+}
+
+record(ai, "$(PREFIX):beam:twiss:calc_time")
+{
+	field(DESC, "Twiss: calcultion time?")
+	field(DTYP, "pydev")
+	field(INP,  "@pydev.iointr('$(PREFIX):beam:twiss:calc_time')")
+	field(SCAN, "I/O Intr")
+	field(VAL, 0)
+	field(PREC, 3)
+	# field(TPRO, 1)
+	field(PINI, "YES")
+
+}
+
+record(waveform, "$(PREFIX):beam:orbit:fixed_point")
+{
+	field(DESC, "Closed orbit: fixed point")
+	field(EGU, "mm / mrad")
+	field(DTYP, "pydev")
+	field(INP,  "@pydev.iointr('$(PREFIX):beam:orbit:fixed_point')")
+	field(SCAN, "I/O Intr")
+	field(FTVL, "DOUBLE")
+	field(PREC, 12)
+	field(NELM, 6)
+	# field(TPRO, 1)
+}
 
 record(waveform, "$(PREFIX):beam:orbit:x")
 {
@@ -36,7 +90,7 @@ record(waveform, "$(PREFIX):beam:orbit:x")
 	field(PREC, 6)
 	field(NELM, 2048)
 	field(FTVL, "DOUBLE")
-	field(TPRO, 1)
+	# field(TPRO, 1)
 }
 
 record(waveform, "$(PREFIX):beam:orbit:y")
@@ -48,7 +102,7 @@ record(waveform, "$(PREFIX):beam:orbit:y")
 	field(SCAN, "I/O Intr")
 	field(FTVL, "DOUBLE")
 	field(NELM, 2048)
-	field(TPRO, 1)
+	# field(TPRO, 1)
 }
 
 
@@ -145,7 +199,7 @@ record(waveform, "$(PREFIX):beam:names")
 	field(SCAN, "I/O Intr")
 	field(NELM, 2048)
 	field(FTVL, "STRING")
-	field(TPRO, 1)
+	# field(TPRO, 1)
 }
 
 record(longout, "$(PREFIX):beam:publish")

@@ -8,7 +8,7 @@ from thor_scsi.utils.accelerator import (
 import gtpsa
 
 # there are some memory management problems in thor scsi
-desc = gtpsa.desc(6, 2)
+desc = gtpsa.desc(6, 1)
 
 logger = logging.getLogger("thor-scsi-lib")
 
@@ -23,9 +23,11 @@ class Calculator:
 
 class TwissCalculator(Calculator):
     def calculate(self):
+        logger.warning("Computing Twiss parameters (start)")
         n_dof = 2
         self.result = compute_Twiss_along_lattice(n_dof, self.parent.acc, self.parent.conf, desc=desc,
                                                   mapping=self.parent.mapping)
+        logger.warning("Computed  Twiss parameters (end)  ")
         return self.result
 
 
@@ -48,15 +50,15 @@ class OrbitCalculator(Calculator):
 
         self.eps = eps
 
-        self.eps = 1e-15
-        logger.warning(f"got {eps=} forced to {self.eps} ")
+        # self.eps = 1e-15
+        # logger.warning(f"got {eps=} forced to {self.eps} ")
 
     def get_epsilon(self):
         return self.eps
 
     def calculate(self, *, mapping, desc=None):
         # Determine whether delta and x0 need to be set
-        logger.info(f"Before calculating: last stored result {self.result=} eps = {self.eps}")
+        logger.debug("Before calculating: last stored result %s eps = %s", self.result, self.eps)
         if self.result is None or not np.isfinite(self.result.x0.iloc).all():
             delta = 0.0
             x0 = None
@@ -64,7 +66,13 @@ class OrbitCalculator(Calculator):
             delta = None
             x0 = self.result.x0
 
-        # start alw
+        # start with last settings
+        px0 = None
+        if x0 is not None:
+            px0 = x0 * 1000
+        logger.warning("Calculating orbit with x0 * 1000 = %s for eps %s", px0, self.eps)
+        del px0
+
         try:
             # Call compute_closed_orbit with the appropriate arguments
             self.result = compute_closed_orbit(
@@ -88,6 +96,6 @@ class OrbitCalculator(Calculator):
 
         # Calculate the orbit using the updated result object
         self.orbit = extract_orbit_from_accelerator_with_standard_observers(self.parent.acc)
-        logger.warning(f"Calculated Orbit x0 * 1000 = {self.result.x0 * 1000} for eps {self.eps}")
+        logger.warning(f"Calculated Orbit x0 * 1000 = %s for eps %s", self.result.x0 * 1000, self.eps)
 
         return self.result

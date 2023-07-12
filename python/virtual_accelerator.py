@@ -8,7 +8,6 @@ from .pending_calculation_manager import PendingCalculationManager
 from .calculation_running_manager import CalculationRunningManager
 from .delay_execution import DelayExecution
 from .bpm_mimikry import BPMMimikry
-import logging
 from typing import Sequence
 from thor_scsi.utils.extract_info import accelerator_info
 
@@ -159,7 +158,14 @@ class VirtualAccelerator:
 
         logger.warning("Executing twiss calculation")
         with self.twiss_pending:
+            tic = time.time()
             self._calculate_twiss()
+            tac = time.time()
+            dt = tac - tic
+
+            label = f"{self.prefix}:beam:twiss:calc_time"
+            logger.info("Executing pydev.iontr(%s, %s)", label, dt)
+            pydev.iointr(label, dt)
 
         logger.warning(f"Twiss: after calculation still need? {self.twiss_pending.pending}")
 
@@ -170,7 +176,14 @@ class VirtualAccelerator:
 
         logger.warning("Executing orbit calculation")
         with self.orbit_pending:
+            tic = time.time()
             r = self._calculate_orbit()
+            tac = time.time()
+            dt = tac - tic
+
+            label = f"{self.prefix}:beam:orbit:calc_time"
+            logger.info("Executing pydev.iontr(%s, %s)", label, dt)
+            pydev.iointr(label, dt)
 
         logger.warning("Orbit: after calculation still need? %d", self.orbit_pending.pending)
 
@@ -210,19 +223,34 @@ class VirtualAccelerator:
         # Calculate the orbit
         r = self.accelerator_facade.calculate_orbit()
 
+        prefix = self.prefix + ":beam"
+
+        # export closed orbit ...
+        # found, fixed point, orbit
+        # orbit only if found
+        label = f"{prefix}:orbit:found"
+        logger.info(f"Executing pydev.iontr({label}, {r.found_closed_orbit})")
+        pydev.iointr(label, r.found_closed_orbit)
+
+        label = f"{prefix}:orbit:fixed_point"
+        # towards mm / mrad
+        x0 = np.array(r.x0.iloc) * 1000.0
+        x0 = list(x0)
+        logger.info(f"Executing pydev.iontr({label}, {x0}")
+        pydev.iointr(label, list(x0))
+
         # Raise a ValueError if no closed orbit is found
         if not r.found_closed_orbit:
             raise ValueError("No closed orbit was found")
 
         # Get the orbit data
         ds = self.accelerator_facade.orbit.orbit
-        prefix = self.prefix + ":beam"
 
         # Publish orbit data for x and y planes
         for plane in "x", "y":
             val = ds.ps.sel(phase_coordinate=plane).values.tolist()
             label = f"{prefix}:orbit:{plane}"
-            logger.info(f"Executing pydev.iontr({label}, {val[:3]} {type(val)}")
+            logger.info(f"Executing pydev.iontr({label}, {val[:3]} {type(val)})")
             pydev.iointr(label, val)
 
         # Publish BPM data

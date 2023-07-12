@@ -29,6 +29,7 @@ class DelayExecution:
         self.lock = threading.Lock()
         self.execution = PendingCalculationManager(info="delayed execution")
         self.label = f"{prefix}-dt-delayed-calcs"
+        logger.debug("pydev.iointr(%s, %s)", self.label, self.pending)
         pydev.iointr(self.label, self.execution.pending)
 
     def request_execution(self):
@@ -43,6 +44,7 @@ class DelayExecution:
                 return
 
             self.pending = True
+            logger.debug("pydev.iointr(%s, %s)", self.label, self.pending)
             pydev.iointr(self.label, self.pending)
             logger.info("Delayed execution requested")
             self.request_timestamp = datetime.datetime.now()
@@ -60,16 +62,18 @@ class DelayExecution:
         time.sleep(self.delay)
         with self.lock:
             if self.pending:
-                logger.warning("Delayed execution: start")
+                logger.info("Delayed execution: start")
                 with self.execution:
                     self.callback()
                 self.pending = False
+                logger.debug("pydev.iointr(%s, %s)", self.label, self.pending)
                 pydev.iointr(self.label, self.pending)
-                logger.warning("Delayed execution: end")
+                logger.info("Delayed execution: end")
 
     def cancel_execution(self):
         """Cancel pending execution"""
         with self.lock:
             self.pending = False
+            logger.debug("pydev.iointr(%s, %s)", self.label, self.pending)
             pydev.iointr(self.label, self.pending)
             logger.warning("Delayed execution cancelled")

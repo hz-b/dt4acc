@@ -45,7 +45,21 @@ record(calcout, "$(PREFIX):$(ELEMENT):im:Imux")
     field(EGU, "A")
     field(VAL, "0")
     field(PINI,  "YES")
-    field(FLNK, "$(PREFIX):$(ELEMENT):im:I")
+    # don't forget passive process
+    # redirection over Imuxfwd so that the
+    # equivalent sum current does not jitter around
+    field(OUT,  "$(PREFIX):$(ELEMENT):im:ImuxProxy PP")
+}
+
+#
+# relay the current .. so that the sum current does
+# not jump unphysically
+#
+record(ao, "$(PREFIX):$(ELEMENT):im:ImuxProxy")
+{
+    field(DESC, "Mux cur. scaled (proxy/ forward)")
+    field(TPRO, 1)
+    field(FLNK,  "$(PREFIX):$(ELEMENT):im:I")
 }
 
 # the muxer typically uses an other coil than the main

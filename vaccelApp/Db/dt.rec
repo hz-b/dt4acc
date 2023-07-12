@@ -49,22 +49,13 @@ record(bi, "$(PREFIX):dt:delayed-calcs")
      field(DTYP, "pydev")
      field(INP,  "@pydev.iointr('$(PREFIX)-dt-delayed-calcs')")
      field(SCAN, "I/O Intr")
-     field(ZNAM, "OFF")
-     field(ONAM, "ON")
+     field(ZNAM, "none pending")
+     field(ONAM, "pending")
      field(TPRO, 0)
      field(VAL, 1)
      field(PINI, "YES")
 }
 
-
-record(bi, "$(PREFIX):dt:found_closed_orbit")
-{
-     field(DTYP, "pydev")
-     field(ZNAM, "OFF")
-     field(ONAM, "ON")
-     field(VAL, 1)
-     field(PINI, "YES")
-}
 
 record(bo, "$(PREFIX):dt:do_calc_start:0")
 {
