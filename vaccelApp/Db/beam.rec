@@ -157,7 +157,7 @@ record(waveform, "$(PREFIX):beam:beta:y")
 
 record(waveform, "$(PREFIX):beam:nu:x")
 {
-	field(DESC, "Twiss nu: x")
+	field(DESC, "Twiss nu: x (Floquet coordinate)")
 	field(EGU, "rad")
 	field(DTYP, "pydev")
 	field(INP,  "@pydev.iointr('$(PREFIX):beam:nu:x')")
@@ -169,7 +169,7 @@ record(waveform, "$(PREFIX):beam:nu:x")
 
 record(waveform, "$(PREFIX):beam:nu:y")
 {
-	field(DESC, "Twiss nu: y")
+	field(DESC, "Twiss nu: y (Floquet coordinate)")
 	field(EGU, "rad")
 	field(DTYP, "pydev")
 	field(INP,  "@pydev.iointr('$(PREFIX):beam:nu:y')")
@@ -179,16 +179,16 @@ record(waveform, "$(PREFIX):beam:nu:y")
 	# field(TPRO, 1)
 }
 
-record(waveform, "$(PREFIX):beam:s")
+record(waveform, "$(PREFIX):beam:nu:x")
 {
-	field(DESC, "Beam: s")
-	field(EGU, "m")
+	field(DESC, "Twiss nu: x (Floquet coordinate)")
+	field(EGU, "rad")
 	field(DTYP, "pydev")
-	field(INP,  "@pydev.iointr('$(PREFIX):beam:s')")
+	field(INP,  "@pydev.iointr('$(PREFIX):beam:nu:x')")
 	field(SCAN, "I/O Intr")
-	field(NELM, 2048)
 	field(FTVL, "DOUBLE")
-	field(TPRO, 1)
+	field(NELM, 2048)
+	# field(TPRO, 1)
 }
 
 record(waveform, "$(PREFIX):beam:names")
@@ -211,4 +211,76 @@ record(longout, "$(PREFIX):beam:publish")
      field(PINI, "YES")
      field(TPRO, 1)
 
+}
+
+record(ai, "$(PREFIX):beam:working_point:x")
+{
+     field(DESC, "Beam: Q x")
+     field(EGU, "")
+     field(DTYP, "pydev")
+     field(INP,  "@pydev.iointr('$(PREFIX):beam:working_point:x')")
+     field(SCAN, "I/O Intr")
+     field(VAL, 0)
+     field(FLNK, "$(PREFIX):beam:working_point:frac_x")
+}
+
+record(ai, "$(PREFIX):beam:working_point:y")
+{
+    field(DESC, "Beam: Q y")
+    field(EGU, "")
+    field(DTYP, "pydev")
+    field(INP,  "@pydev.iointr('$(PREFIX):beam:working_point:y')")
+    field(SCAN, "I/O Intr")
+    field(VAL, 0)
+    field(FLNK, "$(PREFIX):beam:working_point:frac_y")
+}
+
+record(calc, "$(PREFIX):beam:working_point:frac_x")
+{
+    field(DESC, "Beam: Q x (fractional part)")
+    field(INPA, "$(PREFIX):beam:working_point:x")
+    field(CALC, "A - floor(A)")
+    # that's more like bunch by bunch feed back ?
+    # field(CALC, "B:= A - floor(A); B < 0.5 ? B : 1 - B")
+    field(PREC, "6")
+    field(TPRO, 1)
+    field(FLNK, "$(PREFIX):TUNEZR:rdH")
+}
+
+record(calc, "$(PREFIX):beam:working_point:frac_y")
+{
+    field(DESC, "Beam: Q x (fractional part)")
+    field(INPA, "$(PREFIX):beam:working_point:y")
+    field(CALC, "A - floor(A)")
+    # that's more like bunch by bunch feed back ?
+    # field(CALC, "B:= A - floor(A); B < 0.5 ? B : 1 - B")
+    field(PREC, "6")
+    field(TPRO, 1)
+    field(FLNK, "$(PREFIX):TUNEZR:rdV")
+}
+
+record(longout, "$(PREFIX):beam:nbunches")
+{
+     field(DESC, "number of bunches in the machine")
+     field(VAL, 400)
+     field(PINI, "YES")
+     field(FLNK, "$(PREFIX):beam:revolution_freq")
+}
+
+record(calc, "$(PREFIX):beam:revolution_freq")
+{
+     field(DESC, "Revolution frequency of the machine")
+     field(EGU,  "kHz")
+     field(INPA, "$(PREFIX):beam:nbunches")
+     field(INPB, "$(PREFIX):master_clock:freq")
+     field(CALC, "B / A")
+     field(FLNK, "$(PREFIX):beam:revolution_freq:fanout")
+
+}
+
+record(fanout, "$(PREFIX):beam:revolution_freq:fanout")
+{
+    field(DESC, "inform that revolution frequncy changed")
+    field(LNK1, "$(PREFIX):TUNEZR:rdH")
+    field(LNK2, "$(PREFIX):TUNEZR:rdV")
 }

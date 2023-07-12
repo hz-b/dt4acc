@@ -8,3 +8,6 @@ include "beam_position_monitors.rec"
 include "dt.rec"
 include "beam.rec"
 include "accelerator.rec"
+
+include "master_clock.rec"
+include "tune.rec"

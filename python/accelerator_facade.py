@@ -116,7 +116,7 @@ class AcceleratorFacade:
             logger.info(f"Directly using {element} ignoring element:{element_name} with index:{element_index}")
         method = self.walk_to_method(element=element, method_names=method_names)
         val = method()
-        logger.warning(f"Get property {element} using method {method_names}. value {val}")
+        logger.info(f"Got property {element} using method {method_names}. value {val}")
         return val
 
     def set_property(self, element_name: str, element_index: int, method_names, value):
@@ -133,7 +133,7 @@ class AcceleratorFacade:
         except Exception as exc:
             logger.error(f"Set element {elem} using method {method} to value {value} failed: {exc}")
         else:
-            logger.warning(f"Set element {elem.name} using method {method_names} to value {value}")
+            logger.info(f"Set element {elem.name} using method {method_names} to value {value}")
         return elem
 
     def calculate_twiss(self):

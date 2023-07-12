@@ -211,6 +211,13 @@ class VirtualAccelerator:
                 logger.info(f"Executing pydev.iontr({label}, {val[:3]} {type(val)})")
                 pydev.iointr(label, val)
 
+                if lpar == "nu":
+                    # publish the working point separately
+                    label = f"{prefix}:working_point:{plane}"
+                    qval = val[-1]
+                    logger.info(f"Executing pydev.iontr({label}, {qval} {type(qval)})")
+                    pydev.iointr(label, qval)
+
         return r
 
     def _calculate_orbit(self):
