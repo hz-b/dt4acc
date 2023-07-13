@@ -179,17 +179,6 @@ record(waveform, "$(PREFIX):beam:nu:y")
 	# field(TPRO, 1)
 }
 
-record(waveform, "$(PREFIX):beam:nu:x")
-{
-	field(DESC, "Twiss nu: x (Floquet coordinate)")
-	field(EGU, "rad")
-	field(DTYP, "pydev")
-	field(INP,  "@pydev.iointr('$(PREFIX):beam:nu:x')")
-	field(SCAN, "I/O Intr")
-	field(FTVL, "DOUBLE")
-	field(NELM, 2048)
-	# field(TPRO, 1)
-}
 
 record(waveform, "$(PREFIX):beam:names")
 {
@@ -240,7 +229,7 @@ record(calc, "$(PREFIX):beam:working_point:frac_x")
     field(DESC, "Beam: Q x (fractional part)")
     field(INPA, "$(PREFIX):beam:working_point:x")
     field(CALC, "A - floor(A)")
-    # that's more like bunch by bunch feed back ?
+    # that's more like bunch by bunch feed back frequency ?
     # field(CALC, "B:= A - floor(A); B < 0.5 ? B : 1 - B")
     field(PREC, "6")
     field(TPRO, 1)
@@ -252,7 +241,7 @@ record(calc, "$(PREFIX):beam:working_point:frac_y")
     field(DESC, "Beam: Q x (fractional part)")
     field(INPA, "$(PREFIX):beam:working_point:y")
     field(CALC, "A - floor(A)")
-    # that's more like bunch by bunch feed back ?
+    # that's more like bunch by bunch feed back frequency ?
     # field(CALC, "B:= A - floor(A); B < 0.5 ? B : 1 - B")
     field(PREC, "6")
     field(TPRO, 1)

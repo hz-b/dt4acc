@@ -44,8 +44,19 @@ record(waveform, "$(PREFIX):bpm:bdata")
     field(INP,  "@pydev.iointr('$(PREFIX)-bpm-bdata')")
     field(SCAN, "I/O Intr")
     field(FTVL, "DOUBLE")
-    #    field(TPRO, 1)
+    field(FLNK, "$(PREFIX):bpm:bdata:count")
 
+}
+
+# A counter to use as feedback that new beam position data are available
+record(calc, "$(PREFIX):bpm:bdata:count")
+{
+
+    field(INPA, "$(PREFIX):bpm:bdata:count")
+    field(VAL, 0)
+    field(CALC, "A+1")
+    field(TPRO, 0)
+    field(PINI, "YES")
 }
 
 # Ensure that bpm data are only periodically updated if

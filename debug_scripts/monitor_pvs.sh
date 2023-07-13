@@ -9,7 +9,7 @@ ELEMENT=q3m2t8r
 ELEMENT_PVS='im:dItest im:ImuxProxy im:mux:active im:Imux par:hw2phys im:I y:set Cm:set Cm:rdbk'
 BEAM_PVS='orbit:found orbit:fixed_point orbit:eps orbit:im:eps working_point:x working_point:y'
 CALCULATION_PVS='dt:delayed-calcs dt:calcs beam:orbit:calc_time beam:twiss:calc_time'
-PVS="QSPAZR:set TUNEZR:rdH TUNEZR:rdV"
+PVS="QSPAZR:set TUNEZR:rdH TUNEZR:rdV bpm:bdata:count"
 
 
 do_expand () {

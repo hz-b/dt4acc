@@ -31,6 +31,15 @@ record(bo, "$(PREFIX):PMUXZR:$(ELEMENT)")
 
 }
 
+#
+# TODO:
+#
+#     trigger further processing when the
+#     muxer power converter is switched to this
+#     magnet and its value is not zero
+#
+#     Currently no processing is triggered
+#
 record(calcout, "$(PREFIX):$(ELEMENT):im:Imux")
 {
     field(DESC, "Mux current applied and scaled")
