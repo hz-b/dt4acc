@@ -5,46 +5,85 @@ Brho   = Energy/c0;
 pi     = 3.14159;
 n_step = 10;
 
+rad2deg = 180e0/pi;
+
 coeff_1 = 45.0 / 192.5 / Brho;
 coeff_2 = 45.0 / 193.9 / Brho;
 
-iQ1PT  = 41.31  * coeff_1;
-iQ3PT  = 37.423 * coeff_1;
-iQ4PT  = 23.427 * coeff_1;
-iQ5PT  = 30.368 * coeff_1;
-iQ8PT  = 67.938 * coeff_1;
-iQ9PT  = 55.465 * coeff_1;
-iQ10PT = 43.048 * coeff_2;
-iQ12PT = 56.0   * coeff_2;
+# adjusted value to Meghan's value
+scale =  1.1162381812269828;
+
+iQ1PT  = 41.31  * coeff_1 * scale;
+iQ3PT  = 37.423 * coeff_1 * scale;
+iQ4PT  = 23.427 * coeff_1 * scale;
+iQ5PT  = 30.368 * coeff_1 * scale;
+iQ8PT  = 67.938 * coeff_1 * scale * 1.0000013315145737;
+iQ9PT  = 55.465 * coeff_1 * scale;
+iQ10PT = 43.048 * coeff_2 * scale * 1.0102309719467322;
+iQ11PT = 0e0; #43.048 * coeff_1 * scale;
+iQ12PT = 56.0   * coeff_2 * scale * 1.0102309719467322;
 
 #*******************************************************************************
 # * define elements
 # *****************************************************************************/
+# Quadrupoles
 
 # Vertically focusing.
-Q1MT:  Quadrupole, L = 0.2635, K = -iQ1PT,  N = n_step;
-Q3MT:  Quadrupole, L = 0.2635, K =  iQ3PT,  N = n_step;
-Q4MT:  Quadrupole, L = 0.2635, K =  iQ4PT,  N = n_step;
+Q1MT:  Quadrupole, L = 0.2619, K = -iQ1PT,  N = n_step;
+# an extra quadrupole, which is off
+Q2MT:  Quadrupole, L = 0.2619, K =      0,  N = n_step;
+Q3MT:  Quadrupole, L = 0.2619, K =  iQ3PT,  N = n_step;
+Q4MT:  Quadrupole, L = 0.2619, K =  iQ4PT,  N = n_step;
 # Vertically focusing.
-Q5MT:  Quadrupole, L = 0.2635, K = -iQ5PT,  N = n_step;
-Q8MT:  Quadrupole, L = 0.2635, K =  iQ8PT,  N = n_step;
+Q5MT:  Quadrupole, L = 0.2619, K = -iQ5PT,  N = n_step;
+# again a quad that's off
+Q7MT:  Quadrupole, L = 0.2619, K =      0,  N = n_step;
+Q8MT:  Quadrupole, L = 0.2619, K =  iQ8PT,  N = n_step;
 # Vertically focusing.
-Q9MT:  Quadrupole, L = 0.2635, K = -iQ9PT,  N = n_step;
+# added to Johan#s file
+Q9MT:  Quadrupole, L = 0.2619, K = -iQ9PT,  N = n_step;
+Q11MT: Quadrupole, L = 0.2123, K = -iQ11PT, N = n_step;
 # Vertically focusing.
-Q10MT: Quadrupole, L = 0.2135, K = -iQ10PT, N = n_step;
-Q12MT: Quadrupole, L = 0.2135, K =  iQ12PT, N = n_step;
+Q10MT: Quadrupole, L = 0.2123, K = -iQ10PT, N = n_step;
+Q12MT: Quadrupole, L = 0.2123, K =  iQ12PT, N = n_step;
 
-phi_1 = -5.55769;
-SEK1S12B: Bending, L=  0.7, T = phi_1, T1 = phi_1/2.0, T2 = phi_1/2, K = 0.0,
-	  N = n_step;
-SEK2S12B: Bending, L=  0.7, T = phi_1, T1 = phi_1/2.0, T2 = phi_1/2, K = 0.0,
-	  N = n_step;
+# Septa
+# booster septa
+# Johans value
+# phi_1 = -5.55769;
+# Meghan's value... angle deflection of both septa
+booster_septa_total_angle = -0.194 * rad2deg;
+# share due to current
+septum_scale1 = 611 / (611 + 338);
+septum_scale2 = 338 / (611 + 338);
 
+# phi_1 = -0.125;
+# phi_2 = -0.069;
+septa_phi_1 = booster_septa_total_angle * septum_scale1;
+septa_phi_2 = booster_septa_total_angle * septum_scale2;
+SEK1S12B: Bending, L=  0.7, T = septa_phi_1, T1 = septa_phi_1/2.0, T2 = septa_phi_1/2, K = 0.0,
+          N = n_step;
+SEK2S12B: Bending, L=  0.7, T = septa_phi_2, T1 = septa_phi_2/2.0, T2 = septa_phi_2/2, K = 0.0,
+          N = n_step;
+
+# bending magnets
+# rectangular ones
 B1M1T:    Bending, L = 1.778, T = 22.0, K = 0.0, N = n_step;
 B1M2T:    Bending, L = 1.778, T = 22.0, K = 0.0, N = n_step;
-phi_2 = 7.74639;
+# phi_2 = 7.74639;
+# Meghans value
+phi_2 = 7.75;
 B2MT:     Bending, L = 1.02,  T =  phi_2, T1 = phi_2/2.0, T2 = phi_2/2.0,
-	  K = 0.0, N = n_step;
+          K = 0.0, N = n_step;
+
+# ring septa
+# -0.124904 / np.pi * 180;
+ring_septum_phi_1 = 0.065816 * rad2deg;
+ring_septum_phi_2 = ring_septum_phi_1 * 1.01432;
+SEK1D1R: Bending, L=  0.555, T = ring_septum_phi_1, T1 = ring_septum_phi_1/2.0, T2 = ring_septum_phi_1/2, K = 0.0,
+          N = n_step;
+SEK2D1R: Bending, L=  0.555, T = ring_septum_phi_2, T1 = ring_septum_phi_2/2.0, T2 = ring_septum_phi_2/2, K = 0.0,
+          N = n_step;
 
 FOMZ1T: Marker;
 FOMZ2T: Marker;
@@ -61,6 +100,9 @@ BPMZ3T: Marker;
 BPMZ4T: Marker;
 BPMZ5T: Marker;
 BPMZ6T: Marker;
+
+# FOM of the machine ?
+FOMZ2D1R: Marker;
 
 # Orbit trims.
 H1MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
@@ -79,45 +121,61 @@ H7MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
 V7MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
 V8MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
 
+# Kicker magnets of the ring
+KIK3D1R: HorizontalSteerer, L = 0.595, T = 0.0, K = 0.0, N = n_step;
+KIK4D1R: HorizontalSteerer, L = 0.595, T = 0.0, K = 0.0, N = n_step;
+
 
 DRIFT_0:  Drift, L = 0.07500000;
 DRIFT_1:  Drift, L = 0.07500000;
 DRIFT_2:  Drift, L = 0.25800000;
 DRIFT_3:  Drift, L = 0.06500000;
 DRIFT_4:  Drift, L = 0.96500000;
-DRIFT_5:  Drift, L = 0.31325000;
-DRIFT_6:  Drift, L = 0.83650000;
-DRIFT_7:  Drift, L = 0.19825000;
-DRIFT_8:  Drift, L = 0.09000000;
-DRIFT_9:  Drift, L = 0.07500000;
-DRIFT_10: Drift, L = 0.23500000;
-DRIFT_11: Drift, L = 0.28800000;
-DRIFT_12: Drift, L = 0.06500000;
-DRIFT_13: Drift, L = 0.14025000;
-DRIFT_14: Drift, L = 0.04225000;
-DRIFT_15: Drift, L = 0.04425000;
-DRIFT_16: Drift, L = 3.09625000;
-DRIFT_17: Drift, L = 1.60100000;
-DRIFT_18: Drift, L = 0.17100000;
-DRIFT_19: Drift, L = 0.06500000;
-DRIFT_20: Drift, L = 0.67825000;
-DRIFT_21: Drift, L = 0.28650000;
-DRIFT_22: Drift, L = 0.58425000;
-DRIFT_23: Drift, L = 0.22000000;
-DRIFT_24: Drift, L = 0.06500000;
-DRIFT_25: Drift, L = 0.22400000;
-DRIFT_26: Drift, L = 0.24325000;
-DRIFT_27: Drift, L = 0.02725000;
-DRIFT_28: Drift, L = 0.30000000;
-DRIFT_29: Drift, L = 0.05925000;
-DRIFT_30: Drift, L = 0.14225000;
-DRIFT_31: Drift, L = 0.05300000;
-DRIFT_32: Drift, L = 0.11400000;
-DRIFT_33: Drift, L = 0.23100000;
-DRIFT_34: Drift, L = 0.95000000;
-DRIFT_35: Drift, L = 0.13900000;
+DRIFT_5:  Drift, L = 0.314050;
+# Johan had a drift between Q1 to Q3
+# Meghan has a quadrupole Q2 in between
+# DRIFT_6:  Drift, L = 0.83650000;
+DRIFT_6:  Drift, L = 0.2881;
+DRIFT_7:  Drift, L = 0.2881;
+DRIFT_8:  Drift, L = 0.19905;
+DRIFT_9:  Drift, L = 0.09000000;
+DRIFT_10:  Drift, L = 0.07500000;
+DRIFT_11: Drift, L = 0.23500000;
+DRIFT_12: Drift, L = 0.28800000;
+DRIFT_13: Drift, L = 0.06500000;
+DRIFT_14: Drift, L = 0.14105000;
+DRIFT_15: Drift, L = 0.04305;
+DRIFT_16: Drift, L = 0.04505;
+DRIFT_17: Drift, L = 3.09705;
+DRIFT_18: Drift, L = 1.60100000;
+DRIFT_19: Drift, L = 0.17100000;
+DRIFT_20: Drift, L = 0.06500000;
+DRIFT_21: Drift, L = 0.12905;
+DRIFT_22: Drift, L = 0.28810000;
+DRIFT_23: Drift, L = 0.2881;
+DRIFT_24: Drift, L = 0.58505;
+DRIFT_25: Drift, L = 0.2200000;
+DRIFT_26: Drift, L = 0.06500000;
+DRIFT_27: Drift, L = 0.224000;
+DRIFT_28: Drift, L = 0.24385000;
+DRIFT_29: Drift, L = 0.02785;
+DRIFT_30: Drift, L = 0.05985000;
+DRIFT_31: Drift, L = 0.02785;
+DRIFT_32: Drift, L = 0.05985;
+DRIFT_33: Drift, L = 0.14285;
+DRIFT_34: Drift, L = 0.05300000;
+DRIFT_35: Drift, L = 0.114;
+DRIFT_36: Drift, L = 0.231;
+DRIFT_37: Drift, L = 0.589;
+DRIFT_38: Drift, L = 0.171;
+# towards ring septa
+DRIFT_39: Drift, L = 0.093;
+DRIFT_40: Drift, L = 0.0605;
+DRIFT_41: Drift, L = 0.245;
+DRIFT_42: Drift, L = 0.456;
 
 START: Marker;
+END: Marker;
 
 TL: LINE = (
   START,
@@ -125,17 +183,24 @@ TL: LINE = (
   DRIFT_0, FOMZ1T, DRIFT_1,
   SEK2S12B,
   DRIFT_2, FOMZ2T, DRIFT_3, BPMZ1T, DRIFT_4, H1MT, V1MT, DRIFT_5, Q1MT, DRIFT_6,
-  Q3MT, DRIFT_7, FOMZ3T, DRIFT_8, BPMZ2T, DRIFT_9, H2MT, V2MT, DRIFT_10,
+  # a additional quadrupole in Meghan's lattice followed by a drift
+  Q2MT, DRIFT_7,
+  #
+  Q3MT, DRIFT_8, FOMZ3T, DRIFT_9, BPMZ2T, DRIFT_10, H2MT, V2MT, DRIFT_11,
   B1M1T,
-  DRIFT_11, FOMZ4T, DRIFT_12, BPMZ3T, DRIFT_13, Q4MT, DRIFT_14, H3MT, V3MT,
-  DRIFT_15, Q5MT, DRIFT_16, H4MT, V4MT, DRIFT_17, H5MT, V5MT, DRIFT_18, FOMZ5T,
-  DRIFT_19, BPMZ4T, DRIFT_20, Q8MT, DRIFT_21, Q9MT, DRIFT_22, H6MT, V6MT,
-  DRIFT_23, FOMZ6T, DRIFT_24, BPMZ5T, DRIFT_25,
+  DRIFT_12, FOMZ4T, DRIFT_13, BPMZ3T, DRIFT_14, Q4MT, DRIFT_15, H3MT, V3MT,
+  DRIFT_16, Q5MT, DRIFT_17, H4MT, V4MT, DRIFT_18, H5MT, V5MT, DRIFT_19, FOMZ5T,
+  DRIFT_20, BPMZ4T, DRIFT_21, Q7MT, DRIFT_22, Q8MT, DRIFT_23, Q9MT, DRIFT_24, H6MT, V6MT,
+  DRIFT_25, FOMZ6T, DRIFT_26, BPMZ5T, DRIFT_27,
   B1M2T,
-  DRIFT_26, Q10MT, DRIFT_27, H7MT, DRIFT_28, V7MT, DRIFT_29, Q12MT, DRIFT_30,
-  FOMZ7T, DRIFT_31, BPMZ6T, DRIFT_32,
+  DRIFT_28, Q10MT, DRIFT_29, H7MT, DRIFT_30,
+  Q11MT, DRIFT_31, V7MT, DRIFT_32, Q12MT, DRIFT_33,
+  FOMZ7T, DRIFT_34, BPMZ6T, DRIFT_35,
   B2MT,
-  DRIFT_33, V8MT, DRIFT_34, FOMZ8T, DRIFT_35
+  DRIFT_36, V8MT, DRIFT_37, FOMZ8T, DRIFT_38,
+  # towards ring septa
+  SEK1D1R, DRIFT_39, SEK2D1R, DRIFT_40, FOMZ2D1R, DRIFT_41,
+  KIK3D1R, DRIFT_42, KIK4D1R, END
 );
 
 cell: TL, symmetry = 1;
