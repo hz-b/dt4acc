@@ -105,21 +105,21 @@ BPMZ6T: Marker;
 FOMZ2D1R: Marker;
 
 # Orbit trims.
-H1MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
-V1MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
-H2MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
-V2MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
-H3MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
-V3MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
-H4MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
-V4MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
-H5MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
-V5MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
-H6MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
-V6MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
-H7MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
-V7MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
-V8MT: Bending, L = 0.1, T = 0.0, K = 0.0, N = n_step;
+H1MT: HorizontalSteerer , L = 0.1, T = 0.0, K = 0.0, N = n_step;
+V1MT: VerticalSteerer   , L = 0.1, T = 0.0, K = 0.0, N = n_step;
+H2MT: HorizontalSteerer , L = 0.1, T = 0.0, K = 0.0, N = n_step;
+V2MT: VerticalSteerer   , L = 0.1, T = 0.0, K = 0.0, N = n_step;
+H3MT: HorizontalSteerer , L = 0.1, T = 0.0, K = 0.0, N = n_step;
+V3MT: VerticalSteerer   , L = 0.1, T = 0.0, K = 0.0, N = n_step;
+H4MT: HorizontalSteerer , L = 0.1, T = 0.0, K = 0.0, N = n_step;
+V4MT: VerticalSteerer   , L = 0.1, T = 0.0, K = 0.0, N = n_step;
+H5MT: HorizontalSteerer , L = 0.1, T = 0.0, K = 0.0, N = n_step;
+V5MT: VerticalSteerer   , L = 0.1, T = 0.0, K = 0.0, N = n_step;
+H6MT: HorizontalSteerer , L = 0.1, T = 0.0, K = 0.0, N = n_step;
+V6MT: VerticalSteerer   , L = 0.1, T = 0.0, K = 0.0, N = n_step;
+H7MT: HorizontalSteerer , L = 0.1, T = 0.0, K = 0.0, N = n_step;
+V7MT: VerticalSteerer   , L = 0.1, T = 0.0, K = 0.0, N = n_step;
+V8MT: VerticalSteerer   , L = 0.1, T = 0.0, K = 0.0, N = n_step;
 
 # Kicker magnets of the ring
 KIK3D1R: HorizontalSteerer, L = 0.595, T = 0.0, K = 0.0, N = n_step;
