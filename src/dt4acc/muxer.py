@@ -36,6 +36,8 @@ class Muxer:
             zero.
         """
         for name in self._positive_list:
+            # Todo: get machine names to upper names
+            name = name.lower()
             label = f"{self._prefix}:{name}:im:mux:active"
             if self._selected is not None and name == self._selected:
                 logger.info(f"Selected {label}")
@@ -43,7 +45,7 @@ class Muxer:
             else:
                 flag = False
 
-            logger.debug(f"MUXER {label}: selected? {flag}")
+            logger.warning(f"MUXER {label}: selected? {flag}")
             pydev.iointr(label, flag)
 
     def off(self, val):
@@ -178,5 +180,6 @@ def build_muxer(*, prefix, positive_list_file="quadrupole_names.json"):
     with open(quad_names_file) as fp:
         quad_names = json.load(fp)
 
+    quad_names = [name.upper() for name in quad_names]
     mux = Muxer(positive_list=quad_names, prefix=prefix)
     return mux
