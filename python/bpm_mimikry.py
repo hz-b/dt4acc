@@ -4,7 +4,7 @@ import numpy as np
 import pydev
 import pandas as pd
 
-logger = logging.getLogger("thor-scsi-lib")
+logger = logging.getLogger("dt4acc")
 
 #: todo: needs to be imported from database
 from bact_bessyii_ophyd.devices.pp import bpm_paramters
