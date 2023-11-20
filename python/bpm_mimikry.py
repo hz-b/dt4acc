@@ -2,13 +2,16 @@ import logging
 
 import numpy as np
 import pydev
-import pydev
 import pandas as pd
 
-logger = logging.getLogger("thor-scsi-lib")
+logger = logging.getLogger("dt4acc")
 
 #: todo: needs to be imported from database
-from bact2.ophyd.devices.process import bpm_parameters
+from bact_bessyii_ophyd.devices.pp import bpm_paramters
+from bact_device_models.filters.bpm_calibration import BPMCalibrationPlane
+
+# one fits all ...
+calib = BPMCalibrationPlane()
 
 class BPMMimikry:
     """
@@ -40,7 +43,7 @@ class BPMMimikry:
         df.idx = np.arange(n_channels) * -1000 - 1
         df.name = [f"not_set_value_{cnt}_XXX" for cnt in range(n_channels)]
         df.name[indices] = self.bpm_config['name']
-        # todo: check that I am currently guessing (think how I am thinking)
+        # todo: check if the indices I assume currently are correct
         df.idx[indices] = indices
         df = df.set_index("name")
         self.bpm_prep = df
@@ -64,7 +67,7 @@ class BPMMimikry:
             logger.warning("No valid orbit!")
             return
 
-        bpm_offsets= self.parent.accelerator_facade.get_bpm_data()
+        bpm_offsets = self.parent.accelerator_facade.get_bpm_data()
         logger.debug("BPM data shape: %s, %s", bpm_offsets.shape, bpm_offsets.index)
 
         # Publish BPM names
@@ -94,7 +97,19 @@ class BPMMimikry:
         common_names = set(bpm_offsets.index).intersection(df.index)
         common_names = list(common_names)
         common_names.sort()
-        df.loc[:, ["x", "y"]] = bpm_offsets.loc[common_names, ["x", "y"]]
+
+        pd.DataFrame.apply()
+        # recalculate BPM values to bits, use same scale for all
+        bpm_o_phys = bpm_offsets.loc[common_names, ["x", "y"]]
+        bpm_o_eng = bpm_o_phys.copy()
+        if True:
+             bpm_o_eng.loc[:,  ["x", "y"]] = bpm_o_phys.loc[:, ["x", "y"]].apply(
+                 lambda v: calib.to_bits(v)
+             )
+             df.loc[:, ["x", "y"]] += bpm_o_eng
+        else:
+            # df.loc[:, ["x", "y"]] = bpm_o_eng
+            pass
         df.x_rms = .6
         df.y_rms = .7
         df.stat = 0
@@ -103,6 +118,7 @@ class BPMMimikry:
         # todo: find good default values for intensity (z, s) stat and gain raw
         df.loc[:, "intensity_z"] = .2
         df.loc[:, "intensity_s"] = .3
+
 
         bdata_prepare = df.loc[:,  df.columns[1:]].values
         bdata_prepare = np.array(bdata_prepare, dtype=np.float)
