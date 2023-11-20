@@ -45,7 +45,7 @@ class Muxer:
             else:
                 flag = False
 
-            logger.debug(f"MUXER {label}: selected? {flag}")
+            logger.warning(f"MUXER {label}: selected? {flag}")
             pydev.iointr(label, flag)
 
     def off(self, val):
