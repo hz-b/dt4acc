@@ -13,8 +13,8 @@ print(thor_scsi)
 
 from thor_scsi.factory import accelerator_from_config
 
-from python.accelerator_facade import AcceleratorFacade
-from python.virtual_accelerator import VirtualAccelerator
+from .accelerator_facade import AcceleratorFacade
+from .virtual_accelerator import VirtualAccelerator
 
 logger = logging.getLogger("thor-scsi-lib")
 

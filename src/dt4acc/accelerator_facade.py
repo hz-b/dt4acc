@@ -8,7 +8,7 @@ import gtpsa
     # extract_orbit_from_standard_observers,
     # extract_orbit_from_accelerator_with_standard_observers,
 # )
-from python.calculator import TwissCalculator, OrbitCalculator
+from .calculator import TwissCalculator, OrbitCalculator
 import pandas as pd
 
 logger = logging.getLogger("thor-scsi-lib")

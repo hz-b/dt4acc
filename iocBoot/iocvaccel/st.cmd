@@ -29,11 +29,11 @@ vaccel_registerRecordDeviceDriver pdbbase
 
 dbLoadTemplate "db/digital_twin_templates.db", "PREFIX=$(PREFIX)"
 dbLoadRecords "db/digital_twin_records.db", "PREFIX=$(PREFIX)"
-pydev("import accelerator;")
+pydev("from dt4acc import accelerator, muxer;")
 # pydev("vacc = accelerator.build_virtual_accelerator(prefix='$(PREFIX)')")
 pydev("vacc = accelerator.build_virtual_accelerator(prefix='$(PREFIX)', cmd=accelerator.move_quad_compensate)")
 
-pydev("import muxer; mux = muxer.build_muxer(prefix='$(PREFIX)')")
+pydev("mux = muxer.build_muxer(prefix='$(PREFIX)')")
 
 cd "${TOP}/iocBoot/${IOC}"
 iocInit

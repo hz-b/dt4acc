@@ -7,7 +7,7 @@ import pandas as pd
 logger = logging.getLogger("dt4acc")
 
 #: todo: needs to be imported from database
-from bact_bessyii_ophyd.devices.pp import bpm_paramters
+from bact_bessyii_ophyd.devices.pp import bpm_parameters
 from bact_device_models.filters.bpm_calibration import BPMCalibrationPlane
 
 # one fits all ...
@@ -98,11 +98,11 @@ class BPMMimikry:
         common_names = list(common_names)
         common_names.sort()
 
-        pd.DataFrame.apply()
+        # pd.DataFrame.apply()
         # recalculate BPM values to bits, use same scale for all
         bpm_o_phys = bpm_offsets.loc[common_names, ["x", "y"]]
         bpm_o_eng = bpm_o_phys.copy()
-        if True:
+        if False:
              bpm_o_eng.loc[:,  ["x", "y"]] = bpm_o_phys.loc[:, ["x", "y"]].apply(
                  lambda v: calib.to_bits(v)
              )
