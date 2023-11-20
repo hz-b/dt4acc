@@ -2,13 +2,15 @@
 # Implementation of a muxer for the digital twin
 # Works together with the pydevice implementation of the muxer
 
+# todo: make it shadow like
 # muxer powerconverter part
-record(ao, "$(PREFIX):QSPAZR:set")
+record(ai, "$(PREFIX):QSPAZR:set")
 {
 	field(DESC, "Sim. mux. power converter: setpoint")
 	field(VAL, 0)
 	# field(TPRO, 1)
 	field(PREC, 5)
+	field(INP, "QSPAZR:set CPP")
 	field(FLNK, "$(PREFIX):mux:im:set")
 }
 
