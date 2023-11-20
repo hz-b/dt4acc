@@ -121,12 +121,12 @@ class BPMMimikry:
 
 
         bdata_prepare = df.loc[:,  df.columns[1:]].values
-        bdata_prepare = np.array(bdata_prepare, dtype=np.float)
+        bdata_prepare = np.array(bdata_prepare, dtype=float)
 
         # prepare the data to be compatible in vector to what
         # the control system exports
         bdata = bdata_prepare.transpose().ravel()
-        bdata_all = np.zeros((2048,), dtype=np.float)
+        bdata_all = np.zeros((2048,), dtype=float)
         bdata_all[:len(bdata)] = bdata
 
         # Publish BPM data
