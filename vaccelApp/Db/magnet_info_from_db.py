@@ -109,6 +109,7 @@ def load_data(collection_names, index_name=None):
 
     # host = "mongodb.bessy.de"
     host = "localhost"
+    host = "192.168.31.142"
     port = 37017
     url = f"mongodb://visitor:HZB@{host}:{port}/"
     with MongoClient(url) as client:
