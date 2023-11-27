@@ -8,7 +8,7 @@
 cd "${TOP}"
 
 # Won't be left in the environment Path
-# epicsEnvSet("PYTHONPATH","$(TOP)/python:$(TOP)/thor-scsi-lib/python:/home/waheed/workspace/bact2:")
+# epicsEnvSet("PYTHONPATH","$(TOP)/src", "$(PYTHONPATH)")
 
 # Must be specified outside of this directory? switch to static ?
 # epicsEnvSet("LD_LIBRARY_PATH","$(TOP)/lib:")
