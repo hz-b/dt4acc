@@ -2,15 +2,36 @@
 # Implementation of a muxer for the digital twin
 # Works together with the pydevice implementation of the muxer
 
-# todo: make it shadow like
-# muxer powerconverter part
+# Adding shadow: connect to real and twin power converter
+# use the one that is active
+
+# the twin artificial power converter
 record(ai, "$(PREFIX):QSPAZR:set")
 {
 	field(DESC, "Sim. mux. power converter: setpoint")
 	field(VAL, 0)
 	# field(TPRO, 1)
 	field(PREC, 5)
-	field(INP, "QSPAZR:set CPP")
+	field(FLNK, "$(PREFIX):QSPAZR:im:set")
+}
+
+record(calcout, "$(PREFIX):QSPAZR:im:set")
+{
+	field(DESC, "Sim. mux. pc: used setpoint")
+	field(VAL, 0)
+	# which source of current to use: real or twin ?
+	# real in twin mode
+	field(INPA, "$(PREFIX):par:mode PP")
+	field(INPB, "$(PREFIX):QSPAZR:set CPP")
+	field(INPC, "QSPAZR:set CPP")
+	# 1 .. shadow ... use interal one
+	field(CALC, "A == 1 ? C : B")
+	field(OOPT, "On Change")
+	field(EGU, "A")
+	field(VAL, "0")
+	field(PINI,  "YES")
+	field(TPRO, 1)
+	field(PREC, 5)
 	field(FLNK, "$(PREFIX):mux:im:set")
 }
 
@@ -26,7 +47,7 @@ record(ai, "$(PREFIX):QSPAZR:rdbk")
 	field(VAL, 0)
 	field(PREC, 5)
 	# field(TPRO, 1)
-	field(INP, "$(PREFIX):QSPAZR:set")
+	field(INP, "$(PREFIX):QSPAZR:im:set")
 }
 
 record(bo, "$(PREFIX):QSPAZR:cmd1")
