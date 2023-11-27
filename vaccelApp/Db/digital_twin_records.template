@@ -1,6 +1,7 @@
 # Template file that includes the different records. Thus only
 # one dbLoadRecord needs to be issued during start
 
+include "shadow.db"
 include "muxer.db"
 
 include "quadrupole_power_converter_fanout.inc"
