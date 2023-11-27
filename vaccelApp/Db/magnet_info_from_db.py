@@ -107,8 +107,9 @@ def load_data(collection_names, index_name=None):
             df = df.set_index(index_name)
         return df
 
-    host = "mongodb.bessy.de"
-    # host = "localhost"
+    # host = "mongodb.bessy.de"
+    host = "localhost"
+    host = "192.168.31.142"
     port = 37017
     url = f"mongodb://visitor:HZB@{host}:{port}/"
     with MongoClient(url) as client:
@@ -124,7 +125,7 @@ df_vcm = df_vcm.loc[[name[:3] != "VS4" for name in df_vcm.CommonNames], :]
 df_vcm.loc[:, "PS"] = df_vcm.Setpoint.apply(setpoint_2_power_converter_name)
 df_vcm.loc[:, "polarity"] = np.where(df_vcm.hw2phys < 0, -1, 1)
 df_vcm.loc[:, "default_current"] = 0.0
-df_vcm.loc[:, "element"] = [name.lower() for name in df_vcm.CommonNames.values]
+df_vcm.loc[:, "element"] = [name for name in df_vcm.CommonNames.values]
 
 
 df_hcm, = load_data(["StorageRing.HCM"])
@@ -134,7 +135,7 @@ df_hcm.loc[:, "polarity"] = np.where(df_hcm.hw2phys < 0, -1, 1)
 # Ignore the ones on the dipoles
 df_hcm = df_hcm.loc[[name[:2] != "HB" for name in df_hcm.CommonNames], :]
 df_hcm.loc[:, "default_current"] = 0.0
-df_hcm.loc[:, "element"] = [name.lower() for name in df_hcm.CommonNames.values]
+df_hcm.loc[:, "element"] = [name for name in df_hcm.CommonNames.values]
 
 # Quadrupoles
 df_qs = load_data(
@@ -149,7 +150,7 @@ df_qs = load_data(
 df_q = pd.concat(df_qs)
 df_q.reindex(columns=list(df_q.columns) + ["element", "default_current", "PS"])
 df_q.loc[:, "PS"] = df_q.Setpoint.apply(setpoint_2_power_converter_name)
-df_q.loc[:, "element"] = [name.lower() for name in df_q.CommonNames]
+df_q.loc[:, "element"] = [name for name in df_q.CommonNames]
 
 # Only these power converters have currently default values
 # all others would spoil the settings from the lattice file
@@ -263,7 +264,7 @@ vcm_lines = list(
 
 df = df_q.sort_values("CommonNames")
 df_quad_loco2 = df_quad_loco.reindex(columns=list(df_quad_loco.columns) + ["element"])
-df_quad_loco2.loc[:, "element"] = [name.lower() for name in df_quad_loco.index.values]
+df_quad_loco2.loc[:, "element"] = [name for name in df_quad_loco.index.values]
 q_lines = list(
     generate_lines(
         # df.loc[:, ["element", "hw2phys"]],

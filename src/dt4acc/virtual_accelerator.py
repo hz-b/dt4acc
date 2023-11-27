@@ -85,6 +85,12 @@ class VirtualAccelerator:
         if active:
             self.execute_pending_calculations()
 
+    def _element_name_to_lower(self, **kwargs):
+        element_name = kwargs["element_name"]
+        nkws = kwargs.copy()
+        nkws["element_name"] = element_name.lower()
+        return nkws
+
     def get_property(self, **kwargs) -> Dict[str, Any]:
         """
         Method to get the property.
@@ -96,11 +102,13 @@ class VirtualAccelerator:
             dict: A dictionary of the property.
         """
         # was set property
+        kwargs = self._element_name_to_lower(kwargs)
         return self.accelerator_facade.get_property(**kwargs)
 
     def set_property(self, **kwargs):
         """
         """
+        kwargs = self._element_name_to_lower(kwargs)
         return self.accelerator_facade.set_property(**kwargs)
 
     def set_property_and_readback(self, *, readback_method, readback_label, twiss=True, orbit=True, **kwargs):
@@ -109,6 +117,7 @@ class VirtualAccelerator:
             Review as soon as readback also walks to a method
             if not better implement walk to element
         """
+        kwargs = self._element_name_to_lower(kwargs)
         # Set property and get element
         elem = self.set_property(**kwargs)
 
