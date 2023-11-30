@@ -27,11 +27,18 @@ try:
 except KeyError:
     lattice_filename_default = None
 
+
 def build_virtual_accelerator(*, prefix, lattice_file_name=lattice_filename_default, cmd=None):
-    """
-    cmd: setup of commands to be run accelerator facade after setup is finished,
-    but before startup calculations are run
-    """
+    """instaniate the virtual_accelerator
+
+    Args:
+        cmd: execute this function after the virtual_accelerator
+             has been has instanitated.
+
+             It will be run before the virtual_accelerator starts
+             it's startup calculations (e.g. triggering orbit and
+             twiss for the first time)
+   """
     if not lattice_file_name:
         if lattice_filename_default is None:
             raise ValueError("No filename was given nor a default is known")
@@ -53,6 +60,7 @@ def build_virtual_accelerator(*, prefix, lattice_file_name=lattice_filename_defa
         cmd(acc)
     vacc.execute_calculations_at_startup()
     return vacc
+
 
 def move_quad_compensate(acc):
     """
