@@ -5,7 +5,7 @@
 cd "${TOP}"
 
 # Won't be left in the environment Path
-epicsEnvSet("PYTHONPATH","$(TOP)/src/:$(PYTHONPATH)")
+epicsEnvSet("PYTHONPATH","$(TOP)/src/:$PYTHONPATH")
 
 epicsEnvSet("PREFIX","Pierre:DT")
 epicsEnvSet("THOR_SCSI_LATTICE", "$(TOP)/lattices/b2_stduser_beamports_blm_tracy_corr.lat")

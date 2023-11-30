@@ -49,8 +49,8 @@ def build_virtual_accelerator(*, prefix, lattice_file_name=lattice_filename_defa
     # Twiss parameters are recalculated
     vacc = VirtualAccelerator(af, prefix=prefix)
     # some calculations to do at start up
-    #
-    cmd(acc)
+    if cmd is not None:
+        cmd(acc)
     vacc.execute_calculations_at_startup()
     return vacc
 
