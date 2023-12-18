@@ -70,6 +70,9 @@ class VirtualAccelerator:
             self.execute_calculations(active=False)
             time.sleep(3)
             logger.warning("Startup: executing pending calculations")
+            self.twiss_pending.pending = True
+            self.orbit_pending.pending = True
+            self.execute_pending_calculations()
             self._execute_pending_calculations()
             logger.warning("Startup: setting execute back to start value")
             self.execute_calculations(active=val)
@@ -89,7 +92,7 @@ class VirtualAccelerator:
         if active:
             self.execute_pending_calculations()
 
-    def _element_name_to_lower(self, **kwargs):
+    def _element_name_to_lower(self, kwargs):
         element_name = kwargs["element_name"]
         nkws = kwargs.copy()
         nkws["element_name"] = element_name.lower()

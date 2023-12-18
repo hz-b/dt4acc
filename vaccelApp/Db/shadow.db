@@ -17,4 +17,5 @@ record(fanout, "$(PREFIX):im:mode:fanout")
 
 record(fanout, "$(PREFIX):im:mode:muxer:fanout")
 {
+    field(LNK1, "$(PREFIX):QSPAZR:im:set")
 }

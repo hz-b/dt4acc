@@ -55,7 +55,7 @@ record(calcout, "$(PREFIX):$(ELEMENT):im:Imux")
     field(EGU, "A")
     field(VAL, "0")
     field(PINI,  "YES")
-    field(TPRO, 1)
+    field(TPRO, 0)
     # don't forget passive process
     # redirection over Imuxfwd so that the
     # equivalent sum current does not jitter around

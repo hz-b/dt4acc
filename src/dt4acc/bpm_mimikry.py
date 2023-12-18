@@ -49,7 +49,6 @@ class BPMMimikry:
         self.bpm_prep = df
 
 
-
     def publish_bpm_data(self, orbit_result):
         """
         Publish BPM data to EPICS.
@@ -76,9 +75,13 @@ class BPMMimikry:
         pydev.iointr(label, names_as_bytes)
 
         # Publish BPM data for each plane
-        for data, plane in zip(bpm_offsets.T, ["x", "y"]):
+        for plane in ["x", "y"]:
+            data = bpm_offsets.loc[:, plane].values
             label = f"{self.prefix}-bpm.d{plane}"
-            logger.debug("BPM data for plane %s: %s", plane, list(data))
+            logger.debug(
+                "BPM: publishing data with label %s for plane %s: %s",
+                label, plane, data
+            )
             pydev.iointr(label, list(data))
 
         # Build BPM data together
@@ -108,7 +111,7 @@ class BPMMimikry:
              )
              df.loc[:, ["x", "y"]] += bpm_o_eng
         else:
-            # df.loc[:, ["x", "y"]] = bpm_o_eng
+            df.loc[:, ["x", "y"]] = bpm_o_eng
             pass
         df.x_rms = .6
         df.y_rms = .7
@@ -118,7 +121,6 @@ class BPMMimikry:
         # todo: find good default values for intensity (z, s) stat and gain raw
         df.loc[:, "intensity_z"] = .2
         df.loc[:, "intensity_s"] = .3
-
 
         bdata_prepare = df.loc[:,  df.columns[1:]].values
         bdata_prepare = np.array(bdata_prepare, dtype=float)
@@ -131,4 +133,5 @@ class BPMMimikry:
 
         # Publish BPM data
         label = f"{self.prefix}-bpm-bdata"
+        logger.warning(f"BPM: publishing {label}")
         pydev.iointr(label, list(bdata_all))
