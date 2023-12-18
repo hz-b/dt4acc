@@ -17,13 +17,17 @@ record(ai, "$(PREFIX):QSPAZR:set")
 
 record(calcout, "$(PREFIX):QSPAZR:im:set")
 {
+    # Todo: how the handle the connection to
+    #       the devices only existing in the real
+    #       machine: set INPC at start up?
 	field(DESC, "Sim. mux. pc: used setpoint")
 	field(VAL, 0)
 	# which source of current to use: real or twin ?
 	# real in twin mode
 	field(INPA, "$(PREFIX):par:mode PP")
-	field(INPB, "$(PREFIX):QSPAZR:set CPP")
-	field(INPC, "QSPAZR:set CPP")
+	field(INPB, "$(PREFIX):QSPAZR:set")
+	field(INPC, "-1000")
+	# field(INPC, "QSPAZR:set CPP")
 	# 1 .. shadow ... use interal one
 	field(CALC, "A == 1 ? C : B")
 	field(OOPT, "On Change")
@@ -52,27 +56,41 @@ record(ai, "$(PREFIX):QSPAZR:rdbk")
 
 record(bo, "$(PREFIX):QSPAZR:cmd1")
 {
+    # Todo: check that ZNAM / ONAM matches real world
 	field(DESC, "Simulated muxer power converter")
 	field(VAL, 0)
 	field(ZNAM, "ON")
 	field(ONAM, "set")
+	field(PINI, "YES")
 	# field(TPRO, 1)
+	field(FLNK, "$(PREFIX):QSPAZR:im:stat_calc")
 }
 
-record(bo, "$(PREFIX):QSPAZR:stat1")
+record(calc, "$(PREFIX):QSPAZR:im:stat_calc")
+{
+    field(DESC, "mux: pc appear on if switched on")
+    field(INPA, "$(PREFIX):QSPAZR:cmd1")
+    field(CALC, "!A")
+    field(FLNK, "$(PREFIX):QSPAZR:stat1")
+}
+
+record(bi, "$(PREFIX):QSPAZR:stat1")
 {
 	field(DESC, "Simulated muxer power converter")
+	field(INP, "$(PREFIX):QSPAZR:im:stat_calc")
 	field(VAL, 0)
 	field(ZNAM, "OFF")
-	field(ZNAM, "ON")
+	field(ONAM, "ON")
 	# field(TPRO, 1)
 }
 
 
 record(bo, "$(PREFIX):QSPAZR:stat2")
 {
+    # Todo: when to go in error mode
 	field(DESC, "Simulated muxer power converter")
-	field(VAL, 0)
+	field(VAL, 1)
+	field(PINI, "yes")
 	field(ZNAM, "Sum Error")
 	field(ONAM, "No Error")
 	# field(TPRO, 1)
