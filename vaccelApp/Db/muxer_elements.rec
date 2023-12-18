@@ -43,9 +43,10 @@ record(bo, "$(PREFIX):PMUXZR:$(ELEMENT)")
 record(calcout, "$(PREFIX):$(ELEMENT):im:Imux")
 {
     field(DESC, "Mux current applied and scaled")
+    # todo: make it switchable from shadow to twin 
     # Muxer power converter
-    #	field(INPA, "QSPAZR:set CPP")
-    field(INPA, "$(PREFIX):QSPAZR:set CPP")
+    field(INPA, "QSPAZR:set CPP")
+    # field(INPA, "$(PREFIX):QSPAZR:set CPP")
     # Implemented as pydev in muxer_quad.template
     field(INPB,  "$(PREFIX):$(ELEMENT):im:mux:active")
     field(INPC,  "$(PREFIX):$(ELEMENT):par:muxscale")
@@ -54,6 +55,7 @@ record(calcout, "$(PREFIX):$(ELEMENT):im:Imux")
     field(EGU, "A")
     field(VAL, "0")
     field(PINI,  "YES")
+    field(TPRO, 1)
     # don't forget passive process
     # redirection over Imuxfwd so that the
     # equivalent sum current does not jitter around

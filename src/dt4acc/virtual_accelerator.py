@@ -42,6 +42,7 @@ class VirtualAccelerator:
         """
         self.accelerator_facade = accelerator_facade
         self.prefix = prefix
+        #: todo rename attribute as function with similar method exists
         self.executeCalculations = False
         self.orbit_pending = PendingCalculationManager(info="closed orbit")
         self.twiss_pending = PendingCalculationManager(info="Twiss parameters")
@@ -65,13 +66,16 @@ class VirtualAccelerator:
 
         def run():
             logger.warning("Startup delaying calculations")
-            val = self.execute_calculations
+            val = self.executeCalculations
             self.execute_calculations(active=False)
             time.sleep(3)
             logger.warning("Startup: executing pending calculations")
             self._execute_pending_calculations()
             logger.warning("Startup: setting execute back to start value")
             self.execute_calculations(active=val)
+
+        # Todo: why is the run not executed ...
+        # run()
 
     def execute_calculations(self, *, active):
         """
@@ -80,7 +84,7 @@ class VirtualAccelerator:
         Args:
             active (bool): A flag indicating whether to execute calculations.
         """
-        self.execute_calculations = bool(active)
+        self.executeCalculations = bool(active)
         logger.warning(f"Request for executing calculations: {active}")
         if active:
             self.execute_pending_calculations()

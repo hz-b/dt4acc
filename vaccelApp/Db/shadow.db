@@ -1,0 +1,20 @@
+record(bo, "$(PREFIX):par:mode")
+{
+	field(DESC, "Runnning as twin or as shadow")
+	field(ZNAM, "as twin")
+	field(ONAM, "as shadow")
+
+	field(VAL, 0)
+	field(TPRO, 0)
+	field(PINI, "YES")
+}
+
+record(fanout, "$(PREFIX):im:mode:fanout")
+{
+	field(DESC, "twin / shadow mode change prop")
+	field(LNK1, "$(PREFIX):im:mode:muxer:fanout")
+}
+
+record(fanout, "$(PREFIX):im:mode:muxer:fanout")
+{
+}
