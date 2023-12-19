@@ -90,7 +90,7 @@ record(bo, "$(PREFIX):QSPAZR:stat2")
     # Todo: when to go in error mode
 	field(DESC, "Simulated muxer power converter")
 	field(VAL, 1)
-	field(PINI, "yes")
+	field(PINI, "YES")
 	field(ZNAM, "Sum Error")
 	field(ONAM, "No Error")
 	# field(TPRO, 1)
