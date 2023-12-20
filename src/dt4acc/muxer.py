@@ -36,8 +36,9 @@ class Muxer:
             zero.
         """
         for name in self._positive_list:
-            # Todo: get machine names to upper names
-            name = name.lower()
+            # The names here have to be upper case:
+            # epics db records use upper case (non converted ones)
+            # already
             label = f"{self._prefix}:{name}:im:mux:active"
             if self._selected is not None and name == self._selected:
                 logger.info(f"Selected {label}")
