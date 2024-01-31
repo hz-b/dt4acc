@@ -1,0 +1,27 @@
+# Linear gradient: If the magnet would not suffer from hysterersis
+record(ao, "$(PREFIX):$(ELEMENT):Cm:set")
+{
+
+
+     field(DESC, "Pushing Cm to Element")
+     field(DTYP, "pydev")
+     field(OUT,  "@vacc.set_property_and_readback(element_name='$(ELEMENT)', element_index=0, method_names=['set_main_multipole_strength'], value=%VAL%, readback_method='get_main_multipole_strength_component', readback_label='$(PREFIX):$(ELEMENT)-Cm', twiss=True, orbit=True)")
+     field(PREC, 11)
+     field(MDEL, 1e-5)
+     field(EGU, "m")
+     # field(TPRO, 1)
+}
+
+record(ai, "$(PREFIX):$(ELEMENT):Cm:rdbk")
+{
+
+     field(DESC, "Reading Cm (Bm/Am) from element")
+     field(DTYP, "pydev")
+     field(INP,  "@pydev.iointr('$(PREFIX):$(ELEMENT)-Cm')")
+     field(SCAN, "I/O Intr")
+     field(VAL,  "1000")
+     field(EGU,  "m")
+     field(PREC, 8)
+     field(PINI, "YES")
+     # field(TPRO, 1)
+}

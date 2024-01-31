@@ -1,1 +1,1 @@
-from . import accelerator
+from . import accelerators
