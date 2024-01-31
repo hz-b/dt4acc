@@ -12,6 +12,7 @@
 include "transfer.substitutions"
 
 # transfer functions ... exported horizontal vertical steerers
+include "setup_function.inc"
 include "transfer_function.inc"
 # End transfer functions ------------------------------------------------------
 

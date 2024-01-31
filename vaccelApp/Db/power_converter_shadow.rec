@@ -1,0 +1,20 @@
+record(calcout, "$(PREFIX):$(PC):shadow:set")
+{
+    field(DESC, "$(PC): track change, push to calc eng.")
+    field(INPA, "$(MACHINE)$(PC):set CPP")
+    # variable for shadow to activate
+    # field(INPB, "")
+    field(CALCOUT, "A")
+    field(CALC, "B")
+    field(OOPT, "When Non-Zero")
+    field(DOPT, "Use OCAL")
+    field(EGU, "A")
+    # substitute with NaN
+    field(VAL,  "0.0")
+    field(PINI, "YES")
+    field(PREC, 6)
+    # that should be enough to forward the value and update the
+    # other record
+    field(OUT, "$(PREFIX):$(PC):set PP")
+    # field(FLNK, "$(PREFIX):$(PC):set")
+}
