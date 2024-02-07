@@ -1,4 +1,4 @@
-# 10.01.2024 Teresia Olsson, Markus Ries... translation of present BESSY II reference lattice to pyat (&review & refactor)
+# 10.01.2024 Teresia Olsson, Markus Ries.. translation of present BESSY II reference lattice to pyat (&review & refactor)
 
 import numpy as np
 import at

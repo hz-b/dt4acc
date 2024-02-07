@@ -45,11 +45,11 @@ class Muxer:
             else:
                 flag = False
 
-            logger.warning(f"MUXER {label}: selected? {flag}")
+            logger.debug(f"MUXER {label}: selected? {flag}")
             pydev.iointr(label, flag)
 
     def off(self, val):
-        """Switch muxer off ....
+        """Switch muxer off ..
 
         Todo:
 
@@ -110,7 +110,7 @@ class Muxer:
         else:
             display_name = mux_off
 
-        # Longer delay if value is set ... be closer to the real device
+        # Longer delay if value is set .. be closer to the real device
         # At startup this routine is called many times. Be rather fast
         # here so that startup finishes swiftly
         if val:
@@ -127,7 +127,7 @@ class Muxer:
             self.setDisplayName(name)
 
         def fend():
-            # Now switching virtual relay ....
+            # Now switching virtual relay ..
             self._redirectRelay()
             self._running = False
             logger.info(f"Muxer processing: {display_name} done")
@@ -156,7 +156,7 @@ class Muxer:
         logger.info(
             f"Muxer processing: was off {was_off} already_selected {already_selected} delay {delay}"
         )
-        # That's how the muxer responds ....
+        # That's how the muxer responds ..
         # according to the comment in the description
         if was_off:
             func = fwas_off

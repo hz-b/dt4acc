@@ -4,11 +4,11 @@ import gtpsa
 import thor_scsi.lib as tslib
 from thor_scsi.factory import accelerator_from_config
 
-from src.dt4acc.accelerators.accelerator_impl import AcceleratorImpl
-from src.dt4acc.calculator.thor_scsi_calculator import ThorScsiTwissCalculator, ThorScsiOrbitCalculator
-from src.dt4acc.device_interface.bpm_mimikry import BPMMimikry
-from src.dt4acc.model.orbit import Orbit
-from src.dt4acc.view.calculation_result_view import ResultView
+from ..accelerators.accelerator_impl import AcceleratorImpl
+from ..calculator.thor_scsi_calculator import ThorScsiTwissCalculator, ThorScsiOrbitCalculator
+from ..device_interface.bpm_mimikry import BPMMimikry
+from ..model.orbit import Orbit
+from ..view.calculation_result_view import ResultView
 
 t_dir = Path(__file__).resolve().parent.parent
 lattice_filename_default = f"{t_dir}/resources/b2_stduser_beamports_blm_tracy_corr.lat"
