@@ -19,24 +19,39 @@ class ElementProxy(ElementInterface):
         self._obj = obj
         self.on_update_finished = Event()
 
+    def update_shift(self, *, dx=None, dy=None):
+        """
+        todo: find out if there is a shift
+        """
+        assert dx is not None or dy is not None
+
+        sub_lattice = self._obj
+
+        try:
+            shift = sub_lattice.shift
+        except AttributeError:
+            shift = [0.0, 0.0]
+        shift = shift.copy()
+        if dx is None:
+            dx = shift[0]
+        if dy is None:
+            dy = shift[1]
+        sub_lattice.set_shift(dx, dy)
+
+
     def update(self, property_id: str, value):
         """
         Todo:
             set property
         """
-        sub_lattice = self._obj
-        element, = sub_lattice
+        element, = self._obj
         method_name = "set_" + property_id
         if method_name == "set_dx":
             # Todo: check that lattice placement works on the original lattice
             #       and that this is not a copy
-            shift = sub_lattice.shift.copy()
-            shift[0] = value
-            sub_lattice.set_shift(shift, absolute=True)
+            self.update_shift(dx=value)
         elif method_name == "set_dy":
-            shift = sub_lattice.shift.copy()
-            shift[1] = value
-            sub_lattice.set_shift(shift, absolute=True)
+            self.update_shift(dy=value)
         elif method_name == "set_main_multipole_strength":
             # Check that it is a quadrupole
             element.update(K=value)
