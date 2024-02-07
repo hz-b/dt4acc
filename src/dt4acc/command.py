@@ -1,5 +1,6 @@
 import os
 
+from .update_context_manager import UpdateContext
 
 calculation_engine_default = os.environ["calculation_engine"]
 
@@ -23,5 +24,6 @@ def update(*, element_id, property_name, value=None):
         Is value=None a value user wants to set?
         If so get an other place holder...
     """
-    elem_proxy = acc.get_element(element_id)
-    elem_proxy.update(property_name, value)
+    with UpdateContext(element_id=element_id, property_name=property_name, value=value, kwargs=dict()):
+        elem_proxy = acc.get_element(element_id)
+        elem_proxy.update(property_name, value)
