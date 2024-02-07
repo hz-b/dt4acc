@@ -2,14 +2,14 @@ import logging
 
 import pandas as pd
 
-from src.dt4acc.model.orbit import Orbit
+from ..model.orbit import Orbit
 
 logger = logging.getLogger("dt4acc")
 
 #: todo: needs to be imported from database
 from bact_device_models.filters.bpm_calibration import BPMCalibrationPlane
 
-# one fits all ...
+# one fits all ..
 calib = BPMCalibrationPlane()
 
 
@@ -48,7 +48,7 @@ class BPMMimikry:
             logger.warning("No valid orbit!")
             return
 
-        # find indices where the names are ...
+        # find indices where the names are ..
         df = pd.DataFrame(index=["x", "y"], columns=orbit_result.names, data=[orbit_result.x, orbit_result.y]).T.loc[
              self.bpm_names, :]
         return Orbit(x=df.x.values, y=df.y.values, names=df.index.values, found=orbit_result.found, x0=orbit_result.x0)

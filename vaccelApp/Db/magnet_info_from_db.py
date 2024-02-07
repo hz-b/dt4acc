@@ -159,9 +159,9 @@ df_q.loc[:, "element"] = [name for name in df_q.CommonNames]
 # data as measured by loco
 df_quad_loco = pd.read_json("bessy2_quad_loco_current_hw2phys.json")
 
-# Export steerer fanout ... steerer dt power converter to element
+# Export steerer fanout .. steerer dt power converter to element
 # power converter
-# Quadrupoles have many on one line ... created differently.
+# Quadrupoles have many on one line .. created differently.
 # Here it is one to one so I use a template to create them
 
 
@@ -268,7 +268,7 @@ df_quad_loco2.loc[:, "element"] = [name for name in df_quad_loco.index.values]
 q_lines = list(
     generate_lines(
         # df.loc[:, ["element", "hw2phys"]],
-        # In this case ... also write power_converter currents
+        # In this case .. also write power_converter currents
         df_quad_loco2.loc[:, ["element", "hw2phys"]],
         pos_names=df_quad_loco2.element.values,
         entry_types="quadrupoles",
@@ -312,10 +312,10 @@ vcm_lines = list(
 )
 "\n".join(vcm_lines)
 
-# Connected to more than one magnet sometimes ... reduce it to them
+# Connected to more than one magnet sometimes .. reduce it to them
 df_quad_loco_red = df_quad_loco.loc[:, ["setpoint", "current"]]
 quad_power_converter_names = list(set(df_quad_loco_red.setpoint.values))
-# QIPTR ...
+# QIPTR ..
 quad_power_converter_names.remove(None)
 quad_power_converter_names.sort()
 # should be identical for different lines here one should suffice
@@ -325,7 +325,7 @@ df_quad_loco_red = df_quad_loco_red.iloc[quad_sel_idx, :]
 q_lines = list(
     generate_lines(
         # df.loc[:, ["element", "hw2phys"]],
-        # In this case ... also write power_converter currents
+        # In this case .. also write power_converter currents
         df_quad_loco_red.loc[:, ["setpoint", "current"]],
         # pos_names=df.element.values,
         pos_names=df_quad_loco_red.setpoint.values,
@@ -351,7 +351,7 @@ with open(filename, "wt") as fp:
 q_lines = list(
     generate_lines(
         # df.loc[:, ["element", "hw2phys"]],
-        # In this case ... also write power_converter currents
+        # In this case .. also write power_converter currents
         df_quad_loco2.loc[:, ["element"]],
         # pos_names=df.element.values,
         pos_names=df_quad_loco2.element,

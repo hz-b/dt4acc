@@ -36,7 +36,7 @@ record(bi, "$(PREFIX):beam:orbit:found")
 	field(SCAN, "I/O Intr")
 
 	field(VAL, 0)
-	# field(TPRO, 1)
+	field(TPRO, 1)
 	field(PINI, "YES")
 
 }
@@ -188,14 +188,17 @@ record(waveform, "$(PREFIX):beam:names")
 	field(SCAN, "I/O Intr")
 	field(NELM, 2048)
 	field(FTVL, "STRING")
-	# field(TPRO, 1)
+	field(TPRO, 1)
 }
 
 record(longout, "$(PREFIX):beam:publish")
 {
      field(DESC, "Publish lattice")
      field(DTYP, "pydev")
-     field(OUT, "@vacc.publishLattice()")
+     # todo: make latttice publsihable
+     #:      what did that mean?
+     field(OUT, "@publish(what='lattice')")
+     #field(OUT, "@print('How should I publish the lattice?')")
      field(VAL, -1)
      field(PINI, "YES")
      field(TPRO, 1)

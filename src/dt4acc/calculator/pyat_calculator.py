@@ -31,7 +31,7 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
         alpha = twiss["alpha"]
         beta = twiss["beta"]
         nu = twiss["mu"]
-        #: todo: find out how to store mu ...
+        #: todo: find out how to store mu ..
         return Twiss(
             x=TwissForPlane(alpha=alpha[0], beta=beta[0], nu=nu[0]),
             y=TwissForPlane(alpha=alpha[1], beta=beta[1], nu=nu[1]),

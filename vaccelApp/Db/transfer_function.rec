@@ -11,8 +11,8 @@ record(calcout, "$(PREFIX):$(ELEMENT):im:Cm")
     field(DOPT, "Use CALC")
     # field(TPRO, 1)
     field(PREC, 8)
-    field(OUT, "$(PREFIX):$(ELEMENT):Cm:set")
-    field(FLNK, "$(PREFIX):$(ELEMENT):Cm:set")
+    field(OUT, "$(PREFIX):$(ELEMENT):Cm:set PP")
+    # field(FLNK, "$(PREFIX):$(ELEMENT):Cm:set")
 
 }
 

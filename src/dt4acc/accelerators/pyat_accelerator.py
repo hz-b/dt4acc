@@ -1,17 +1,20 @@
-from src.dt4acc.accelerators.accelerator_impl import AcceleratorImpl
-from src.dt4acc.calculator.pyat_calculator import PyAtTwissCalculator, PyAtOrbitCalculator
-from src.dt4acc.device_interface.bpm_mimikry import BPMMimikry
-from src.dt4acc.model.orbit import Orbit
-from src.dt4acc.resources.bessy2_sr_reflat import bessy2Lattice
-from src.dt4acc.view.calculation_result_view import ResultView
+from ..accelerators.accelerator_impl import AcceleratorImpl
+from ..calculator.pyat_calculator import PyAtTwissCalculator, PyAtOrbitCalculator
+from ..device_interface.bpm_mimikry import BPMMimikry
+from ..model.orbit import Orbit
+from ..resources.bessy2_sr_reflat import bessy2Lattice
+from ..view.calculation_result_view import ResultView, ElementParameterView
 
 acc = bessy2Lattice()
-
-pyat_accelerator = AcceleratorImpl(acc, PyAtTwissCalculator(acc), PyAtOrbitCalculator(acc))
-view = ResultView(prefix="WS")
-bpm_names_pyat = [elem.FamName for elem in pyat_accelerator.acc if "bpm" in elem.FamName]
-bpm_pyat = BPMMimikry(prefix="WS", bpm_names=bpm_names_pyat)
-pyat_accelerator.on_new_orbit.append(view.push_orbit)
+prefix = "Pierre:DT"
+accelerator = AcceleratorImpl(acc, PyAtTwissCalculator(acc), PyAtOrbitCalculator(acc))
+view = ResultView(prefix=prefix +":beam")
+#: todo into a controller to pass prefix as parameter at start ?
+elem_par_view = ElementParameterView(prefix=prefix)
+bpm_names_pyat = [elem.FamName for elem in accelerator.acc if "bpm" in elem.FamName]
+bpm_pyat = BPMMimikry(prefix=prefix, bpm_names=bpm_names_pyat)
+accelerator.on_new_orbit.append(view.push_orbit)
+accelerator.on_changed_value.append(elem_par_view.push_value)
 
 
 def cb(orbit_data: Orbit):
@@ -19,9 +22,9 @@ def cb(orbit_data: Orbit):
     view.push_bpms(reduced_data_pyat)
 
 
-pyat_accelerator.on_new_orbit.append(cb)
-pyat_accelerator.on_new_twiss.append(view.push_twiss)
+accelerator.on_new_orbit.append(cb)
+accelerator.on_new_twiss.append(view.push_twiss)
 
 
 def set_accelerator():
-    return pyat_accelerator
+    return accelerator
