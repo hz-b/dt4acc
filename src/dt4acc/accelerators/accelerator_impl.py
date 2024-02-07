@@ -24,9 +24,25 @@ class ElementProxy(ElementInterface):
         Todo:
             set property
         """
+        sub_lattice = self._obj
+        element, = sub_lattice
         method_name = "set_" + property_id
-        method = getattr(self._obj, method_name)
-        method(value)
+        if method_name == "set_dx":
+            # Todo: check that lattice placement works on the original lattice
+            #       and that this is not a copy
+            shift = sub_lattice.shift.copy()
+            shift[0] = value
+            sub_lattice.set_shift(shift, absolute=True)
+        elif method_name == "set_dy":
+            shift = sub_lattice.shift.copy()
+            shift[1] = value
+            sub_lattice.set_shift(shift, absolute=True)
+        elif method_name == "set_main_multipole_strength":
+            # Check that it is a quadrupole
+            element.update(K=value)
+        else:
+            method = getattr(self._obj, method_name)
+            method(value)
         self.on_update_finished.trigger(None)
 
 
@@ -44,9 +60,11 @@ class AcceleratorImpl(AcceleratorInterface, UserList):
 
     def get_element(self, element_id) -> ElementInterface:
         # TODO: see how the  data is structured  than return the element by id
-        element = self.acc.find(element_id, 0)
-        if element:
-            proxy = ElementProxy(element)
+        sub_lattice = self.acc[element_id]
+        # single element expected in sublattice
+        _, = sub_lattice
+        if sub_lattice:
+            proxy = ElementProxy(sub_lattice)
 
             def cb(unused):
                 self.twiss = self.twiss_calculator.calculate()
