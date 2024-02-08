@@ -1,6 +1,6 @@
 import pytest
 
-from src.dt4acc.command import update
+from dt4acc.command import update
 
 
 def test_update_simple():
