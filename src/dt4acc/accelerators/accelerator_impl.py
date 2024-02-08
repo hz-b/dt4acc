@@ -1,6 +1,7 @@
 from collections import UserList
 
 import numpy as np
+from at import shift_elem
 
 from ..interfaces.accelerator_interface import AcceleratorInterface
 from ..interfaces.element_interface import ElementInterface
@@ -17,13 +18,32 @@ class Event(UserList):
             callback(obj)
 
 
+def estimate_shift(element, eps=1e-8):
+    """
+    Todo: get it upstreamed into pyat
+    """
+    try:
+        down_stream_shift = element.T1
+    except AttributeError:
+        down_stream_shift = np.zeros([6], np.float)
+    try:
+        up_stream_shift = element.T2
+    except AttributeError:
+        up_stream_shift = np.zeros([6], np.float)
+
+    prep = np.array([down_stream_shift, -up_stream_shift])
+    shift = prep.mean(axis=0)
+
+    assert (np.absolute(prep.std(axis=0)) < eps).all()
+    return shift
+
+
 class ElementProxy(ElementInterface):
     def __init__(self, obj, *, element_id):
         self._obj = obj
         self.element_id = element_id
         self.on_update_finished = Event()
         self.on_changed_value = Event()
-
 
     def update_roll(self, *, roll):
         """
@@ -39,27 +59,21 @@ class ElementProxy(ElementInterface):
 
         Push updated value back to sender?
         """
-        return
 
         assert dx is not None or dy is not None
 
-        sub_lattice = self._obj
+        element, = self._obj
 
-        try:
-            shift = sub_lattice.shift
-        except AttributeError:
-            shift = [0.0, 0.0]
-        shift = shift.copy()
+        shift = estimate_shift(element)
         if dx is None:
             dx = shift[0]
         if dy is None:
             dy = shift[1]
+        shift_elem(element, dx, dy)
 
-        sub_lattice.set_shift(dx, dy)
-
-        # be sure to retrieve properly, perhaps a bit paranoic
-        sub_lattice = self._obj
-        dxr, dyr = sub_lattice.shift
+        # look what really happened
+        element, = self._obj
+        dxr, _, dyr, _, _, _ = estimate_shift(element)
         self.on_changed_value.trigger(
             ElementUpdate(element_id=self._obj.name, property_name="dx", value=dxr)
         )
@@ -88,7 +102,6 @@ class ElementProxy(ElementInterface):
         elif method_name == "set_K":
             # Check that it is a quadrupole
             element.update(K=value)
-            kc = self._obj[0].K
             self.on_changed_value.trigger(
                 ElementUpdate(element_id=self.element_id, property_name="K", value=self._obj[0].K)
             )
@@ -120,6 +133,7 @@ class AcceleratorImpl(AcceleratorInterface, UserList):
         if sub_lattice:
             proxy = ElementProxy(sub_lattice, element_id=element_id)
             proxy.on_changed_value.append(self.on_changed_value.trigger)
+
             def cb(unused):
                 self.twiss = self.twiss_calculator.calculate()
                 self.orbit = self.orbit_calculator.calculate()

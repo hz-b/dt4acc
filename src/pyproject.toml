@@ -18,7 +18,7 @@ python = ">=3.7"
 numpy = "*"
 pandas = "*"
 accelerator-toolbox = ">=0.5"
-bact-device-model = "*"
+bact-device-models = "*"
 
 Sphinx = { version = "*", optional = true }
 sphinx-rtd-theme = { version = "*", optional = true }
