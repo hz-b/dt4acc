@@ -15,6 +15,13 @@ jobs:
         python-version: [ "3.9", "3.10", "3.12" ]
 
     steps:
+    - name: checkout dt4acc
+      uses: actions/checkout@v4
+      with:
+        repository: hz-b/dt4acc
+        path: dt4acc
+        ref: dev/main
+        submodules: False
     - name: checkout bact-device-models
       uses: actions/checkout@v4
       with:
@@ -42,15 +49,15 @@ jobs:
         pip install ./bact-device-models
     - name: Install this package
       run: |
-        if [ -f src/requirements.txt ]; then pip install -r src/requirements.txt; fi
+        if [ -f dt4acc/src/requirements.txt ]; then pip install -r dt4acc/src/requirements.txt; fi
         # need to add that? ... seems so
-        pip install ./src
+        pip install dt4acc/src
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 ./src --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 dt4acc/src --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 ./src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        flake8 dt4acc/src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        CALCULATION_ENGINE=default pytest ./src/tests
+        CALCULATION_ENGINE=default pytest dt4acc/src/tests
