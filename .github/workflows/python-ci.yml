@@ -22,7 +22,6 @@ jobs:
         path: bact-device-models
         ref: dev/main
         submodules: False
-    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
@@ -37,6 +36,8 @@ jobs:
         python -m pip install flake8 pytest setuptools wheel
     - name: Install bact device models
       run : |
+        find . -type d
+        find . -type f 
         if [ -f bact-device-models/requirements.txt ]; then pip install -r bact-device-models/requirements.txt; fi
         pip install ./bact-device-models
     - name: Install this package
