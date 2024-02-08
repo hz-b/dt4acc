@@ -8,7 +8,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -16,6 +15,13 @@ jobs:
         python-version: [ "3.9", "3.10", "3.12" ]
 
     steps:
+    - name: checkout bact-device-models
+      uses: actions/checkout@v4
+      with:
+        repository: hz-b/bact-device-models
+        path: bact-device-models
+        ref: dev/main
+        submodules: False
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
@@ -25,10 +31,16 @@ jobs:
         cache-dependency-path: |
            **/pyproject.toml
            **/requirements*.txt
-    - name: Install dependencies
+    - name: python pip package update
       run: |
         python -m pip install --upgrade pip
         python -m pip install flake8 pytest setuptools wheel
+    - name: Install bact device models
+      run : |
+        if [ -f bact-device-models/requirements.txt ]; then pip install -r bact-device-models/requirements.txt; fi
+        pip install ./bact-device-models
+    - name: Install this package
+      run: |
         if [ -f src/requirements.txt ]; then pip install -r src/requirements.txt; fi
         # need to add that? ... seems so
         pip install ./src
