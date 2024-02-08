@@ -20,6 +20,7 @@ DB += power_converter_relay.rec
 DB += muxer_elements.rec
 DB += quadrupole_names.json
 
+DB += setup_function.rec
 
 DB += beam.rec
 # If <anyname>.db template is not named <anyname>*.template add

@@ -498,7 +498,7 @@ file db/offset.rec
 
 
 # QITT
-		{ QIT6R }
+		{ QIT6 }
 # end of quadrupoles
 }
 # EOF
