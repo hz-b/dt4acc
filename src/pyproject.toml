@@ -1,0 +1,26 @@
+[build-system]
+requires = [ "poetry-core>=1.0.0",]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "dt4acc"
+version = "0.0.1"
+description = "Digital twin for accelerators"
+authors = [ "Waheedullah Sulaiman Khail", "Pierre Schnizer"]
+license = "GPL-3.0"
+homepage = "https://github.com/hz-b/dt4acc"
+documentation = "https://hz-b.github.io/dt4acc/"
+repository = "https://github.com/hz-b/dt4acc"
+keywords = []
+
+[tool.poetry.dependencies]
+python = ">=3.7"
+numpy = "*"
+pyat = ">=0.5"
+
+Sphinx = { version = "*", optional = true }
+sphinx-rtd-theme = { version = "*", optional = true }
+sphinxcontrib-napoleon = { version = "*", optional = true }
+
+[tool.poetry.extras]
+docs = ["Sphinx", "sphinx-rtd-theme", "sphinxcontrib-napoleon"]
