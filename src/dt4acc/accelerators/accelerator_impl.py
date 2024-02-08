@@ -25,11 +25,11 @@ def estimate_shift(element, eps=1e-8):
     try:
         down_stream_shift = element.T1
     except AttributeError:
-        down_stream_shift = np.zeros([6], np.float)
+        down_stream_shift = np.zeros([6], float)
     try:
         up_stream_shift = element.T2
     except AttributeError:
-        up_stream_shift = np.zeros([6], np.float)
+        up_stream_shift = np.zeros([6], float)
 
     prep = np.array([down_stream_shift, -up_stream_shift])
     shift = prep.mean(axis=0)
