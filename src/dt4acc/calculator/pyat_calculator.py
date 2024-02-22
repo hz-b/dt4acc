@@ -33,7 +33,7 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
     def calculate(self) -> Twiss:
         # Implement calculation using pyAt
         # with self.calculation_lock:  # Acquire the lock
-        logger.debug("pyat twiss caluculation starting (get_optics)")
+        logger.warning("pyat twiss caluculation starting (get_optics)")
         _, __, twiss = self.acc.get_optics(at.All)
         alpha = twiss["alpha"]
         beta = twiss["beta"]
@@ -54,7 +54,7 @@ class PyAtOrbitCalculator(OrbitCalculator, metaclass=ABCMeta):
     def calculate(self) -> Orbit:
         # with self.calculation_lock:  # Acquire the lock
         # Implement calculation using pyAt
-        logger.debug("pyat orbit caluculation starting (get_optics)")
+        logger.warning("pyat orbit caluculation starting (get_optics)")
 
         x0, orbit = self.acc.find_orbit(at.All)
         # assuming always True ?
