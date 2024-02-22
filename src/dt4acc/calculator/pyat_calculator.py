@@ -1,3 +1,4 @@
+import logging
 from abc import ABCMeta
 from typing import Sequence
 
@@ -7,8 +8,10 @@ from ..interfaces.calculation_interface import TwissCalculator, OrbitCalculator
 from ..model.orbit import Orbit
 from ..model.twiss import Twiss, TwissForPlane
 
+logger = logging.Logger("pyat-calc")
 
-def _construct_name_list(acc : at.Lattice) -> Sequence[str]:
+
+def _construct_name_list(acc: at.Lattice) -> Sequence[str]:
     """
     Todo:
         * length difference of orbit and twiss data
@@ -19,14 +22,18 @@ def _construct_name_list(acc : at.Lattice) -> Sequence[str]:
         * FamName would be the same for ach element if period is more than one
     """
     assert acc.periodicity == 1
-    return ["XXX_START"] +  [elem.FamName for elem in acc]
+    return ["XXX_START"] + [elem.FamName for elem in acc]
+
 
 class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
-    def __init__(self, acc):
+    def __init__(self, acc, calculation_lock):
         self.acc = acc
+        # self.calculation_lock = calculation_lock
 
     def calculate(self) -> Twiss:
         # Implement calculation using pyAt
+        # with self.calculation_lock:  # Acquire the lock
+        logger.debug("pyat twiss caluculation starting (get_optics)")
         _, __, twiss = self.acc.get_optics(at.All)
         alpha = twiss["alpha"]
         beta = twiss["beta"]
@@ -40,11 +47,15 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
 
 
 class PyAtOrbitCalculator(OrbitCalculator, metaclass=ABCMeta):
-    def __init__(self, acc):
+    def __init__(self, acc, calculation_lock):
         self.acc = acc
+        # self.calculation_lock = calculation_lock
 
     def calculate(self) -> Orbit:
+        # with self.calculation_lock:  # Acquire the lock
         # Implement calculation using pyAt
+        logger.debug("pyat orbit caluculation starting (get_optics)")
+
         x0, orbit = self.acc.find_orbit(at.All)
         # assuming always True ?
         #: Todo: correct

@@ -3,19 +3,12 @@ from collections import UserList
 import numpy as np
 from at import shift_elem
 
+from ..device_interface.event import Event
+from ..device_interface.delay_execution import DelayExecution
+
 from ..interfaces.accelerator_interface import AcceleratorInterface
 from ..interfaces.element_interface import ElementInterface
 from ..model.element_upate import ElementUpdate
-
-
-class Event(UserList):
-    def append(self, item):
-        assert (callable(item))
-        super().append(item)
-
-    def trigger(self, obj):
-        for callback in self:
-            callback(obj)
 
 
 def estimate_shift(element, eps=1e-8):
@@ -100,7 +93,7 @@ class ElementProxy(ElementInterface):
         elif method_name == "set_roll":
             self.update_roll(roll=value)
         elif method_name == "set_K":
-            # Check that it is a quadrupole
+            # Todo: Check that it is a quadrupole
             element.update(K=value)
             self.on_changed_value.trigger(
                 ElementUpdate(element_id=self.element_id, property_name="K", value=self._obj[0].K)
@@ -118,11 +111,27 @@ class AcceleratorImpl(AcceleratorInterface, UserList):
         self.acc = acc
         self.twiss_calculator = twiss_calculator
         self.orbit_calculator = orbit_calculator
+
         self.twiss = twiss_calculator.calculate()
         self.orbit = orbit_calculator.calculate()
 
         self.on_new_orbit = Event()
         self.on_new_twiss = Event()
+
+        # need to create delayed execution for these two above
+        # these need the to trigger the events below if they are finished
+        # or their trigger is passed here
+        def cb_twiss():
+            self.twiss = self.twiss_calculator.calculate()
+            self.on_new_twiss.trigger(self.twiss)
+
+        def cb_orbit():
+            self.orbit = self.orbit_calculator.calculate()
+            self.on_new_orbit.trigger(self.orbit)
+
+        self.twiss_calculation_delay = DelayExecution(callback=cb_twiss, delay=1e-1)
+        self.orbit_calculation_delay = DelayExecution(callback=cb_orbit, delay=1e-1)
+
         self.on_changed_value = Event()
 
     def get_element(self, element_id) -> ElementInterface:
@@ -135,13 +144,11 @@ class AcceleratorImpl(AcceleratorInterface, UserList):
             proxy.on_changed_value.append(self.on_changed_value.trigger)
 
             def cb(unused):
-                self.twiss = self.twiss_calculator.calculate()
-                self.orbit = self.orbit_calculator.calculate()
-                self.on_new_orbit.trigger(self.orbit)
-                self.on_new_twiss.trigger(self.twiss)
-
+                self.orbit_calculation_delay.request_execution()
+                self.twiss_calculation_delay.request_execution()
             proxy.on_update_finished.append(cb)
             return proxy
+
         else:
             raise ValueError(f"Element with ID {element_id} not found")
 

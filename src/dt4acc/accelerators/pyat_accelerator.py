@@ -5,9 +5,12 @@ from ..model.orbit import Orbit
 from ..resources.bessy2_sr_reflat import bessy2Lattice
 from ..view.calculation_result_view import ResultView, ElementParameterView
 
+import threading
+
+calculation_lock = threading.Lock()
 acc = bessy2Lattice()
 prefix = "Pierre:DT"
-accelerator = AcceleratorImpl(acc, PyAtTwissCalculator(acc), PyAtOrbitCalculator(acc))
+accelerator = AcceleratorImpl(acc, PyAtTwissCalculator(acc,calculation_lock), PyAtOrbitCalculator(acc,calculation_lock))
 view = ResultView(prefix=prefix +":beam")
 #: todo into a controller to pass prefix as parameter at start ?
 elem_par_view = ElementParameterView(prefix=prefix)

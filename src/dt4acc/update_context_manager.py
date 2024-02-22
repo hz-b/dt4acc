@@ -13,11 +13,11 @@ class UpdateContext:
         self.kwargs = kwargs
 
     def __enter__(self):
-        pass
-        # print(
-        #     f"Updating element {self.element_id=}:"
-        #     f"{self.property_name=} {self.value=} {self.kwargs=}"
-        # )
+        # pass
+        print(
+            f"Updating element {self.element_id=}:"
+            f"{self.property_name=} {self.value=} {self.kwargs=}"
+        )
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_type is None:
