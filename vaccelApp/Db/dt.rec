@@ -11,10 +11,21 @@ record(bo, "$(PREFIX):dt:do_calc")
 {
      field(DESC, "calculations active?")
      field(DTYP, "pydev")
-     field(OUT, "@vacc.executeCalculations(active=%VAL%)")
+     # TODO: Review this whole record. (it is kept inactive for now)
+     # Design of command: let user inhibit "delayed calculations"
+     # so when 0 no "backend cacluations like orbit or twiss were executed "
+     # needs to reviewed how to be implemented with #update
+     #@update(element_id='$(ELEMENT)', property_name='dx', value=%VAL%)")
+     # todo: review if element id is a good name.
+     # why: element id is linked to lattice
+     # device could then be a device of the lattice or
+     # any other component
+     # perhps to name it device_name or dev_name ?
+     #field(OUT, "@update(element_id="dt_manager", property="do_background_calcualtions", value=%VAL%)")
+     # field(OUT, "@vacc.executeCalculations(active=%VAL%)")
      field(ZNAM, "OFF")
      field(ONAM, "ON")
-     field(TPRO, 0)
+     field(TPRO, 1)
 }
 
 record(bi, "$(PREFIX):dt:calcs")
@@ -47,7 +58,8 @@ record(bi, "$(PREFIX):dt:delayed-calcs")
 {
      field(DESC, "delayed calc. pending")
      field(DTYP, "pydev")
-     field(INP,  "@pydev.iointr('$(PREFIX)-dt-delayed-calcs')")
+     # TODO: Review this whole record. (it is kept inactive for now)
+     #field(INP,  "@pydev.iointr('$(PREFIX)-dt-delayed-calcs')")
      field(SCAN, "I/O Intr")
      field(ZNAM, "none pending")
      field(ONAM, "pending")
