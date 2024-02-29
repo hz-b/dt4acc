@@ -117,17 +117,19 @@ class AddOnElementProxy(ElementProxy):
         raise NotImplementedError("Needs to be implementd for specific case")
 
 
-class KickAngleCorrector(AddOnElementProxy):
+class KickAngleCorrectorProxy(AddOnElementProxy):
     """
     Todo:
         already third layer
     """
+    def __init__(self, obj, *, updates, **kwargs):
+        assert updates is in ["x", "y"]
+        self.updates = updates
+        super().__init__(*obj, **kwargs)
 
     def update_kick(self, *, kick_x=None, kick_y=None):
         """Similar to shift
         """
-        raise NotImplementedError
-
 
     def update(self, property_id: str, value):
         assert property_id == "K"
@@ -135,15 +137,21 @@ class KickAngleCorrector(AddOnElementProxy):
         if method_name == "set_K":
             """needs to know if it is x or y
             """
-            self.update_kick(kick_k, kick_y)
+            if self.updates == "x":
+                self.update_kick(value)
+            elif self.updates == "y":
+                self.update_kick(value)
+            else:
+                raise ValueError()
         else:
-            raise ValueError(f"element id {self.element_id}, host element id {self.host_element_id}: property_id {property_id} unknown")
+            raise ValueError()
 
 
 class AcceleratorImpl(AcceleratorInterface, UserList):
-    def __init__(self, acc, twiss_calculator, orbit_calculator):
+    def __init__(self, acc, proxy_factory, twiss_calculator, orbit_calculator):
         super().__init__()
         self.acc = acc
+        self.proxy_factory = proxy_factory
         self.twiss_calculator = twiss_calculator
         self.orbit_calculator = orbit_calculator
 
@@ -170,18 +178,16 @@ class AcceleratorImpl(AcceleratorInterface, UserList):
         self.on_changed_value = Event()
 
     def get_element(self, element_id) -> ElementInterface:
-        return self._element_to_proxy(element_id)
+        proxy = self.proxy_factory(element_id)
+        self._proxy_add_callbacks(proxy)
+        return proxy
+
         # see if the elemnt id is known to the lattice
         sub_lattice = self._get_element(element_id)
         if sub_lattice:
             return self._element_add_callbacks(sub_lattice)
         else:
             raise ValueError(f"Element with ID {element_id} not found")
-
-    def _element_to_proxy(self, elment_id) -> ElementInterface:
-        proxy = self.proxy_factory(element_id)
-        self._proxy_add_callbacks(proxy)
-        return proxy
 
     def _proxy_add_callbacks(self, proxy):
         proxy.on_changed_value.append(self.on_changed_value.trigger)
