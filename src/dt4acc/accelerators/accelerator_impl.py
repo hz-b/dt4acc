@@ -105,41 +105,6 @@ class ElementProxy(ElementInterface):
         self.on_update_finished.trigger(None)
 
 
-class AddOnElementProxy(ElementProxy):
-    """Proxy for an element whose update is to be relayed to an
-    other element
-    """
-    def __init__(self, obj, *, element_id, host_element_id):
-        super().__init__(obj, element_id)
-        host_element_id = element_id
-
-    def update(self, property_id: str, value):
-        raise NotImplementedError("Needs to be implementd for specific case")
-
-
-class KickAngleCorrector(AddOnElementProxy):
-    """
-    Todo:
-        already third layer
-    """
-
-    def update_kick(self, *, kick_x=None, kick_y=None):
-        """Similar to shift
-        """
-        raise NotImplementedError
-
-
-    def update(self, property_id: str, value):
-        assert property_id == "K"
-        method_name = "set_" + property_id
-        if method_name == "set_K":
-            """needs to know if it is x or y
-            """
-            self.update_kick(kick_k, kick_y)
-        else:
-            raise ValueError(f"element id {self.element_id}, host element id {self.host_element_id}: property_id {property_id} unknown")
-
-
 class AcceleratorImpl(AcceleratorInterface, UserList):
     def __init__(self, acc, twiss_calculator, orbit_calculator):
         super().__init__()
@@ -170,53 +135,22 @@ class AcceleratorImpl(AcceleratorInterface, UserList):
         self.on_changed_value = Event()
 
     def get_element(self, element_id) -> ElementInterface:
-        return self._element_to_proxy(element_id)
-        # see if the elemnt id is known to the lattice
-        sub_lattice = self._get_element(element_id)
-        if sub_lattice:
-            return self._element_add_callbacks(sub_lattice)
-        else:
-            raise ValueError(f"Element with ID {element_id} not found")
-
-    def _element_to_proxy(self, elment_id) -> ElementInterface:
-        proxy = self.proxy_factory(element_id)
-        self._proxy_add_callbacks(proxy)
-        return proxy
-
-    def _proxy_add_callbacks(self, proxy):
-        proxy.on_changed_value.append(self.on_changed_value.trigger)
-
-        def cb(unused):
-            self.orbit_calculation_delay.request_execution()
-            self.twiss_calculation_delay.request_execution()
-
-        proxy.on_update_finished.append(cb)
-        return proxy
-
-    def _get_element(self, element_id):
         # TODO: see how the  data is structured  than return the element by id
         sub_lattice = self.acc[element_id]
         # single element expected in sublattice
         _, = sub_lattice
         if sub_lattice:
             proxy = ElementProxy(sub_lattice, element_id=element_id)
-            self._element_add_callbacks(proxy)
+            proxy.on_changed_value.append(self.on_changed_value.trigger)
 
-        element_id_of host = self._get_element_id_of_host(element_id)
-        sub_lattice = self.acc[element_id]
-        # single element expected in sublattice
-        _, = sub_lattice
-        if not sub_lattice:
+            def cb(unused):
+                self.orbit_calculation_delay.request_execution()
+                self.twiss_calculation_delay.request_execution()
+            proxy.on_update_finished.append(cb)
+            return proxy
+
+        else:
             raise ValueError(f"Element with ID {element_id} not found")
-
-        proxy = AddOnElementProxy(sub_lattice, element_id=element_id, host_element_id=element_id)
-        self._element_add_callbacks(proxy)
-        return proxy
-
-    def _get_element_id_of_host(self, element_id):
-        """find an element that is hosted on an other element
-        """
-        return self.substituion_database[element_id]
 
     def calculate_twiss(self):
         return self.twiss_calculator.calculate()
