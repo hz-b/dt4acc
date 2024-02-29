@@ -1,4 +1,5 @@
 from collections import UserList
+from typing import Union
 
 from ..device_interface.event import Event
 from ..device_interface.delay_execution import DelayExecution
@@ -7,7 +8,7 @@ from ..interfaces.element_interface import ElementInterface
 
 
 class AcceleratorImpl(AcceleratorInterface, UserList):
-    def __init__(self, acc, proxy_factory, twiss_calculator, orbit_calculator):
+    def __init__(self, acc, proxy_factory, twiss_calculator, orbit_calculator, *, delay=1e-1):
         super().__init__()
         self.acc = acc
         self.proxy_factory = proxy_factory
@@ -31,10 +32,16 @@ class AcceleratorImpl(AcceleratorInterface, UserList):
             self.orbit = self.orbit_calculator.calculate()
             self.on_new_orbit.trigger(self.orbit)
 
-        self.twiss_calculation_delay = DelayExecution(callback=cb_twiss, delay=1e-1)
-        self.orbit_calculation_delay = DelayExecution(callback=cb_orbit, delay=1e-1)
+        self.twiss_calculation_delay = DelayExecution(callback=cb_twiss, delay=delay)
+        self.orbit_calculation_delay = DelayExecution(callback=cb_orbit, delay=delay)
 
         self.on_changed_value = Event()
+
+    def set_delay(self, delay: Union[float, None]):
+        """How much to delay twiss and orbit calculation after last received comamnd
+        """
+        self.twiss_calculation_delay.set_delay(delay)
+        self.orbit_calculation_delay.set_delay(delay)
 
     def get_element(self, element_id) -> ElementInterface:
         proxy = self.proxy_factory.get(element_id)
@@ -42,7 +49,7 @@ class AcceleratorImpl(AcceleratorInterface, UserList):
 
         def cb(unused):
             self.orbit_calculation_delay.request_execution()
-            # self.twiss_calculation_delay.request_execution()
+            self.twiss_calculation_delay.request_execution()
 
         #: Todo: review if orbit and twiss are to be calculated
         #:       when ever something is updated
