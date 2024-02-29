@@ -32,6 +32,19 @@ class AlignmentInterface(metaclass=ABCMeta):
 
 
 class ElementInterface(metaclass=ABCMeta):
+    """
+    Todo:
+        * review if an method should be added that user is supposed
+          to override and an other one that is the external
+          interface?
+
+        * should be the on_update_finished an event that has to
+          be added here?
+
+    Reason: after the element has been updated the proxy should
+    trigger the on_update_finished.
+
+    """
     @abstractmethod
     def update(self, property_id, value):
         pass

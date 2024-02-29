@@ -134,12 +134,17 @@ class KickAngleCorrectorProxy(AddOnElementProxy):
         """updates requested kick
         """
         kick_angles = self._obj.KickAngle.copy()
-        for idx, kick in  enumerate([kick_x, kick_y]):
+        for idx, kick in enumerate([kick_x, kick_y]):
             if kick is not None:
                 kick_angles[idx] = kick
         self._obj.KickAngle = kick_angles
-        tmp = self._obj.KickAngle.copy()
-        tmp
+
+        kick_angles = self._obj.KickAngle
+        for i, kick in  enumerate([kick_x, kick_y]):
+            if kick is not None:
+                self.on_changed_value.trigger(
+                    ElementUpdate(element_id=self.element_id, property_name="K", value=kick_angles[i])
+                )
 
     def update(self, property_id: str, value):
         assert property_id == "K"
@@ -157,3 +162,5 @@ class KickAngleCorrectorProxy(AddOnElementProxy):
                 )
         else:
             raise ValueError(f"{self.element_id}: property {property_id} unknown")
+
+        self.on_update_finished.trigger(None)
