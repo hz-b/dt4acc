@@ -21,7 +21,7 @@ record(ao, "$(PREFIX):beam:orbit:im:eps")
 	field(EGU, "m??")
 	field(DTYP, "pydev")
 	field(PREC, 12)
-    field(OUT, "@update(element_id="dt_manager", property="do_background_calcualtions", value=%VAL%)")
+	field(OUT, "@update(element_id='dt_manager', property='do_background_calculations', value=%VAL%)")
 	field(TPRO, 0)
 }
 

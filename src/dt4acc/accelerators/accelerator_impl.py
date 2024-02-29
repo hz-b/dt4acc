@@ -41,19 +41,13 @@ class AcceleratorImpl(AcceleratorInterface, UserList):
         proxy.on_changed_value.append(self.on_changed_value.trigger)
 
         def cb(unused):
-            return
             self.orbit_calculation_delay.request_execution()
-            self.twiss_calculation_delay.request_execution()
+            # self.twiss_calculation_delay.request_execution()
 
         #: Todo: review if orbit and twiss are to be calculated
         #:       when ever something is updated
         proxy.on_update_finished.append(cb)
         return proxy
-
-    def _get_element_id_of_host(self, element_id):
-        """find an element that is hosted on an other element
-        """
-        return self.substituion_database[element_id]
 
     def calculate_twiss(self):
         return self.twiss_calculator.calculate()
