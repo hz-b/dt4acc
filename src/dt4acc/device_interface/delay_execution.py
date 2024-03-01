@@ -47,6 +47,17 @@ class DelayExecution:
         self.pending_queue.put(datetime.datetime.now())
 
     def worker(self):
+        # The "busy" wait is favoured to its straightforward
+        # implementation.
+        # The alternative would be to block forever when
+        # calculation_request is false, and to block with timeout
+        # only when there is a calculation request. This,however,
+        # would require a careful analysis of possible race
+        # conditions. In its current form a missed request would
+        # only result in some extra delay.
+        # The load of this implementation was estimated to be less
+        # than 1 percent on a standard cpu. Thus, this extra load
+        # is deemed to be acceptable.
         while True:
             try:
                 timestamp = self.pending_queue.get(block=True, timeout=self.delay)
@@ -56,9 +67,3 @@ class DelayExecution:
                     self.calculation_requested = False
             else:
                 continue
-
-                time_diff = (datetime.datetime.now() - timestamp).total_seconds()
-                if time_diff < self.delay:
-                    time.sleep(self.delay - time_diff)
-                self.callback()
-                self.pending_queue.task_done()
