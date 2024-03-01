@@ -25,11 +25,11 @@ record(ao, "$(PREFIX):beam:orbit:im:eps")
 	field(TPRO, 0)
 }
 
-record(bi, "$(PREFIX):beam:orbit:found")
+record(longin, "$(PREFIX):beam:orbit:found")
 {
 	field(DESC, "Closed orbit: fixed point found?")
-	field(ZNAM, "particle lost")
-	field(ONAM, "found")
+	# field(ZNAM, "particle lost")
+	# field(ONAM, "found")
 
 	field(DTYP, "pydev")
 	field(INP,  "@pydev.iointr('$(PREFIX):beam:orbit:found')")

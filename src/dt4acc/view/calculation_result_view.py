@@ -2,6 +2,7 @@ import logging
 
 import pydev
 
+
 from ..model.element_upate import ElementUpdate
 from ..model.orbit import Orbit
 from ..model.twiss import Twiss
@@ -26,7 +27,7 @@ class ResultView:
     def push_orbit(self, orbit_result: Orbit):
         label = f"{self.prefix}:orbit:found"
         logger.warning('label %s = %s type(%s)', label, orbit_result.found, type(orbit_result.found))
-        pydev.iointr(label, orbit_result.found)
+        pydev.iointr(label, bool(orbit_result.found))
         pydev.iointr(f"{self.prefix}:orbit:x", orbit_result.x)
         pydev.iointr(f"{self.prefix}:orbit:y", orbit_result.y)
         label = f"{self.prefix}:names"
@@ -51,6 +52,30 @@ class ResultView:
         # fmt:on
 
     def push_bpms(self, bpm_result: Orbit):
+        """
+        Todo:
+            implement that data is pushed to bdata
+            or make it unnecssary ...
+
+        Warning:
+            Current implementation is broken
+        """
+        import numpy as np
+
+        n_entries = 128
+        n_found = len(bpm_result.x)
+        bdata = np.zeros([8, n_entries], dtype=float)
+        bdata[0, :n_found] = bpm_result.x
+        bdata[1, :n_found] = bpm_result.y
+        label = f"{self.prefix}:bpm:bdata"
+        data = list(bdata.ravel())
+        pydev.iointr(label, data)
+        logger.warning("Published bdata using label %s, n data %s, data[:10] %s",
+                       label, len(data), data[:10])
+
+        return
+
         pydev.iointr(f"{self.prefix}:bpm:x", list(bpm_result.x))
         pydev.iointr(f"{self.prefix}:bpm:y", list(bpm_result.y))
         pydev.iointr(f"{self.prefix}:bpm:names", list(bpm_result.names))
+
