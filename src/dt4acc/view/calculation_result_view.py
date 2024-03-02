@@ -67,15 +67,10 @@ class ResultView:
         bdata = np.zeros([8, n_entries], dtype=float)
         bdata[0, :n_found] = bpm_result.x
         bdata[1, :n_found] = bpm_result.y
-        label = f"{self.prefix}:bpm:bdata"
-        data = list(bdata.ravel())
-        pydev.iointr(label, data)
-        logger.warning("Published bdata using label %s, n data %s, data[:10] %s",
-                       label, len(data), data[:10])
+        pydev.iointr(f"{self.prefix}:bpm:bdata", list(bdata.ravel()))
 
-        return
+        pydev.iointr(f"{self.prefix}:bpm:dx", list(bpm_result.x))
+        pydev.iointr(f"{self.prefix}:bpm:dy", list(bpm_result.y))
+        pydev.iointr(f"{self.prefix}:bpm:names", [bytes(name.encode("utf8")) for name in bpm_result.names])
 
-        pydev.iointr(f"{self.prefix}:bpm:x", list(bpm_result.x))
-        pydev.iointr(f"{self.prefix}:bpm:y", list(bpm_result.y))
-        pydev.iointr(f"{self.prefix}:bpm:names", list(bpm_result.names))
 
