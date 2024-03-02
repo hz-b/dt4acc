@@ -1,37 +1,37 @@
-record(waveform, "$(PREFIX):BPM:dx")
+record(waveform, "$(PREFIX):beam:bpm:dx")
 {
     field(DESC, "BPM: dx")
     field(EGU, "m")
     field(DTYP, "pydev")
-    field(INP,  "@pydev.iointr('$(PREFIX)-bpm.dx')")
+    field(INP,  "@pydev.iointr('$(PREFIX):beam:bpm:dx')")
     field(SCAN, "I/O Intr")
     field(NELM, 2048)
     field(FTVL, "DOUBLE")
-    # field(TPRO, 1)
+    field(TPRO, 1)
 }
 
-record(waveform, "$(PREFIX):BPM:dy")
+record(waveform, "$(PREFIX):beam:bpm:dy")
 {
     field(DESC, "BPM: dy")
     field(EGU, "m")
     field(DTYP, "pydev")
-    field(INP,  "@pydev.iointr('$(PREFIX)-bpm.dy')")
+    field(INP,  "@pydev.iointr('$(PREFIX):beam:bpm:dy')")
     field(SCAN, "I/O Intr")
     field(NELM, 2048)
     field(FTVL, "DOUBLE")
-    # field(TPRO, 1)
+    field(TPRO, 1)
 
 }
 
-record(waveform, "$(PREFIX):BPM:names")
+record(waveform, "$(PREFIX):beam:bpm:names")
 {
     field(DESC, "BPM: element names")
     field(DTYP, "pydev")
-    field(INP,  "@pydev.iointr('$(PREFIX)-bpm-names')")
+    field(INP,  "@pydev.iointr('$(PREFIX):beam:bpm:names')")
     field(SCAN, "I/O Intr")
     field(NELM, 2048)
     field(FTVL, "STRING")
-    # field(TPRO, 1)
+    field(TPRO, 1)
 }
 
 record(waveform, "$(PREFIX):beam:bpm:bdata")
