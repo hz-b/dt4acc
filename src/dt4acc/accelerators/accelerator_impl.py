@@ -37,6 +37,13 @@ class AcceleratorImpl(AcceleratorInterface, UserList):
 
         self.on_changed_value = Event()
 
+        # Shall one subscribe to the object below or should one just hand it through?
+        # this all seems to call for a message  bus ...
+        self.on_orbit_calculation_request = self.orbit_calculation_delay.on_calculation_requested
+        self.on_orbit_calculation = self.orbit_calculation_delay.on_calculation
+        self.on_twiss_calculation_request = self.twiss_calculation_delay.on_calculation_requested
+        self.on_twiss_calculation = self.twiss_calculation_delay.on_calculation
+
     def set_delay(self, delay: Union[float, None]):
         """How much to delay twiss and orbit calculation after last received comamnd
         """

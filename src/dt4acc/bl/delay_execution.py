@@ -6,7 +6,7 @@ from typing import Union
 
 from .context_manager_with_trigger import TriggerEnterExitContextManager
 
-from .event import Event
+from .event import StatusChange
 from queue import Queue
 
 
@@ -28,8 +28,8 @@ class DelayExecution:
         self.worker_thread.daemon = True  # Daemonize the worker thread
         self.worker_thread.start()
         self._calculation_requested = False
-        self.on_calculation = Event()
-        self.on_calculation_requested = Event()
+        self.on_calculation = StatusChange()
+        self.on_calculation_requested = StatusChange()
 
     @property
     def calculation_requested(self):
