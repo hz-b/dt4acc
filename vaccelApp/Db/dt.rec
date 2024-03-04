@@ -28,24 +28,31 @@ record(bo, "$(PREFIX):dt:do_calc")
      field(TPRO, 1)
 }
 
-record(bi, "$(PREFIX):dt:calcs")
+record(longin, "$(PREFIX):dt:im:updates")
 {
      field(DESC, "delayed calc. actual executed")
      field(DTYP, "pydev")
-     field(INP,  "@pydev.iointr('$(PREFIX):dt:calcs')")
+     field(INP,  "@pydev.iointr('$(PREFIX):dt:im:updates')")
      field(SCAN, "I/O Intr")
-     field(ZNAM, "finished")
-     field(ONAM, "calculating")
-     field(TPRO, 0)
      field(VAL, 1)
      field(PINI, "YES")
-     field(FLNK, "$(PREFIX):dt:calcs:fanout")
+     field(TPRO, 1)
+     field(FLNK, "$(PREFIX):dt:updates")
+}
+
+record(bi, "$(PREFIX):dt:updates")
+{
+     field(DESC, "delayed calc. actual executed")
+     field(INP,  "$(PREFIX):dt:im:updates")
+     field(ZNAM, "finished")
+     field(ONAM, "updating")
+     field(FLNK, "$(PREFIX):dt:update:fanout")
 }
 
 # For internal reasons of the accelerator some results are
 # published before calcs singlas done
 # these can be republished after calcs goes to z
-record(fanout, "$(PREFIX):dt:calcs:fanout")
+record(fanout, "$(PREFIX):dt:update:fanout")
 {
     field(DESC, "Pushing calcs finished")
     # INformation to bpm
