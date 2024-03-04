@@ -1,14 +1,13 @@
 import logging
 import queue
 import threading
-import time
 import datetime
 from typing import Union
 
-from .event import Event
-from queue import Queue
+from .context_manager_with_trigger import TriggerEnterExitContextManager
 
-logger = logging.getLogger("dt4acc")
+from .event import StatusChange
+from queue import Queue
 
 
 class DelayExecution:
@@ -21,14 +20,30 @@ class DelayExecution:
     """
 
     def __init__(self, *, callback, delay: Union[float, None]):
-        self.callback = callback
+        self._callback = callback
         self.set_delay(delay)
 
         self.pending_queue = Queue()  # Queue for managing pending executions
         self.worker_thread = threading.Thread(target=self.worker)
         self.worker_thread.daemon = True  # Daemonize the worker thread
         self.worker_thread.start()
-        self.calculation_requested = False
+        self._calculation_requested = False
+        self.on_calculation = StatusChange()
+        self.on_calculation_requested = StatusChange()
+
+    @property
+    def calculation_requested(self):
+        return self._calculation_requested
+
+    @calculation_requested.setter
+    def calculation_requested(self, flag: bool):
+        flag = bool(flag)
+        self.on_calculation_requested.trigger(flag)
+        self._calculation_requested = flag
+
+    def callback(self):
+        with TriggerEnterExitContextManager(self.on_calculation):
+            return self._callback()
 
     def set_delay(self, delay: Union[float, None]):
         if delay is not None:

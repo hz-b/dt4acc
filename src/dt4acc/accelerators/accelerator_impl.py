@@ -1,8 +1,8 @@
 from collections import UserList
 from typing import Union
 
-from ..device_interface.event import Event
-from ..device_interface.delay_execution import DelayExecution
+from dt4acc.bl.event import Event
+from dt4acc.bl.delay_execution import DelayExecution
 from ..interfaces.accelerator_interface import AcceleratorInterface
 from ..interfaces.element_interface import ElementInterface
 
@@ -36,6 +36,13 @@ class AcceleratorImpl(AcceleratorInterface, UserList):
         self.orbit_calculation_delay = DelayExecution(callback=cb_orbit, delay=delay)
 
         self.on_changed_value = Event()
+
+        # Shall one subscribe to the object below or should one just hand it through?
+        # this all seems to call for a message  bus ...
+        self.on_orbit_calculation_request = self.orbit_calculation_delay.on_calculation_requested
+        self.on_orbit_calculation = self.orbit_calculation_delay.on_calculation
+        self.on_twiss_calculation_request = self.twiss_calculation_delay.on_calculation_requested
+        self.on_twiss_calculation = self.twiss_calculation_delay.on_calculation
 
     def set_delay(self, delay: Union[float, None]):
         """How much to delay twiss and orbit calculation after last received comamnd

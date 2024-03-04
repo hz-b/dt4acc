@@ -1,11 +1,172 @@
 record(bo, "$(PREFIX):dt:active")
 {
+     # Todo: send that to twin: e.g. inhibiting all updates if
+     #       false?
      field(DESC, "digital twin activated?")
      field(VAL, 1)
      field(ZNAM, "OFF")
      field(ONAM, "ON")
      field(PINI, "YES")
 }
+
+
+record(longin, "$(PREFIX):dt:im:updates")
+{
+     field(DESC, "updates in progress")
+     field(DTYP, "pydev")
+     field(INP,  "@pydev.iointr('$(PREFIX):dt:im:updates')")
+     field(SCAN, "I/O Intr")
+     field(VAL, 1)
+     field(PINI, "YES")
+     field(TPRO, 0)
+     field(FLNK, "$(PREFIX):dt:updates")
+}
+
+record(bi, "$(PREFIX):dt:updates")
+{
+     field(DESC, "updates in progress?")
+     field(INP,  "$(PREFIX):dt:im:updates")
+     field(ZNAM, "finished")
+     field(ONAM, "updating")
+     field(FLNK, "$(PREFIX):dt:im:update:fanout")
+}
+
+record(fanout, "$(PREFIX):dt:im:updates:fanout")
+{
+     field(DESC, "updates in progress?")
+     field(LNK0, "$(PREFIX):dt:calc:orbit:roe")
+}
+
+record(longin, "$(PREFIX):dt:im:calc:orbit:req")
+{
+    field(DESC, "Orbit Calculation requested")
+    field(DTYP, "pydev")
+    # Default to 1 ... at start up ...
+    # it is assumed that updates for calculated parameters
+    # (e.g. beam position monitors) are  inhibited as long as the
+    # requests or calculation is true
+    #  field(VAL, 1)
+    # field(PINI, "YES")
+    field(INP,  "@pydev.iointr('$(PREFIX):dt:im:calc:orbit:req')")
+    field(SCAN, "I/O Intr")
+    field(TPRO, 0)
+    field(FLNK, "$(PREFIX):dt:calc:orbit:req")
+}
+
+record(longin, "$(PREFIX):dt:im:calc:orbit:exc")
+{
+    field(DESC, "Orbit Calculation in progress")
+    field(DTYP, "pydev")
+    # field(VAL, 1)
+    # field(PINI, "YES")
+    field(INP,  "@pydev.iointr('$(PREFIX):dt:im:calc:orbit:exc')")
+    field(SCAN, "I/O Intr")
+    field(TPRO, 0)
+    field(FLNK, "$(PREFIX):dt:calc:orbit:exc")
+}
+
+record(bi, "$(PREFIX):dt:calc:orbit:req")
+{
+    field(DESC, "Orbit calculation executing ")
+    field(INP, "$(PREFIX):dt:im:calc:orbit:req")
+    field(ZNAM, "done")
+    field(ONAM, "pending")
+    field(FLNK, "$(PREFIX):dt:calc:orbit:roe")
+}
+
+record(bi, "$(PREFIX):dt:calc:orbit:exc")
+{
+    field(DESC, "Orbit calculation exectung")
+    field(INP, "$(PREFIX):dt:im:calc:orbit:exc")
+    field(ZNAM, "done")
+    field(ONAM, "executing")
+    field(FLNK, "$(PREFIX):dt:calc:orbit:roe")
+}
+
+record(calc, "$(PREFIX):dt:calc:orbit:roe")
+{
+    field(DESC, "Orbit calculation requested or pending")
+    field(INPA, "$(PREFIX):dt:calc:orbit:req")
+    field(INPB, "$(PREFIX):dt:calc:orbit:exc")
+    # also flag progress when updates are in progress
+    field(INPC, "$(PREFIX):dt:updates")
+    field(CALC, "A | B | C")
+}
+
+
+
+record(longin, "$(PREFIX):dt:im:calc:twiss:req")
+{
+    field(DESC, "Twiss calculation requested")
+    field(DTYP, "pydev")
+    # Default to 1 ... at start up ...
+    # it is assumed that updates for calculcated parameters
+    # (e.g. beam position monitors) are  inhibited as long as the
+    # requests or calculation is true
+    field(VAL, 1)
+    field(PINI, "YES")
+    field(INP,  "@pydev.iointr('$(PREFIX):dt:im:calc:twiss:req')")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(PREFIX):dt:calc:twiss:req")
+}
+
+record(longin, "$(PREFIX):dt:im:calc:twiss:exc")
+{
+    field(DESC, "Twiss calculation in progress")
+    field(DTYP, "pydev")
+    # field(VAL, 1)
+    # field(PINI, "YES")
+    field(TPRO, 0)
+    field(INP,  "@pydev.iointr('$(PREFIX):dt:im:calc:twiss:exc')")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(PREFIX):dt:calc:twiss:exc")
+}
+
+record(bi, "$(PREFIX):dt:calc:twiss:req")
+{
+    field(DESC, "Orbit Calculation executing ")
+    field(INP, "$(PREFIX):dt:im:calc:twiss:req")
+    field(ZNAM, "done")
+    field(ONAM, "pending")
+}
+
+record(bi, "$(PREFIX):dt:calc:twiss:exc")
+{
+    field(DESC, "Orbit Calculation exectung")
+    field(INP, "$(PREFIX):dt:im:calc:twiss:exc")
+    field(ZNAM, "done")
+    field(ONAM, "executing")
+}
+
+# For internal reasons of the accelerator some results are
+# published before calcs singlas done
+# these can be republished after calcs goes to z
+record(fanout, "$(PREFIX):dt:update:fanout")
+{
+    field(DESC, "Pushing calcs finished")
+    # INformation to bpm
+    field(TPRO, 0)
+    # currently deactivated
+    #     field(LNK9, "$(PREFIX):bpm:im:bdata:trigger:pass")
+}
+
+
+
+record(bi, "$(PREFIX):dt:delayed-calcs")
+{
+     field(DESC, "delayed calc. pending")
+     field(DTYP, "pydev")
+     # TODO: Review this whole record. (it is kept inactive for now)
+     #field(INP,  "@pydev.iointr('$(PREFIX):dt:delayed-calcs')")
+     field(SCAN, "I/O Intr")
+     field(ZNAM, "none pending")
+     field(ONAM, "pending")
+     field(TPRO, 0)
+     field(VAL, 1)
+     field(PINI, "YES")
+}
+
+
 
 record(bo, "$(PREFIX):dt:do_calc")
 {
@@ -28,47 +189,6 @@ record(bo, "$(PREFIX):dt:do_calc")
      field(TPRO, 1)
 }
 
-record(bi, "$(PREFIX):dt:calcs")
-{
-     field(DESC, "delayed calc. actual executed")
-     field(DTYP, "pydev")
-     field(INP,  "@pydev.iointr('$(PREFIX)-dt-calcs')")
-     field(SCAN, "I/O Intr")
-     field(ZNAM, "finished")
-     field(ONAM, "calculating")
-     field(TPRO, 0)
-     field(VAL, 1)
-     field(PINI, "YES")
-     field(FLNK, "$(PREFIX):dt:calcs:fanout")
-}
-
-# For internal reasons of the accelerator some results are
-# published before calcs singlas done
-# these can be republished after calcs goes to z
-record(fanout, "$(PREFIX):dt:calcs:fanout")
-{
-    field(DESC, "Pushing calcs finished")
-    # INformation to bpm
-    field(TPRO, 1)
-    # currently deactivated
-    #     field(LNK9, "$(PREFIX):bpm:im:bdata:trigger:pass")
-}
-
-record(bi, "$(PREFIX):dt:delayed-calcs")
-{
-     field(DESC, "delayed calc. pending")
-     field(DTYP, "pydev")
-     # TODO: Review this whole record. (it is kept inactive for now)
-     #field(INP,  "@pydev.iointr('$(PREFIX)-dt-delayed-calcs')")
-     field(SCAN, "I/O Intr")
-     field(ZNAM, "none pending")
-     field(ONAM, "pending")
-     field(TPRO, 0)
-     field(VAL, 1)
-     field(PINI, "YES")
-}
-
-
 record(bo, "$(PREFIX):dt:do_calc_start:0")
 {
 
@@ -76,7 +196,7 @@ record(bo, "$(PREFIX):dt:do_calc_start:0")
      field(DTYP, "pydev")
      field(ZNAM, "OFF")
      field(ONAM, "ON")
-     field(OUT, "@vacc.executeCalculationsAtStartup(active=%VAL%)")
+     field(OUT, "@print('ERROR: triggering calculation needs to be implemented')")
      field(VAL, 1)
      field(PINI, "YES")
 }

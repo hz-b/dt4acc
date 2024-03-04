@@ -31,7 +31,7 @@ class BPMMimikry:
         self.prefix = prefix
         self.bpm_names = bpm_names
 
-    def extract_bpm_data_from_orbit(self, orbit_result: Orbit):
+    def extract_bpm_data(self, orbit_result: Orbit):
         """
         Publish BPM data to EPICS.
 
@@ -49,6 +49,6 @@ class BPMMimikry:
             return
 
         # find indices where the names are ..
-        df = pd.DataFrame(index=["x", "y"], columns=orbit_result.names, data=[orbit_result.x, orbit_result.y]).T.loc[
-             self.bpm_names, :]
-        return Orbit(x=df.x.values, y=df.y.values, names=df.index.values, found=orbit_result.found, x0=orbit_result.x0)
+        df = pd.DataFrame(index=["x", "y"], columns=orbit_result.names, data=[orbit_result.x, orbit_result.y]).T
+        df_bpm = df.loc[self.bpm_names, :]
+        return Orbit(x=df_bpm.x.values, y=df_bpm.y.values, names=df_bpm.index.values, found=orbit_result.found, x0=orbit_result.x0)

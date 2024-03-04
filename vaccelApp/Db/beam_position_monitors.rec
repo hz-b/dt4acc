@@ -1,51 +1,54 @@
-record(waveform, "$(PREFIX):BPM:dx")
+record(waveform, "$(PREFIX):beam:bpm:dx")
 {
     field(DESC, "BPM: dx")
     field(EGU, "m")
     field(DTYP, "pydev")
-    field(INP,  "@pydev.iointr('$(PREFIX)-bpm.dx')")
+    field(INP,  "@pydev.iointr('$(PREFIX):beam:bpm:dx')")
     field(SCAN, "I/O Intr")
     field(NELM, 2048)
     field(FTVL, "DOUBLE")
-    # field(TPRO, 1)
+    field(TPRO, 0)
 }
 
-record(waveform, "$(PREFIX):BPM:dy")
+record(waveform, "$(PREFIX):beam:bpm:dy")
 {
     field(DESC, "BPM: dy")
     field(EGU, "m")
     field(DTYP, "pydev")
-    field(INP,  "@pydev.iointr('$(PREFIX)-bpm.dy')")
+    field(INP,  "@pydev.iointr('$(PREFIX):beam:bpm:dy')")
     field(SCAN, "I/O Intr")
     field(NELM, 2048)
     field(FTVL, "DOUBLE")
-    # field(TPRO, 1)
+    field(TPRO, 0)
 
 }
 
-record(waveform, "$(PREFIX):BPM:names")
+record(waveform, "$(PREFIX):beam:bpm:names")
 {
     field(DESC, "BPM: element names")
     field(DTYP, "pydev")
-    field(INP,  "@pydev.iointr('$(PREFIX)-bpm-names')")
+    field(INP,  "@pydev.iointr('$(PREFIX):beam:bpm:names')")
     field(SCAN, "I/O Intr")
     field(NELM, 2048)
     field(FTVL, "STRING")
-    # field(TPRO, 1)
+    field(TPRO, 0)
 }
 
-record(waveform, "$(PREFIX):bpm:bdata")
+record(waveform, "$(PREFIX):beam:bpm:bdata")
 {
     field(DESC, "BPM packed data")
     field(DTYP, "pydev")
     field(NELM, 2048)
+    field(NORD, 128)
     # So that hopefully further processing works ...
     # in bluesky scripts
-    field(INP,  "@pydev.iointr('$(PREFIX)-bpm-bdata')")
+    # Warning: need to get label
+    field(INP,  "@pydev.iointr('$(PREFIX):beam:bpm:bdata')")
     field(SCAN, "I/O Intr")
     field(FTVL, "DOUBLE")
+    field(PREC, 5)
+    field(TPRO, 0)
     field(FLNK, "$(PREFIX):bpm:bdata:count")
-
 }
 
 # A counter to use as feedback that new beam position data are available
@@ -67,29 +70,32 @@ record(calc, "$(PREFIX):bpm:bdata:count")
 record(calcout, "$(PREFIX):bpm:im:bdata:trigger")
 {
     field(DESC, "BPM packed data: trigger update")
-    field(INPA, "$(PREFIX):dt:delayed-calcs PP")
-    field(VAL, 0)
+    # Do not trigger on start up
+    field(VAL, 1)
+    field(INPA, "$(PREFIX):dt:calc:orbit:roe PP")
     field(CALC, "A")
-    field(OCAL, "1")
+    field(OCAL, "0")
     field(DOPT, "Use OCAL")
     field(OUT, "$(PREFIX):bpm:im:bdata:trigger:pass PP")
     field(PINI, "YES")
     field(TPRO, 0)
     field(OOPT, "When Zero")
+    # field(OOPT, "Every Time")
     field(SCAN, ".5 second")
     # field(SCAN, "2 second")
-
 }
 
 
-# Wanted to implement it as a counter ... failed
-record(bi, "$(PREFIX):bpm:im:bdata:trigger:pass")
+# now always traversing from 0 to 1 ... but
+# better visible on camonitor
+record(calc, "$(PREFIX):bpm:im:bdata:trigger:pass")
 {
    field(DESC, "BPM packed data: trigger pass")
-   field(INP, "$(PREFIX):bpm:im:bdata:trigger")
-   field(ZNAM, "active")
-   field(ONAM, "inactive")
-   field(VAL, 1)
+   # field(INP, "$(PREFIX):bpm:im:bdata:trigger")
+   # field(ZNAM, "active")
+   # field(ONAM, "inactive")
+   field(VAL, 0)
+   field(CALC, "VAL + 1")
    field(PINI, "YES")
    field(FLNK, "$(PREFIX):MDIZ2T5G:bdata")
 
@@ -98,12 +104,13 @@ record(bi, "$(PREFIX):bpm:im:bdata:trigger:pass")
 record(waveform, "$(PREFIX):MDIZ2T5G:bdata")
 {
     field(DESC, "BPM packed data:  periodically updated")
-    field(INP, "$(PREFIX):bpm:bdata")
+    field(INP, "$(PREFIX):beam:bpm:bdata")
     field(NELM, 2048)
     # So that hopefully further processing works ...
     # in bluesky scripts
-    field(PINI, "YES")
+    # field(PINI, "YES")
     field(TPRO, 0)
+    field(PREC, 6)
     field(FTVL, "DOUBLE")
     field(FLNK, "$(PREFIX):MDIZ2T5G:count")
 

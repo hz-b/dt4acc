@@ -27,7 +27,7 @@ thor_scsi_accelerator.on_new_orbit.append(view.push_orbit)
 
 
 def cb(orbit_data: Orbit):
-    reduced_data = bpm.extract_bpm_data_from_orbit(orbit_data)
+    reduced_data = bpm.pyat_orbit_data_to_model(orbit_data)
     view.push_bpms(reduced_data)
 
 

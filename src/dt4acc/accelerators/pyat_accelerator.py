@@ -1,3 +1,5 @@
+import logging
+
 from ..accelerators.accelerator_impl import AcceleratorImpl
 from ..accelerators.proxy_factory import PyATProxyFactory
 from ..calculator.pyat_calculator import PyAtTwissCalculator, PyAtOrbitCalculator
@@ -16,15 +18,19 @@ accelerator = AcceleratorImpl(acc, PyATProxyFactory(lattice_model=None, at_latti
 view = ResultView(prefix=prefix +":beam")
 #: todo into a controller to pass prefix as parameter at start ?
 elem_par_view = ElementParameterView(prefix=prefix)
-bpm_names_pyat = [elem.FamName for elem in accelerator.acc if "bpm" in elem.FamName]
+bpm_names_pyat = [elem.FamName for elem in accelerator.acc if "BPM" == elem.FamName[:3]]
 bpm_pyat = BPMMimikry(prefix=prefix, bpm_names=bpm_names_pyat)
 accelerator.on_new_orbit.append(view.push_orbit)
 accelerator.on_changed_value.append(elem_par_view.push_value)
 
 
+logger = logging.getLogger("dt4acc")
+
+
 def cb(orbit_data: Orbit):
-    reduced_data_pyat = bpm_pyat.extract_bpm_data_from_orbit(orbit_data)
-    view.push_bpms(reduced_data_pyat)
+    # Todo: push all orbit data to beam
+    bpm_data = bpm_pyat.extract_bpm_data(orbit_data)
+    view.push_bpms(bpm_data)
 
 
 accelerator.on_new_orbit.append(cb)
