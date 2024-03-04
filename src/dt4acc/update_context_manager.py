@@ -14,7 +14,7 @@ class UpdateContext:
 
     def __enter__(self):
         # pass
-        print(
+        logger.debug(
             f"Updating element {self.element_id=}:"
             f"{self.property_name=} {self.value=} {self.kwargs=}"
         )

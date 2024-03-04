@@ -1,4 +1,5 @@
 from ..accelerators.accelerator_impl import AcceleratorImpl
+from ..accelerators.proxy_factory import PyATProxyFactory
 from ..calculator.pyat_calculator import PyAtTwissCalculator, PyAtOrbitCalculator
 from ..device_interface.bpm_mimikry import BPMMimikry
 from ..model.orbit import Orbit
@@ -10,7 +11,8 @@ import threading
 calculation_lock = threading.Lock()
 acc = bessy2Lattice()
 prefix = "Pierre:DT"
-accelerator = AcceleratorImpl(acc, PyAtTwissCalculator(acc,calculation_lock), PyAtOrbitCalculator(acc,calculation_lock))
+
+accelerator = AcceleratorImpl(acc, PyATProxyFactory(lattice_model=None, at_lattice=acc), PyAtTwissCalculator(acc,calculation_lock), PyAtOrbitCalculator(acc,calculation_lock))
 view = ResultView(prefix=prefix +":beam")
 #: todo into a controller to pass prefix as parameter at start ?
 elem_par_view = ElementParameterView(prefix=prefix)

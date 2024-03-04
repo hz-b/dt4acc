@@ -21,7 +21,7 @@ record(ao, "$(PREFIX):beam:orbit:im:eps")
 	field(EGU, "m??")
 	field(DTYP, "pydev")
 	field(PREC, 12)
-    field(OUT, "@update(element_id="dt_manager", property="do_background_calcualtions", value=%VAL%)")
+	field(OUT, "@update(element_id='dt_manager', property='do_background_calculations', value=%VAL%)")
 	field(TPRO, 0)
 }
 
@@ -106,12 +106,12 @@ record(waveform, "$(PREFIX):beam:orbit:y")
 }
 
 
-record(waveform, "$(PREFIX):beam:alpha:x")
+record(waveform, "$(PREFIX):beam:twiss:alpha:x")
 {
 	field(DESC, "Twiss alpha: x")
 	field(EGU, "m??")
 	field(DTYP, "pydev")
-	field(INP,  "@pydev.iointr('$(PREFIX):beam:alpha:x')")
+	field(INP,  "@pydev.iointr('$(PREFIX):beam:twiss:alpha:x')")
 	field(SCAN, "I/O Intr")
 	field(PREC, 6)
 	field(NELM, 2048)
@@ -119,60 +119,60 @@ record(waveform, "$(PREFIX):beam:alpha:x")
 	# field(TPRO, 1)
 }
 
-record(waveform, "$(PREFIX):beam:alpha:y")
+record(waveform, "$(PREFIX):beam:twiss:alpha:y")
 {
 	field(DESC, "Twiss alpha: y")
 	field(EGU, "m??")
 	field(DTYP, "pydev")
-	field(INP,  "@pydev.iointr('$(PREFIX):beam:alpha:y')")
+	field(INP,  "@pydev.iointr('$(PREFIX):beam:twiss:alpha:y')")
 	field(SCAN, "I/O Intr")
 	field(FTVL, "DOUBLE")
 	field(NELM, 2048)
 	# field(TPRO, 1)
 }
 
-record(waveform, "$(PREFIX):beam:beta:x")
+record(waveform, "$(PREFIX):beam:twiss:beta:x")
 {
 	field(DESC, "Twiss beta: x")
 	field(EGU, "m")
 	field(DTYP, "pydev")
-	field(INP,  "@pydev.iointr('$(PREFIX):beam:beta:x')")
+	field(INP,  "@pydev.iointr('$(PREFIX):beam:twiss:beta:x')")
 	field(SCAN, "I/O Intr")
 	field(FTVL, "DOUBLE")
 	field(NELM, 2048)
 	# field(TPRO, 1)
 }
 
-record(waveform, "$(PREFIX):beam:beta:y")
+record(waveform, "$(PREFIX):beam:twiss:beta:y")
 {
 	field(DESC, "Twiss beta: y")
 	field(EGU, "m??")
 	field(DTYP, "pydev")
-	field(INP,  "@pydev.iointr('$(PREFIX):beam:beta:y')")
+	field(INP,  "@pydev.iointr('$(PREFIX):beam:twiss:beta:y')")
 	field(SCAN, "I/O Intr")
 	field(NELM, 2048)
 	field(FTVL, "DOUBLE")
 	# field(TPRO, 1)
 }
 
-record(waveform, "$(PREFIX):beam:nu:x")
+record(waveform, "$(PREFIX):beam:twiss:nu:x")
 {
-	field(DESC, "Twiss nu: x (Floquet coordinate)")
+	field(DESC, "Twiss nu: x (Floquet coordinate * 2 pi)")
 	field(EGU, "rad")
 	field(DTYP, "pydev")
-	field(INP,  "@pydev.iointr('$(PREFIX):beam:nu:x')")
+	field(INP,  "@pydev.iointr('$(PREFIX):beam:twiss:nu:x')")
 	field(SCAN, "I/O Intr")
 	field(FTVL, "DOUBLE")
 	field(NELM, 2048)
 	# field(TPRO, 1)
 }
 
-record(waveform, "$(PREFIX):beam:nu:y")
+record(waveform, "$(PREFIX):beam:twiss:nu:y")
 {
-	field(DESC, "Twiss nu: y (Floquet coordinate)")
+	field(DESC, "Twiss nu: y (Floquet coordinate * 2 pi)")
 	field(EGU, "rad")
 	field(DTYP, "pydev")
-	field(INP,  "@pydev.iointr('$(PREFIX):beam:nu:y')")
+	field(INP,  "@pydev.iointr('$(PREFIX):beam:twiss:nu:y')")
 	field(SCAN, "I/O Intr")
 	field(NELM, 2048)
 	field(FTVL, "DOUBLE")

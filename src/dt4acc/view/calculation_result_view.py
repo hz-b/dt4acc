@@ -37,15 +37,17 @@ class ResultView:
 
     def push_twiss(self, twiss_result: Twiss):
         # fmt:off
-        pydev.iointr(f"{self.prefix}:twiss:x:alpha", twiss_result.x.alpha)
-        pydev.iointr(f"{self.prefix}:twiss:x:beta", twiss_result.x.beta)
-        pydev.iointr(f"{self.prefix}:twiss:x:nu", twiss_result.x.nu)
+        pydev.iointr(f"{self.prefix}:twiss:alpha:x", twiss_result.x.alpha)
+        pydev.iointr(f"{self.prefix}:twiss:beta:x",  twiss_result.x.beta)
+        pydev.iointr(f"{self.prefix}:twiss:nu:x",    twiss_result.x.nu)
 
-        pydev.iointr(f"{self.prefix}:twiss:y:alpha", twiss_result.y.alpha)
-        pydev.iointr(f"{self.prefix}:twiss:y:beta", twiss_result.y.beta)
-        pydev.iointr(f"{self.prefix}:twiss:y:nu", twiss_result.y.nu)
+        pydev.iointr(f"{self.prefix}:twiss:alpha:y", twiss_result.y.alpha)
+        pydev.iointr(f"{self.prefix}:twiss:beta:y",  twiss_result.y.beta)
+        pydev.iointr(f"{self.prefix}:twiss:nu:y",    twiss_result.y.nu)
 
-        pydev.iointr(f"{self.prefix}:twiss:names", twiss_result.names)
+        # names are not published: assuming these are identical
+        # with the names that orbit publishes
+
         # fmt:on
 
     def push_bpms(self, bpm_result: Orbit):
