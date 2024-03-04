@@ -61,7 +61,7 @@ record(longin, "$(PREFIX):dt:im:calc:orbit:exc")
     # field(PINI, "YES")
     field(INP,  "@pydev.iointr('$(PREFIX):dt:im:calc:orbit:exc')")
     field(SCAN, "I/O Intr")
-    field(TPRO, 1)
+    field(TPRO, 0)
     field(FLNK, "$(PREFIX):dt:calc:orbit:exc")
 }
 
@@ -116,7 +116,7 @@ record(longin, "$(PREFIX):dt:im:calc:twiss:exc")
     field(DTYP, "pydev")
     # field(VAL, 1)
     # field(PINI, "YES")
-    field(TPRO, 1)
+    field(TPRO, 0)
     field(INP,  "@pydev.iointr('$(PREFIX):dt:im:calc:twiss:exc')")
     field(SCAN, "I/O Intr")
     field(FLNK, "$(PREFIX):dt:calc:twiss:exc")
@@ -145,7 +145,7 @@ record(fanout, "$(PREFIX):dt:update:fanout")
 {
     field(DESC, "Pushing calcs finished")
     # INformation to bpm
-    field(TPRO, 1)
+    field(TPRO, 0)
     # currently deactivated
     #     field(LNK9, "$(PREFIX):bpm:im:bdata:trigger:pass")
 }

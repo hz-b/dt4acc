@@ -7,7 +7,7 @@ record(waveform, "$(PREFIX):beam:bpm:dx")
     field(SCAN, "I/O Intr")
     field(NELM, 2048)
     field(FTVL, "DOUBLE")
-    field(TPRO, 1)
+    field(TPRO, 0)
 }
 
 record(waveform, "$(PREFIX):beam:bpm:dy")
@@ -19,7 +19,7 @@ record(waveform, "$(PREFIX):beam:bpm:dy")
     field(SCAN, "I/O Intr")
     field(NELM, 2048)
     field(FTVL, "DOUBLE")
-    field(TPRO, 1)
+    field(TPRO, 0)
 
 }
 
@@ -31,7 +31,7 @@ record(waveform, "$(PREFIX):beam:bpm:names")
     field(SCAN, "I/O Intr")
     field(NELM, 2048)
     field(FTVL, "STRING")
-    field(TPRO, 1)
+    field(TPRO, 0)
 }
 
 record(waveform, "$(PREFIX):beam:bpm:bdata")
@@ -47,7 +47,7 @@ record(waveform, "$(PREFIX):beam:bpm:bdata")
     field(SCAN, "I/O Intr")
     field(FTVL, "DOUBLE")
     field(PREC, 5)
-    field(TPRO, 1)
+    field(TPRO, 0)
     field(FLNK, "$(PREFIX):bpm:bdata:count")
 
 }
@@ -81,8 +81,8 @@ record(calcout, "$(PREFIX):bpm:im:bdata:trigger")
     field(OUT, "$(PREFIX):bpm:im:bdata:trigger:pass PP")
     field(PINI, "YES")
     field(TPRO, 0)
-    # field(OOPT, "When Zero")
-    field(OOPT, "Every Time")
+    field(OOPT, "When Zero")
+    # field(OOPT, "Every Time")
     field(SCAN, ".5 second")
     # field(SCAN, "2 second")
 }

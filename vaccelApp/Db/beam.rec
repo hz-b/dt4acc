@@ -188,7 +188,7 @@ record(waveform, "$(PREFIX):beam:names")
 	field(SCAN, "I/O Intr")
 	field(NELM, 2048)
 	field(FTVL, "STRING")
-	field(TPRO, 1)
+	field(TPRO, 0)
 }
 
 record(longout, "$(PREFIX):beam:publish")
