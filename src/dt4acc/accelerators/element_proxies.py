@@ -1,4 +1,4 @@
-from ..device_interface.event import Event
+from dt4acc.bl.event import Event
 from ..interfaces.element_interface import ElementInterface
 from ..model.element_upate import ElementUpdate
 

@@ -1,8 +1,8 @@
 from collections import UserList
 from typing import Union
 
-from ..device_interface.event import Event
-from ..device_interface.delay_execution import DelayExecution
+from dt4acc.bl.event import Event
+from dt4acc.bl.delay_execution import DelayExecution
 from ..interfaces.accelerator_interface import AcceleratorInterface
 from ..interfaces.element_interface import ElementInterface
 
