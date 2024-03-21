@@ -25,10 +25,9 @@ def _construct_name_list(acc: at.Lattice) -> Sequence[str]:
     return ["XXX_START"] + [elem.FamName for elem in acc]
 
 
-class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
-    def __init__(self, acc, calculation_lock):
+class PyAtTwissCalculator(TwissCalculator):
+    def __init__(self, acc):
         self.acc = acc
-        # self.calculation_lock = calculation_lock
 
     def calculate(self) -> Twiss:
         # Implement calculation using pyAt
@@ -46,10 +45,9 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
         )
 
 
-class PyAtOrbitCalculator(OrbitCalculator, metaclass=ABCMeta):
-    def __init__(self, acc, calculation_lock):
+class PyAtOrbitCalculator(OrbitCalculator):
+    def __init__(self, acc):
         self.acc = acc
-        # self.calculation_lock = calculation_lock
 
     def calculate(self) -> Orbit:
         # with self.calculation_lock:  # Acquire the lock
