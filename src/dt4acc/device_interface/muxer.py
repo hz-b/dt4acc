@@ -47,7 +47,7 @@ class Muxer:
                 flag = False
 
             logger.debug(f"MUXER {label}: selected? {flag}")
-            pydev.iointr(label, flag)
+            #pydev.iointr(label, flag)
 
     def off(self, val):
         """Switch muxer off ..
@@ -61,7 +61,7 @@ class Muxer:
         self.setDisplayName(mux_off)
 
     def setDisplayName(self, name):
-        pydev.iointr("muxer_selected_magnet", name)
+        #pydev.iointr("muxer_selected_magnet", name)
 
     def select(self, a_list):
         """

@@ -50,18 +50,22 @@ class AcceleratorImpl(AcceleratorInterface, UserList):
         self.twiss_calculation_delay.set_delay(delay)
         self.orbit_calculation_delay.set_delay(delay)
 
-    def get_element(self, element_id) -> ElementInterface:
+    async def get_element(self, element_id) -> ElementInterface:
         proxy = self.proxy_factory.get(element_id)
         proxy.on_changed_value.append(self.on_changed_value.trigger)
 
-        def cb(unused):
-            self.orbit_calculation_delay.request_execution()
-            self.twiss_calculation_delay.request_execution()
+        async def cb(unused):
+            await self.orbit_calculation_delay.request_execution()
+            await self.twiss_calculation_delay.request_execution()
 
+        async def foo():
+            proxy.on_update_finished.append(cb)
+            return True
         #: Todo: review if orbit and twiss are to be calculated
         #:       when ever something is updated
-        proxy.on_update_finished.append(cb)
+        await foo()
         return proxy
+
 
     def calculate_twiss(self):
         return self.twiss_calculator.calculate()

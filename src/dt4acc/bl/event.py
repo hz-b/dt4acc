@@ -6,11 +6,14 @@ class Event(UserList):
         assert (callable(item))
         super().append(item)
 
-    def trigger(self, obj):
+    async def trigger(self, obj):
         for callback in self:
-            callback(obj)
+            if obj == None:
+                return
+            else:
+                await callback(obj)
 
 
 class StatusChange(Event):
-    def trigger(self, flag: bool):
-        return super().trigger(flag)
+    async def trigger(self, flag: bool):
+        return await super().trigger(flag)

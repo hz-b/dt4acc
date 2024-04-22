@@ -1,20 +1,24 @@
 import asyncio
 import logging
 import time
+import tracemalloc
 
 from p4p.nt import NTScalar
-from p4p.server import Server, StaticProvider
+from p4p.server import Server
 from p4p.server.asyncio import SharedPV
 
 import dt4acc.command as cmd
 from dt4acc.resources.bessy2_sr_reflat import bessy2Lattice
+from dt4acc.setup_configuration.pv_manager import PVManager
 
 help_type = NTScalar('s')
 types = {
     'int': NTScalar('i').wrap(0),
     'float': NTScalar('d').wrap(0.0),
     'str': NTScalar('s').wrap(''),
-    'array': NTScalar('ad').wrap([0.0, 0.0])
+    'array': NTScalar('ad').wrap([0.0, 0.0]),
+    'bool': NTScalar('b').wrap(False),
+    'bool_array': NTScalar('ab').wrap([])
 }
 
 
@@ -37,20 +41,33 @@ class ElementHandler(object):
         pv.close()  # disconnect client
         pv.open(newtype)
 
-    def put(self, pv, op):
+    async def put(self, pv, op):
         val = op.value()
         logging.info("Assign %s = %s", op.name(), val)
         # Notify any subscribers of the new value.
         # Also set timeStamp with current system time.
         pv.post(val, timestamp=time.time())
         # Notify the client making this PUT operation that it has now completed
-        cmd.update(element_id=self.element.FamName, property_name="dx", value=float(op.value()))
+        if isinstance(self.element, str):
+            FamName = self.element
+        else:
+            FamName = self.element.FamName
+        await cmd.update(element_id=FamName, property_name="dx", value=float(op.value()))
         op.done()
 
+
+def create_pv(initial_value_type, initial_type, element):
+    initial = types[initial_value_type]
+    pv = SharedPV(nt=NTScalar(initial_type), initial=initial, handler=ElementHandler(element))
+    return pv
+
+
 async def server_start_up():
-    provider = StaticProvider('abc')  # 'mailbox' is an arbitrary name
-    # Iterate over each element in the accelerator list and create shared PVs
-    ring_pvs = []
+    # Get the PVManager instance
+    manager = PVManager()
+
+    # Iterate over each element in the accelerator list and add shared PVs
+
     # todo: change the lattice reading to use db (lat2db)
     acc = bessy2Lattice()
     prefix = "Pierre:DT:"
@@ -65,12 +82,14 @@ async def server_start_up():
             #   1 -> maybe read from a db where defaults for each pv are stored
             #   2 -> another alternative can be to read from machine if available
             #   Finally use a pattern to separate the different options (read from default db values, load from machine,...
+            # Create a SharedPV and add it to the PVManager
+            pv = create_pv('float', 'd', element)
+            manager.add_pv(pv_name, pv)
 
-            pv = SharedPV(nt=NTScalar('d'), initial=types['float'], handler=ElementHandler(element))
-            provider.add(pv_name, pv)
-            ring_pvs.append(pv)
-    # Server.forever(providers=[provider])
-    # Create a P4P server with the created shared PVs
+    # Create a StaticProvider and register it with the PVManager
+    provider = manager.get_provider()
+
+    # Create a P4P server with the created provider
     with Server(providers=[provider]):
         print('Server Starting')
         try:
@@ -88,4 +107,5 @@ async def server_start_up():
 
 
 if __name__ == "__main__":
+    tracemalloc.start()
     asyncio.run(server_start_up())

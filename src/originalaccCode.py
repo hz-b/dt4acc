@@ -231,8 +231,8 @@ class CalculationRunningManager:
 
     def signal(self):
         cls_name = self.__class__.__name__
-        logger.warning(f"{cls_name}: pydev.iointr({self.label}, {self.running})")
-        pydev.iointr(self.label, self.running)
+        logger.warning(f"{cls_name}: #pydev.iointr({self.label}, {self.running})")
+        #pydev.iointr(self.label, self.running)
 
     def __enter__(self):
         self.running = True
@@ -277,7 +277,7 @@ class DelayExecution:
 
         self.running = False
         self.label = f"{prefix}-dt-delayed-calcs"
-        pydev.iointr(self.label, self.execution.pending)
+        #pydev.iointr(self.label, self.execution.pending)
 
     def tic(self):
         def run():
@@ -293,7 +293,7 @@ class DelayExecution:
                 return
 
             self.execution.pending = True
-            pydev.iointr(self.label, self.execution.pending)
+            #pydev.iointr(self.label, self.execution.pending)
             logger.info(f"{cls_name}: delayed execution requested")
             self.actual_timestamp = datetime.datetime.now()
             thread = threading.Thread(target=run)
@@ -310,9 +310,9 @@ class DelayExecution:
                 self.callback()
             self.execution.pending = False
             logger.debug(
-                f"Executing pydev.iointr({self.label}, {self.execution.pending})"
+                f"Executing #pydev.iointr({self.label}, {self.execution.pending})"
             )
-            pydev.iointr(self.label, self.execution.pending)
+            #pydev.iointr(self.label, self.execution.pending)
         logger.warning(f"{cls_name}: delayed execution: end")
 
 
@@ -335,12 +335,12 @@ class BPMMimikry:
         prefix = self.prefix
         label = f"{prefix}-bpm-names"
         names_as_bytes = [name.encode() for name in names]
-        pydev.iointr(label, names_as_bytes)
+        #pydev.iointr(label, names_as_bytes)
 
         for data, plane in zip(bpm_data.T, ["x", "y"]):
             label = f"{prefix}-bpm.d{plane}"
             logger.debug("BPM Data for plane %s: %s", plane, list(data))
-            pydev.iointr(label, list(data))
+            #pydev.iointr(label, list(data))
 
         # Build bpm data together
         n_channels = 128
@@ -356,7 +356,7 @@ class BPMMimikry:
         bdata_all[: len(bdata)] = bdata
 
         label = f"{prefix}-bpm-bdata"
-        pydev.iointr(label, list(bdata_all))
+        #pydev.iointr(label, list(bdata_all))
 
 
 class VirtualAccelerator:
@@ -421,7 +421,7 @@ class VirtualAccelerator:
         logger.info(
             f"Publishing readback {rdbk} type {type(rdbk)} with label {readback_label}"
         )
-        pydev.iointr(readback_label, rdbk)
+        #pydev.iointr(readback_label, rdbk)
 
         # Typically these calculations below will fail if the twin sets
         # unsensible data during start up.
@@ -491,7 +491,7 @@ class VirtualAccelerator:
                 val = val.tolist()
                 label = f"{prefix}:{lpar}:{plane}"
                 logger.info(f"Executing pydev.iontr({label}, {val[:3]} {type(val)}")
-                pydev.iointr(label, val)
+                #pydev.iointr(label, val)
         return r
 
     def _calculateOrbit(self):
@@ -510,7 +510,7 @@ class VirtualAccelerator:
             val = ds.ps.sel(phase_coordinate=plane).values.tolist()
             label = f"{prefix}:orbit:{plane}"
             logger.info(f"Executing pydev.iontr({label}, {val[:3]} {type(val)}")
-            pydev.iointr(label, val)
+            #pydev.iointr(label, val)
 
         self.bpm.publishBPMData(r)
 
@@ -525,14 +525,14 @@ class VirtualAccelerator:
         prefix = self.prefix + ":beam"
         label = f"{prefix}:s"
         logger.info(f"Executing pydev.iontr({label}, {val[:3]} {type(val)}")
-        pydev.iointr(label, val)
+        #pydev.iointr(label, val)
         val = next(publish_counter)
 
         names = info.names
         val = [name.encode() for name in names.values]
         label = f"{prefix}:names"
         logger.warning(f"Executing pydev.iontr({label}, {val[:3]} {type(val)}")
-        pydev.iointr(label, val)
+        #pydev.iointr(label, val)
         val = next(publish_counter)
 
         return val

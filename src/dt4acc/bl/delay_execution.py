@@ -41,9 +41,9 @@ class DelayExecution:
         self.on_calculation_requested.trigger(flag)
         self._calculation_requested = flag
 
-    def callback(self):
-        with TriggerEnterExitContextManager(self.on_calculation):
-            return self._callback()
+    async def callback(self):
+        # with TriggerEnterExitContextManager(self.on_calculation):
+        return await self._callback()
 
     def set_delay(self, delay: Union[float, None]):
         if delay is not None:
@@ -51,15 +51,15 @@ class DelayExecution:
 
         self.delay = delay
 
-    def request_execution(self):
+    async def request_execution(self):
         if self.delay is None:
             # In case there was still a pending calculation
             self.calculation_requested = False
-            self.callback()
+            await self.callback()
             return
 
         self.calculation_requested = True
-        self.pending_queue.put(datetime.datetime.now())
+        await self.pending_queue.put(datetime.datetime.now())
 
     def worker(self):
         # The "busy" wait is favoured to its straightforward

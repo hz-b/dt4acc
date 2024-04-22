@@ -46,7 +46,7 @@ class ElementProxy(ElementInterface):
         return
         self._obj.set_tilt(roll)
 
-    def update_shift(self, *, dx=None, dy=None):
+    async def update_shift(self, *, dx=None, dy=None):
         """
         todo: find out if there is a shift
 
@@ -67,14 +67,14 @@ class ElementProxy(ElementInterface):
         # look what really happened
         element, = self._obj
         dxr, _, dyr, _, _, _ = estimate_shift(element)
-        self.on_changed_value.trigger(
+        await self.on_changed_value.trigger(
             ElementUpdate(element_id=self._obj.name, property_name="dx", value=dxr)
         )
-        self.on_changed_value.trigger(
+        await self.on_changed_value.trigger(
             ElementUpdate(element_id=self._obj.name, property_name="dy", value=dyr)
         )
 
-    def update(self, property_id: str, value):
+    async def update(self, property_id: str, value):
         """
         Todo:
             activate update calculations again
@@ -87,22 +87,22 @@ class ElementProxy(ElementInterface):
         if method_name == "set_dx":
             # Todo: check that lattice placement works on the original lattice
             #       and that this is not a copy
-            self.update_shift(dx=value)
+            await self.update_shift(dx=value)
         elif method_name == "set_dy":
-            self.update_shift(dy=value)
+            await self.update_shift(dy=value)
         elif method_name == "set_roll":
-            self.update_roll(roll=value)
+            await self.update_roll(roll=value)
         elif method_name == "set_K":
             # Todo: Check that it is a quadrupole
-            element.update(K=value)
-            self.on_changed_value.trigger(
+            await element.update(K=value)
+            await self.on_changed_value.trigger(
                 ElementUpdate(element_id=self.element_id, property_name="K", value=self._obj[0].K)
             )
         else:
             method = getattr(self._obj, method_name)
-            method(value)
+            await method(value)
 
-        self.on_update_finished.trigger(None)
+        await self.on_update_finished.trigger(None)
 
 
 class AddOnElementProxy(ElementProxy):

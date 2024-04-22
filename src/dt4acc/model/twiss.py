@@ -1,7 +1,11 @@
 from dataclasses import dataclass
+from enum import Enum
 from typing import Sequence
 
 
+class Planes(Enum):
+    x = "x"
+    y = "y"
 @dataclass
 class TwissForPlane:
     alpha: Sequence[float]
@@ -14,3 +18,12 @@ class Twiss:
     x: TwissForPlane
     y: TwissForPlane
     names: Sequence
+
+    def get_plane(self, plane: Planes):
+        plane = Planes(plane)
+        if plane == Planes.x:
+            return self.x
+        elif plane == Planes.y:
+            return self.y
+        else:
+            raise AssertionError("How could I end up here")

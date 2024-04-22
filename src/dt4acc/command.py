@@ -1,6 +1,6 @@
 from .bl.context_manager_with_trigger import TriggerEnterExitContextManager
 from .bl.event import Event
-from .update_context_manager import UpdateContext
+from dt4acc.update_context_manager import UpdateContext
 from .view.calculation_progress_view import StatusFlagView
 import os
 
@@ -37,7 +37,7 @@ acc.on_orbit_calculation.append(view.on_update)
 view = StatusFlagView(prefix=f"{prefix}:dt:im:calc:twiss:req")
 acc.on_orbit_calculation_request.append(view.on_update)
 
-def update(*, element_id, property_name, value=None):
+async def update(*, element_id, property_name, value=None):
     """
     What to do here:
         find the element
@@ -49,7 +49,7 @@ def update(*, element_id, property_name, value=None):
         Is value=None a value user wants to set?
         If so get another placeholder..
     """
-    with TriggerEnterExitContextManager(on_update_event):
-        with UpdateContext(element_id=element_id, property_name=property_name, value=value, kwargs=dict()):
-            elem_proxy = acc.get_element(element_id)
-            elem_proxy.update(property_name, value)
+    # with TriggerEnterExitContextManager(on_update_event):
+    with UpdateContext(element_id=element_id, property_name=property_name, value=value, kwargs=dict()):
+        elem_proxy = await acc.get_element(element_id)
+        await elem_proxy.update(property_name, value)

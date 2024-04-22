@@ -27,10 +27,10 @@ accelerator.on_changed_value.append(elem_par_view.push_value)
 logger = logging.getLogger("dt4acc")
 
 
-def cb(orbit_data: Orbit):
+async def cb(orbit_data: Orbit):
     # Todo: push all orbit data to beam
     bpm_data = bpm_pyat.extract_bpm_data(orbit_data)
-    view.push_bpms(bpm_data)
+    await view.push_bpms(bpm_data)
 
 
 accelerator.on_new_orbit.append(cb)
