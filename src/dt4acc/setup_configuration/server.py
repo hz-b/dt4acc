@@ -43,7 +43,7 @@ class ElementHandler(object):
 
     async def put(self, pv, op):
         val = op.value()
-        logging.info("Assign %s = %s", op.name(), val)
+        logging.warning("Assign %s = %s", op.name(), val)
         # Notify any subscribers of the new value.
         # Also set timeStamp with current system time.
         pv.post(val, timestamp=time.time())
@@ -78,13 +78,16 @@ async def server_start_up():
         element_type = element_split_by_space[0]
         if element_type in ["Quadrupole:", "Sextupole:"]:
             pv_name = prefix + element.FamName
+            cm_pv_name = pv_name + ":Cm:set"
             # todo: what values should the array start with?
             #   1 -> maybe read from a db where defaults for each pv are stored
             #   2 -> another alternative can be to read from machine if available
             #   Finally use a pattern to separate the different options (read from default db values, load from machine,...
             # Create a SharedPV and add it to the PVManager
             pv = create_pv('float', 'd', element)
+            cm_pv = create_pv('float', 'd', element)
             manager.add_pv(pv_name, pv)
+            manager.add_pv(cm_pv_name, cm_pv)
 
     # Create a StaticProvider and register it with the PVManager
     provider = manager.get_provider()
