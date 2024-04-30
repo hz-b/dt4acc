@@ -17,6 +17,7 @@ def set_pyat_ring():
     from lat2db.tools.factories.pyat import factory
     from pymongo import MongoClient
 
+    return bessy2Lattice()
     # get database
     client = MongoClient("mongodb://127.0.0.1:27017/")
     db = client["bessyii"]
