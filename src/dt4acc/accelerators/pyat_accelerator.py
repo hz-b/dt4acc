@@ -1,5 +1,6 @@
 import logging
 import threading
+import os
 
 from ..accelerators.accelerator_impl import AcceleratorImpl
 from ..accelerators.proxy_factory import PyATProxyFactory
@@ -15,7 +16,7 @@ def set_pyat_ring():
     return Accelerator().ring
 
 acc = set_pyat_ring()
-prefix = "Pierre:DT"
+prefix = os.environ["DT4ACC_PREFIX"]
 # set_ring(acc)
 accelerator = AcceleratorImpl(acc, PyATProxyFactory(lattice_model=None, at_lattice=acc),
                               PyAtTwissCalculator(acc, calculation_lock), PyAtOrbitCalculator(acc, calculation_lock))
