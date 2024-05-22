@@ -21,7 +21,7 @@ def publish(*, what):
 
 # Signals to EPICS:
 #      that an update is in progress
-prefix = "Pierre:DT"
+prefix = os.environ["DT4ACC_PREFIX"]
 view = StatusFlagView(prefix=f"{prefix}:dt:im:updates")
 on_update_event = Event()
 on_update_event.append(view.on_update)

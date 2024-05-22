@@ -1,1 +1,1 @@
-from . import accelerators
+__all__ = ["accelerators", "command"]
