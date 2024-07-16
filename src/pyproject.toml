@@ -17,8 +17,10 @@ keywords = []
 python = ">=3.7"
 numpy = "*"
 pandas = "*"
+scipy = "*"
 accelerator-toolbox = ">=0.5"
 bact-device-models = "*"
+lat2db = "*"
 
 Sphinx = { version = "*", optional = true }
 sphinx-rtd-theme = { version = "*", optional = true }
