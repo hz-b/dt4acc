@@ -1,9 +1,11 @@
-from dt4acc.bl.event import Event
-from ..interfaces.element_interface import ElementInterface
-from ..model.element_upate import ElementUpdate
+import asyncio
 
 import numpy as np
 from at import shift_elem
+
+from dt4acc.bl.event import Event
+from ..interfaces.element_interface import ElementInterface
+from ..model.element_upate import ElementUpdate
 
 
 def estimate_shift(element, eps=1e-8):
@@ -43,7 +45,7 @@ class ElementProxy(ElementInterface):
         Todo: implement setting roll
 
         """
-        return
+        # return
         self._obj.set_tilt(roll)
 
     async def update_shift(self, *, dx=None, dy=None):
@@ -67,12 +69,13 @@ class ElementProxy(ElementInterface):
         # look what really happened
         element, = self._obj
         dxr, _, dyr, _, _, _ = estimate_shift(element)
-        await self.on_changed_value.trigger(
-            ElementUpdate(element_id=self._obj.name, property_name="dx", value=dxr)
-        )
-        await self.on_changed_value.trigger(
-            ElementUpdate(element_id=self._obj.name, property_name="dy", value=dyr)
-        )
+        return
+        asyncio.create_task(self.on_changed_value.trigger(
+            ElementUpdate(element_id=self.element_id, property_name="dx", value=value)
+        ))
+        asyncio.create_task(self.on_changed_value.trigger(
+            ElementUpdate(element_id=self.element_id, property_name="dy", value=value)
+        ))
 
     async def update(self, property_id: str, value):
         """
@@ -94,10 +97,26 @@ class ElementProxy(ElementInterface):
             await self.update_roll(roll=value)
         elif method_name == "set_K":
             # Todo: Check that it is a quadrupole
-            await element.update(K=value)
-            await self.on_changed_value.trigger(
-                ElementUpdate(element_id=self.element_id, property_name="K", value=self._obj[0].K)
-            )
+            element.update(K=value)
+            # todo:  check if the value did change and then call update of the element
+            # self.on_changed_value.trigger(
+            #     ElementUpdate(element_id=self.element_id, property_name="K", value=self._obj[0].K)
+            # )
+        elif method_name == "set_im":
+            # await self.on_changed_value.trigger(
+            #     ElementUpdate(element_id=self.element_id, property_name="rdbk", value=value)
+            # )
+            asyncio.create_task(self.on_changed_value.trigger(
+                ElementUpdate(element_id=self.element_id, property_name="rdbk", value=value)
+            ))
+            asyncio.create_task(self.on_changed_value.trigger(
+                ElementUpdate(element_id=self.element_id, property_name="Cm:set", value=value * 1.5)
+            ))
+            # await self.on_changed_value.trigger(
+            #     ElementUpdate(element_id=self.element_id, property_name="Cm:set", value=value * 1.1)   # todo calculate f(i)
+            # )
+        elif method_name == "set_rdbk":
+            pass
         else:
             method = getattr(self._obj, method_name)
             await method(value)
@@ -109,6 +128,7 @@ class AddOnElementProxy(ElementProxy):
     """Proxy for an element whose update is to be relayed to
     another element
     """
+
     def __init__(self, obj, *, element_id, host_element_id):
         super().__init__(obj, element_id=element_id)
         self.host_element_id = host_element_id
@@ -125,12 +145,13 @@ class KickAngleCorrectorProxy(AddOnElementProxy):
     Todo:
         already third layer
     """
+
     def __init__(self, obj, *, correction_plane, **kwargs):
         assert correction_plane in ["horizontal", "vertical"]
         self.correction_planes = correction_plane
         super().__init__(*obj, **kwargs)
 
-    def update_kick(self, *, kick_x=None, kick_y=None):
+    async def update_kick(self, *, kick_x=None, kick_y=None):
         """updates requested kick
         """
         kick_angles = self._obj.KickAngle.copy()
@@ -140,13 +161,13 @@ class KickAngleCorrectorProxy(AddOnElementProxy):
         self._obj.KickAngle = kick_angles
 
         kick_angles = self._obj.KickAngle
-        for i, kick in  enumerate([kick_x, kick_y]):
+        for i, kick in enumerate([kick_x, kick_y]):
             if kick is not None:
-                self.on_changed_value.trigger(
+                await self.on_changed_value.trigger(
                     ElementUpdate(element_id=self.element_id, property_name="K", value=kick_angles[i])
                 )
 
-    def update(self, property_id: str, value):
+    async def update(self, property_id: str, value):
         assert property_id == "K"
         method_name = "set_" + property_id
         if method_name == "set_K":
@@ -163,4 +184,4 @@ class KickAngleCorrectorProxy(AddOnElementProxy):
         else:
             raise ValueError(f"{self.element_id}: property {property_id} unknown")
 
-        self.on_update_finished.trigger(None)
+        await self.on_update_finished.trigger(None)

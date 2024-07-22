@@ -1,13 +1,12 @@
-from collections import UserList
 from typing import Union
 
-from dt4acc.bl.event import Event
 from dt4acc.bl.delay_execution import DelayExecution
+from dt4acc.bl.event import Event
 from ..interfaces.accelerator_interface import AcceleratorInterface
 from ..interfaces.element_interface import ElementInterface
 
 
-class AcceleratorImpl(AcceleratorInterface, UserList):
+class AcceleratorImpl(AcceleratorInterface):
     def __init__(self, acc, proxy_factory, twiss_calculator, orbit_calculator, *, delay=1e-1):
         super().__init__()
         self.acc = acc
@@ -21,51 +20,39 @@ class AcceleratorImpl(AcceleratorInterface, UserList):
         self.on_new_orbit = Event()
         self.on_new_twiss = Event()
 
-        # need to create delayed execution for these two above
-        # these need the to trigger the events below if they are finished
-        # or their trigger is passed here
-        def cb_twiss():
+        async def cb_twiss():
             self.twiss = self.twiss_calculator.calculate()
-            self.on_new_twiss.trigger(self.twiss)
+            await self.on_new_twiss.trigger(self.twiss)
 
-        def cb_orbit():
+        async def cb_orbit():
             self.orbit = self.orbit_calculator.calculate()
-            self.on_new_orbit.trigger(self.orbit)
+            await self.on_new_orbit.trigger(self.orbit)
 
         self.twiss_calculation_delay = DelayExecution(callback=cb_twiss, delay=delay)
         self.orbit_calculation_delay = DelayExecution(callback=cb_orbit, delay=delay)
 
         self.on_changed_value = Event()
 
-        # Shall one subscribe to the object below or should one just hand it through?
-        # this all seems to call for a message  bus ...
         self.on_orbit_calculation_request = self.orbit_calculation_delay.on_calculation_requested
         self.on_orbit_calculation = self.orbit_calculation_delay.on_calculation
         self.on_twiss_calculation_request = self.twiss_calculation_delay.on_calculation_requested
         self.on_twiss_calculation = self.twiss_calculation_delay.on_calculation
 
     def set_delay(self, delay: Union[float, None]):
-        """How much to delay twiss and orbit calculation after last received comamnd
-        """
+        """How much to delay twiss and orbit calculation after last received command"""
         self.twiss_calculation_delay.set_delay(delay)
         self.orbit_calculation_delay.set_delay(delay)
 
     async def get_element(self, element_id) -> ElementInterface:
         proxy = self.proxy_factory.get(element_id)
-        proxy.on_changed_value.append(self.on_changed_value.trigger)
+        await proxy.on_changed_value.subscribe(self.on_changed_value.trigger)
 
         async def cb(unused):
             await self.orbit_calculation_delay.request_execution()
             await self.twiss_calculation_delay.request_execution()
 
-        async def foo():
-            proxy.on_update_finished.append(cb)
-            return True
-        #: Todo: review if orbit and twiss are to be calculated
-        #:       when ever something is updated
-        await foo()
+        await proxy.on_update_finished.subscribe(cb)
         return proxy
-
 
     def calculate_twiss(self):
         return self.twiss_calculator.calculate()

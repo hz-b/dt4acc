@@ -23,7 +23,7 @@ thor_scsi_accelerator = AcceleratorImpl(acc, ThorScsiTwissCalculator(tslib.Confi
 view = ResultView(prefix="WS")
 bpm_names = [elem.name for elem in thor_scsi_accelerator.acc if "bpm" in elem.name]
 bpm = BPMMimikry(prefix="WS", bpm_names=bpm_names)
-thor_scsi_accelerator.on_new_orbit.append(view.push_orbit)
+thor_scsi_accelerator.on_new_orbit.subscribe(view.push_orbit)
 
 
 def cb(orbit_data: Orbit):
@@ -31,8 +31,8 @@ def cb(orbit_data: Orbit):
     view.push_bpms(reduced_data)
 
 
-thor_scsi_accelerator.on_new_orbit.append(cb)
-thor_scsi_accelerator.on_new_twiss.append(view.push_twiss)
+thor_scsi_accelerator.on_new_orbit.subscribe(cb)
+thor_scsi_accelerator.on_new_twiss.subscribe(view.push_twiss)
 
 
 def set_accelerator():

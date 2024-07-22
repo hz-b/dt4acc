@@ -19,7 +19,7 @@ acc.set_delay(None)
 
 
 def test_update_quad_strength():
-    update(element_id='Q1M1D1R', property_name='K', value=2.43852)
+    update(element_id='Q1M1D1R', property_name='K', value=34344)
 
 
 def test_update_quad_offset_hor():

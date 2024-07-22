@@ -8,8 +8,11 @@ from p4p.server import Server
 from p4p.server.asyncio import SharedPV
 
 import dt4acc.command as cmd
-from dt4acc.resources.bessy2_sr_reflat import bessy2Lattice
+from dt4acc.model.element_upate import ElementUpdate
 from dt4acc.setup_configuration.pv_manager import PVManager
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 help_type = NTScalar('s')
 types = {
@@ -21,15 +24,12 @@ types = {
     'bool_array': NTScalar('ab').wrap([])
 }
 
-
-# Define a handler class for handling write requests to the PV
-class ElementHandler(object):
+class ElementHandler:
     def __init__(self, element):
         self.element = element
 
     def rpc(self, pv, op):
         V = op.value()
-        print("RPC", V, V.query.get('help'), V.query.get('newtype'))
         if V.query.get('help') is not None:
             op.done(help_type.wrap('Try newtype=int (or float or str)'))
             return
@@ -38,61 +38,81 @@ class ElementHandler(object):
 
         op.done(help_type.wrap('Success'))
 
-        pv.close()  # disconnect client
+        pv.close()
         pv.open(newtype)
 
     async def put(self, pv, op):
         val = op.value()
-        logging.warning("Assign %s = %s", op.name(), val)
-        # Notify any subscribers of the new value.
-        # Also set timeStamp with current system time.
+        logging.info("Assigning %s = %s", op.name(), val)
         pv.post(val, timestamp=time.time())
-        # Notify the client making this PUT operation that it has now completed
-        if isinstance(self.element, str):
-            FamName = self.element
+        pv_name = op.name()
+        property_id = get_property_id(pv_name)
+        if isinstance(self.element, ElementUpdate) or property_id == "rdbk":
+            logging.info("its readback put or update of an element so no command update ")
+            op.done()
         else:
-            FamName = self.element.FamName
-        await cmd.update(element_id=FamName, property_name="dx", value=float(op.value()))
-        op.done()
-
+            logging.info("Need to call Command Update for %s value = %s", property_id, val)
+            if isinstance(self.element, str):
+                FamName = self.element
+            else:
+                FamName = self.element.FamName
+            try:
+                await cmd.update(element_id=FamName, property_name=property_id, value=float(op.value()))
+                logging.info("Successfully updated element %s property %s with value %s", FamName, property_id, val)
+            except Exception as e:
+                logging.error("Error updating element %s property %s with value %s: %s", FamName, property_id, val, e)
+            op.done()
 
 def create_pv(initial_value_type, initial_type, element):
     initial = types[initial_value_type]
     pv = SharedPV(nt=NTScalar(initial_type), initial=initial, handler=ElementHandler(element))
     return pv
 
+def get_property_id(pv_name):
+    if ':Cm:set' in pv_name:
+        return 'K'
+    elif ':x:set' in pv_name:
+        return 'x'
+    elif ':y:set' in pv_name:
+        return 'y'
+    elif ':im:I' in pv_name:
+        return 'im'
+    elif ':rdbk' in pv_name:
+        return 'rdbk'
+    else:
+        return None
 
 async def server_start_up():
-    # Get the PVManager instance
     manager = PVManager()
 
-    # Iterate over each element in the accelerator list and add shared PVs
-
-    # todo: change the lattice reading to use db (lat2db)
-    acc = bessy2Lattice()
-    prefix = "Pierre:DT:"
+    from lat2db.model.accelerator import Accelerator
+    acc = Accelerator().ring
+    prefix = "Anonym:"
     for element in acc:
-        # todo: once lattice is read from db then play with sequences instead of this AT format.
         element_str = str(element)
         element_split_by_space = element_str.split('\n')
         element_type = element_split_by_space[0]
         if element_type in ["Quadrupole:", "Sextupole:"]:
             pv_name = prefix + element.FamName
             cm_pv_name = pv_name + ":Cm:set"
-            # todo: what values should the array start with?
-            #   1 -> maybe read from a db where defaults for each pv are stored
-            #   2 -> another alternative can be to read from machine if available
-            #   Finally use a pattern to separate the different options (read from default db values, load from machine,...
-            # Create a SharedPV and add it to the PVManager
+            dx_pv_name = pv_name + ":x:set"
+            dy_pv_name = pv_name + ":y:set"
+            im_pv_name = pv_name + ":im:I"
+            rdbk_pv_name = pv_name + ":rdbk"
             pv = create_pv('float', 'd', element)
             cm_pv = create_pv('float', 'd', element)
+            dx_pv = create_pv('float', 'd', element)
+            dy_pv = create_pv('float', 'd', element)
+            im_pv = create_pv('float', 'd', element)
+            rdbk_pv = create_pv('float', 'd', element)
             manager.add_pv(pv_name, pv)
             manager.add_pv(cm_pv_name, cm_pv)
-
-    # Create a StaticProvider and register it with the PVManager
+            manager.add_pv(dx_pv_name, dx_pv)
+            manager.add_pv(dy_pv_name, dy_pv)
+            manager.add_pv(im_pv_name, im_pv)
+            manager.add_pv(rdbk_pv_name, rdbk_pv)
     provider = manager.get_provider()
 
-    # Create a P4P server with the created provider
     with Server(providers=[provider]):
         print('Server Starting')
         try:
@@ -107,7 +127,6 @@ async def server_start_up():
                 if task != asyncio.current_task():
                     task.cancel()
             await asyncio.gather(*tasks, return_exceptions=True)
-
 
 if __name__ == "__main__":
     tracemalloc.start()

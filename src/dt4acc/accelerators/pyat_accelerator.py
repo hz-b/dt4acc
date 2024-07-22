@@ -16,7 +16,7 @@ def set_pyat_ring():
     return Accelerator().ring
 
 acc = set_pyat_ring()
-prefix = os.environ["DT4ACC_PREFIX"]
+prefix = "Anonym" #os.environ["DT4ACC_PREFIX"]
 # set_ring(acc)
 accelerator = AcceleratorImpl(acc, PyATProxyFactory(lattice_model=None, at_lattice=acc),
                               PyAtTwissCalculator(acc, calculation_lock), PyAtOrbitCalculator(acc, calculation_lock))
@@ -25,8 +25,8 @@ view = ResultView(prefix=prefix + ":beam")
 elem_par_view = ElementParameterView(prefix=prefix)
 bpm_names_pyat = [elem.FamName for elem in accelerator.acc if "BPM" == elem.FamName[:3]]
 bpm_pyat = BPMMimikry(prefix=prefix, bpm_names=bpm_names_pyat)
-accelerator.on_new_orbit.append(view.push_orbit)
-accelerator.on_changed_value.append(elem_par_view.push_value)
+accelerator.on_new_orbit.subscribe(view.push_orbit)
+accelerator.on_changed_value.subscribe(elem_par_view.push_value)
 
 logger = logging.getLogger("dt4acc")
 
@@ -37,8 +37,8 @@ async def cb(orbit_data: Orbit):
     await view.push_bpms(bpm_data)
 
 
-accelerator.on_new_orbit.append(cb)
-accelerator.on_new_twiss.append(view.push_twiss)
+accelerator.on_new_orbit.subscribe(cb)
+accelerator.on_new_twiss.subscribe(view.push_twiss)
 
 
 def set_accelerator():

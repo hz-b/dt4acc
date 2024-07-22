@@ -21,21 +21,21 @@ def publish(*, what):
 
 # Signals to EPICS:
 #      that an update is in progress
-prefix = os.environ["DT4ACC_PREFIX"]
+prefix = "Anonym" #os.environ["DT4ACC_PREFIX"]
 view = StatusFlagView(prefix=f"{prefix}:dt:im:updates")
 on_update_event = Event()
-on_update_event.append(view.on_update)
+on_update_event.subscribe(view.on_update)
 
 # signal if orbit or twiss calculations are requested
-view = StatusFlagView(prefix=f"{prefix}:dt:im:calc:orbit:exc")
-acc.on_orbit_calculation.append(view.on_update)
-view = StatusFlagView(prefix=f"{prefix}:dt:im:calc:orbit:req")
-acc.on_orbit_calculation_request.append(view.on_update)
-
-view = StatusFlagView(prefix=f"{prefix}:dt:im:calc:twiss:exc")
-acc.on_orbit_calculation.append(view.on_update)
-view = StatusFlagView(prefix=f"{prefix}:dt:im:calc:twiss:req")
-acc.on_orbit_calculation_request.append(view.on_update)
+# view = StatusFlagView(prefix=f"{prefix}:dt:im:calc:orbit:exc")
+# acc.on_orbit_calculation.subscribe(view.on_update)
+# view = StatusFlagView(prefix=f"{prefix}:dt:im:calc:orbit:req")
+# acc.on_orbit_calculation_request.subscribe(view.on_update)
+#
+# view = StatusFlagView(prefix=f"{prefix}:dt:im:calc:twiss:exc")
+# acc.on_orbit_calculation.subscribe(view.on_update)
+# view = StatusFlagView(prefix=f"{prefix}:dt:im:calc:twiss:req")
+# acc.on_orbit_calculation_request.subscribe(view.on_update)
 
 async def update(*, element_id, property_name, value=None):
     """
@@ -53,3 +53,5 @@ async def update(*, element_id, property_name, value=None):
     with UpdateContext(element_id=element_id, property_name=property_name, value=value, kwargs=dict()):
         elem_proxy = await acc.get_element(element_id)
         await elem_proxy.update(property_name, value)
+        # await acc.calculate_orbit()
+        # await acc.calculate_twiss()
