@@ -4,28 +4,18 @@ import asyncio
 class Event:
     def __init__(self):
         self.callbacks = []
-        self.event_queue = asyncio.Queue()
 
-    async def subscribe(self, callback):
-        status = self.callbacks.append(callback)
-        if status is None:
-            print(callback)
-        await status
+    def subscribe(self, callback):
+        self.callbacks.append(callback)
 
-    async def trigger(self, obj):
-        # Process each callback asynchronously but in sequence
-        if len(self.callbacks) == 0:
-            print(self)
-            return
-        for callback in self.callbacks:
-            await callback(obj)  # Ensure your callbacks are designed as coroutine functions
+    def trigger(self, obj):
+        async def execute():
+            # todo: use asyncio,gather
+            for cb in self.callbacks:
+                await cb(obj)
 
-
-    async def process_events(self):
-        while True:
-            obj, callbacks = await self.event_queue.get()
-            for callback in callbacks:
-                callback(obj)  # Ensure your callbacks are coroutine functions
+        loop = asyncio.get_running_loop()
+        loop.run_until_complete(execute())
 
 
 class StatusChange(Event):
