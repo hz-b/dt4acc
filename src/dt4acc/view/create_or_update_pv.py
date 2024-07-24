@@ -5,7 +5,7 @@ from ..setup_configuration.server import create_pv
 manager = PVManager()
 
 
-def update_or_create_pv(element, pv_name, value, value_type, initial_type):
+async def update_or_create_pv(element, pv_name, value, value_type, initial_type):
     # Check if the PV already exists
     pv = manager.get_pv(pv_name)
     if pv is None:
@@ -13,4 +13,4 @@ def update_or_create_pv(element, pv_name, value, value_type, initial_type):
         new_pv = create_pv(initial_value_type=value_type,initial_type=initial_type, element=element)
         manager.add_pv(pv_name, new_pv)
     # Update the PV
-    manager.update_pv(pv_name, value)
+    await manager.update_pv(pv_name, value)

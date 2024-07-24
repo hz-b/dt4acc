@@ -45,13 +45,13 @@ class AcceleratorImpl(AcceleratorInterface):
 
     async def get_element(self, element_id) -> ElementInterface:
         proxy = self.proxy_factory.get(element_id)
-        await proxy.on_changed_value.subscribe(self.on_changed_value.trigger)
+        proxy.on_changed_value.subscribe(self.on_changed_value.trigger)
 
         async def cb(unused):
             await self.orbit_calculation_delay.request_execution()
             await self.twiss_calculation_delay.request_execution()
 
-        await proxy.on_update_finished.subscribe(cb)
+        proxy.on_update_finished.subscribe(cb)
         return proxy
 
     def calculate_twiss(self):

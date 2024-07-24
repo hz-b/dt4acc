@@ -87,11 +87,11 @@ class ElementProxy(ElementInterface):
 
         element, = self._obj
         method_name = "set_" + property_id
-        if method_name == "set_dx":
+        if method_name == "set_x":
             # Todo: check that lattice placement works on the original lattice
             #       and that this is not a copy
             await self.update_shift(dx=value)
-        elif method_name == "set_dy":
+        elif method_name == "set_y":
             await self.update_shift(dy=value)
         elif method_name == "set_roll":
             await self.update_roll(roll=value)

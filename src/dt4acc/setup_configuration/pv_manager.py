@@ -20,20 +20,20 @@ class PVManager:
         self.provider.add(name, pv)
         logging.info(f"Added PV {name}")
 
-    def update_pv(self, name, new_value, ctx=None):
+    async def update_pv(self, name, new_value, ctx=None):
         if ctx is None:
             ctx = Context('pva')
         pv = self.pvs.get(name)
         if pv:
             try:
                 logging.info(f"Updating PV {name} with value {new_value}")
-                ctx.put(name, new_value, timeout=20.0)  # Adjusted timeout
+                await ctx.put(name, new_value)  # Adjusted timeout
                 logging.info(f"Successfully updated PV {name} with value {new_value}")
-            except TimeoutError:
-                logging.error(f"Timeout occurred while updating {name}. Retrying...")
-                # Implement retry logic or handle the failure appropriately
-            except Exception as e:
-                logging.error(f"Error updating PV {name}: {e}")
+            # except TimeoutError:
+            #     logging.error(f"Timeout occurred while updating {name}. Retrying...")
+            #     # Implement retry logic or handle the failure appropriately
+            # except Exception as e:
+            #     logging.error(f"Error updating PV {name}: {e}")
             finally:
                 ctx.close()
         else:

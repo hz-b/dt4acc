@@ -1,7 +1,7 @@
 from .bl.context_manager_with_trigger import TriggerEnterExitContextManager
 from .bl.event import Event
 from dt4acc.update_context_manager import UpdateContext
-from .view.calculation_progress_view import StatusFlagView
+from .view.calculation_result_view import StatusFlagView
 import os
 
 CALCULATION_ENGINE_default = os.environ["CALCULATION_ENGINE"]
@@ -27,15 +27,15 @@ on_update_event = Event()
 on_update_event.subscribe(view.on_update)
 
 # signal if orbit or twiss calculations are requested
-# view = StatusFlagView(prefix=f"{prefix}:dt:im:calc:orbit:exc")
-# acc.on_orbit_calculation.subscribe(view.on_update)
-# view = StatusFlagView(prefix=f"{prefix}:dt:im:calc:orbit:req")
-# acc.on_orbit_calculation_request.subscribe(view.on_update)
-#
-# view = StatusFlagView(prefix=f"{prefix}:dt:im:calc:twiss:exc")
-# acc.on_orbit_calculation.subscribe(view.on_update)
-# view = StatusFlagView(prefix=f"{prefix}:dt:im:calc:twiss:req")
-# acc.on_orbit_calculation_request.subscribe(view.on_update)
+view = StatusFlagView(prefix=f"{prefix}:im:calc:orbit:exc")
+acc.on_orbit_calculation.subscribe(view.on_update)
+view = StatusFlagView(prefix=f"{prefix}:im:calc:orbit:req")
+acc.on_orbit_calculation_request.subscribe(view.on_update)
+
+view = StatusFlagView(prefix=f"{prefix}:im:calc:twiss:exc")
+acc.on_twiss_calculation_request.subscribe(view.on_update)
+view = StatusFlagView(prefix=f"{prefix}:im:calc:twiss:req")
+acc.on_twiss_calculation_request.subscribe(view.on_update)
 
 async def update(*, element_id, property_name, value=None):
     """

@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from .create_or_update_pv import update_or_create_pv
 from ..model.element_upate import ElementUpdate
@@ -10,17 +11,31 @@ from ..model.twiss import Twiss
 logger = logging.getLogger("dt4acc")
 
 
+class StatusFlagView:
+    def __init__(self, *, prefix):
+        self.prefix = prefix
+
+    async def on_update(self, flag: bool):
+        return
+        if isinstance(flag, datetime):
+            val = True  # or False, depending on your logic
+        else:
+            val = int(flag)
+        await update_or_create_pv(self, self.prefix, val, 'bool', 'b')
+        # pydev.iointr(self.prefix, val)
+        logger.debug("sent label %s, val %s", self.prefix, val)
+
+
 class ElementParameterView:
     def __init__(self, *, prefix):
         self.prefix = prefix
 
-    def push_value(self, elm_update: ElementUpdate):
-        property_name = 'Cm:set' if 'K' in elm_update.property_name else ('x:set' if 'x' in elm_update.property_name else ('y:set' if 'dy' in elm_update.property_name else elm_update.property_name))
+    async def push_value(self, elm_update: ElementUpdate):
+        property_name = 'Cm:set' if 'K' in elm_update.property_name else (
+            'x:set' if 'x' in elm_update.property_name else (
+                'y:set' if 'dy' in elm_update.property_name else elm_update.property_name))
         label = f'{self.prefix}:{elm_update.element_id}:{property_name}'
-        logger.debug('label: %s = %s', label, elm_update.value)
-        # pydev.iointr(label, elm_update.value)
-        # update_or_create_pv(twiss_result,label,elm_update.value,'float','d')
-        update_or_create_pv(elm_update, label, elm_update.value, 'float', 'd')
+        await update_or_create_pv(elm_update, label, elm_update.value, 'float', 'd')
 
 
 class ResultView:
@@ -28,20 +43,23 @@ class ResultView:
         self.prefix = prefix
 
     async def push_orbit(self, orbit_result: Orbit):
+        # return
         label = f"{self.prefix}:orbit:found"
-        logger.warning('label %s = %s type(%s)', label, orbit_result.found, type(orbit_result.found))
+        logger.warning('Orbit pushing view %s = %s type(%s)', label, orbit_result.found, type(orbit_result.found))
         # pydev.iointr(label, bool(orbit_result.found))
-        await update_or_create_pv(orbit_result,label,bool(orbit_result.found),bool,'b')
-        # pydev.iointr(f"{self.prefix}:orbit:x", orbit_result.x)
-        # pydev.iointr(f"{self.prefix}:orbit:y", orbit_result.y)
-        label = f"{self.prefix}:names"
-        logger.warning('label %s', label)
-        names = [bytes(name, 'utf-8') for name in orbit_result.names]
-        logger.debug('label %s = %s', label, names)
+        await update_or_create_pv(orbit_result, f"{self.prefix}:orbit:x", orbit_result.x, 'array', 'ad')
+        await update_or_create_pv(orbit_result, f"{self.prefix}:orbit:y", orbit_result.y, 'array', 'ad')
+        await update_or_create_pv(orbit_result, label, orbit_result.found, 'bool', 'b')
+        await update_or_create_pv(orbit_result, f"{self.prefix}:orbit:fixed_point", orbit_result.x0, 'array', 'ad')
+        # label = f"{self.prefix}:names"
+        # logger.warning('label %s', label)
+        # names = [bytes(name, 'utf-8') for name in orbit_result.names]
+        # logger.debug('label %s = %s', label, names)
         # pydev.iointr(label, names)
 
     async def push_twiss(self, twiss_result: Twiss):
         # fmt:off
+        logger.warning('Twiss pushing view')
         await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:alpha:x", twiss_result.x.alpha, 'float', 'd')
         await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:beta:x", twiss_result.x.beta, 'float', 'd')
         await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:nu:x", twiss_result.x.nu, 'float', 'd')

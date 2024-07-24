@@ -25,6 +25,7 @@ view = ResultView(prefix=prefix + ":beam")
 elem_par_view = ElementParameterView(prefix=prefix)
 bpm_names_pyat = [elem.FamName for elem in accelerator.acc if "BPM" == elem.FamName[:3]]
 bpm_pyat = BPMMimikry(prefix=prefix, bpm_names=bpm_names_pyat)
+accelerator.on_new_twiss.subscribe(view.push_twiss)
 accelerator.on_new_orbit.subscribe(view.push_orbit)
 accelerator.on_changed_value.subscribe(elem_par_view.push_value)
 
@@ -34,11 +35,11 @@ logger = logging.getLogger("dt4acc")
 async def cb(orbit_data: Orbit):
     # Todo: push all orbit data to beam
     bpm_data = bpm_pyat.extract_bpm_data(orbit_data)
-    await view.push_bpms(bpm_data)
+    # await view.push_bpms(bpm_data)
 
 
-accelerator.on_new_orbit.subscribe(cb)
-accelerator.on_new_twiss.subscribe(view.push_twiss)
+# accelerator.on_new_orbit.subscribe(cb)
+# accelerator.on_new_twiss.subscribe(view.push_twiss)
 
 
 def set_accelerator():

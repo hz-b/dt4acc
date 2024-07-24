@@ -54,6 +54,7 @@ class PyAtOrbitCalculator(OrbitCalculator, metaclass=ABCMeta):
     def calculate(self) -> Orbit:
         # with self.calculation_lock:  # Acquire the lock
         # Implement calculation using pyAt
+        # return
         logger.warning("pyat orbit calculation starting (find_orbit)")
 
         x0, orbit = self.acc.find_orbit(at.All)

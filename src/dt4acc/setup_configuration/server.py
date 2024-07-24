@@ -3,13 +3,14 @@ import logging
 import time
 import tracemalloc
 
+import dt4acc.command as cmd
+from dt4acc.model.element_upate import ElementUpdate
+from dt4acc.model.orbit import Orbit
+from dt4acc.model.twiss import Twiss
+from dt4acc.setup_configuration.pv_manager import PVManager
 from p4p.nt import NTScalar
 from p4p.server import Server
 from p4p.server.asyncio import SharedPV
-
-import dt4acc.command as cmd
-from dt4acc.model.element_upate import ElementUpdate
-from dt4acc.setup_configuration.pv_manager import PVManager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -23,6 +24,7 @@ types = {
     'bool': NTScalar('b').wrap(False),
     'bool_array': NTScalar('ab').wrap([])
 }
+
 
 class ElementHandler:
     def __init__(self, element):
@@ -47,8 +49,9 @@ class ElementHandler:
         pv.post(val, timestamp=time.time())
         pv_name = op.name()
         property_id = get_property_id(pv_name)
-        if isinstance(self.element, ElementUpdate) or property_id == "rdbk":
-            logging.info("its readback put or update of an element so no command update ")
+        if property_id is None or isinstance(self.element, ElementUpdate) or isinstance(self.element,
+                                                                                        Orbit) or isinstance(
+            self.element, Twiss) or property_id == "rdbk":
             op.done()
         else:
             logging.info("Need to call Command Update for %s value = %s", property_id, val)
@@ -63,10 +66,12 @@ class ElementHandler:
                 logging.error("Error updating element %s property %s with value %s: %s", FamName, property_id, val, e)
             op.done()
 
+
 def create_pv(initial_value_type, initial_type, element):
     initial = types[initial_value_type]
     pv = SharedPV(nt=NTScalar(initial_type), initial=initial, handler=ElementHandler(element))
     return pv
+
 
 def get_property_id(pv_name):
     if ':Cm:set' in pv_name:
@@ -81,6 +86,7 @@ def get_property_id(pv_name):
         return 'rdbk'
     else:
         return None
+
 
 async def server_start_up():
     manager = PVManager()
@@ -127,6 +133,7 @@ async def server_start_up():
                 if task != asyncio.current_task():
                     task.cancel()
             await asyncio.gather(*tasks, return_exceptions=True)
+
 
 if __name__ == "__main__":
     tracemalloc.start()
