@@ -53,12 +53,12 @@ class ResultView:
     async def push_twiss(self, twiss_result: Twiss):
         # fmt:off
         logger.warning('Twiss pushing view')
-        await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:alpha:x", twiss_result.x.alpha, 'float', 'd')
-        await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:beta:x", twiss_result.x.beta, 'float', 'd')
-        await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:nu:x", twiss_result.x.nu, 'float', 'd')
-        await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:alpha:y", twiss_result.y.alpha, 'float', 'd')
-        await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:beta:y", twiss_result.y.beta, 'float', 'd')
-        await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:nu:y", twiss_result.y.nu, 'float', 'd')
+        await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:alpha:x", twiss_result.x.alpha, 'array', 'ad')
+        await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:beta:x", twiss_result.x.beta, 'array', 'ad')
+        await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:nu:x", twiss_result.x.nu, 'array', 'ad')
+        await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:alpha:y", twiss_result.y.alpha, 'array', 'ad')
+        await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:beta:y", twiss_result.y.beta, 'array', 'ad')
+        await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:nu:y", twiss_result.y.nu, 'array', 'ad')
 
         # pydev.iointr(f"{self.prefix}:twiss:alpha:x", twiss_result.x.alpha)
         # pydev.iointr(f"{self.prefix}:twiss:beta:x",  twiss_result.x.beta)

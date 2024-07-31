@@ -19,7 +19,7 @@ class PVManager:
     def add_pv(self, name, pv):
         self.pvs[name] = pv
         self.provider.add(name, pv)
-        logging.info(f"Added PV {name}")
+        logging.debug(f"Added PV {name}")
 
     async def update_pv(self, name, new_value):
         pv = self.pvs.get(name)
