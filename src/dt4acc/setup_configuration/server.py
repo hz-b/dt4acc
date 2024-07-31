@@ -45,8 +45,11 @@ class ElementHandler:
 
     async def put(self, pv, op):
         val = op.value()
-        logging.info("Assigning %s = %s", op.name(), val)
-        pv.post(val, timestamp=time.time())
+        logging.debug("Assigning %s = %s", op.name(), val)
+        try:
+            pv.post(val, timestamp=time.time())
+        except Exception as e:
+            logging.error("Error updating pv %s value %s exception $s", op.name(), val, e)
         pv_name = op.name()
         property_id = get_property_id(pv_name)
         if property_id is None or isinstance(self.element, ElementUpdate) or isinstance(self.element,
@@ -54,14 +57,14 @@ class ElementHandler:
             self.element, Twiss) or property_id == "rdbk":
             op.done()
         else:
-            logging.info("Need to call Command Update for %s value = %s", property_id, val)
+            logging.info("Calling Command Update for %s value = %s", property_id, val)
             if isinstance(self.element, str):
                 FamName = self.element
             else:
                 FamName = self.element.FamName
             try:
                 await cmd.update(element_id=FamName, property_name=property_id, value=float(op.value()))
-                logging.info("Successfully updated element %s property %s with value %s", FamName, property_id, val)
+                logging.debug("Successfully updated element %s property %s with value %s", FamName, property_id, val)
             except Exception as e:
                 logging.error("Error updating element %s property %s with value %s: %s", FamName, property_id, val, e)
             op.done()
@@ -136,5 +139,4 @@ async def server_start_up():
 
 
 if __name__ == "__main__":
-    tracemalloc.start()
     asyncio.run(server_start_up())

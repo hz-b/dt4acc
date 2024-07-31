@@ -8,7 +8,6 @@ from ..calculator.pyat_calculator import PyAtTwissCalculator, PyAtOrbitCalculato
 from ..device_interface.bpm_mimikry import BPMMimikry
 from ..model.orbit import Orbit
 from ..view.calculation_result_view import ResultView, ElementParameterView
-calculation_lock = threading.Lock()
 
 
 def set_pyat_ring():
@@ -19,7 +18,7 @@ acc = set_pyat_ring()
 prefix = "Anonym" #os.environ["DT4ACC_PREFIX"]
 # set_ring(acc)
 accelerator = AcceleratorImpl(acc, PyATProxyFactory(lattice_model=None, at_lattice=acc),
-                              PyAtTwissCalculator(acc, calculation_lock), PyAtOrbitCalculator(acc, calculation_lock))
+                              PyAtTwissCalculator(acc), PyAtOrbitCalculator(acc))
 view = ResultView(prefix=prefix + ":beam")
 #: todo into a controller to pass prefix as parameter at start ?
 elem_par_view = ElementParameterView(prefix=prefix)

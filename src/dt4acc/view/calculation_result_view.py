@@ -43,19 +43,12 @@ class ResultView:
         self.prefix = prefix
 
     async def push_orbit(self, orbit_result: Orbit):
-        # return
         label = f"{self.prefix}:orbit:found"
         logger.warning('Orbit pushing view %s = %s type(%s)', label, orbit_result.found, type(orbit_result.found))
-        # pydev.iointr(label, bool(orbit_result.found))
+        await update_or_create_pv(orbit_result, label, orbit_result.found, 'bool', 'b')
         await update_or_create_pv(orbit_result, f"{self.prefix}:orbit:x", orbit_result.x, 'array', 'ad')
         await update_or_create_pv(orbit_result, f"{self.prefix}:orbit:y", orbit_result.y, 'array', 'ad')
-        await update_or_create_pv(orbit_result, label, orbit_result.found, 'bool', 'b')
         await update_or_create_pv(orbit_result, f"{self.prefix}:orbit:fixed_point", orbit_result.x0, 'array', 'ad')
-        # label = f"{self.prefix}:names"
-        # logger.warning('label %s', label)
-        # names = [bytes(name, 'utf-8') for name in orbit_result.names]
-        # logger.debug('label %s = %s', label, names)
-        # pydev.iointr(label, names)
 
     async def push_twiss(self, twiss_result: Twiss):
         # fmt:off

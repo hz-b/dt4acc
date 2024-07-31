@@ -12,7 +12,8 @@ class PVManager:
         if cls._instance is None:
             cls._instance = super(PVManager, cls).__new__(cls)
             cls._instance.pvs = {}
-            cls._instance.provider = StaticProvider('digital_twin')  # 'digital_twin' is an arbitrary name
+            cls._instance.provider = StaticProvider('digital_twin')
+            cls._instance.context = Context('pva')  # Persistent context for efficiency
         return cls._instance
 
     def add_pv(self, name, pv):
@@ -20,22 +21,15 @@ class PVManager:
         self.provider.add(name, pv)
         logging.info(f"Added PV {name}")
 
-    async def update_pv(self, name, new_value, ctx=None):
-        if ctx is None:
-            ctx = Context('pva')
+    async def update_pv(self, name, new_value):
         pv = self.pvs.get(name)
         if pv:
             try:
                 logging.info(f"Updating PV {name} with value {new_value}")
-                await ctx.put(name, new_value)  # Adjusted timeout
+                await self.context.put(name, new_value)  # Using persistent context
                 logging.info(f"Successfully updated PV {name} with value {new_value}")
-            # except TimeoutError:
-            #     logging.error(f"Timeout occurred while updating {name}. Retrying...")
-            #     # Implement retry logic or handle the failure appropriately
-            # except Exception as e:
-            #     logging.error(f"Error updating PV {name}: {e}")
-            finally:
-                ctx.close()
+            except Exception as e:
+                logging.error(f"Error updating PV {name}: {e}")
         else:
             logging.error(f"PV {name} not found")
 
