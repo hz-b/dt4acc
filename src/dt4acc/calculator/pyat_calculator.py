@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Sequence
 
 import at
+import numpy as np
 
 from ..interfaces.calculation_interface import TwissCalculator, OrbitCalculator
 from ..model.orbit import Orbit
@@ -33,9 +34,15 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
 
     def calculate(self) -> Twiss:
         logger.warning("Starting Twiss calculation (get_optics)")
-        try:
-            _, __, twiss = self.acc.get_optics(at.All)
+        twiss_in = {}
+        twiss_in['beta'] = np.array([8.860461, 4.03432])
+        twiss_in['alpha'] = np.array([1.030877, 0.602887])
+        twiss_in['dispersion'] = np.array([0.013117, -0.031177, 0, 0])
 
+        try:
+            # _, __, twiss = self.acc.get_optics(at.All,twiss_in=twiss_in) # for transfer line
+
+            _, __, twiss = self.acc.get_optics(at.All)
             alpha = twiss["alpha"]
             beta = twiss["beta"]
             nu = twiss["mu"]
