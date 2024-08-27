@@ -1,9 +1,11 @@
 import logging
+
 from p4p.client.thread import Context
 from p4p.server import StaticProvider
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
+
 
 class PVManager:
     _instance = None
@@ -32,7 +34,16 @@ class PVManager:
                 logging.error(f"Error updating PV {name}: {e}")
         else:
             logging.error(f"PV {name} not found")
-
+    async def update_pv_list(self, names, values):
+        pv = self.pvs.get(names[0])
+        if pv:
+            try:
+                await self.context.put(names, values)  # Using persistent context
+                logging.info(f"Successfully updated PV {names[0]} with value {values[0]}")
+            except Exception as e:
+                logging.error(f"Error updating PV {names[0]}: {e}")
+        else:
+            logging.error(f"PV {names[0]} not found")
     def remove_pv(self, name):
         pv = self.pvs.pop(name, None)
         if pv:

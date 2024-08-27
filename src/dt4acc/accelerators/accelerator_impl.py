@@ -7,7 +7,7 @@ from ..interfaces.element_interface import ElementInterface
 
 
 class AcceleratorImpl(AcceleratorInterface):
-    def __init__(self, acc, proxy_factory, twiss_calculator, orbit_calculator, *, delay=1e-1):
+    def __init__(self, acc, proxy_factory, twiss_calculator, orbit_calculator, *, delay=0.1):
         super().__init__()
         self.acc = acc
         self.proxy_factory = proxy_factory

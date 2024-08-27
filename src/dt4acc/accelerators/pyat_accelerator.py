@@ -34,10 +34,10 @@ logger = logging.getLogger("dt4acc")
 async def cb(orbit_data: Orbit):
     # Todo: push all orbit data to beam
     bpm_data = bpm_pyat.extract_bpm_data(orbit_data)
-    # await view.push_bpms(bpm_data)
+    await view.push_bpms(bpm_data)
 
 
-# accelerator.on_new_orbit.subscribe(cb)
+accelerator.on_new_orbit.subscribe(cb)
 # accelerator.on_new_twiss.subscribe(view.push_twiss)
 
 

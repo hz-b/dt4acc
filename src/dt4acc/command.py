@@ -1,10 +1,8 @@
-from .bl.context_manager_with_trigger import TriggerEnterExitContextManager
-from .bl.event import Event
 from dt4acc.update_context_manager import UpdateContext
+from .bl.event import Event
 from .view.calculation_result_view import StatusFlagView
-import os
 
-CALCULATION_ENGINE_default = os.environ["CALCULATION_ENGINE"]
+CALCULATION_ENGINE_default = 'AT'  # os.environ["CALCULATION_ENGINE"]
 
 if CALCULATION_ENGINE_default == 'thor_scsi':
     from .accelerators import thor_scsi_accelerator
@@ -15,13 +13,14 @@ else:
 
     acc = pyat_accelerator.set_accelerator()
 
+
 def publish(*, what):
     print(f"Need to implement publishing {what}?")
 
 
 # Signals to EPICS:
 #      that an update is in progress
-prefix = "Anonym" #os.environ["DT4ACC_PREFIX"]
+prefix = "Anonym"  # os.environ["DT4ACC_PREFIX"]
 view = StatusFlagView(prefix=f"{prefix}:dt:im:updates")
 on_update_event = Event()
 on_update_event.subscribe(view.on_update)
@@ -36,6 +35,7 @@ view = StatusFlagView(prefix=f"{prefix}:im:calc:twiss:exc")
 acc.on_twiss_calculation_request.subscribe(view.on_update)
 view = StatusFlagView(prefix=f"{prefix}:im:calc:twiss:req")
 acc.on_twiss_calculation_request.subscribe(view.on_update)
+
 
 async def update(*, element_id, property_name, value=None):
     """
@@ -53,5 +53,3 @@ async def update(*, element_id, property_name, value=None):
     with UpdateContext(element_id=element_id, property_name=property_name, value=value, kwargs=dict()):
         elem_proxy = await acc.get_element(element_id)
         await elem_proxy.update(property_name, value)
-        # await acc.calculate_orbit()
-        # await acc.calculate_twiss()

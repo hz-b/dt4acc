@@ -1,4 +1,5 @@
 import asyncio
+
 import aioca
 from p4p.client.asyncio import Context
 
@@ -15,28 +16,42 @@ fanout_config = {
 }
 
 
-async def update_fanout(fanout_items, prefix='Anonym:'):
+async def update_fanout(fanout_items, prefix='Anonym:', use_machine=False):
     context = Context('pva')
+    magnet_updates = []
 
-    # Iterate over each fanout group, read source PV, update all target PVs
-    for source_pv, target_pvs in fanout_items.items():
-        # Read the source PV value from the EPICS 3 machine
-        source_value = await aioca.caget(source_pv)
+    # Default values to use when not connecting to the machine
+    default_values = [2.44045585 * 100, 2.440455 * 100]  # [1e49, 1e69]
 
-        # Asynchronously update each target PV in the EPICS 7 twin
-        tasks = []
+    # Perform the first bulk update for power converter PVs
+    pv_names = []
+    pv_values = []
+    for idx, (source_pv, target_pvs) in enumerate(fanout_items.items()):
+        if use_machine:
+            source_value = await aioca.caget(source_pv)
+        else:
+            # Use the default values instead of caget
+            source_value = default_values[idx % len(default_values)]  # Alternate between 1e49 and 1e69
+
         for target_pv in target_pvs:
             twin_pv_name = prefix + target_pv
-            tasks.append(context.put(twin_pv_name, source_value))
+            pv_names.append(twin_pv_name)
+            pv_values.append(source_value)
+            magnet_name = twin_pv_name.replace("im:I", "Cm:set")
+            magnet_value = source_value / 100
+            magnet_updates.append((magnet_name, magnet_value))
 
-        # Execute all updates concurrently
-        await asyncio.gather(*tasks)
-        print(f"Updated all twin PVs based on {source_pv}")
+    await context.put(pv_names, pv_values)
+    print("Bulk update completed for all twin PVs")
+
+    # Now perform the secondary bulk update for magnet PVs
+    if magnet_updates:
+        magnet_pv_names, magnet_pv_values = zip(*magnet_updates)
+        await context.put(magnet_pv_names, magnet_pv_values)
 
     context.close()
 
 
-# Example of calling the update function, using the machine prefix where your source PVs are located
 async def main():
     await update_fanout(fanout_config)
 

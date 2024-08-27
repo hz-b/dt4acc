@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from .create_or_update_pv import update_or_create_pv
+from .create_or_update_pv import update_or_create_pv, update_orbit_pv, update_twiss_pv, update_bpm_pv
 from ..model.element_upate import ElementUpdate
 from ..model.orbit import Orbit
 from ..model.twiss import Twiss
@@ -43,55 +43,29 @@ class ResultView:
         self.prefix = prefix
 
     async def push_orbit(self, orbit_result: Orbit):
-        label = f"{self.prefix}:orbit:found"
-        logger.warning('Orbit pushing view %s = %s type(%s)', label, orbit_result.found, type(orbit_result.found))
-        await update_or_create_pv(orbit_result, label, orbit_result.found, 'bool', 'b')
-        await update_or_create_pv(orbit_result, f"{self.prefix}:orbit:x", orbit_result.x, 'array', 'ad')
-        await update_or_create_pv(orbit_result, f"{self.prefix}:orbit:y", orbit_result.y, 'array', 'ad')
-        await update_or_create_pv(orbit_result, f"{self.prefix}:orbit:fixed_point", orbit_result.x0, 'array', 'ad')
+        logger.warning('Orbit pushing view')
+
+        # Define the PV name for the structured Orbit data
+        pv_name = f"{self.prefix}:orbit"
+
+        # Use the new function to update the structured Orbit PV
+        await update_orbit_pv(pv_name, orbit_result)
+
 
     async def push_twiss(self, twiss_result: Twiss):
-        # fmt:off
         logger.warning('Twiss pushing view')
-        await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:alpha:x", twiss_result.x.alpha, 'array', 'ad')
-        await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:beta:x", twiss_result.x.beta, 'array', 'ad')
-        await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:nu:x", twiss_result.x.nu, 'array', 'ad')
-        await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:alpha:y", twiss_result.y.alpha, 'array', 'ad')
-        await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:beta:y", twiss_result.y.beta, 'array', 'ad')
-        await update_or_create_pv(twiss_result, f"{self.prefix}:twiss:nu:y", twiss_result.y.nu, 'array', 'ad')
 
-        # pydev.iointr(f"{self.prefix}:twiss:alpha:x", twiss_result.x.alpha)
-        # pydev.iointr(f"{self.prefix}:twiss:beta:x",  twiss_result.x.beta)
-        # pydev.iointr(f"{self.prefix}:twiss:nu:x",    twiss_result.x.nu)
+        # Define the PV name for the structured Twiss data
+        pv_name = f"{self.prefix}:twiss"
 
-        # pydev.iointr(f"{self.prefix}:twiss:alpha:y", twiss_result.y.alpha)
-        # pydev.iointr(f"{self.prefix}:twiss:beta:y",  twiss_result.y.beta)
-        # pydev.iointr(f"{self.prefix}:twiss:nu:y",    twiss_result.y.nu)
-
-        # names are not published: assuming these are identical
-        # with the names that orbit publishes
-
-        # fmt:on
-        # pass
+        # Use the bulk update function to update the structured PV
+        await update_twiss_pv(pv_name, twiss_result)
 
     async def push_bpms(self, bpm_result: Orbit):
-        """
-        Todo:
-            implement that data is pushed to bdata
-            or make it unnecssary ...
+        logger.warning('BPM pushing view')
 
-        Warning:
-            Current implementation is broken
-        """
-        import numpy as np
+        # Define the PV name for the structured BPM data
+        pv_name = f"{self.prefix}:bpm"
 
-        n_entries = 128
-        n_found = len(bpm_result.x)
-        bdata = np.zeros([8, n_entries], dtype=float)
-        bdata[0, :n_found] = bpm_result.x
-        bdata[1, :n_found] = bpm_result.y
-        # pydev.iointr(f"{self.prefix}:bpm:bdata", list(bdata.ravel()))
-
-        # pydev.iointr(f"{self.prefix}:bpm:dx", list(bpm_result.x))
-        # pydev.iointr(f"{self.prefix}:bpm:dy", list(bpm_result.y))
-        # pydev.iointr(f"{self.prefix}:bpm:names", [bytes(name.encode("utf8")) for name in bpm_result.names])
+        # Use the new function to update the structured BPM PV
+        await update_bpm_pv(pv_name, bpm_result)

@@ -1,16 +1,16 @@
 import asyncio
 import logging
 import time
-import tracemalloc
+
+from p4p.nt import NTScalar
+from p4p.server import Server
+from p4p.server.asyncio import SharedPV
 
 import dt4acc.command as cmd
 from dt4acc.model.element_upate import ElementUpdate
 from dt4acc.model.orbit import Orbit
 from dt4acc.model.twiss import Twiss
 from dt4acc.setup_configuration.pv_manager import PVManager
-from p4p.nt import NTScalar
-from p4p.server import Server
-from p4p.server.asyncio import SharedPV
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -54,26 +54,20 @@ class ElementHandler:
         property_id = get_property_id(pv_name)
         if property_id is None or isinstance(self.element, ElementUpdate) or isinstance(self.element,
                                                                                         Orbit) or isinstance(
-            self.element, Twiss) or property_id == "rdbk":
+            self.element, Twiss) or property_id in ["rdbk", "im"]:
             op.done()
         else:
-            logging.info("Calling Command Update for %s value = %s", property_id, val)
+            # logging.info("Calling Command Update for %s value = %s", property_id, val)
             if isinstance(self.element, str):
                 FamName = self.element
             else:
                 FamName = self.element.FamName
             try:
                 await cmd.update(element_id=FamName, property_name=property_id, value=float(op.value()))
-                logging.debug("Successfully updated element %s property %s with value %s", FamName, property_id, val)
+                op.done()
             except Exception as e:
                 logging.error("Error updating element %s property %s with value %s: %s", FamName, property_id, val, e)
             op.done()
-
-
-def create_pv(initial_value_type, initial_type, element):
-    initial = types[initial_value_type]
-    pv = SharedPV(nt=NTScalar(initial_type), initial=initial, handler=ElementHandler(element))
-    return pv
 
 
 def get_property_id(pv_name):
@@ -89,6 +83,17 @@ def get_property_id(pv_name):
         return 'rdbk'
     else:
         return None
+
+
+def create_pv(initial_value_type, initial_type, element):
+    initial = types[initial_value_type]
+    pv = SharedPV(nt=NTScalar(initial_type), initial=initial, handler=ElementHandler(element))
+    return pv
+
+
+def create_pv_structured(initial_value_type, element):
+    pv = SharedPV(initial=initial_value_type, handler=ElementHandler(element))
+    return pv
 
 
 async def server_start_up():
