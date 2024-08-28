@@ -1,13 +1,14 @@
 import logging
 
 import pandas as pd
+from bact_device_models.devices.bpm_elem_libera import BPMElement, BPMElementPosition, BPMElementList
+from bact_device_models.filters.bpm_calibration import BPMCalibrationPlane
 
 from ..model.orbit import Orbit
 
 logger = logging.getLogger("dt4acc")
 
 #: todo: needs to be imported from database
-from bact_device_models.filters.bpm_calibration import BPMCalibrationPlane
 
 # one fits all ..
 calib = BPMCalibrationPlane()
@@ -51,5 +52,9 @@ class BPMMimikry:
         # find indices where the names are ..
         df = pd.DataFrame(index=["x", "y"], columns=orbit_result.names, data=[orbit_result.x, orbit_result.y]).T
         # todo: where shall one handle the conversion form etter to nano meters?
-        df_bpm = df.loc[self.bpm_names, :]
-        return Orbit(x=df_bpm.x.values, y=df_bpm.y.values, names=df_bpm.index.values, found=orbit_result.found, x0=orbit_result.x0)
+        return BPMElementList([
+            BPMElement(name=name,
+                       pos=BPMElementPosition(x=df.loc[name, "x"], y=df.loc[name, "y"]),
+                       sig=None)
+            for name in self.bpm_names
+        ])

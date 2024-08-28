@@ -1,6 +1,7 @@
 import asyncio
 import logging
 
+from bact_device_models.devices.bpm_elem import BpmElementList
 from p4p.server.asyncio import SharedPV
 from p4p.wrapper import Value, Type
 
@@ -159,16 +160,34 @@ async def update_orbit_pv(pv_name, orbit_result: Orbit):
         pv.post(value_to_post)
         logger.info(f"Successfully updated structured PV {pv_name} with new data.")
 
-# Define the structure for the BPM PV using Type
-bpm_type = Type([
-    ('x', 'ad'),  # Array of doubles for x positions
-    ('y', 'ad'),  # Array of doubles for y positions
-    ('names', 'as'),  # Array of strings for element names
-    ('found', '?'),  # Boolean to indicate if the BPM data was found
-    ('x0', 'ad'),  # Array of doubles for x0 fixed points
+
+bpm_position_type = Type([
+    ('x', 'd'),  # Double for x position
+    ('y', 'd'),  # Double for y position
 ])
 
+bpm_element_type = Type([
+    ('name', 's'),
+    ('pos', ('S', None, [
+        ('x', 'd'),
+        ('y', 'd'),
+    ])),
+])
+
+
+bpm_type = Type([
+    ('bpms', ('aS', None, [
+        ('name', 's'),
+        ('pos', bpm_position_type),
+    ])),
+])
 async def update_bpm_pv(pv_name, bpm_result):
+
+    # Prepare the BPM data in the expected format
+    bpm_data = [{
+        'name': bpm.name,
+        'pos': {'x': bpm.pos.x, 'y': bpm.pos.y},
+    } for bpm in bpm_result.bpms]
 
     # Check if the structured PV exists
     pv = manager.get_pv(pv_name)
@@ -176,13 +195,7 @@ async def update_bpm_pv(pv_name, bpm_result):
         logger.debug(f"Creating new structured PV for {pv_name}.")
 
         # Create the structured PV with initial data
-        initial_data = {
-            'x': bpm_result.x,
-            'y': bpm_result.y,
-            'names': bpm_result.names,
-            'found': bpm_result.found,
-            'x0': bpm_result.x0,
-        }
+        initial_data = {'bpms': bpm_data}
 
         new_pv = SharedPV(initial=Value(bpm_type, initial_data))
         await asyncio.get_running_loop().run_in_executor(None, manager.add_pv, pv_name, new_pv)
@@ -191,13 +204,7 @@ async def update_bpm_pv(pv_name, bpm_result):
         logger.debug(f"Updating existing structured PV {pv_name} with new data.")
 
         # Prepare the new data
-        new_data = {
-            'x': bpm_result.x,
-            'y': bpm_result.y,
-            'names': bpm_result.names,
-            'found': bpm_result.found,
-            'x0': bpm_result.x0,
-        }
+        new_data = {'bpms': bpm_data}
 
         # Convert the dictionary to a Value object
         value_to_post = Value(bpm_type, new_data)

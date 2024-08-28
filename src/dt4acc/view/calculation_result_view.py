@@ -1,6 +1,8 @@
 import logging
 from datetime import datetime
 
+from bact_device_models.devices.bpm_elem import BpmElementList
+
 from .create_or_update_pv import update_or_create_pv, update_orbit_pv, update_twiss_pv, update_bpm_pv
 from ..model.element_upate import ElementUpdate
 from ..model.orbit import Orbit
@@ -61,7 +63,7 @@ class ResultView:
         # Use the bulk update function to update the structured PV
         await update_twiss_pv(pv_name, twiss_result)
 
-    async def push_bpms(self, bpm_result: Orbit):
+    async def push_bpms(self, bpm_result: BpmElementList):
         logger.warning('BPM pushing view')
 
         # Define the PV name for the structured BPM data
