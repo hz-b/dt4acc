@@ -1,0 +1,25 @@
+record(fanout, "$(PREFIX):Q1PDR:dt:fanout")
+{
+	field(DESC, "informing digital twin converters")
+	field(LNK1, "$(PREFIX):Q1M1D1R:im:I")
+	field(LNK2, "$(PREFIX):Q1M1D2R:im:I")
+	field(LNK3, "$(PREFIX):Q1M1D3R:im:I")
+	field(LNK4, "$(PREFIX):Q1M1D4R:im:I")
+	field(LNK5, "$(PREFIX):Q1M1D5R:im:I")
+	field(LNK6, "$(PREFIX):Q1M1D6R:im:I")
+	field(LNK7, "$(PREFIX):Q1M1D7R:im:I")
+	field(LNK8, "$(PREFIX):Q1M1D8R:im:I")
+}
+
+record(fanout, "$(PREFIX):Q1PTR:dt:fanout")
+{
+	field(DESC, "informing digital twin converters")
+	field(LNK1, "$(PREFIX):Q1M1T1R:im:I")
+	field(LNK2, "$(PREFIX):Q1M1T2R:im:I")
+	field(LNK3, "$(PREFIX):Q1M1T3R:im:I")
+	field(LNK4, "$(PREFIX):Q1M1T4R:im:I")
+	field(LNK5, "$(PREFIX):Q1M1T5R:im:I")
+	field(LNK6, "$(PREFIX):Q1M1T6R:im:I")
+	field(LNK7, "$(PREFIX):Q1M1T7R:im:I")
+	field(LNK8, "$(PREFIX):Q1M1T8R:im:I")
+}

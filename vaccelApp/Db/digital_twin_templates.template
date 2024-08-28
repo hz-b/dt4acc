@@ -1,0 +1,61 @@
+# Template file that includes the different subsitution files
+# Thus only one template file needs to be loaded by the start
+# script
+# Records are loaded by an other file
+
+# handling offsets
+# include "offset.substitutions"
+
+# Transfer functions ----------------------------------------------------------
+
+# transfer functions ... hand made
+include "transfer.substitutions"
+
+# transfer functions ... exported horizontal vertical steerers
+include "setup_function.inc"
+include "transfer_function.inc"
+# End transfer functions ------------------------------------------------------
+
+# sextupole transfer functions ... exported horizontal vertical steerers
+include "sextupole_transfer.inc"
+# End transfer functions ------------------------------------------------------
+
+
+# Offset of elements
+include "offset.inc"
+
+# power converters ------------------------------------------------------------
+        # power converter default values --------------------------------------
+        # hand made ones for quadrupoles
+	# now substitued by values measured by LOCO
+        # include "power_converter.substitutions"
+
+        # power converter defaults ... exported horizontal vertical steerers
+        include "power_converter.inc"
+
+        # end power converter default values ----------------------------------
+
+        # power converter fan outs  -------------------------------------------
+	# take care that info on change is propagated
+ 	# required that a power converter driving many magnets can be treated
+	# similarily to one driving a single magnet
+	#
+	# Be aware: fan outs to many are loaded as record not template
+
+	# fanouts for vertical horizontal steerers
+	include "power_converter_fanout.inc"
+
+
+        # end power converter fan outs  ---------------------------------------
+
+	# relay: current to be used for the specific element
+	# knows here to collect the data ... fanout informs on changes
+        include "power_converter_relay.substitutions"
+
+	# exported ones steerer / correctors
+	include "power_converter_relay.inc"
+# End power converters --------------------------------------------------------
+
+# Muxer -----------------------------------------------------------------------
+        include "muxer_elements.inc"
+# End muxer -------------------------------------------------------------------

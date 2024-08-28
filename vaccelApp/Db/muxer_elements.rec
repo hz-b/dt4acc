@@ -1,0 +1,88 @@
+record(bi, "$(PREFIX):$(ELEMENT):im:mux:active")
+{
+	field(DESC, "Muxer connected to this magnet?")
+	field(ZNAM, "Disconnected")
+	field(ONAM, "Connected")
+
+	field(DTYP, "pydev")
+	field(INP,  "@pydev.iointr('$(PREFIX):$(ELEMENT):im:mux:active')")
+	field(SCAN, "I/O Intr")
+
+	field(FLNK, "$(PREFIX):$(ELEMENT):im:Imux")
+	field(VAL, 0)
+	# field(TPRO, 1)
+	field(PINI, "YES")
+}
+
+# Todo:
+# Implement combination of both variables ....
+# Correct implementation of physical device
+record(bo, "$(PREFIX):PMUXZR:$(ELEMENT)")
+{
+	field(DESC, "Connect muxer to this magnet")
+	field(VAL, 0)
+	field(ZNAM, "$(ELEMENT)")
+	field(ONAM, "set")
+	field(PINI, "YES")
+	field(DTYP, "pydev")
+	field(OUT,  "@mux.select(['$(ELEMENT)', %VAL%])")
+	field(TPRO, 0)
+	field(FLNK, "$(PREFIX):$(ELEMENT):im:Imux")
+
+}
+
+#
+# TODO:
+#
+#     trigger further processing when the
+#     muxer power converter is switched to this
+#     magnet and its value is not zero
+#
+#     Currently no processing is triggered
+#
+record(calcout, "$(PREFIX):$(ELEMENT):im:Imux")
+{
+    field(DESC, "Mux current applied and scaled")
+    # todo: make it switchable from shadow to twin 
+    # Muxer power converter
+    # field(INPA, "QSPAZR:set CPP")
+    field(INPA, "$(PREFIX):QSPAZR:set CPP")
+    # Implemented as pydev in muxer_quad.template
+    field(INPB,  "$(PREFIX):$(ELEMENT):im:mux:active")
+    field(INPC,  "$(PREFIX):$(ELEMENT):par:muxscale")
+    field(CALC, "B == 1 ? A * C : 0")
+    field(OOPT, "On Change")
+    field(EGU, "A")
+    field(VAL, "0")
+    field(PINI,  "YES")
+    field(TPRO, 0)
+    # don't forget passive process
+    # redirection over Imuxfwd so that the
+    # equivalent sum current does not jitter around
+    field(OUT,  "$(PREFIX):$(ELEMENT):im:ImuxProxy PP")
+}
+
+#
+# relay the current .. so that the sum current does
+# not jump unphysically
+#
+record(ao, "$(PREFIX):$(ELEMENT):im:ImuxProxy")
+{
+    field(DESC, "Mux cur. scaled (proxy/ forward)")
+    field(TPRO, 1)
+    field(FLNK,  "$(PREFIX):$(ELEMENT):im:I")
+}
+
+# the muxer typically uses an other coil than the main
+# power converter. this has more windings. so the
+# current of the muxer has to scaled up to match the main
+# magnet windings so that the forecasted K value matches
+# the expectation
+record(ao, "$(PREFIX):$(ELEMENT):par:muxscale") {
+  field(DESC, "muxer cur. to main winding scale")
+  field(EGU, "")
+  field(PINI, "YES")
+  field(PREC, "4")
+  field(VAL, "$(MUXSCALE)")
+  field(FLNK, "$(PREFIX):$(ELEMENT):im:Imux")
+}
