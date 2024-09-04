@@ -77,7 +77,7 @@ class ElementProxy(ElementInterface):
             ElementUpdate(element_id=self.element_id, property_name="dy", value=value)
         ))
 
-    async def update(self, property_id: str, value):
+    async def update(self, property_id: str, value, element_data):
         """
         Todo:
             activate update calculations again
@@ -95,27 +95,10 @@ class ElementProxy(ElementInterface):
             await self.update_shift(dy=value)
         elif method_name == "set_roll":
             await self.update_roll(roll=value)
-        elif method_name == "set_K":
-            # Todo: Check that it is a quadrupole
-            element.update(K=value)
-            # todo:  check if the value did change and then call update of the element
-            # self.on_changed_value.trigger(
-            #     ElementUpdate(element_id=self.element_id, property_name="K", value=self._obj[0].K)
-            # )
         elif method_name == "set_im":
-            # await self.on_changed_value.trigger(
-            #     ElementUpdate(element_id=self.element_id, property_name="rdbk", value=value)
-            # )
-            asyncio.create_task(self.on_changed_value.trigger(
-                ElementUpdate(element_id=self.element_id, property_name="rdbk", value=value)
-            ))
-            asyncio.create_task(self.on_changed_value.trigger(
-                ElementUpdate(element_id=self.element_id, property_name="Cm:set", value=value * 1.5)
-            ))
-            # await self.on_changed_value.trigger(
-            #     ElementUpdate(element_id=self.element_id, property_name="Cm:set", value=value * 1.1)   # todo calculate f(i)
-            # )
-        elif method_name == "set_rdbk":
+            element.update(K=value * element_data.hw2phys)
+
+        elif method_name in ["set_rdbk", "set_K"]:
             pass
         else:
             method = getattr(self._obj, method_name)

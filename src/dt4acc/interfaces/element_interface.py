@@ -46,7 +46,7 @@ class ElementInterface(metaclass=ABCMeta):
 
     """
     @abstractmethod
-    def update(self, property_id, value):
+    def update(self, property_id, value, element):
         pass
 
 

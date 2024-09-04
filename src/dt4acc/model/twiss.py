@@ -12,6 +12,13 @@ class TwissForPlane:
     beta: Sequence[float]
     nu: Sequence[float]
 
+@dataclass
+class TwissWithAggregatedKValues:
+    x: TwissForPlane
+    y: TwissForPlane
+    names: Sequence
+    all_k_pv_names: Sequence
+    all_k_pv_values: Sequence[float]
 
 @dataclass
 class Twiss:

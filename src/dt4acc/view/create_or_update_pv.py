@@ -1,12 +1,11 @@
 import asyncio
 import logging
 
-from bact_device_models.devices.bpm_elem import BpmElementList
 from p4p.server.asyncio import SharedPV
 from p4p.wrapper import Value, Type
 
 from ..model.orbit import Orbit
-from ..model.twiss import Twiss
+from ..model.twiss import TwissWithAggregatedKValues
 from ..setup_configuration.pv_manager import PVManager
 from ..setup_configuration.server import create_pv
 
@@ -62,7 +61,7 @@ twiss_type = Type([
 ])
 
 
-async def update_twiss_pv(pv_name, twiss_result: Twiss):
+async def update_twiss_pv(pv_name, twiss_result: TwissWithAggregatedKValues):
     # Check if the structured PV exists
     pv = manager.get_pv(pv_name)
     if pv is None:
@@ -110,6 +109,8 @@ async def update_twiss_pv(pv_name, twiss_result: Twiss):
         # Post the Value object to the PV
         pv.post(value_to_post)
         logger.info(f"Successfully updated structured PV {pv_name} with new data.")
+
+    manager.context.put(twiss_result.all_k_pv_names, twiss_result.all_k_pv_values)
 
 
 orbit_type = Type([
@@ -174,15 +175,15 @@ bpm_element_type = Type([
     ])),
 ])
 
-
 bpm_type = Type([
     ('bpms', ('aS', None, [
         ('name', 's'),
         ('pos', bpm_position_type),
     ])),
 ])
-async def update_bpm_pv(pv_name, bpm_result):
 
+
+async def update_bpm_pv(pv_name, bpm_result):
     # Prepare the BPM data in the expected format
     bpm_data = [{
         'name': bpm.name,

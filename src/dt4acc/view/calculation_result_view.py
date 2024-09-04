@@ -6,9 +6,7 @@ from bact_device_models.devices.bpm_elem import BpmElementList
 from .create_or_update_pv import update_or_create_pv, update_orbit_pv, update_twiss_pv, update_bpm_pv
 from ..model.element_upate import ElementUpdate
 from ..model.orbit import Orbit
-from ..model.twiss import Twiss
-
-# import pydev
+from ..model.twiss import TwissWithAggregatedKValues
 
 logger = logging.getLogger("dt4acc")
 
@@ -53,8 +51,7 @@ class ResultView:
         # Use the new function to update the structured Orbit PV
         await update_orbit_pv(pv_name, orbit_result)
 
-
-    async def push_twiss(self, twiss_result: Twiss):
+    async def push_twiss(self, twiss_result: TwissWithAggregatedKValues):
         logger.warning('Twiss pushing view')
 
         # Define the PV name for the structured Twiss data

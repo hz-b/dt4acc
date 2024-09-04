@@ -6,11 +6,12 @@ logger = logging.getLogger("dt4cc")
 
 
 class UpdateContext:
-    def __init__(self, *, element_id, property_name, value, kwargs):
+    def __init__(self, *, element_id, property_name, value, element, kwargs):
         self.element_id = element_id
         self.property_name = property_name
         self.value = value
         self.kwargs = kwargs
+        self.element = element
 
     def __enter__(self):
         # pass

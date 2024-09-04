@@ -8,7 +8,7 @@ import numpy as np
 
 from ..interfaces.calculation_interface import TwissCalculator, OrbitCalculator
 from ..model.orbit import Orbit
-from ..model.twiss import Twiss, TwissForPlane
+from ..model.twiss import TwissForPlane, TwissWithAggregatedKValues
 
 logger = logging.Logger("pyat-calc")
 
@@ -32,7 +32,7 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
         self.acc = acc
         self.executor = ThreadPoolExecutor()  # Executor for blocking calls
 
-    def calculate(self) -> Twiss:
+    def calculate(self) -> TwissWithAggregatedKValues:
         logger.warning("Starting Twiss calculation (get_optics)")
         twiss_in = {}
         twiss_in['beta'] = np.array([8.860461, 4.03432])
@@ -46,11 +46,22 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
             alpha = twiss["alpha"]
             beta = twiss["beta"]
             nu = twiss["mu"]
-
-            return Twiss(
+            pv_names = []
+            values = []
+            for element in self.acc:
+                element_str = str(element)
+                element_split_by_space = element_str.split('\n')
+                element_type = element_split_by_space[0]
+                if element_type in ["Quadrupole:"]:
+                    pv_names.append('Anonym:' + element.FamName + ':Cm:set')
+                    values.append(element.K)
+            return TwissWithAggregatedKValues(
                 x=TwissForPlane(alpha=alpha[:, 0], beta=beta[:, 0], nu=nu[:, 0]),
                 y=TwissForPlane(alpha=alpha[:, 1], beta=beta[:, 1], nu=nu[:, 1]),
-                names=_construct_name_list(self.acc)
+                names=_construct_name_list(self.acc),
+                # todo: rename the return model as it is not only twiss results but also it aggregates k values in it
+                all_k_pv_names=pv_names,
+                all_k_pv_values=values
             )
         except Exception as e:
             logger.error(f"Error during Twiss calculation: {e}")

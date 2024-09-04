@@ -61,6 +61,7 @@ class Muxer:
         self.setDisplayName(mux_off)
 
     def setDisplayName(self, name):
+        pass
         #pydev.iointr("muxer_selected_magnet", name)
 
     def select(self, a_list):
