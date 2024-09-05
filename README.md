@@ -90,9 +90,9 @@ results in response to changes in the machine's power converter values, and publ
    which reads real-time power converter values from the machine and updates the corresponding Digital Twin PVs.
    This pattern has been specifically implemented for this project and was recently workshopped
    in the EUROplop 2024 conference (soon to be published).
-        * Real-Time Synchronization: The shadow client continuously monitors the real machine’s state
+      * Real-Time Synchronization: The shadow client continuously monitors the real machine’s state
           by reading power converter PVs and updating the corresponding PVs in the Digital Twin.
-        * Ensures Consistency: The twin state synchronization ensures that the Digital Twin reflects
+      * Ensures Consistency: The twin state synchronization ensures that the Digital Twin reflects
           the real-time behavior of the machine, providing a highly accurate virtual model.
 
 5. Update Pattern
@@ -103,10 +103,10 @@ results in response to changes in the machine's power converter values, and publ
    all related recalculations (twiss, orbit, BPM) are triggered efficiently.
    This pattern has been specifically implemented for this project and was recently workshopped
    in the EUROplop 2024 conference (soon to be published).
-        * Event-Driven Updates: Each time a PV value is updated, events are triggered to handle
+      * Event-Driven Updates: Each time a PV value is updated, events are triggered to handle
           recalculations of twiss parameters, orbits, and BPM results.
           These events are managed asynchronously, ensuring smooth and responsive updates.
-        * Optimized for Bulk Updates: In bulk update scenarios, the pattern ensures that events
+      * Optimized for Bulk Updates: In bulk update scenarios, the pattern ensures that events
           are queued and processed efficiently without overloading the system.
 
 * Main Components:
