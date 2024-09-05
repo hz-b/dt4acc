@@ -1,11 +1,5 @@
 # Digital twin for accelerators
 
-This twin is based on `epics` and `thor scsi lib`. It is provided
-as an Input Output Controller (IOC). The machine is modelled
-using `thor scsi lib`. It's engineering to physics space is
-implemented by epics records. PyDevice based records are used to
-get data from the records into thor-scsi-lib.
-
 This Digital Twin framework is designed based on `EPICS` (Experimental Physics and Industrial Control System)  to simulate and monitor the performance of accelerators 
 by integrating real-world machine data into a virtual representation. 
 The system is designed in a way that it can use either `AT` or `Thor scsi lib` as back engine.
@@ -50,11 +44,9 @@ This pattern is used to encapsulate requests to update Process Variables (PVs) a
 This pattern helps manage and execute the updates, events, and interactions between accelerator components and their corresponding PVs.
     * Key Features of Command Pattern:
 
-    Encapsulates Update Logic: When a PV (e.g., Cm:set or im:I) is updated, 
-    command.py determines the appropriate action to process the update. 
-    It triggers recalculations for twiss, orbit, and BPM results as needed.
-    Supports Bulk and Individual Updates: The command pattern is flexible enough to support 
-    both individual PV updates and bulk updates, using the update() method.
+  Encapsulates Update Logic: When a PV (e.g., Cm:set or im:I) is updated, command.py determines the appropriate action to process the update. It triggers recalculations for twiss, orbit, and BPM results as needed.
+  Supports Bulk and Individual Updates: The command pattern is flexible enough to support 
+  both individual PV updates and bulk updates, using the update() method.
 
 2. Dependency Injection
 
