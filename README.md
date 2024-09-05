@@ -146,9 +146,11 @@ results in response to changes in the machine's power converter values, and publ
    git clone https://gitlab.helmholtz-berlin.de/acc-tools/dt4cc.git dt4acc
    ```
 
-2. Install the project
-   development installation
+2. Install the project.
+   development installation:
+    ```shell
    pip3 install -e .
+     ```
 
 3. Mongodb setup
    Ensure MongoDB is running and available.
