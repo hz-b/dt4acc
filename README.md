@@ -49,17 +49,15 @@ results in response to changes in the machine's power converter values, and publ
 
 1. Command Pattern
 
-At the heart of the architecture is the Command Pattern which is implemented in command.py.
-This pattern is used to encapsulate requests to update Process Variables (PVs) and decouple the update logic from the
-request handler.
-This pattern helps manage and execute the updates, events, and interactions between accelerator components and their
-corresponding PVs.
-* Key Features of Command Pattern:
-
-Encapsulates Update Logic: When a PV (e.g., Cm:set or im:I) is updated, command.py determines the appropriate action to
-process the update. It triggers recalculations for twiss, orbit, and BPM results as needed.
-Supports Bulk and Individual Updates: The command pattern is flexible enough to support
-both individual PV updates and bulk updates, using the update() method.
+    At the heart of the architecture is the Command Pattern which is implemented in command.py.
+    This pattern is used to encapsulate requests to update Process Variables (PVs) and decouple the update logic from the
+    request handler.
+    This pattern helps manage and execute the updates, events, and interactions between accelerator components and their
+    corresponding PVs.
+        * Encapsulates Update Logic: When a PV (e.g., Cm:set or im:I) is updated, command.py determines the appropriate action to
+    process the update. It triggers recalculations for twiss, orbit, and BPM results as needed.
+      * Supports Bulk and Individual Updates: The command pattern is flexible enough to support
+      both individual PV updates and bulk updates, using the update() method.
 
 2. Dependency Injection
 
@@ -67,8 +65,6 @@ both individual PV updates and bulk updates, using the update() method.
    Injection pattern.
    This pattern decouples the instantiation of specific calculation engines from the core logic,
    allowing easy swapping or adding new engines.
-    * How Dependency Injection Works:
-
       Flexible Calculation Engines: Different calculation engines, such as pyAT and thor_scsi,
       can be used interchangeably thanks to this pattern. For example, pyat_accelerator.py and pyat_calculator.py
       use this pattern to inject specific calculation logic into the broader workflow.
@@ -77,16 +73,15 @@ both individual PV updates and bulk updates, using the update() method.
 
 3. Accelerator Setup Pattern
 
-The Accelerator Setup Pattern is a novel approach for initializing the accelerator using data stored in MongoDB.
-This pattern has been specifically implemented for this project and was recently workshopped
-in the EUROplop 2024 conference (soon to be published).
-* Key Features:
-* MongoDB Integration: Accelerator components such as quadrupoles and sextupoles are initialized from the database,
-which contains information like hw2phys values, and relevent power converter (as as it is structured in machine)
-making the setup process dynamic and database-driven.
-* P4P and EPICS Integration: The pattern utilizes p4p (Python support for EPICS7 PVAccess)
-to create and manage PVs corresponding to each accelerator component, ensuring smooth communication
-between the digital twin and real-world machine.
+    The Accelerator Setup Pattern is a novel approach for initializing the accelerator using data stored in MongoDB.
+    This pattern has been specifically implemented for this project and was recently workshopped
+    in the EUROplop 2024 conference (soon to be published).
+      * MongoDB Integration: Accelerator components such as quadrupoles and sextupoles are initialized from the database,
+      which contains information like hw2phys values, and relevent power converter (as as it is structured in machine)
+      making the setup process dynamic and database-driven.
+      * P4P and EPICS Integration: The pattern utilizes p4p (Python support for EPICS7 PVAccess)
+      to create and manage PVs corresponding to each accelerator component, ensuring smooth communication
+      between the digital twin and real-world machine.
 
 4. Twin State Synchronization Pattern
 
@@ -95,7 +90,6 @@ between the digital twin and real-world machine.
    which reads real-time power converter values from the machine and updates the corresponding Digital Twin PVs.
    This pattern has been specifically implemented for this project and was recently workshopped
    in the EUROplop 2024 conference (soon to be published).
-    * How It Works:
         * Real-Time Synchronization: The shadow client continuously monitors the real machine’s state
           by reading power converter PVs and updating the corresponding PVs in the Digital Twin.
         * Ensures Consistency: The twin state synchronization ensures that the Digital Twin reflects
@@ -109,8 +103,6 @@ between the digital twin and real-world machine.
    all related recalculations (twiss, orbit, BPM) are triggered efficiently.
    This pattern has been specifically implemented for this project and was recently workshopped
    in the EUROplop 2024 conference (soon to be published).
-    * Key Features:
-
         * Event-Driven Updates: Each time a PV value is updated, events are triggered to handle
           recalculations of twiss parameters, orbits, and BPM results.
           These events are managed asynchronously, ensuring smooth and responsive updates.
