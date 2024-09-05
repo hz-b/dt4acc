@@ -162,14 +162,14 @@ results in response to changes in the machine's power converter values, and publ
      ```shell
      python3 import_accelerator_data.py
      ```
-4. Run the Server
+4. Running the Server. 
    Start the EPICS PV server:
 
      ```shell
      python3 src/dt4acc/setup_configuration/server.py
      ```
 
-5. Run the Shadow Client
+5. Run the Shadow Client.
    Run the shadow client to synchronize the real machine’s power converter values with the Digital Twin:
 
      ```shell
