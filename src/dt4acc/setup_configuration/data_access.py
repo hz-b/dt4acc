@@ -16,3 +16,8 @@ def get_magnets_per_power_converters(pc):
 def get_unique_power_converters():
     """Fetch unique power converter names from magnets in the DB."""
     return db['accelerator.setup'].distinct("pc", {"type": {"$in": ["Quadrupole", "Sextupole", "Steerer"]}})
+
+
+def get_unique_power_converters_type_specified(type_list):
+    """Fetch unique power converter names from magnets in the DB."""
+    return db['accelerator.setup'].distinct("pc", {"type": {"$in": type_list}})

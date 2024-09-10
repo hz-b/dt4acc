@@ -61,7 +61,7 @@ class PyATProxyFactory(ProxyFactoryInterface):
         elif element_id[0] == "V":
             return element_id[1:]
         else:
-            raise ValueError("Do not know how to handle element id")
+            raise ValueError("Do not know how to handle element id %s", element_id)
 
     def instaniate_addon_proxy(self, sub_lattice, *, element_id, host_element_id):
         """currently only implementing for steerers on sextupoles"""

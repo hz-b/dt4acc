@@ -96,8 +96,19 @@ class ElementProxy(ElementInterface):
         elif method_name == "set_roll":
             await self.update_roll(roll=value)
         elif method_name == "set_im":
-            element.update(K=value * element_data.hw2phys)
-
+            val = value * element_data.hw2phys
+            # print("K for Element $s is $s ", element_data.name,val)
+            # currently assming that this is setting the main multipole
+            # todo: consider to make it a bit more explicit
+            #                would mauin_multi;ole be a bit clearer
+            #                current as maincurrent?
+            element_str = str(element)  # Convert element to string
+            element_split_by_space = element_str.split('\n')  # Split by new lines
+            element_type = element_split_by_space[0]
+            if 'Sextupole' in element_type:
+                element.update(H=val)
+            if 'Quadrupole' in element_type:
+                element.update(K=val)
         elif method_name in ["set_rdbk", "set_K"]:
             pass
         else:
@@ -143,19 +154,22 @@ class KickAngleCorrectorProxy(AddOnElementProxy):
                 kick_angles[idx] = kick
         self._obj.KickAngle = kick_angles
 
-        kick_angles = self._obj.KickAngle
         #: todo: check with an other element
         #        used to be that one would get a "sub lattice" for the
         #        requested element. seems now it is the element
         #
         element = self._obj
+        # only change the angle that the request was made for
+        kick_angles = self._obj.KickAngle.copy()
         for i, kick in enumerate([kick_x, kick_y]):
             if kick is not None:
-                element.update(K=(kick_angles[i] * element_data.hw2phys))
-                pass
-                await self.on_changed_value.trigger(
-                    ElementUpdate(element_id=self.element_id, property_name="K", value=kick_angles[i])
-                )
+                kick_angles[i] = kick_angles[i] * element_data.hw2phys
+        element.update(KickAngle=kick_angles)
+        return
+
+        await self.on_changed_value.trigger(
+            ElementUpdate(element_id=self.element_id, property_name="K", value=kick_angles[i])
+        )
 
     async def update(self, property_id: str, value, element_data):
         assert property_id == "im"

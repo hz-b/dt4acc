@@ -31,7 +31,7 @@ async def generate_fanout_config(pc_list):
     return fanout_config
 
 
-async def update_fanout(fanout_items, prefix='Anonym:', use_machine=False):
+async def update_fanout(fanout_items, prefix='Anonym:', use_machine=True):
     context = Context('pva')
 
     # Default values to use when not connecting to the machine
@@ -59,7 +59,7 @@ async def update_fanout(fanout_items, prefix='Anonym:', use_machine=False):
 
 async def main():
     # Generate the fanout configuration dynamically
-    fanout_config = await generate_fanout_config(["Q1PDR", "Q1PTR"])
+    fanout_config = await generate_fanout_config(["S1PR"])
 
     # Update the PVs based on the fanout configuration
     await update_fanout(fanout_config)

@@ -31,11 +31,13 @@ class ElementParameterView:
         self.prefix = prefix
 
     async def push_value(self, elm_update: ElementUpdate):
-        property_name = 'Cm:set' if 'K' in elm_update.property_name else (
-            'x:set' if 'x' in elm_update.property_name else (
-                'y:set' if 'dy' in elm_update.property_name else elm_update.property_name))
-        label = f'{self.prefix}:{elm_update.element_id}:{property_name}'
-        await update_or_create_pv(elm_update, label, elm_update.value, 'float', 'd')
+        if elm_update.property_name == "K":
+            pass
+        else:
+            property_name = 'x:set' if 'x' in elm_update.property_name else (
+                'y:set' if 'dy' in elm_update.property_name else elm_update.property_name)
+            label = f'{self.prefix}:{elm_update.element_id}:{property_name}'
+            await update_or_create_pv(elm_update, label, elm_update.value, 'float', 'd')
 
 
 class ResultView:
