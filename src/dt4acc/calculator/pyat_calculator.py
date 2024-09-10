@@ -52,7 +52,7 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
                 element_str = str(element)
                 element_split_by_space = element_str.split('\n')
                 element_type = element_split_by_space[0]
-                if element_type in ["Quadrupole:"]:
+                if element_type in ["Sextupole:", "Quadrupole:"]:
                     pv_names.append('Anonym:' + element.FamName + ':Cm:set')
                     values.append(element.K)
             return TwissWithAggregatedKValues(

@@ -33,7 +33,6 @@ async def generate_fanout_config(pc_list):
 
 async def update_fanout(fanout_items, prefix='Anonym:', use_machine=False):
     context = Context('pva')
-    magnet_updates = []
 
     # Default values to use when not connecting to the machine
     default_values = [216.0197917196, 215.82754328]  # [1e49, 1e69]
@@ -54,11 +53,6 @@ async def update_fanout(fanout_items, prefix='Anonym:', use_machine=False):
 
     await context.put(pv_names, pv_values)
     print("Bulk update completed for all twin PVs")
-
-    # Now perform the secondary bulk update for magnet PVs
-    if magnet_updates:
-        magnet_pv_names, magnet_pv_values = zip(*magnet_updates)
-        await context.put(magnet_pv_names, magnet_pv_values)
 
     context.close()
 

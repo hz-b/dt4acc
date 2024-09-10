@@ -119,7 +119,7 @@ class AddOnElementProxy(ElementProxy):
     def __str__(self):
         return f"{self.__class__.__name__}({self._obj}, element_id={self.element_id}, host_element_id={self.host_element_id})"
 
-    def update(self, property_id: str, value):
+    def update(self, property_id: str, value, element_data):
         raise NotImplementedError("Needs to be implemented for specific case")
 
 
@@ -134,7 +134,7 @@ class KickAngleCorrectorProxy(AddOnElementProxy):
         self.correction_planes = correction_plane
         super().__init__(*obj, **kwargs)
 
-    async def update_kick(self, *, kick_x=None, kick_y=None):
+    async def update_kick(self, *, kick_x=None, kick_y=None, element_data):
         """updates requested kick
         """
         kick_angles = self._obj.KickAngle.copy()
@@ -144,22 +144,29 @@ class KickAngleCorrectorProxy(AddOnElementProxy):
         self._obj.KickAngle = kick_angles
 
         kick_angles = self._obj.KickAngle
+        #: todo: check with an other element
+        #        used to be that one would get a "sub lattice" for the
+        #        requested element. seems now it is the element
+        #
+        element = self._obj
         for i, kick in enumerate([kick_x, kick_y]):
             if kick is not None:
+                element.update(K=(kick_angles[i] * element_data.hw2phys))
+                pass
                 await self.on_changed_value.trigger(
                     ElementUpdate(element_id=self.element_id, property_name="K", value=kick_angles[i])
                 )
 
-    async def update(self, property_id: str, value):
-        assert property_id == "K"
+    async def update(self, property_id: str, value, element_data):
+        assert property_id == "im"
         method_name = "set_" + property_id
-        if method_name == "set_K":
+        if method_name == "set_im":
             """needs to know if it is x or y
             """
             if self.correction_planes == "horizontal":
-                self.update_kick(kick_x=value)
+                await self.update_kick(kick_x=value, element_data=element_data)
             elif self.correction_planes == "vertical":
-                self.update_kick(kick_y=value)
+                await self.update_kick(kick_y=value, element_data=element_data)
             else:
                 raise ValueError(
                     f"{self.element_id}, updating: did not expect to use (coordinate) {self.correction_planes}"
