@@ -80,25 +80,25 @@ for pc_name in get_unique_power_converters():
     add_pc_pvs(pc_name)
 
 def initialize_orbit_pvs():
-    builder.aOut(f"orbit:x", initial_value=0.0)
-    builder.aOut(f"orbit:y", initial_value=0.0)
-    builder.aOut(f"orbit:names", initial_value=0.0)
-    builder.aOut(f"orbit:found", initial_value=0)
-    builder.aOut(f"orbit:x0", initial_value=0.0)
+    builder.WaveformOut(f"beam:orbit:x", initial_value=[0.0], length=1000)  # Specify max length
+    builder.WaveformOut(f"beam:orbit:y", initial_value=[0.0], length=1000)
+    builder.WaveformOut(f"beam:orbit:names", initial_value=[""], length=1000)
+    builder.aOut(f"beam:orbit:found", initial_value=0)  # Bool array
+    builder.WaveformOut(f"beam:orbit:x0", initial_value=[0.0], length=1000)
 
 def initialize_twiss_pvs():
-    builder.aOut(f"twiss:x:alpha", initial_value=0.0)
-    builder.aOut(f"twiss:x:beta", initial_value=0.0)
-    builder.aOut(f"twiss:x:nu", initial_value=0.0)
-    builder.aOut(f"twiss:y:alpha", initial_value=0.0)
-    builder.aOut(f"twiss:y:beta", initial_value=0.0)
-    builder.aOut(f"twiss:y:nu", initial_value=0.0)
-    builder.aOut(f"twiss:names", initial_value=0.0)
+    builder.WaveformOut(f"beam:twiss:x:alpha", initial_value=[0.0],length=1000)
+    builder.WaveformOut(f"beam:twiss:x:beta", initial_value=[0.0],length=1000)
+    builder.WaveformOut(f"beam:twiss:x:nu", initial_value=[0.0],length=1000)
+    builder.WaveformOut(f"beam:twiss:y:alpha", initial_value=[0.0],length=1000)
+    builder.WaveformOut(f"beam:twiss:y:beta", initial_value=[0.0],length=1000)
+    builder.WaveformOut(f"beam:twiss:y:nu", initial_value=[0.0],length=1000)
+    builder.WaveformOut(f"beam:twiss:names", initial_value=[0.0],length=1000)
 
 def initialize_bpm_pvs():
-    builder.aOut(f"bpm:x", initial_value=0.0)
-    builder.aOut(f"bpm:y", initial_value=0.0)
-    builder.aOut(f"bpm:names", initial_value=0.0)
+    builder.WaveformOut(f"beam:bpm", initial_value=[0.0],length=1000)
+    # builder.WaveformOut(f"bpm:y", initial_value=0.0)
+    # builder.WaveformOut(f"bpm:names", initial_value=0.0)
 
 # Call the initialization functions
 initialize_twiss_pvs()
