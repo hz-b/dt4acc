@@ -1,6 +1,5 @@
+import asyncio
 import logging
-import threading
-import os
 
 from ..accelerators.accelerator_impl import AcceleratorImpl
 from ..accelerators.proxy_factory import PyATProxyFactory
@@ -14,8 +13,9 @@ def set_pyat_ring():
     from lat2db.model.accelerator import Accelerator
     return Accelerator().ring
 
+
 acc = set_pyat_ring()
-prefix = "Anonym" #os.environ["DT4ACC_PREFIX"]
+prefix = "Anonym"  # os.environ["DT4ACC_PREFIX"]
 # set_ring(acc)
 accelerator = AcceleratorImpl(acc, PyATProxyFactory(lattice_model=None, at_lattice=acc),
                               PyAtTwissCalculator(acc), PyAtOrbitCalculator(acc))
@@ -33,11 +33,26 @@ logger = logging.getLogger("dt4acc")
 
 async def cb(orbit_data: Orbit):
     # Todo: push all orbit data to beam
-    bpm_data = bpm_pyat.extract_bpm_data(orbit_data)
-    await view.push_bpms(bpm_data)
+    try:
+        bpm_legacy_data = bpm_pyat.extract_bpm_legacy_data(orbit_data)
+    except Exception as exc:
+        raise exc
+    # await view.push_bpms(bpm_data)
+    while(True):
+        await asyncio.sleep(2)
+        await periodic_update(bpm_legacy_data)
+    # await view.push_legacy_bpm_data(bpm_legacy_data)
 
 
 accelerator.on_new_orbit.subscribe(cb)
+
+async def periodic_update(bpm_legacy_data):
+    if bpm_legacy_data is None:
+        return
+    await view.push_legacy_bpm_data(bpm_legacy_data)
+
+
+
 # accelerator.on_new_twiss.subscribe(view.push_twiss)
 
 

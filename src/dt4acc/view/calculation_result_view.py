@@ -1,6 +1,8 @@
 import logging
 from datetime import datetime
+from typing import Sequence
 
+import numpy as np
 from bact_device_models.devices.bpm_elem import BpmElementList
 
 from .create_or_update_pv import update_or_create_pv, update_orbit_pv, update_twiss_pv, update_bpm_pv
@@ -70,3 +72,12 @@ class ResultView:
 
         # Use the new function to update the structured BPM PV
         await update_bpm_pv(pv_name, bpm_result)
+
+    async def push_legacy_bpm_data(self, bpm_legacy_data: Sequence[np.int16]):
+        # Define the PV name for the structured BPM data
+        # todo: find out
+        # todo: address prefix
+        pv_name = f"Anonym:MDIZ2T5G:bdata"
+
+        # Use the new function to update the structured BPM PV
+        await update_bpm_pv(pv_name, bpm_legacy_data)

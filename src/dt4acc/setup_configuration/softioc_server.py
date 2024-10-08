@@ -1,3 +1,4 @@
+import numpy as np
 from softioc import softioc, builder, asyncio_dispatcher
 
 import dt4acc.command as cmd
@@ -96,7 +97,9 @@ def initialize_twiss_pvs():
     builder.WaveformOut(f"beam:twiss:names", initial_value=[0.0],length=1000)
 
 def initialize_bpm_pvs():
-    builder.WaveformOut(f"beam:bpm", initial_value=[0.0],length=1000)
+    tmp = np.empty([2048], np.int16)
+    tmp.fill(-2**15)
+    builder.WaveformOut(f"MDIZ2T5G:bdata", initial_value=tmp,length=len(tmp))
     # builder.WaveformOut(f"bpm:y", initial_value=0.0)
     # builder.WaveformOut(f"bpm:names", initial_value=0.0)
 
@@ -105,6 +108,7 @@ initialize_twiss_pvs()
 initialize_orbit_pvs()
 initialize_bpm_pvs()
 
+builder.longIn("MDIZ2T5G:count", initial_value=0)
 builder.LoadDatabase()
 softioc.iocInit(dispatcher)
 
