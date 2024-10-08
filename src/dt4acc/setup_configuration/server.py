@@ -141,14 +141,33 @@ def add_magnet_pvs(magnet, prefix, manager):
 
 def add_power_converter_pvs(pc_name, prefix, manager):
     # replicating real machine power converters.
+    # pc_pv_name = prefix + f"{pc_name}:set"
+    # pc_rdbk_name = prefix + f"{pc_name}:rdbk"
+    # pc_pv = create_pv('float', 'd', PowerConverterElementSetup(name=pc_name, type='pc'))
+    # pc_rdbk_pv = create_pv('float', 'd', PowerConverterElementSetup(name=pc_name, type='pc'))
+    #
+    # manager.add_pv(pc_pv_name, pc_pv)
+    # manager.add_pv(pc_rdbk_name, pc_rdbk_pv)
+
+    # PV names for PVA and CA contexts
     pc_pv_name = prefix + f"{pc_name}:set"
     pc_rdbk_name = prefix + f"{pc_name}:rdbk"
+    pc_ca_pv_name = prefix + f"{pc_name}:ca:set"
+    pc_ca_rdbk_name = prefix + f"{pc_name}:ca:rdbk"
+
+    # Create PVs for PVA
     pc_pv = create_pv('float', 'd', PowerConverterElementSetup(name=pc_name, type='pc'))
     pc_rdbk_pv = create_pv('float', 'd', PowerConverterElementSetup(name=pc_name, type='pc'))
 
-    manager.add_pv(pc_pv_name, pc_pv)
-    manager.add_pv(pc_rdbk_name, pc_rdbk_pv)
+    # Create PVs for CA context (if desired, they can be the same objects or separate ones)
+    pc_ca_pv = create_pv('float', 'd', PowerConverterElementSetup(name=pc_name, type='pc'))
+    pc_ca_rdbk_pv = create_pv('float', 'd', PowerConverterElementSetup(name=pc_name, type='pc'))
 
+    # Add to manager for both PVA and CA
+    manager.add_pv(pc_pv_name, pc_pv)  # For PVA
+    manager.add_pv(pc_rdbk_name, pc_rdbk_pv)  # For PVA
+    manager.add_pv(pc_ca_pv_name, pc_ca_pv)  # For CA
+    manager.add_pv(pc_ca_rdbk_name, pc_ca_rdbk_pv)  # For CA
 
 async def server_start_up():
     """

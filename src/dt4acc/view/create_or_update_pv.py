@@ -1,6 +1,7 @@
 import asyncio
 import logging
 
+from p4p.client.asyncio import Context
 from p4p.server.asyncio import SharedPV
 from p4p.wrapper import Value, Type
 
@@ -11,6 +12,8 @@ from ..setup_configuration.server import create_pv
 
 manager = PVManager()
 logger = logging.getLogger(__name__)
+
+ctx = Context("pva")
 
 
 async def update_or_create_pv(element, pv_name, value, value_type, initial_type):
@@ -64,6 +67,8 @@ twiss_type = Type([
 async def update_twiss_pv(pv_name, twiss_result: TwissWithAggregatedKValues):
     # Check if the structured PV exists
     pv = manager.get_pv(pv_name)
+    if pv is None:
+        pv = await ctx.get(pv_name)
     if pv is None:
         logger.debug(f"Creating new structured PV for {pv_name}.")
 
@@ -126,40 +131,43 @@ async def update_orbit_pv(pv_name, orbit_result: Orbit):
     # Get or create the PV manager
 
     # Check if the structured PV exists
-    pv = manager.get_pv(pv_name)
-    if pv is None:
-        logger.debug(f"Creating new structured PV for {pv_name}.")
+    # pv = manager.get_pv(pv_name)
+    # if pv is None:
+    pv = await ctx.get(pv_name)
+    # if pv is None:
+    #     logger.debug(f"Creating new structured PV for {pv_name}.")
+    #
+    #     # Create the structured PV with initial data
+    #     initial_data = {
+    #         'x': orbit_result.x,
+    #         'y': orbit_result.y,
+    #         'names': orbit_result.names,
+    #         'found': orbit_result.found,
+    #         'x0': orbit_result.x0,
+    #     }
+    #
+    #     new_pv = SharedPV(initial=Value(orbit_type, initial_data))
+    #     await asyncio.get_running_loop().run_in_executor(None, manager.add_pv, pv_name, new_pv)
+    #     logger.debug(f"Structured PV {pv_name} created and added to manager.")
+    # else:
+    # logger.debug(f"Updating existing structured PV {pv_name} with new data.")
 
-        # Create the structured PV with initial data
-        initial_data = {
-            'x': orbit_result.x,
-            'y': orbit_result.y,
-            'names': orbit_result.names,
-            'found': orbit_result.found,
-            'x0': orbit_result.x0,
-        }
+    # Prepare the new data
+    new_data = {
+        'x': orbit_result.x,
+        'y': orbit_result.y,
+        'names': orbit_result.names,
+        'found': orbit_result.found,
+        'x0': orbit_result.x0,
+    }
 
-        new_pv = SharedPV(initial=Value(orbit_type, initial_data))
-        await asyncio.get_running_loop().run_in_executor(None, manager.add_pv, pv_name, new_pv)
-        logger.debug(f"Structured PV {pv_name} created and added to manager.")
-    else:
-        logger.debug(f"Updating existing structured PV {pv_name} with new data.")
-
-        # Prepare the new data
-        new_data = {
-            'x': orbit_result.x,
-            'y': orbit_result.y,
-            'names': orbit_result.names,
-            'found': orbit_result.found,
-            'x0': orbit_result.x0,
-        }
-
-        # Convert the dictionary to a Value object
-        value_to_post = Value(orbit_type, new_data)
-
-        # Post the Value object to the PV
-        pv.post(value_to_post)
-        logger.info(f"Successfully updated structured PV {pv_name} with new data.")
+    # Convert the dictionary to a Value object
+    value_to_post = Value(orbit_type, new_data)
+    # pv.open(value_to_post)
+    # # Post the Value object to the PV
+    # pv.post(value_to_post)
+    await ctx.put(name=pv_name, values=value_to_post)
+    logger.info(f"Successfully updated structured PV {pv_name} with new data.")
 
 
 bpm_position_type = Type([
@@ -192,6 +200,8 @@ async def update_bpm_pv(pv_name, bpm_result):
 
     # Check if the structured PV exists
     pv = manager.get_pv(pv_name)
+    if pv is None:
+        pv = await ctx.get(pv_name)
     if pv is None:
         logger.debug(f"Creating new structured PV for {pv_name}.")
 

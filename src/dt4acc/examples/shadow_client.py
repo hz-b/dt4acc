@@ -31,7 +31,7 @@ async def generate_fanout_config(pc_list):
     return fanout_config
 
 
-async def update_fanout(fanout_items, prefix='Anonym:', use_machine=True):
+async def update_fanout(fanout_items, prefix='Anonym:', use_machine=False):
     context = Context('pva')
 
     # Default values to use when not connecting to the machine
