@@ -21,6 +21,8 @@ scipy = "*"
 accelerator-toolbox = ">=0.5"
 bact-device-models = "*"
 lat2db = "*"
+p4p = "*"
+softIoc = "*"
 
 Sphinx = { version = "*", optional = true }
 sphinx-rtd-theme = { version = "*", optional = true }
