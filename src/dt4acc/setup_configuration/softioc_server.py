@@ -45,6 +45,7 @@ async def handle_element_update(pv_name, value, element):
 
 # Create PVs for Magnets
 def add_magnet_pvs(magnet):
+    bessyii_brho =5.67229387129245
     magnet_name = magnet['name']
     element = MagnetElementSetup(
         type=magnet['type'],
@@ -55,7 +56,7 @@ def add_magnet_pvs(magnet):
         magnetic_strength=magnet['magnetic_strength'],
         electron_rest_mass=0.51099895e6,  # Hardcoded
         speed_of_light=299792458,
-        brho=5.67229387129245,
+        brho=bessyii_brho,
         edf=1 / 5.67229387129245,
         pc=magnet['pc'],
         k=magnet['k']
@@ -67,7 +68,7 @@ def add_magnet_pvs(magnet):
     k_value = element.k if element.k is not None else 0.0
     builder.aOut(f"{magnet_name}:Cm:set", initial_value=k_value,
                  on_update=lambda val: handle_element_update(f"{magnet_name}:Cm:set", val, element))
-    builder.aOut(f"{magnet_name}:im:I", initial_value=k_value * element.phys2hw,
+    builder.aOut(f"{magnet_name}:im:I", initial_value=k_value * element.phys2hw * element.brho,
                  on_update=lambda val: handle_element_update(f"{magnet_name}:im:I", val, element))
 
 
