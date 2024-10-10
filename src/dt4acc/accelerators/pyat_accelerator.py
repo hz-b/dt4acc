@@ -1,5 +1,9 @@
 import asyncio
 import logging
+from dataclasses import dataclass
+from typing import Sequence, Union
+
+import numpy as np
 
 from ..accelerators.accelerator_impl import AcceleratorImpl
 from ..accelerators.proxy_factory import PyATProxyFactory
@@ -19,18 +23,13 @@ prefix = "Anonym"  # os.environ["DT4ACC_PREFIX"]
 # set_ring(acc)
 accelerator = AcceleratorImpl(acc, PyATProxyFactory(lattice_model=None, at_lattice=acc),
                               PyAtTwissCalculator(acc), PyAtOrbitCalculator(acc))
-view = ResultView(prefix=prefix + ":beam")
+view = ResultView(prefix=prefix)
 #: todo into a controller to pass prefix as parameter at start ?
 elem_par_view = ElementParameterView(prefix=prefix)
 bpm_names_pyat = [elem.FamName for elem in accelerator.acc if "BPM" == elem.FamName[:3]]
 bpm_pyat = BPMMimikry(prefix=prefix, bpm_names=bpm_names_pyat)
 accelerator.on_new_twiss.subscribe(view.push_twiss)
 accelerator.on_new_orbit.subscribe(view.push_orbit)
-accelerator.on_changed_value.subscribe(elem_par_view.push_value)
-
-logger = logging.getLogger("dt4acc")
-
-
 async def cb(orbit_data: Orbit):
     # Todo: push all orbit data to beam
     try:
@@ -38,18 +37,12 @@ async def cb(orbit_data: Orbit):
     except Exception as exc:
         raise exc
     # await view.push_bpms(bpm_data)
-    while(True):
-        await asyncio.sleep(2)
-        await periodic_update(bpm_legacy_data)
-    # await view.push_legacy_bpm_data(bpm_legacy_data)
-
-
-accelerator.on_new_orbit.subscribe(cb)
-
-async def periodic_update(bpm_legacy_data):
-    if bpm_legacy_data is None:
-        return
     await view.push_legacy_bpm_data(bpm_legacy_data)
+accelerator.on_new_orbit.subscribe(cb)
+accelerator.on_changed_value.subscribe(elem_par_view.push_value)
+
+
+
 
 
 

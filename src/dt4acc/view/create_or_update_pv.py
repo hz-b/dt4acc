@@ -1,4 +1,5 @@
 import asyncio
+import itertools
 import logging
 from softioc import builder
 from p4p.client.asyncio import Context
@@ -255,9 +256,11 @@ async def update_orbit_pv(pv_name, orbit_result):
         logger.error(f"Failed to update or create PV {pv_name}: {e}")
 
 # Function to update BPM PVs
+cnt = itertools.count()
 async def update_bpm_pv(pv_name,bpm_result):
     try:
         await ctx.put(pv_name, bpm_result)
+        await ctx.put('MDIZ2T5G:count', next(cnt)) #add the prefix
     except Exception as e:
         logger.error(f"Failed to update or create PV {pv_name}: {e}")
     # await ctx.put(f"bpm:y", bpm_result.y)

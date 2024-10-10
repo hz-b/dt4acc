@@ -82,16 +82,18 @@ class BPMMimikry:
             return
         bpm_config = create_bpm_config()
 
+
         # find indices where the names are ..
         df = pd.DataFrame(index=["x", "y"], columns=orbit_result.names, data=[orbit_result.x, orbit_result.y]).T
         bpm_names_as_index = pd.Series([f"empty_{cnt:03d}" for cnt in np.arange(128)])
-        bpm_names_as_index.iloc[bpm_config["idx"]] = bpm_config["name"]
+        bpm_names_as_index.iloc[bpm_config["idx"]-1] = bpm_config["name"]
         df_bpm = pd.DataFrame(columns=["x", "y", "intensity_z", "intensity_s", "status", "x_rms", "y_rms"],
                               index=bpm_names_as_index)
 
         # Waring: order is lost!!!
         known_bpm_names = list(set(bpm_config["name"]).intersection(orbit_result.names))
         assert len(known_bpm_names) > 1
+        #: todo  BESSY II specific
         assert df_bpm.shape[0] == 128
 
         # default values

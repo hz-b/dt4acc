@@ -1,3 +1,4 @@
+from typing import Optional
 
 from pydantic.dataclasses import dataclass
 
@@ -14,6 +15,7 @@ class MagnetElementSetup:
     brho: float
     edf: float
     pc: str
+    k: Optional[float] = None
 
 @dataclass
 class PowerConverterElementSetup:

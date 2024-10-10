@@ -1,9 +1,12 @@
 import numpy as np
+from p4p.client.asyncio import Context
 from softioc import softioc, builder, asyncio_dispatcher
 
 import dt4acc.command as cmd
+from dt4acc.calculator.pyat_calculator import logger
 from dt4acc.model.elementmodel import MagnetElementSetup
-from dt4acc.setup_configuration.data_access import get_magnets, get_unique_power_converters
+from dt4acc.setup_configuration.data_access import get_unique_power_converters, \
+    get_magnets_per_power_converters
 
 # Initialize the Asyncio Dispatcher for SoftIOC
 dispatcher = asyncio_dispatcher.AsyncioDispatcher()
@@ -54,31 +57,65 @@ def add_magnet_pvs(magnet):
         speed_of_light=299792458,
         brho=5.67229387129245,
         edf=1 / 5.67229387129245,
-        pc=magnet['pc']
+        pc=magnet['pc'],
+        k=magnet['k']
     )
     # Store element in cache
     element_cache[magnet_name] = element
 
     # Create PVs and link to update logic
-    builder.aOut(f"{magnet_name}:Cm:set", initial_value=0.0,
+    k_value = element.k if element.k is not None else 0.0
+    builder.aOut(f"{magnet_name}:Cm:set", initial_value=k_value,
                  on_update=lambda val: handle_element_update(f"{magnet_name}:Cm:set", val, element))
-    builder.aOut(f"{magnet_name}:im:I", initial_value=0.0,
+    builder.aOut(f"{magnet_name}:im:I", initial_value=k_value * element.phys2hw,
                  on_update=lambda val: handle_element_update(f"{magnet_name}:im:I", val, element))
 
 
 # Initialize all magnets from DB
-for magnet_data in get_magnets():
-    add_magnet_pvs(magnet_data)
+# for magnet_data in get_magnets():
+#     add_magnet_pvs(magnet_data)
+async def update_power_converter(pc_name, value, connected_magnets):
+    # Update the readback PV of the power converter
+    ctx = Context("pva")
+    try:
+        await ctx.put(f"Anonym:{pc_name}:rdbk", value)
+    except Exception as e:
+        logger.info(f"Error updating power converter rdbk {pc_name}: {e}")
+    # Update the `im:I` PVs of all connected magnets
+    try:
+        for magnet_name in connected_magnets:
+            await ctx.put(f"Anonym:{magnet_name}:im:I", value)
+    except Exception as e:
+        logger.info(f"Error updating power converter {pc_name}: {e}")
 
 
 # Initialize all power converters from DB
 def add_pc_pvs(pc_name):
-    builder.aOut(f"{pc_name}:set", initial_value=0.0, on_update=lambda val: print(f"Update {pc_name}:set with {val}"))
+    magnets = get_magnets_per_power_converters(pc_name)
+    element = {'magnets': [item['name'] for item in magnets]}
+    # Store element in cache
+    element_cache[pc_name] = element
+    for magnet_data in magnets:
+        add_magnet_pvs(magnet_data)
+        # def on_update():
+        """
+        Todo:
+            each power converter has list of magnets it is connected to
+            this list is stored in the element, 
+            we need to update all those magnets (the im:I fields) whenever there is an update to the power converter value
+            also update the  rdbk pv as well
+
+        """
+
+    builder.aOut(f"{pc_name}:set", initial_value=0.0,
+                 on_update=lambda val: update_power_converter(pc_name, val, element['magnets']))
+    # print(f"Updating... {pc_name}:set with {val}"))
     builder.aOut(f"{pc_name}:rdbk", initial_value=0.0)
 
 
 for pc_name in get_unique_power_converters():
     add_pc_pvs(pc_name)
+
 
 def initialize_orbit_pvs():
     builder.WaveformOut(f"beam:orbit:x", initial_value=[0.0], length=1000)  # Specify max length
@@ -87,21 +124,25 @@ def initialize_orbit_pvs():
     builder.aOut(f"beam:orbit:found", initial_value=0)  # Bool array
     builder.WaveformOut(f"beam:orbit:x0", initial_value=[0.0], length=1000)
 
+
 def initialize_twiss_pvs():
-    builder.WaveformOut(f"beam:twiss:x:alpha", initial_value=[0.0],length=1000)
-    builder.WaveformOut(f"beam:twiss:x:beta", initial_value=[0.0],length=1000)
-    builder.WaveformOut(f"beam:twiss:x:nu", initial_value=[0.0],length=1000)
-    builder.WaveformOut(f"beam:twiss:y:alpha", initial_value=[0.0],length=1000)
-    builder.WaveformOut(f"beam:twiss:y:beta", initial_value=[0.0],length=1000)
-    builder.WaveformOut(f"beam:twiss:y:nu", initial_value=[0.0],length=1000)
-    builder.WaveformOut(f"beam:twiss:names", initial_value=[0.0],length=1000)
+    builder.WaveformOut(f"beam:twiss:x:alpha", initial_value=[0.0], length=1000)
+    builder.WaveformOut(f"beam:twiss:x:beta", initial_value=[0.0], length=1000)
+    builder.WaveformOut(f"beam:twiss:x:nu", initial_value=[0.0], length=1000)
+    builder.WaveformOut(f"beam:twiss:y:alpha", initial_value=[0.0], length=1000)
+    builder.WaveformOut(f"beam:twiss:y:beta", initial_value=[0.0], length=1000)
+    builder.WaveformOut(f"beam:twiss:y:nu", initial_value=[0.0], length=1000)
+    builder.WaveformOut(f"beam:twiss:names", initial_value=[0.0], length=1000)
+
 
 def initialize_bpm_pvs():
     tmp = np.empty([2048], np.int16)
-    tmp.fill(-2**15)
-    builder.WaveformOut(f"MDIZ2T5G:bdata", initial_value=tmp,length=len(tmp))
+    tmp.fill(-2 ** 15)
+    builder.WaveformOut(f"MDIZ2T5G:bdata", initial_value=tmp, length=len(tmp),
+                        SCAN='1 second')
     # builder.WaveformOut(f"bpm:y", initial_value=0.0)
     # builder.WaveformOut(f"bpm:names", initial_value=0.0)
+
 
 # Call the initialization functions
 initialize_twiss_pvs()
