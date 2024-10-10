@@ -37,3 +37,9 @@ vaccelApp/src/*.inc
 
 # envPaths: built during first make after make clean
 iocBoot/iocvaccel/envPaths
+
+# python related stuff
+src/dist/
+*.pyc
+*.pyo
+__pycache__/
