@@ -1,9 +1,14 @@
 # data_access.py
-from pymongo import MongoClient
+import os
 
-client = MongoClient("mongodb://localhost:27017/")
-db = client.bessyii
+import pymongo
 
+MONGO_URI = os.environ.get("MONGODB_URL", "mongodb://localhost:27017")
+DB_NAME = "bessyii"
+COLLECTION_NAME = "accelerator.setup"
+client = pymongo.MongoClient(MONGO_URI)
+db = client[DB_NAME]
+collection = db[COLLECTION_NAME]
 
 def get_magnets():
     return db['accelerator.setup'].find({"type": {"$in": ["Quadrupole", "Sextupole", "Steerer"]}})
