@@ -160,7 +160,7 @@ results in response to changes in the machine's power converter values, and publ
    data from the JSON file into MongoDB using the import_accelerator_data.py script:
 
      ```shell
-     python3 import_accelerator_data.py
+     python3 -m dt4acc.scripts.import_accelerator_from_configuration
      ```
 4. Running the Server. 
    Start the EPICS PV server:
