@@ -166,7 +166,7 @@ results in response to changes in the machine's power converter values, and publ
    Start the EPICS PV server:
 
      ```shell
-     python3 src/dt4acc/setup_configuration/server.py
+     python3 src/dt4acc/setup_configuration/softioc_server.py
      ```
 
 5. Run the Shadow Client.
