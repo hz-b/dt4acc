@@ -59,6 +59,7 @@ class ElementProxy(ElementInterface):
 
         element, = self._obj
 
+        #: todo handled in shift elem?
         shift = estimate_shift(element)
         if dx is None:
             dx = shift[0]
@@ -69,13 +70,7 @@ class ElementProxy(ElementInterface):
         # look what really happened
         element, = self._obj
         dxr, _, dyr, _, _, _ = estimate_shift(element)
-        return
-        asyncio.create_task(self.on_changed_value.trigger(
-            ElementUpdate(element_id=self.element_id, property_name="dx", value=value)
-        ))
-        asyncio.create_task(self.on_changed_value.trigger(
-            ElementUpdate(element_id=self.element_id, property_name="dy", value=value)
-        ))
+        pass
 
     async def update(self, property_id: str, value, element_data):
         """
@@ -165,11 +160,6 @@ class KickAngleCorrectorProxy(AddOnElementProxy):
             if kick is not None:
                 kick_angles[i] = kick_angles[i] * element_data.hw2phys
         element.update(KickAngle=kick_angles)
-        return
-
-        await self.on_changed_value.trigger(
-            ElementUpdate(element_id=self.element_id, property_name="K", value=kick_angles[i])
-        )
 
     async def update(self, property_id: str, value, element_data):
         assert property_id == "im"
