@@ -1,12 +1,14 @@
 import pandas as pd
 import pymongo
+import os
 
+from ..resources import conversion_factors_file
 from ..resources.power_converters import quad_power_supplies, sext_power_supplies, steerer_power_supplies
 
 from lat2db.model.accelerator import Accelerator
 
 # MongoDB connection details
-MONGO_URI = "mongodb://localhost:27017"
+MONGO_URI = os.environ.get("MONGODB_URL", "mongodb://localhost:27017")
 DB_NAME = "bessyii"
 COLLECTION_NAME = "accelerator.setup"
 
@@ -63,7 +65,7 @@ def insert_data(data, magnet_type, machine):
 
 
 # Load data from Excel
-excel_file = "../resources/conversion-factors-simplified-table.xlsx"
+
 sheets = {
     "Quadrupole": "Quadrupoles",
     "Sextupole": "Sextupoles",
@@ -72,7 +74,7 @@ sheets = {
 
 machine = Accelerator().machine
 for magnet_type, sheet_name in sheets.items():
-    df = pd.read_excel(excel_file, sheet_name=sheet_name)
+    df = pd.read_excel(conversion_factors_file, sheet_name=sheet_name)
     df = df.iloc[:, [0, 1]]  # Select only the first two columns
     df.columns = ['Magnet', 'Magnetic Strength']  # Rename columns for clarity
     df.dropna(subset=['Magnet', 'Magnetic Strength'], inplace=True)

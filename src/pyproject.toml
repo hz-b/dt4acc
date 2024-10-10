@@ -13,6 +13,8 @@ documentation = "https://hz-b.github.io/dt4acc/"
 repository = "https://github.com/hz-b/dt4acc"
 keywords = []
 
+include = ["resources/conversion-factors-simplified-table.xlsx"]
+
 [tool.poetry.dependencies]
 python = ">=3.7"
 numpy = "*"
@@ -23,6 +25,11 @@ bact-device-models = "*"
 lat2db = "*"
 p4p = "*"
 softIoc = "*"
+
+# For importing excel files
+# the risk is with yours: you are not using standarised
+# formats
+openpyxl = "*"
 
 Sphinx = { version = "*", optional = true }
 sphinx-rtd-theme = { version = "*", optional = true }
