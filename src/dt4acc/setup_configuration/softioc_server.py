@@ -70,8 +70,10 @@ def add_magnet_pvs(magnet):
                  on_update=lambda val: handle_element_update(f"{magnet_name}:Cm:set", val, element))
     builder.aOut(f"{magnet_name}:im:I", initial_value=k_value * element.phys2hw * element.brho,
                  on_update=lambda val: handle_element_update(f"{magnet_name}:im:I", val, element))
-
-
+    builder.aOut(f"{magnet_name}:x:set", initial_value=0.0,
+                 on_update=lambda val: handle_element_update(f"{magnet_name}:x:set", val, element))
+    builder.aOut(f"{magnet_name}:y:set", initial_value=0.0,
+                 on_update=lambda val: handle_element_update(f"{magnet_name}:y:set", val, element))
 # Initialize all magnets from DB
 # for magnet_data in get_magnets():
 #     add_magnet_pvs(magnet_data)
