@@ -3,9 +3,7 @@ import os.path
 import json
 import time
 import threading
-import pydev
 
-# logging.basicConfig(level=logging.DEBUG)
 logger = logging.Logger("thor-scsi-lib")
 logger.setLevel(logging.WARNING)
 mux_off = "Mux OFF"

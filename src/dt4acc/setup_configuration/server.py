@@ -16,8 +16,6 @@ from dt4acc.setup_configuration.data_access import get_magnets, get_unique_power
     get_magnets_per_power_converters
 from dt4acc.setup_configuration.pv_manager import PVManager
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
 
 help_type = NTScalar('s')
 types = {

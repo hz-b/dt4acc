@@ -3,8 +3,6 @@ import logging
 from p4p.client.thread import Context
 from p4p.server import StaticProvider
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
 
 
 class PVManager:
