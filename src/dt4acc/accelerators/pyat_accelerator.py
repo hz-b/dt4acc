@@ -15,14 +15,14 @@ from ..view.calculation_result_view import ResultView, ElementParameterView
 
 def set_pyat_ring():
     from lat2db.model.accelerator import Accelerator
-    return Accelerator().ring
+    return Accelerator()
 
 
 acc = set_pyat_ring()
 prefix = "Anonym"  # os.environ["DT4ACC_PREFIX"]
 # set_ring(acc)
-accelerator = AcceleratorImpl(acc, PyATProxyFactory(lattice_model=None, at_lattice=acc),
-                              PyAtTwissCalculator(acc), PyAtOrbitCalculator(acc))
+accelerator = AcceleratorImpl(acc.ring, PyATProxyFactory(lattice_model=None, at_lattice=acc.ring),
+                              PyAtTwissCalculator(acc), PyAtOrbitCalculator(acc.ring))
 view = ResultView(prefix=prefix)
 #: todo into a controller to pass prefix as parameter at start ?
 elem_par_view = ElementParameterView(prefix=prefix)

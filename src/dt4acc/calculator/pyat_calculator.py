@@ -29,7 +29,8 @@ def _construct_name_list(acc: at.Lattice) -> Sequence[str]:
 
 class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
     def __init__(self, acc):
-        self.acc = acc
+        self.acc = acc.ring
+        self.machine = acc.machine
         self.executor = ThreadPoolExecutor()  # Executor for blocking calls
 
     def calculate(self) -> TwissWithAggregatedKValues:
@@ -40,9 +41,10 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
         twiss_in['dispersion'] = np.array([0.013117, -0.031177, 0, 0])
 
         try:
-            # _, __, twiss = self.acc.get_optics(at.All,twiss_in=twiss_in) # for transfer line
-
-            _, __, twiss = self.acc.get_optics(at.All)
+            if self.machine.closed : #this means it is a ring
+                _, __, twiss = self.acc.get_optics(at.All)
+            else :
+                _, __, twiss = self.acc.get_optics(at.All,twiss_in=twiss_in) # for transfer line
             alpha = twiss["alpha"]
             beta = twiss["beta"]
             nu = twiss["mu"]
