@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 from p4p.client.asyncio import Context
 from softioc import softioc, builder, asyncio_dispatcher
@@ -5,14 +7,14 @@ from softioc import softioc, builder, asyncio_dispatcher
 import dt4acc.command as cmd
 from dt4acc.calculator.pyat_calculator import logger
 from dt4acc.model.elementmodel import MagnetElementSetup
-from dt4acc.setup_configuration.data_access import get_unique_power_converters, \
+from dt4acc.setup_configuration.get_magnet_data import get_unique_power_converters, \
     get_magnets_per_power_converters
 
 # Initialize the Asyncio Dispatcher for SoftIOC
 dispatcher = asyncio_dispatcher.AsyncioDispatcher()
 
 # Set device name for SoftIOC PVs
-builder.SetDeviceName("Anonym")
+builder.SetDeviceName(os.environ.get("DT4ACC_PREFIX", "Anonym") )
 
 # Cache for magnet elements and PVs
 element_cache = {}
@@ -37,7 +39,7 @@ def get_property_id(pv_name):
 async def handle_element_update(pv_name, value, element):
     property_id = get_property_id(pv_name)
     try:
-        # Call the cmd.update as in the previous server.py logic
+        # Call the cmd.update
         await cmd.update(element_id=element.name, property_name=property_id, value=value, element=element)
     except Exception as e:
         print(f"Error in updating element {element.name}: {e}")
@@ -45,7 +47,7 @@ async def handle_element_update(pv_name, value, element):
 
 # Create PVs for Magnets
 def add_magnet_pvs(magnet):
-    bessyii_brho =5.67229387129245
+    bessyii_brho = 5.67229387129245
     magnet_name = magnet['name']
     element = MagnetElementSetup(
         type=magnet['type'],
@@ -61,6 +63,9 @@ def add_magnet_pvs(magnet):
         pc=magnet['pc'],
         k=magnet['k']
     )
+    #todo: get all the above hard coded values from configuration per facility / env variables
+    # or create a db repository named db.config and store per facility configuration e.g. brho ...
+
     # Store element in cache
     element_cache[magnet_name] = element
 
@@ -74,20 +79,23 @@ def add_magnet_pvs(magnet):
                  on_update=lambda val: handle_element_update(f"{magnet_name}:x:set", val, element))
     builder.aOut(f"{magnet_name}:y:set", initial_value=0.0,
                  on_update=lambda val: handle_element_update(f"{magnet_name}:y:set", val, element))
+
+
 # Initialize all magnets from DB
 # for magnet_data in get_magnets():
 #     add_magnet_pvs(magnet_data)
 async def update_power_converter(pc_name, value, connected_magnets):
     # Update the readback PV of the power converter
     ctx = Context("pva")
+    prefix = os.environ.get("DT4ACC_PREFIX", "Anonym")
     try:
-        await ctx.put(f"Anonym:{pc_name}:rdbk", value)
+        await ctx.put(f"{prefix}:{pc_name}:rdbk", value)
     except Exception as e:
         logger.info(f"Error updating power converter rdbk {pc_name}: {e}")
     # Update the `im:I` PVs of all connected magnets
     try:
         for magnet_name in connected_magnets:
-            await ctx.put(f"Anonym:{magnet_name}:im:I", value)
+            await ctx.put(f"{prefix}:{magnet_name}:im:I", value)
     except Exception as e:
         logger.info(f"Error updating power converter {pc_name}: {e}")
 
@@ -100,19 +108,9 @@ def add_pc_pvs(pc_name):
     element_cache[pc_name] = element
     for magnet_data in magnets:
         add_magnet_pvs(magnet_data)
-        # def on_update():
-        """
-        Todo:
-            each power converter has list of magnets it is connected to
-            this list is stored in the element, 
-            we need to update all those magnets (the im:I fields) whenever there is an update to the power converter value
-            also update the  rdbk pv as well
-
-        """
 
     builder.aOut(f"{pc_name}:set", initial_value=0.0,
                  on_update=lambda val: update_power_converter(pc_name, val, element['magnets']))
-    # print(f"Updating... {pc_name}:set with {val}"))
     builder.aOut(f"{pc_name}:rdbk", initial_value=0.0)
 
 

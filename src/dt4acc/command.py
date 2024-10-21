@@ -1,3 +1,5 @@
+import os
+
 from dt4acc.update_context_manager import UpdateContext
 from .bl.event import Event
 from .view.calculation_result_view import StatusFlagView
@@ -20,7 +22,7 @@ def publish(*, what):
 
 # Signals to EPICS:
 #      that an update is in progress
-prefix = "Anonym"  # os.environ["DT4ACC_PREFIX"]
+prefix = os.environ.get("DT4ACC_PREFIX", "Anonym")   # os.environ["DT4ACC_PREFIX"]
 view = StatusFlagView(prefix=f"{prefix}:dt:im:updates")
 on_update_event = Event()
 on_update_event.subscribe(view.on_update)

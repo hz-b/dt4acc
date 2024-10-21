@@ -1,18 +1,19 @@
 import functools
 import logging
-from typing import Sequence
+import os
 
 import numpy as np
 import pandas as pd
+import pymongo
 from bact_device_models.devices.bpm_elem_libera import BPMElement, BPMElementPosition, BPMElementList
 from bact_device_models.filters.bpm_calibration import BPMCalibrationPlane
 
-from . import bpm_config
 from ..model.orbit import Orbit
-
+MONGO_URI = os.environ.get("MONGODB_URL", "mongodb://localhost:27017")
+DB_NAME = os.environ.get("MONGODB_DB", "bessyii")
+client = pymongo.MongoClient(MONGO_URI)
+db = client[DB_NAME]
 logger = logging.getLogger("dt4acc")
-
-#: todo: needs to be imported from database
 
 # one fits all ..
 calib = BPMCalibrationPlane()
@@ -82,11 +83,10 @@ class BPMMimikry:
             return
         bpm_config = create_bpm_config()
 
-
         # find indices where the names are ..
         df = pd.DataFrame(index=["x", "y"], columns=orbit_result.names, data=[orbit_result.x, orbit_result.y]).T
         bpm_names_as_index = pd.Series([f"empty_{cnt:03d}" for cnt in np.arange(128)])
-        bpm_names_as_index.iloc[bpm_config["idx"]-1] = bpm_config["name"]
+        bpm_names_as_index.iloc[bpm_config["idx"] - 1] = bpm_config["name"]
         df_bpm = pd.DataFrame(columns=["x", "y", "intensity_z", "intensity_s", "status", "x_rms", "y_rms"],
                               index=bpm_names_as_index)
 
@@ -97,7 +97,7 @@ class BPMMimikry:
         assert df_bpm.shape[0] == 128
 
         # default values
-        fill_value = 2**15
+        fill_value = 2 ** 15
         df_bpm.loc[:, "x"] = fill_value
         df_bpm.loc[:, "y"] = fill_value
         df_bpm.loc[:, "y_rms"] = 0
@@ -117,7 +117,6 @@ class BPMMimikry:
         # needs to be at least a bit in 16 ...
         df_bpm.loc[known_bpm_names, "x_rms"] = 1
         df_bpm.loc[known_bpm_names, "y_rms"] = 1
-
 
         tmp = np.empty([len(df_bpm), 8], dtype=np.int16)
         tmp.fill(0)
@@ -175,54 +174,40 @@ def create_bpm_config():
     '''
 
     # fmt: off
-    t_names = ['name', 'x_state', 'y_state',  's',   'idx']
-    formats = ['U20',   np.bool_,  np.bool_,  float,  int]
+    t_names = ['name', 'x_state', 'y_state', 's', 'idx']
+    formats = ['U20', np.bool_, np.bool_, float, int]
     t_names += ['x_scale', 'y_scale', 'x_offset', 'y_offset']
-    formats += [float,      float,     float,      float]
-    # fmt: on
-    dtypes = np.dtype({'names':  t_names, 'formats': formats})
+    formats += [float, float, float, float]
+    dtypes = np.dtype({'names': t_names, 'formats': formats})
 
-    n_bpms = len(bpm_config.bpm_conf)
+
+    # Fetch BPM configuration data from MongoDB
+    bpm_conf_docs = list(db['bpm.config'].find())
+    bpm_offset_docs = {doc['bpm_name']: (doc['offset_x'], doc['offset_y']) for doc in db['bpm.offset'].find()}
+
+    n_bpms = len(bpm_conf_docs)
     data = np.zeros((n_bpms,), dtype=dtypes)
-    for i in range(n_bpms):
-        entry = bpm_config.bpm_conf[i]
+
+    for i, doc in enumerate(bpm_conf_docs):
         no_offset = (0, 0)
-        data[i] = entry + no_offset
+        data[i] = (doc['bpm_name'], doc['x_state'], doc['y_state'], doc['ds'], doc['idx'], doc['scale_x'], doc['scale_y']) + no_offset
 
-    del entry, i, n_bpms
-
-    # The scale factors are stored as multipliers ...
-    # The BPM class expects them as deviders
     data['x_scale'] = 1 / data['x_scale']
     data['y_scale'] = 1 / data['y_scale']
 
-    for name in bpm_config.bpm_offset.keys():
-        x_offset, y_offset = bpm_config.bpm_offset[name]
-
+    for name, (x_offset, y_offset) in bpm_offset_docs.items():
         idx = data['name'] == name
         line = data[idx]
-        assert(name == line['name'])
-
+        assert name == line['name']
         line['x_offset'] = x_offset
         line['y_offset'] = y_offset
         data[idx] = line
 
-    del idx, x_offset, y_offset, line, name
-    # deselect deactivated bpms
     valid_bpms = data['x_state'] & data['y_state']
     reduced_bpms = data[valid_bpms]
-    del data
-
-    # only valid bpms beyond this point
-    assert(sum(reduced_bpms['x_state']) == reduced_bpms.shape[0])
-    assert(sum(reduced_bpms['x_state']) == reduced_bpms.shape[0])
 
     s_sort = np.argsort(reduced_bpms['s'])
     sorted_bpms = np.take(reduced_bpms, s_sort)
-    del s_sort
-    del reduced_bpms
 
-    # data start counting at one ... need to use count at zero
-    # compatible with python
     sorted_bpms['idx'] -= 1
     return sorted_bpms

@@ -1,8 +1,0 @@
-# Required to be consistent for the power converters that
-# are powering a chain of magnets
-
-record(fanout, "$(PREFIX):$(PC):dt:fanout")
-{
-	field(DESC, "toward digital twin pc for $(ELEMENT)")
-	field(LNK1, "$(PREFIX):$(ELEMENT):im:I")
-}

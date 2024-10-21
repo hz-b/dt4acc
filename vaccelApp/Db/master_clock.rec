@@ -1,9 +1,0 @@
-# "MCLKHX251C:freq"
-record(ao, "$(PREFIX):master_clock:freq")
-{
-    field(EGU, "kHz")
-    field(VAL,  "500e3")
-    field(PINI, "YES")
-    field(PREC, 8)
-    field(FLNK, "$(PREFIX):beam:revolution_freq")
-}

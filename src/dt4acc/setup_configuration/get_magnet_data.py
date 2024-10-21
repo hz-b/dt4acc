@@ -1,10 +1,10 @@
-# data_access.py
+# get_magnet_data.py
 import os
 
 import pymongo
 
 MONGO_URI = os.environ.get("MONGODB_URL", "mongodb://localhost:27017")
-DB_NAME = "bessyii"
+DB_NAME = os.environ.get("MONGODB_DB", "bessyii")
 COLLECTION_NAME = "accelerator.setup"
 client = pymongo.MongoClient(MONGO_URI)
 db = client[DB_NAME]

@@ -1,7 +1,0 @@
-
-file db/offset.rec
-{
-	pattern{ ELEMENT }
-               { Q1M1D1R }
-
-}

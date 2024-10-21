@@ -23,10 +23,6 @@ class UpdateContext:
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_type is None:
             return
-        # logger.error(
-        #     f"Could not update element {self.element_id=}:"
-        #     f"{self.property_name=} {self.value=} {self.kwargs=}: {exc_type}({exc_val})"
-        # )
         marker = "-" * 78
         tb_buf = io.StringIO()
         traceback.print_tb(exc_tb, file=tb_buf)

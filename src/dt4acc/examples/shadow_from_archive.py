@@ -6,7 +6,7 @@ from bact_archiver_bessyii import BESSY as archiver_bessy
 from p4p.client.asyncio import Context
 from pymongo import MongoClient
 
-from dt4acc.setup_configuration.data_access import get_unique_power_converters_type_specified
+from dt4acc.setup_configuration.get_magnet_data import get_unique_power_converters_type_specified
 
 # Connect to MongoDB
 client = MongoClient("mongodb://localhost:27017/")

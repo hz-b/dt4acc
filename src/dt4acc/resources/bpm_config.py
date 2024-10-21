@@ -265,6 +265,7 @@ bpm_offset = {
     "BPMZ4D1R":  (-2.322388e-02, -6.217347e-01),
 }
 
+
 #: Translation of status
 #: the bits
 #: typically a correctly working bpm should report
@@ -284,3 +285,5 @@ bpmbits = [
     (6, "CS", "CS Select"),
     (7, "Live", "Live Bit"),
 ]
+
+

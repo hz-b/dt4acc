@@ -1,9 +1,4 @@
-import asyncio
-import logging
-from dataclasses import dataclass
-from typing import Sequence, Union
-
-import numpy as np
+import os
 
 from ..accelerators.accelerator_impl import AcceleratorImpl
 from ..accelerators.proxy_factory import PyATProxyFactory
@@ -19,7 +14,7 @@ def set_pyat_ring():
 
 
 acc = set_pyat_ring()
-prefix = "Anonym"  # os.environ["DT4ACC_PREFIX"]
+prefix = os.environ.get("DT4ACC_PREFIX", "Anonym") #"Anonym"  # os.environ["DT4ACC_PREFIX"]
 # set_ring(acc)
 accelerator = AcceleratorImpl(acc.ring, PyATProxyFactory(lattice_model=None, at_lattice=acc.ring),
                               PyAtTwissCalculator(acc), PyAtOrbitCalculator(acc.ring))
@@ -30,6 +25,8 @@ bpm_names_pyat = [elem.FamName for elem in accelerator.acc if "BPM" == elem.FamN
 bpm_pyat = BPMMimikry(prefix=prefix, bpm_names=bpm_names_pyat)
 accelerator.on_new_twiss.subscribe(view.push_twiss)
 accelerator.on_new_orbit.subscribe(view.push_orbit)
+
+
 async def cb(orbit_data: Orbit):
     # Todo: push all orbit data to beam
     try:
@@ -38,15 +35,10 @@ async def cb(orbit_data: Orbit):
         raise exc
     # await view.push_bpms(bpm_data)
     await view.push_legacy_bpm_data(bpm_legacy_data)
+
+
 accelerator.on_new_orbit.subscribe(cb)
 accelerator.on_changed_value.subscribe(elem_par_view.push_value)
-
-
-
-
-
-
-# accelerator.on_new_twiss.subscribe(view.push_twiss)
 
 
 def set_accelerator():

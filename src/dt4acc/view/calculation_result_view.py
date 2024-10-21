@@ -60,6 +60,7 @@ class ResultView:
             raise exc
         else:
             logger.warning('Orbit pushed view')
+
     async def push_twiss(self, twiss_result: TwissWithAggregatedKValues):
         logger.warning('Twiss pushing view')
 

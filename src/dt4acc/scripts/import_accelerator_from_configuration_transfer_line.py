@@ -1,21 +1,20 @@
-import pandas as pd
-import pymongo
 import os
 
-from ..resources import conversion_factors_file
-from ..resources.power_converters import quad_power_supplies, sext_power_supplies, steerer_power_supplies
-
+import pandas as pd
+import pymongo
 from lat2db.model.accelerator import Accelerator
+
+from ..resources import conversion_factors_file_tl
+from ..resources.power_converters_tl import quad_power_supplies, steerer_power_supplies
 
 # MongoDB connection details
 MONGO_URI = os.environ.get("MONGODB_URL", "mongodb://localhost:27017")
-DB_NAME = os.environ.get("MONGODB_DB", "bessyii")
+DB_NAME = os.environ.get("MONGODB_DB", "bessytl")
 COLLECTION_NAME = "accelerator.setup"
 
 # Mapping of power converters from the power_converters.py
 pc_mapping = {
     "Quadrupole": quad_power_supplies(),
-    "Sextupole": sext_power_supplies(),
     "Steerer": steerer_power_supplies()
 }
 
@@ -36,6 +35,10 @@ def insert_data(data, magnet_type, machine):
             target_magnet = next(
                 (q for q in machine.quadrupoles if q.name == magnet_name), None
             )
+        if magnet_type == "Steerer" and machine.steerers:
+            target_magnet = next(
+                (q for q in machine.steerers if q.name == magnet_name), None
+            )
         else:
             target_magnet = next(
                 (s for s in machine.sextupoles if s.name == magnet_name), None
@@ -45,7 +48,7 @@ def insert_data(data, magnet_type, machine):
         # Extract the 'k' value if the magnet is found
         k = None
         if target_magnet:
-            if magnet_type == "Quadrupole":
+            if magnet_type in ["Quadrupole", "Steerer"]:
                 k = target_magnet.element_configuration.magnetic_element.coeffs.normal_coefficients[1]
             else:
                 k = target_magnet.element_configuration.magnetic_element.coeffs.normal_coefficients[2]
@@ -68,18 +71,18 @@ def insert_data(data, magnet_type, machine):
 
 sheets = {
     "Quadrupole": "Quadrupoles",
-    "Sextupole": "Sextupoles",
     "Steerer": "Steerers"
+    # "Dipole" : "Dipoles"
 }
 
-machine = Accelerator().machine
+machine = Accelerator(uid="670f80c21c338a567fb5f7dd").machine
 for magnet_type, sheet_name in sheets.items():
-    df = pd.read_excel(conversion_factors_file, sheet_name=sheet_name)
+    df = pd.read_excel(conversion_factors_file_tl, sheet_name=sheet_name)
     df = df.iloc[:, [0, 1]]  # Select only the first two columns
     df.columns = ['Magnet', 'Magnetic Strength']  # Rename columns for clarity
     df.dropna(subset=['Magnet', 'Magnetic Strength'], inplace=True)
     df = df[df['Magnet'].str.strip().astype(bool)]
 
-    insert_data(df, magnet_type,machine)
+    insert_data(df, magnet_type, machine)
 
 print("Data insertion completed.")
