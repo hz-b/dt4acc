@@ -49,7 +49,7 @@ jobs:
       - name: install
         run: |
           # listing a non existing directory fails ..
-          python -m pip install wheel/pygsl-*.whl
+          python -m pip install wheel/dt4acc-*.whl
 
       - name: Lint with flake8
         run: |
