@@ -1,0 +1,45 @@
+# PyCharm
+.idea/
+
+# Emacs auto save files
+*~
+
+# build files
+*.o
+
+# Library files
+*.so
+*.a
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Directories created by the build process
+bin/
+lib/
+include/
+dbd/
+db/
+configure/O.linux-x86_64/
+vaccelApp/Db/O.linux-x86_64/
+vaccelApp/Db/O.Common/
+vaccelApp/src/O.Common/
+vaccelApp/src/O.linux-x86_64/
+
+# Files created by magnet_info_from_db
+vaccelApp/src/*.inc
+*.inc
+
+# envPaths: built during first make after make clean
+iocBoot/iocvaccel/envPaths
+
+# python related stuff
+src/dist/
+*.pyc
+*.pyo
+__pycache__/

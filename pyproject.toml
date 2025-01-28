@@ -1,0 +1,29 @@
+[build-system]
+requires = [ "poetry-core>=1.0.0",]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "lat2db"
+version = "0.0.1"
+description = "Storing accelerator lattices as json in mongo"
+authors = [  "Waheedullah Sulaiman Khail", "Pierre Schnizer", "Teresia Olsson"]
+license = "GPL-3.0"
+homepage = "https://github.com/hz-b/bact-bessyii-ophyd"
+documentation = "https://github.com/hz-b/bact-bessyii-ophyd"
+repository = "https://github.com/hz-b/bact-bessyii-ophyd.git"
+keywords = []
+
+[tool.poetry.dependencies]
+python = ">=3.7"
+fastapi="*"
+pymongo="*"
+pydantic="*"
+jsons="*"
+uuid="*"
+pytest="*"
+attrs="*"
+numpy="*"
+uvicorn="*"
+httpx="*"
+lark="*"
+accelerator-toolbox="*"
