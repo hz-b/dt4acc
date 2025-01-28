@@ -1,7 +1,7 @@
-pymongo~=4.10.1
-setuptools~=71.1.0
+# pymongo~=4.10.1
+# setuptools~=71.1.0
 
-pydantic~=2.10.5
-softioc~=4.5.0
-numpy~=2.2.1
-p4p~=4.2.0
+# pydantic~=2.10.5
+# softioc~=4.5.0
+# numpy~=2.2.1
+# p4p~=4.2.0
