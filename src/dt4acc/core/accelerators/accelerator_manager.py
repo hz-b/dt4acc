@@ -1,8 +1,8 @@
-from dt4acc.core.utils.logger import get_logger
-from dt4acc.custom_epics.utils.bpm_mimicry import BPMMimicry
 from .proxy_factory import PyATProxyFactory
 from ..accelerators.accelerator_impl import AcceleratorImpl
 from ..calculations.pyat_calculator import PyAtTwissCalculator, PyAtOrbitCalculator
+from ..utils.logger import get_logger
+from ...custom_epics.utils.bpm_mimicry import BPMMimicry
 from ...custom_epics.views.shared_view import get_view_instance
 
 logger = get_logger()

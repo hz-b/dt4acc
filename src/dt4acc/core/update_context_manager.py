@@ -1,7 +1,8 @@
 import io
 import traceback
 
-from dt4acc.core.utils.logger import get_logger
+from ..core.utils.logger import get_logger
+
 logger = get_logger()
 
 
