@@ -40,6 +40,9 @@ iocBoot/iocvaccel/envPaths
 
 # python related stuff
 src/dist/
+wheels/
 *.pyc
 *.pyo
 __pycache__/
+
+venv*/

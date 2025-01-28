@@ -3,27 +3,40 @@ requires = [ "poetry-core>=1.0.0",]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "lat2db"
-version = "0.0.1"
-description = "Storing accelerator lattices as json in mongo"
-authors = [  "Waheedullah Sulaiman Khail", "Pierre Schnizer", "Teresia Olsson"]
+name = "dt4acc"
+version = "0.0.2"
+description = "digital twin for accelerators"
+authors = [  "Waheedullah Sulaiman Khail", "Pierre Schnizer"]
 license = "GPL-3.0"
-homepage = "https://github.com/hz-b/bact-bessyii-ophyd"
-documentation = "https://github.com/hz-b/bact-bessyii-ophyd"
-repository = "https://github.com/hz-b/bact-bessyii-ophyd.git"
+homepage = "https://github.com/hz-b/dt4acc"
+documentation = "https://github.com/hz-b/dt4acc"
+repository = "https://github.com/hz-b/dt4acc.git"
 keywords = []
+classifiers = [
+     "Development Status :: 4 - Beta",
+     "Intended Audience :: Science/Research",
+     "License :: OSI Approved :: GNU General Public License (GPL)",
+     "Programming Language :: Python :: 3",
+     "Topic :: Scientific/Engineering :: Physics"
+]
 
 [tool.poetry.dependencies]
 python = ">=3.7"
-fastapi="*"
-pymongo="*"
-pydantic="*"
-jsons="*"
-uuid="*"
-pytest="*"
-attrs="*"
-numpy="*"
-uvicorn="*"
-httpx="*"
-lark="*"
 accelerator-toolbox="*"
+numpy="<2.0"
+pymongo="*"
+lat2db="*"
+softioc="*"
+p4p="*"
+bact_device_models="*"
+pandas="*"
+# jsons="*"
+# fastapi="*"
+# pydantic="*"
+#
+# uuid="*"pymongo
+# pytest="*"
+# attrs="*"
+# uvicorn="*"
+# httpx="*"
+# lark="*"
