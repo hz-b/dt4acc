@@ -47,3 +47,4 @@ if __name__ == "__main__":
     dispatcher(main)
     # Start the interactive IOC shell, allowing interaction with the server
     softioc.interactive_ioc(globals())
+    # for testing purpose issue a command

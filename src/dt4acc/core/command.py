@@ -1,13 +1,56 @@
+from bact_twin_architecture.data_model.command import Command, BehaviourOnError
+from bact_twin_architecture.interfaces.command_rewritter import CommandRewriterBase
+from bact_twin_bessyii_impl.bl.io.pytac_repositories import PyTACRepository
+from bact_twin_bessyii_impl.bl.command_rewritter import CommandRewriter
+from bact_twin_bessyii_impl.bl.translation_service import TranslationService
+
 from .accelerators.pyat_accelerator import setup_accelerator
 from .update_context_manager import UpdateContext
 
+
+class UpdateManager:
+    """Handle update requests from the device view
+
+    Treats the incoming requests as commands to be rewritten and delivered to the
+    machine
+    """
+    def __init__(self, command_rewritter: CommandRewriterBase):
+        self.command_rewritter = command_rewritter
+
+    async def update(self, *, device_id, property_name, value=None, element=None):
+        """Update an device property using element knowledge
+
+
+        Todo:
+            element should not need to be passed on beyond this point
+        """
+
+        # this argument shall be removed
+        assert element is None
+        # update context manager: currently here as the async io comm stops at first exception
+        with UpdateContext(element_id=device_id, property_name=property_name, value=value, element=element,
+                           kwargs=dict()):
+            cmd = self.command_rewritter.inverse(
+                Command(id=device_id, property=property_name, value=value, behaviour_on_error=BehaviourOnError.stop
+            ))
+            # Todo: simplify the code down here ... accelerator should not need to
+            elem_proxy = await acc.accelerator.get_element(cmd.id)
+            await elem_proxy.update(cmd.property, cmd.value, element)
+
+
+#: Todo should be in the main startup script
 acc = setup_accelerator()
 
+#: todo replace soon by database service
+repo = PyTACRepository()
 
-async def update(*, element_id, property_name, value=None, element):
-    """
-    Update an element's property and trigger necessary calculations or readbacks.
-    """
-    with UpdateContext(element_id=element_id, property_name=property_name, value=value, element=element, kwargs=dict()):
-        elem_proxy = await acc.accelerator.get_element(element_id)
-        await elem_proxy.update(property_name, value, element)
+
+#: should be in main startup script
+update_manager = UpdateManager(
+    command_rewritter=CommandRewriter(
+        TranslationService(conversion_info=repo.state_conversion_repo)
+    )
+)
+
+def update(*, device_id, property_name, value=None, element):
+    update_manager.update(device_id=device_id, property_name=property_name, value=value, element=element)
