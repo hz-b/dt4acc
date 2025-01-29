@@ -30,12 +30,18 @@ class UpdateManager:
         # update context manager: currently here as the async io comm stops at first exception
         with UpdateContext(element_id=device_id, property_name=property_name, value=value, element=element,
                            kwargs=dict()):
-            cmd = self.command_rewritter.inverse(
+            cmds = self.command_rewritter.inverse(
                 Command(id=device_id, property=property_name, value=value, behaviour_on_error=BehaviourOnError.stop
             ))
-            # Todo: simplify the code down here ... accelerator should not need to
-            elem_proxy = await acc.accelerator.get_element(cmd.id)
-            await elem_proxy.update(cmd.property, cmd.value, element)
+
+            for cmd in cmds:
+                # Todo: simplify the code down here ...
+                # does one still need the proxy factory of the accelerator
+                #
+                # Todo: revisit if a transactional update should be applied here
+
+                elem_proxy = await acc.accelerator.get_element(cmd.id)
+                await elem_proxy.update(cmd.property, cmd.value, element)
 
 
 #: Todo should be in the main startup script

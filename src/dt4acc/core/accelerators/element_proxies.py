@@ -134,6 +134,9 @@ class ElementProxy(ElementInterface):
             element.update(KickAngle=manipulate_kick(element.KickAngle, kick_x=value))
         elif method_name == "set_y_kick":
             element.update(KickAngle=manipulate_kick(element.KickAngle, kick_y=value))
+        elif method_name == "set_frequency":
+            raise AssertionError("Cavity control not yet declared as functional, have a look to the line below")
+            element.update(Frequency=value)
         else:
             method = getattr(element, method_name)
             await method(value)
