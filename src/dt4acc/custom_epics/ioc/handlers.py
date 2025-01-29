@@ -8,23 +8,46 @@ logger = get_logger()
 ctx = Context("pva")  # Create a context for EPICS PVA (PV Access)
 
 
-async def handle_magnet_update(pv_name, value, element):
+async def handle_device_update(device_id: str, property_id: str, value: float):
+    """Handles updates of devices
+
+    Delegates ipdates the corresponding property in the lattice to the
+    device updater
+
+
+    Args:
+        device_name (str): The process variable (PV) name of the magnet.
+        value (float): The updated value for the PV.
+        element (object): The magnet element being updated.
+
+    Todo:
+        should one directly call the update managers. update?
+
+    """
+    try:
+        # Call the command update function to apply the value to the model
+        await command.update(device_id=device_id, property_name=property_id, value=value)
+    except Exception as e:
+        logger.warning(f"Error in updating element {device_id} with property_name: {property_id} value {value}")
+
+
+async def handle_magnet_update(device_id: str, property_id: str, value: float):
     """
     Handles updates to magnet PVs.
 
     Args:
-        pv_name (str): The process variable (PV) name of the magnet.
+        device_name (str): The process variable (PV) name of the magnet.
         value (float): The updated value for the PV.
         element (object): The magnet element being updated.
 
     Updates the corresponding magnet property in the accelerator model.
     """
-    property_id = get_property_id(pv_name)
     try:
         # Call the command update function to apply the value to the model
-        await command.update(element_id=element.name, property_name=property_id, value=value, element=element)
+        await command.update(device_id=device_id, property_name=property_id, value=value)
     except Exception as e:
-        logger.warning(f"Error in updating element {element.name}: {e}")
+        logger.warning(f"Error in updating {device_id=} {property_id=} {value=}: {e}")
+
 
 
 async def handle_power_converter_update(pc_name, value, prefix, connected_magnets):

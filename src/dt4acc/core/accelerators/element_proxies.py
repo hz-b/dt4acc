@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 from at import shift_elem
 
@@ -128,6 +130,10 @@ class ElementProxy(ElementInterface):
             element.update(Frequency=value * 1000)
         elif method_name in ["set_rdbk", "set_K"]:
             pass
+        elif method_name == "set_x_kick":
+            element.update(KickAngle=manipulate_kick(element.KickAngle, kick_x=value))
+        elif method_name == "set_y_kick":
+            element.update(KickAngle=manipulate_kick(element.KickAngle, kick_y=value))
         else:
             method = getattr(element, method_name)
             await method(value)
@@ -175,15 +181,15 @@ class KickAngleCorrectorProxy(AddOnElementProxy):
             kick_x: Horizontal kick angle.
             kick_y: Vertical kick angle.
             element_data: Element-specific conversion data.
+
+        Todo: review if this code is still neede
         """
         element, = self._obj
-        kick_angles = self._obj.KickAngle.copy()
         if kick_x is not None:
-            kick_angles[0] = kick_x * element_data.hw2phys
+            kick_x = kick_x * element_data.hw2phys
         if kick_y is not None:
-            kick_angles[1] = kick_y * element_data.hw2phys
-
-        element.update(KickAngle=kick_angles)
+            kick_y = kick_y * element_data.hw2phys
+        element.update(KickAngle=manipulate_kick(self._obj.KickAngle, kick_x=kick_x, kick_y=kick_y))
 
     async def update(self, property_id: str, value, element_data):
         """
@@ -206,3 +212,12 @@ class KickAngleCorrectorProxy(AddOnElementProxy):
             await self.update_kick(kick_y=value, element_data=element_data)
 
         await self.on_update_finished.trigger(None)
+
+
+def manipulate_kick(kick_angles: Tuple[float, float], kick_x = None, kick_y = None) -> Tuple[float, float]:
+    kick_angles =  kick_angles.copy()
+    if kick_x is not None:
+        kick_angles[0] = kick_x
+    if kick_y is not None:
+        kick_angles[1] = kick_y
+    return kick_angles
