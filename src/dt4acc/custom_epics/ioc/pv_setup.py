@@ -21,34 +21,17 @@ def initialize_magnet_pvs(builder, magnet):
         - `<magnet_name>:x:set`: Horizontal position setpoint
         - `<magnet_name>:y:set`: Vertical position setpoint
     """
-    brho = DEFAULTS['brho']  # from facility specific constants
     magnet_name = magnet['name']
     # Create an element representing the magnet
-    element = MagnetElementSetup(
-        type=magnet['type'],
-        name=magnet['name'],
-        hw2phys=magnet['magnetic_strength'],  # Conversion factor from hardware to physics units
-        phys2hw=1 / magnet['magnetic_strength'],  # Inverse conversion factor
-        energy=DEFAULTS['energy'],  # Default accelerator energy
-        magnetic_strength=magnet['magnetic_strength'],
-        electron_rest_mass=0.51099895e6,  # Electron rest mass (in eV)
-        speed_of_light=299792458,  # Speed of light in m/s
-        brho=brho,
-        edf=1 / brho,
-        pc=magnet['pc'],
-        k=magnet['k']
-    )
-
     # Create PVs and link to update logic
-    k_value = element.k if element.k is not None else 0.0
-    builder.aOut(f"{magnet_name}:Cm:set", initial_value=k_value,
-                 on_update=lambda val: handle_magnet_update(f"{magnet_name}:Cm:set", val, element))
-    builder.aOut(f"{magnet_name}:im:I", initial_value=k_value * element.phys2hw * element.brho,
-                 on_update=lambda val: handle_magnet_update(f"{magnet_name}:im:I", val, element))
+    builder.aOut(f"{magnet_name}:Cm:set", initial_value=magnet["k"] or 0.0,
+                 on_update=lambda val: handle_device_update(magnet_name, "K", val))
+    builder.aOut(f"{magnet_name}:im:I", initial_value=0.0,
+                 on_update=lambda val: handle_magnet_update(f"{magnet_name}:im:I", val))
     builder.aOut(f"{magnet_name}:x:set", initial_value=0.0,
-                 on_update=lambda val: handle_magnet_update(f"{magnet_name}:x:set", val, element))
+                 on_update=lambda val: handle_device_update(magnet_name, "x", val))
     builder.aOut(f"{magnet_name}:y:set", initial_value=0.0,
-                 on_update=lambda val: handle_magnet_update(f"{magnet_name}:y:set", val, element))
+                 on_update=lambda val: handle_device_update(magnet_name, "y", val))
 
 
 def initialize_power_converter_pvs(builder, prefix):
@@ -83,7 +66,7 @@ def add_pc_pvs(builder, pc_name, prefix):
 
     # Create power converter setpoint and readback PVs
     builder.aOut(f"{pc_name}:set", initial_value=0.0,
-                 on_update=lambda val: handle_power_converter_update(pc_name, val, prefix, magnets))
+                 on_update=lambda val: handle_device_update(pc_name, "set_current", val))
     builder.aOut(f"{pc_name}:rdbk", initial_value=0.0)
 
 
