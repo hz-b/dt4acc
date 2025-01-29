@@ -2,7 +2,7 @@ import os
 
 import pymongo
 
-from src.dt4acc import mongodb_
+from dt4acc import mongodb_
 
 client = pymongo.MongoClient(mongodb_)
 DB_NAME = os.environ.get("MONGODB_DB", "bessyii")
