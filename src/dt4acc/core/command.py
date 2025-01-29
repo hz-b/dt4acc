@@ -58,5 +58,5 @@ update_manager = UpdateManager(
     )
 )
 
-def update(*, device_id, property_name, value=None, element):
-    update_manager.update(device_id=device_id, property_name=property_name, value=value, element=element)
+async def update(*, device_id, property_name, value=None, element=None):
+    return await update_manager.update(device_id=device_id, property_name=property_name, value=value, element=element)
