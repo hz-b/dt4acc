@@ -1,6 +1,7 @@
 import numpy as np
 
-from .handlers import handle_magnet_update, handle_power_converter_update, handle_master_clock_update
+from .handlers import handle_magnet_update, handle_power_converter_update, handle_master_clock_update, \
+    handle_device_update
 from ..data.constants import DEFAULTS, CAVITY_NAMES
 from ..data.querries import get_unique_power_converters, get_magnets_per_power_converters
 from ...core.model.elementmodel import MagnetElementSetup
@@ -123,7 +124,7 @@ def initialize_other_pvs(builder, prefix):
         prefix (str): Prefix for PV naming.
     """
     builder.aOut(f"{DEFAULTS['master_clock']}:freq", initial_value=0,
-                 on_update=lambda val: handle_master_clock_update(CAVITY_NAMES, val, prefix))
+                 on_update=lambda val: handle_device_update(device_id="master_clock", property_id="reference_frequency", value=val))
     builder.aOut(f"dummy:x", initial_value=0)
     builder.aOut(f"dummy:y", initial_value=0)
     builder.aOut(f"{DEFAULTS['current']}:current", initial_value=0)
