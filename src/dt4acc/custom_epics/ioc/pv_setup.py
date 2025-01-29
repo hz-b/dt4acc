@@ -1,7 +1,6 @@
 import numpy as np
 
-from .handlers import handle_magnet_update, handle_power_converter_update, handle_master_clock_update, \
-    handle_device_update
+from .handlers import handle_device_update
 from ..data.constants import DEFAULTS, CAVITY_NAMES
 from ..data.querries import get_unique_power_converters, get_magnets_per_power_converters
 from ...core.model.elementmodel import MagnetElementSetup
@@ -27,7 +26,9 @@ def initialize_magnet_pvs(builder, magnet):
     builder.aOut(f"{magnet_name}:Cm:set", initial_value=magnet["k"] or 0.0,
                  on_update=lambda val: handle_device_update(magnet_name, "K", val))
     builder.aOut(f"{magnet_name}:im:I", initial_value=0.0,
-                 on_update=lambda val: handle_magnet_update(f"{magnet_name}:im:I", val))
+                 # Todo: what to do if current is set, should be rather read only
+                 # on_update=lambda val: handle_device_update(f"{magnet_name}:im:I", val)
+    )
     builder.aOut(f"{magnet_name}:x:set", initial_value=0.0,
                  on_update=lambda val: handle_device_update(magnet_name, "x", val))
     builder.aOut(f"{magnet_name}:y:set", initial_value=0.0,
