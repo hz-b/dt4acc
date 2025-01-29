@@ -15,7 +15,7 @@ async def test_update_quadrupole_x():
         await update_manager.update(device_id=device_id, property_name="x", value=val)
         # check that the result arrived
         # todo: reading  interaction should be improved
-        proxy = await acc.accelerator.get_element(device_id)
+        proxy = await acc.acc_mgr.get_element(device_id)
         element, = proxy._obj
         shift =  estimate_shift(element)
         assert shift[0] == pytest.approx(-val, abs=1e-6)
@@ -29,7 +29,7 @@ async def test_update_quadrupole_y():
         await update_manager.update(device_id=device_id, property_name="y", value=val)
         # check that the result arrived
         # todo: reading  interaction should be improved
-        proxy = await acc.accelerator.get_element(device_id)
+        proxy = await acc.acc_mgr.get_element(device_id)
         element, = proxy._obj
         shift =  estimate_shift(element)
         assert shift[0] == pytest.approx(0.0, abs=1e-6)
@@ -48,7 +48,7 @@ async def test_update_steerer_pc_current():
         # check that the result arrived
         # todo: reading  interaction should be improved
         lattice_id = device_id[1:].replace("P", "M")
-        proxy = await acc.accelerator.get_element(lattice_id)
+        proxy = await acc.acc_mgr.get_element(lattice_id)
         element, = proxy._obj
         x_kick, y_kick = element.KickAngle
         
