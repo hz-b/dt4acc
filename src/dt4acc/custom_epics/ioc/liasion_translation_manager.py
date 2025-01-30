@@ -1,5 +1,5 @@
-from collections.abc import Mapping
-from typing import Dict, Sequence
+from typing import Dict, Sequence, Mapping
+import logging
 
 from bact_twin_architecture.data_model.identifiers import LatticeElementPropertyID, DevicePropertyID, ConversionID
 from bact_twin_architecture.interfaces.liaison_manager import LiaisonManagerBase
@@ -12,6 +12,8 @@ from bact_twin_bessyii_impl.bl.bessyii_nomen_clature import name_matches_horizon
 from ..data.querries import get_magnets
 from ..data.constants import DEFAULTS
 from ...core.model.elementmodel import MagnetElementSetup
+
+logger = logging.getLogger("dt4acc")
 
 
 class LiaisonManager(LiaisonManagerBase):
@@ -27,7 +29,10 @@ class LiaisonManager(LiaisonManagerBase):
         return self.forward_lut[id_]
 
     def inverse(self, id_: DevicePropertyID) -> Sequence[LatticeElementPropertyID]:
-        return self.inverse_lut[id_]
+        try:
+            return self.inverse_lut[id_]
+        except KeyError as ke:
+            logger.error(f"{self.__class__.__name__} I did not find id {id_} in lookup table: {ke}")
 
 
 class TranslatorService(TranslatorServiceBase):
@@ -35,7 +40,10 @@ class TranslatorService(TranslatorServiceBase):
         self.lut = lut
 
     def get(self, id_: ConversionID) -> StateConversion:
-        return self.lut[id_]
+        try:
+            return self.lut[id_]
+        except KeyError as ke:
+            logger.error(f"{self.__class__.__name__}: I did not find id {id_} in lookup table: {ke}")
 
 
 def remove_id(d: Dict) -> Dict:
@@ -103,9 +111,13 @@ def build_managers() -> (LiaisonManagerBase, TranslatorServiceBase):
         for pc_name, magnet_names in power_converter_feeds.items() if pc_name not in steerer_pc_names
     })
 
-    # Add lut for quadrupoles and sextupole axes
+    # Add lut for quadrupoles and sextupole
+    # Furthermore to feed through the K value ...
+    # Todo:
+    #     is that appropriate ?
+    #     Should one rather use a handler for lattice elements
     quad_updates = dict()
-    for axis_name  in "x", "y":
+    for axis_name  in "x", "y", "K":
         quad_updates.update({
             DevicePropertyID(device_name=info.name, property=axis_name):
                 (LatticeElementPropertyID(element_name=info.name, property=axis_name),)
@@ -154,7 +166,7 @@ def build_managers() -> (LiaisonManagerBase, TranslatorServiceBase):
     }
 
     axis_updates = dict()
-    for axis_name  in "x", "y":
+    for axis_name  in "x", "y", "K":
         axis_updates.update({
             ConversionID(
                 lattice_property_id=LatticeElementPropertyID(element_name=info.name, property=axis_name),

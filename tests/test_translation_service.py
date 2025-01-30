@@ -26,3 +26,10 @@ def test_translation_service_as_issued_by_command_test():
         )
     )
 
+    device_name = 'S4M1D1R'
+    r = tm.get(
+        ConversionID(
+            lattice_property_id=LatticeElementPropertyID(element_name=device_name, property="K"),
+            device_property_id=DevicePropertyID(device_name=device_name, property="K")
+        )
+    )

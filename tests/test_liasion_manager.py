@@ -9,12 +9,12 @@ def test_liasion_service():
     device_name = "HS4P2D1R"
     r, = lm.inverse(DevicePropertyID(device_name=device_name, property="set_current"))
     assert r.property == "x_kick"
-    assert r.element_name == device_name.replace("P", "M")
+    assert r.element_name == device_name.replace("P", "M")[1:]
 
     device_name = "VS2P2D1R"
     r, = lm.inverse(DevicePropertyID(device_name=device_name, property="set_current"))
     assert r.property == "y_kick"
-    assert r.element_name == device_name.replace("P", "M")
+    assert r.element_name == device_name.replace("P", "M")[1:]
 
 
     device_name = "S4PD1R"
@@ -26,3 +26,10 @@ def test_liasion_service():
     r = down_stream
     assert r.property == "K"
     assert r.element_name == device_name[:2] + "M2" + device_name[3:]
+
+    # todo: review if these should be feed thorough
+    # K is a property of the lattice not the device
+    device_name= 'S4M1D1R'
+    r, = lm.inverse(DevicePropertyID(device_name=device_name, property='K'))
+    assert r.element_name == device_name
+    assert r.property == "K"
