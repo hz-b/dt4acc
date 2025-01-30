@@ -1,6 +1,5 @@
 from bact_twin_bessyii_impl.bl.command_rewritter import CommandRewriter
-from bact_twin_bessyii_impl.bl.io.pytac_repositories import PyTACRepository
-from bact_twin_bessyii_impl.bl.translation_service import TranslationService
+from dt4acc.custom_epics.ioc.liasion_translation_manager import build_managers
 from p4p.client.asyncio import Context
 
 from ...core.accelerators.pyat_accelerator import setup_accelerator
@@ -12,12 +11,14 @@ logger = get_logger()
 ctx = Context("pva")  # Create a context for EPICS PVA (PV Access)
 
 #: todo replace soon by database service
-repo = PyTACRepository()
+
+lm, tm = build_managers()
 
 # todo: should this be part of the controller
 update_manager = UpdateManager(
     command_rewritter=CommandRewriter(
-        TranslationService(conversion_info=repo.state_conversion_repo)
+        liasion_manager=lm,
+        translation_service=tm
     ),
     acc_mgr=setup_accelerator()
 )
