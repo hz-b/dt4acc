@@ -6,16 +6,18 @@ from pydantic.dataclasses import dataclass
 class MagnetElementSetup:
     type: str
     name: str
-    hw2phys: float
-    phys2hw: float
-    energy: float
-    magnetic_strength: float
-    electron_rest_mass: float
-    speed_of_light: float
-    brho: float
-    edf: float
+    #: power converter it is connected to
     pc: str
+    magnetic_strength: float
+    hw2phys: Optional[float] = None
     k: Optional[float] = None
+
+
+    def order(self) -> int:
+        """return order in European Convention
+        """
+        magnet_order = dict(bend=1, quadrupole=2, sextupole=3, octupole=4, steerer=1)
+        return magnet_order[self.type.lower()]
 
 @dataclass
 class PowerConverterElementSetup:
