@@ -41,6 +41,15 @@ def estimate_shift(element, eps=1e-8):
     return shift
 
 
+def manipulate_kick(kick_angles: Tuple[float, float], kick_x = None, kick_y = None) -> Tuple[float, float]:
+    kick_angles =  kick_angles.copy()
+    if kick_x is not None:
+        kick_angles[0] = kick_x
+    if kick_y is not None:
+        kick_angles[1] = kick_y
+    return kick_angles
+
+
 class ElementProxy(ElementInterface):
     """
     Proxy class for an accelerator element to handle interactions and updates.
@@ -215,12 +224,3 @@ class KickAngleCorrectorProxy(AddOnElementProxy):
             await self.update_kick(kick_y=value, element_data=element_data)
 
         await self.on_update_finished.trigger(None)
-
-
-def manipulate_kick(kick_angles: Tuple[float, float], kick_x = None, kick_y = None) -> Tuple[float, float]:
-    kick_angles =  kick_angles.copy()
-    if kick_x is not None:
-        kick_angles[0] = kick_x
-    if kick_y is not None:
-        kick_angles[1] = kick_y
-    return kick_angles
