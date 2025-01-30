@@ -12,6 +12,11 @@ class PyATProxyFactory(ProxyFactoryInterface):
     Warning:
         Currently, this implementation uses an `at_lattice` directly, which should be
         revised when a proper lattice model becomes available.
+
+    Todo:
+        Revisit name: still a proxy? The element proxy currently not necessary`?
+
+        Leave addon element proxy e.g. for handling combined function magnets
     """
 
     def __init__(self, *, lattice_model, at_lattice):
