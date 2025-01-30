@@ -13,15 +13,17 @@ from .pv_setup import (
     initialize_cavity_pvs
 )
 
+# Create an asyncio dispatcher to handle asynchronous PV updates
+dispatcher = asyncio_dispatcher.AsyncioDispatcher()
+
 
 def main():
     """
     Main function to initialize all the process variables (PVs) and start the IOC server.
     """
-    # Create an asyncio dispatcher to handle asynchronous PV updates
-    dispatcher = asyncio_dispatcher.AsyncioDispatcher()
     # Retrieve the device name prefix from the environment, defaulting to "Anonym" if not set
     prefix = os.environ.get("DT4ACC_PREFIX", "Anonym")
+
     builder.SetDeviceName(prefix)
     # Initialize PVs for various accelerator components
     initialize_power_converter_pvs(builder, prefix)  # Initialize power converters and linked magnets
@@ -46,4 +48,3 @@ if __name__ == "__main__":
     dispatcher(main)
     # Start the interactive IOC shell, allowing interaction with the server
     softioc.interactive_ioc(globals())
-    # for testing purpose issue a command
