@@ -1,12 +1,17 @@
+"""
+Todo:
+    Tests show that a readback is required without layer violations
+
+"""
 import asyncio
 import pytest
 
+
 from src.dt4acc.core.accelerators.element_proxies import estimate_shift
-from src.dt4acc.core.command import update_manager, acc
+from src.dt4acc.custom_epics.ioc.handlers import update_manager
 
 
 # pytest_plugins = ('pytest_asyncio',)
-
 
 @pytest.mark.asyncio(scope="session")
 async def test_update_quadrupole_x():
@@ -15,7 +20,7 @@ async def test_update_quadrupole_x():
         await update_manager.update(device_id=device_id, property_name="x", value=val)
         # check that the result arrived
         # todo: reading  interaction should be improved
-        proxy = await acc.acc_mgr.get_element(device_id)
+        proxy = await update_manager.acc_mgr.accelerator.get_element(device_id)
         element, = proxy._obj
         shift =  estimate_shift(element)
         assert shift[0] == pytest.approx(-val, abs=1e-6)
@@ -29,7 +34,7 @@ async def test_update_quadrupole_y():
         await update_manager.update(device_id=device_id, property_name="y", value=val)
         # check that the result arrived
         # todo: reading  interaction should be improved
-        proxy = await acc.acc_mgr.get_element(device_id)
+        proxy = await update_manager.acc_mgr.accelerator.get_element(device_id)
         element, = proxy._obj
         shift =  estimate_shift(element)
         assert shift[0] == pytest.approx(0.0, abs=1e-6)
@@ -38,7 +43,6 @@ async def test_update_quadrupole_y():
 
 @pytest.mark.asyncio(scope="session")
 async def test_update_steerer_pc_current():
-    acc
     device_id = "HS4P1D1R"
     lattice_id = device_id[1:].replace("P", "M")
 
@@ -48,7 +52,7 @@ async def test_update_steerer_pc_current():
         # check that the result arrived
         # todo: reading  interaction should be improved
         lattice_id = device_id[1:].replace("P", "M")
-        proxy = await acc.acc_mgr.get_element(lattice_id)
+        proxy = await update_manager.acc_mgr.accelerator.get_element(lattice_id)
         element, = proxy._obj
         x_kick, y_kick = element.KickAngle
         
@@ -63,5 +67,5 @@ async def test_update_steerer_pc_current():
 async def test_update_master_clock():
     device_id = "MCLKHX251C"
     frequency = 500e6
-    with pytest.raises(AssertionError):
+    with pytest.raises(KeyError):
         await update_manager.update(device_id=device_id, property_name="reference_frequency", value=frequency)
