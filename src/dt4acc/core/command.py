@@ -1,11 +1,7 @@
 from bact_twin_architecture.data_model.command import Command, BehaviourOnError
 from bact_twin_architecture.interfaces.command_rewritter import CommandRewriterBase
-from bact_twin_bessyii_impl.bl.io.pytac_repositories import PyTACRepository
-from bact_twin_bessyii_impl.bl.command_rewritter import CommandRewriter
-from bact_twin_bessyii_impl.bl.translation_service import TranslationService
 
 from .accelerators.accelerator_manager import AcceleratorManager
-from .accelerators.pyat_accelerator import setup_accelerator
 from .update_context_manager import UpdateContext
 
 
