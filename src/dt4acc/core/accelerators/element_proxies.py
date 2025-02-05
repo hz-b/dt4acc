@@ -104,6 +104,9 @@ class ElementProxy(ElementInterface):
 
         Raises:
             ValueError: If an unknown property is specified.
+
+        Todo: is that Liasion management?
+              the inverse way
         """
         if value is not None:
             assert np.isfinite(value), "Value must be finite"
@@ -164,7 +167,7 @@ class KickAngleCorrectorProxy(AddOnElementProxy):
 
     def __init__(self, obj, *, correction_plane, **kwargs):
         assert correction_plane in ["horizontal", "vertical"], "Invalid correction plane"
-        self.correction_planes = correction_plane
+        self.correction_plane = correction_plane
         super().__init__(*obj, **kwargs)
 
     async def update_kick(self, *, kick_x=None, kick_y=None, element_data):
@@ -176,7 +179,7 @@ class KickAngleCorrectorProxy(AddOnElementProxy):
             kick_y: Vertical kick angle.
             element_data: Element-specific conversion data.
         """
-        element, = self._obj
+        element = self._obj
         kick_angles = self._obj.KickAngle.copy()
         if kick_x is not None:
             kick_angles[0] = kick_x * element_data.hw2phys
