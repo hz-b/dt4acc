@@ -8,7 +8,7 @@ import numpy as np
 
 from ..interfaces.calculation_interface import TwissCalculator, OrbitCalculator
 from ..model.orbit import Orbit
-from ..model.twiss import TwissForPlane, TwissWithAggregatedKValues
+from ..model.twiss import TwissForPlane, TwissWithAggregatedKValues, MainValue
 
 from ...core.utils.logger import get_logger
 logger = get_logger()
@@ -75,33 +75,49 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
             else:
                 _, __, twiss = self.acc.get_optics(at.All, twiss_in=twiss_in)  # for transfer line
 
-            pv_names, values = self._extract_pv_values()
+            main_values = self._extract_pv_values()
 
             return TwissWithAggregatedKValues(
                 x=TwissForPlane(alpha=twiss["alpha"][:, 0], beta=twiss["beta"][:, 0], nu=twiss["mu"][:, 0]),
                 y=TwissForPlane(alpha=twiss["alpha"][:, 1], beta=twiss["beta"][:, 1], nu=twiss["mu"][:, 1]),
                 names=_construct_name_list(self.acc),
-                all_k_pv_names=pv_names,
-                all_k_pv_values=values
+                main_values=main_values
             )
         except Exception as e:
             logger.error(f"Error during Twiss calculation: {e}")
             raise RuntimeError("Failed to perform Twiss calculation.") from e
 
-    def _extract_pv_values(self):
+    def _extract_pv_values(self) -> Sequence[MainValue]:
         """
         Extract PV names and K values from the lattice elements.
 
         Returns:
             tuple: PV names and their corresponding K values.
         """
-        pv_names = []
-        values = []
+        main_values = []
+        prefix = os.environ.get('DT4ACC_PREFIX', 'Anonym')
         for element in self.acc:
-            if element.__class__.__name__ in ["Sextupole", "Quadrupole"]:
-                pv_names.append(f"{os.environ.get('DT4ACC_PREFIX', 'Anonym')}:{element.FamName}:Cm:set")
-                values.append(element.K)
-        return pv_names, values
+            if element.__class__.__name__ == "Quadrupole":
+                main_values.append(
+                    MainValue(
+                        pv_name=(f"{prefix}:{element.FamName}:Cm:set"),
+                        value=element.K
+                    )
+                )
+            elif element.__class__.__name__ == "Sextupole":
+                try:
+                    value = element.H
+                except:
+                    element
+                    raise
+                main_values.append(
+                    MainValue(
+                        pv_name=(f"{prefix}:{element.FamName}:Cm:set"),
+                        value=element.H
+                    )
+                )
+
+        return main_values
 
 
 class PyAtOrbitCalculator(OrbitCalculator, metaclass=ABCMeta):
