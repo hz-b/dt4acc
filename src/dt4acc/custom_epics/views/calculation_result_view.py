@@ -8,7 +8,7 @@ from ...core.model.element_upate import ElementUpdate
 from ...core.model.orbit import Orbit
 from ...core.model.twiss import TwissWithAggregatedKValues
 from ...core.utils.logger import get_logger
-from ..data.constants import DEFAULTS
+from ..data.constants import special_pvs
 from ..views.bpm_data import BeamPositionPVs
 from ..views.create_or_update_pv import update_or_create_pv
 
@@ -40,7 +40,8 @@ async def update_twiss_pv(pv_name, twiss_result):
     except Exception as e:
         logger.error(f"Failed to update or create twiss PV {pv_name}: {e}")
     try:
-        await ctx.put(twiss_result.all_k_pv_names, twiss_result.all_k_pv_values)
+
+        await ctx.put([k.pv_name for k in twiss_result.main_values], [k.value for k in twiss_result.main_values])
     except Exception as e:
         logger.error(f"Failed to update or create magnet_strength PV {pv_name}: {e}")
 
@@ -48,7 +49,7 @@ async def update_twiss_pv(pv_name, twiss_result):
 class ResultView:
     def __init__(self, *, prefix):
         self.prefix = prefix
-        self.bpm_pvs = BeamPositionPVs(prefix=f"{self.prefix}:{DEFAULTS['bpm_pv']}")
+        self.bpm_pvs = BeamPositionPVs(prefix=f"{self.prefix}:{special_pvs['bpm_pv']}")
         tmp = np.empty([2048], np.int16)
         tmp.fill(-2 ** 15 + 1)
         self.default_bpm_legacy_data = tmp
@@ -59,6 +60,7 @@ class ResultView:
         self.bpm_mimicry = bpm_mimicry
 
     async def push_value(self, elm_update: ElementUpdate):
+        elm_update
         if elm_update.property_name == "K":
             pass
         else:

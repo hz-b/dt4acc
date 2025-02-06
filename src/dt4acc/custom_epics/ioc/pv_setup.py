@@ -1,9 +1,16 @@
+import logging
+
 import numpy as np
 
 from .handlers import handle_device_update
-from ..data.constants import DEFAULTS, CAVITY_NAMES
+from ..data.constants import config, special_pvs, cavity_names
 from ..data.querries import get_unique_power_converters, get_magnets_per_power_converters
-from ...core.model.elementmodel import MagnetElementSetup
+from ...core.utils.logger import get_logger
+
+logger = get_logger()
+
+def flag_not_handling(pv_name: str, val: object):
+    logger.warning("Not handling update of pv %s to %s", pv_name, val)
 
 
 def initialize_magnet_pvs(builder, magnet):
@@ -28,7 +35,8 @@ def initialize_magnet_pvs(builder, magnet):
     builder.aOut(f"{magnet_name}:im:I", initial_value=0.0,
                  # Todo: what to do if current is set, should be rather read only
                  # on_update=lambda val: handle_device_update(f"{magnet_name}:im:I", val)
-    )
+                 on_update=lambda val: handle_device_update(magnet_name, "powersupply_current", val)
+                 )
     builder.aOut(f"{magnet_name}:x:set", initial_value=0.0,
                  on_update=lambda val: handle_device_update(magnet_name, "x", val))
     builder.aOut(f"{magnet_name}:y:set", initial_value=0.0,
@@ -66,8 +74,10 @@ def add_pc_pvs(builder, pc_name, prefix):
         initialize_magnet_pvs(builder, magnet_data)
 
     # Create power converter setpoint and readback PVs
+    # Todo: put it to power converters directly
     builder.aOut(f"{pc_name}:set", initial_value=0.0,
-                 on_update=lambda val: handle_device_update(pc_name, "set_current", val))
+                 on_update=lambda val: handle_device_update(pc_name, "set_current", val)
+    )
     builder.aOut(f"{pc_name}:rdbk", initial_value=0.0)
 
 
@@ -78,10 +88,10 @@ def initialize_orbit_pvs(builder):
     Args:
         builder: The SoftIOC PV builder instance.
     """
-    builder.WaveformOut(f"beam:orbit:x", initial_value=[0.0], length=DEFAULTS['n_element'])
-    builder.WaveformOut(f"beam:orbit:y", initial_value=[0.0], length=DEFAULTS['n_element'])
-    builder.WaveformOut(f"beam:orbit:x0", initial_value=[0.0], length=DEFAULTS['n_element'])
-    builder.WaveformOut(f"beam:orbit:names", initial_value=[""], length=DEFAULTS['n_element'])
+    builder.WaveformOut(f"beam:orbit:x", initial_value=[0.0], length=config.n_elements)
+    builder.WaveformOut(f"beam:orbit:y", initial_value=[0.0], length=config.n_elements)
+    builder.WaveformOut(f"beam:orbit:x0", initial_value=[0.0], length=config.n_elements)
+    builder.WaveformOut(f"beam:orbit:names", initial_value=[""], length=config.n_elements)
     builder.aOut(f"beam:orbit:found", initial_value=0)
 
 
@@ -93,10 +103,10 @@ def initialize_twiss_pvs(builder):
         builder: The SoftIOC PV builder instance.
     """
     for axis in ['x', 'y']:
-        builder.WaveformOut(f"beam:twiss:{axis}:alpha", initial_value=[0.0], length=DEFAULTS['n_element'])
-        builder.WaveformOut(f"beam:twiss:{axis}:beta", initial_value=[0.0], length=DEFAULTS['n_element'])
-        builder.WaveformOut(f"beam:twiss:{axis}:nu", initial_value=[0.0], length=DEFAULTS['n_element'])
-    builder.WaveformOut(f"beam:twiss:names", initial_value=[""], length=DEFAULTS['n_element'])
+        builder.WaveformOut(f"beam:twiss:{axis}:alpha", initial_value=[0.0], length=config.n_elements)
+        builder.WaveformOut(f"beam:twiss:{axis}:beta", initial_value=[0.0], length=config.n_elements)
+        builder.WaveformOut(f"beam:twiss:{axis}:nu", initial_value=[0.0], length=config.n_elements)
+    builder.WaveformOut(f"beam:twiss:names", initial_value=[""], length=config.n_elements)
 
 
 def initialize_other_pvs(builder, prefix):
@@ -107,19 +117,19 @@ def initialize_other_pvs(builder, prefix):
         builder: The SoftIOC PV builder instance.
         prefix (str): Prefix for PV naming.
     """
-    builder.aOut(f"{DEFAULTS['master_clock']}:freq", initial_value=0,
+    builder.aOut(f"{special_pvs['master_clock']}:freq", initial_value=0,
                  on_update=lambda val: handle_device_update(device_id="master_clock", property_id="reference_frequency", value=val))
     builder.aOut(f"dummy:x", initial_value=0)
     builder.aOut(f"dummy:y", initial_value=0)
-    builder.aOut(f"{DEFAULTS['current']}:current", initial_value=0)
+    builder.aOut(f"{special_pvs['current']}:current", initial_value=0)
 
 
 def initialize_bpm_pvs(builder):
     tmp = np.empty([2048], np.int16)
     tmp.fill(-2 ** 15 + 1)
     # bpm pv names from default
-    builder.WaveformOut(f"{DEFAULTS['bpm_pv']}:bdata", initial_value=tmp, length=len(tmp))
-    builder.longOut(f"{DEFAULTS['bpm_pv']}:count", initial_value=0)
+    builder.WaveformOut(f"{special_pvs['bpm_pv']}:bdata", initial_value=tmp, length=len(tmp))
+    builder.longOut(f"{special_pvs['bpm_pv']}:count", initial_value=0)
 
 
 def initialize_cavity_pvs(builder):
@@ -129,5 +139,5 @@ def initialize_cavity_pvs(builder):
     Args:
         builder: The SoftIOC PV builder instance.
     """
-    for cavity_name in CAVITY_NAMES:
+    for cavity_name in cavity_names:
         builder.aOut(f"{cavity_name}:freq", initial_value=0.0)
