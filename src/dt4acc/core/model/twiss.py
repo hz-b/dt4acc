@@ -13,12 +13,18 @@ class TwissForPlane:
     nu: Sequence[float]
 
 @dataclass
+class MainValue:
+    #: todo should one here not use a lattice element identifier
+    pv_name: str
+    value: str
+
+@dataclass
 class TwissWithAggregatedKValues:
     x: TwissForPlane
     y: TwissForPlane
     names: Sequence
-    all_k_pv_names: Sequence
-    all_k_pv_values: Sequence[float]
+    #: Todo does it belong here?
+    main_values: Sequence[MainValue]
 
 @dataclass
 class Twiss:

@@ -1,6 +1,7 @@
 from p4p.client.asyncio import Context
 
 from ...core.utils.logger import get_logger
+logger = get_logger()
 
 ctx = Context("pva")
 
