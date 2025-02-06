@@ -5,12 +5,12 @@ from bact_twin_architecture.data_model.identifiers import LatticeElementProperty
 from bact_twin_architecture.interfaces.liaison_manager import LiaisonManagerBase
 from bact_twin_architecture.interfaces.state_conversion import StateConversion
 from bact_twin_architecture.interfaces.translator_service import TranslatorServiceBase
-from bact_twin_architecture.utils.unit_conversion import LinearUnitConversion
+from bact_twin_architecture.utils.unit_conversion import LinearUnitConversion, EnergyIndependentLinearUnitConversion
 from bact_twin_bessyii_impl.bl.bessyii_nomen_clature import name_matches_horizontal_steerer_name, \
     name_matches_vertical_steerer_name, name_matches_steerer_name
 
 from ..data.querries import get_magnets
-from ..data.constants import DEFAULTS
+from ..data.constants import ring_parameters
 from ...core.model.elementmodel import MagnetElementSetup
 
 logger = logging.getLogger("dt4acc")
@@ -44,7 +44,7 @@ class TranslatorService(TranslatorServiceBase):
             return self.lut[id_]
         except KeyError as ke:
             logger.error(f"{self.__class__.__name__}: I did not find id {id_} in lookup table: {ke}")
-
+            raise ke
 
 def remove_id(d: Dict) -> Dict:
     nd = d.copy()
@@ -145,14 +145,13 @@ def build_managers() -> (LiaisonManagerBase, TranslatorServiceBase):
             return element_name[1:]
         return element_name
 
-    def construct_linear_conversion(slope: float) -> LinearUnitConversion:
+    def construct_energy_independent_linear_conversion(slope: float) -> EnergyIndependentLinearUnitConversion:
         if slope is None:
             raise AssertionError("Refusing creating linear unit conversion without slope")
-        return LinearUnitConversion(slope=slope, intercept=0.0)
+        return EnergyIndependentLinearUnitConversion(slope=1.0/slope, intercept=0.0, brho=ring_parameters.brho)
 
     # start to build it for the magnets ... power converter feed
     translator_lut = {
-        # todo: replace it with an energy independent version
         ConversionID(
             LatticeElementPropertyID(
                 element_name=extract_host_element_name(info.name),
@@ -161,7 +160,7 @@ def build_managers() -> (LiaisonManagerBase, TranslatorServiceBase):
             DevicePropertyID(device_name=info.pc, property="set_current")
         ):
             # todo: check for the correct conversion
-            construct_linear_conversion(slope=info.magnetic_strength)
+            construct_energy_independent_linear_conversion(slope=info.magnetic_strength)
         for info in infos
     }
 

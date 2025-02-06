@@ -45,3 +45,7 @@ async def handle_device_update(device_id: str, property_id: str, value: float):
         await update_manager.update(device_id=device_id, property_name=property_id, value=value)
     except Exception as e:
         logger.warning(f"Error in updating element {device_id} with property_name: {property_id} value {value}")
+
+
+async def forward_pc_change(pc_name: str, property: str, value: float) -> None:
+    raise NotImplementedError("not yet forwarding current to magnets")
