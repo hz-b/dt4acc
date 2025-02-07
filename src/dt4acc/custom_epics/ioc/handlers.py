@@ -20,6 +20,8 @@ update_manager = UpdateManager(
         liasion_manager=lm,
         translation_service=tm
     ),
+    liaison_manager=lm,
+    translator_service=tm,
     acc_mgr=setup_accelerator()
 )
 
