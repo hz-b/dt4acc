@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 
-from .handlers import handle_device_update
+from .handlers import handle_device_update, update_manager
 from ..data.constants import config, special_pvs, cavity_names
 from ..data.querries import get_unique_power_converters, get_magnets_per_power_converters
 from ...core.utils.logger import get_logger
@@ -30,8 +30,10 @@ def initialize_magnet_pvs(builder, magnet):
     magnet_name = magnet['name']
     # Create an element representing the magnet
     # Create PVs and link to update logic
-    builder.aOut(f"{magnet_name}:Cm:set", initial_value=magnet["k"] or 0.0,
+    val = update_manager.peek(magnet_name, "main_strength")
+    builder.aOut(f"{magnet_name}:Cm:set", initial_value=magnet["k"] or 0,
                  on_update=lambda val: handle_device_update(magnet_name, "K", val))
+    builder.aIn(f"{magnet_name}:Cm:rdbk", initial_value=val)
     builder.aOut(f"{magnet_name}:im:I", initial_value=0.0,
                  # Todo: what to do if current is set, should be rather read only
                  # on_update=lambda val: handle_device_update(f"{magnet_name}:im:I", val)

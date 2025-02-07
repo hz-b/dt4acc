@@ -15,6 +15,14 @@ class UpdateManager:
         self.command_rewritter = command_rewritter
         self.acc_mgr = acc_mgr
 
+    def peek(self, lat_elem, property_name) -> object:
+        """
+        Todo: remove layer violation
+        """
+        proxy = self.acc_mgr.accelerator.proxy_factory.get(lat_elem)
+        val = proxy.peek(property_id=property_name)
+        return val
+
     async def update(self, *, device_id, property_name, value=None, element=None):
         """Update an device property using element knowledge
 
@@ -31,7 +39,7 @@ class UpdateManager:
             cmds = self.command_rewritter.inverse(
                 Command(id=device_id, property=property_name, value=value, behaviour_on_error=BehaviourOnError.stop
             ))
-
+            cmds
             for cmd in cmds:
                 # Todo: simplify the code down here ...
                 # does one still need the proxy factory of the accelerator
