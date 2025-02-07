@@ -155,6 +155,16 @@ class ElementProxy(ElementInterface):
 
         await self.on_update_finished.trigger(None)
 
+    def peek(self, property_id: str) -> float:
+        element, = self._obj
+        element_type = element.__class__.__name__
+        assert property_id == "main_strength"
+        if element_type == "Quadrupole":
+            return element.K
+        elif element_type == "Sextupole":
+            return element.H
+        else:
+            raise NotImplementedError
 
 class AddOnElementProxy(ElementProxy):
     """
@@ -228,3 +238,13 @@ class KickAngleCorrectorProxy(AddOnElementProxy):
             await self.update_kick(kick_y=value, element_data=element_data)
 
         await self.on_update_finished.trigger(None)
+
+    def peek(self, property_id: str) -> float:
+        element = self._obj
+        element
+        if self.correction_planes == "horizontal":
+            return element.KickAngle[0]
+        elif self.correction_planes == "vertical":
+            return element.KickAngle[1]
+        else:
+            raise AssertionError(f"unknown plane {self.correction_planes}")
