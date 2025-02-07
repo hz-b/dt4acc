@@ -6,11 +6,12 @@ from softioc import softioc, builder, asyncio_dispatcher
 from .tasks import monitor_heartbeat
 from .pv_setup import (
     initialize_power_converter_pvs,
+    initialize_cavity_pvs,
+    initialize_master_clock_pvs,
     initialize_orbit_pvs,
     initialize_bpm_pvs,
     initialize_twiss_pvs,
     initialize_other_pvs,
-    initialize_cavity_pvs
 )
 
 # Create an asyncio dispatcher to handle asynchronous PV updates
@@ -25,13 +26,16 @@ def main():
     prefix = os.environ.get("DT4ACC_PREFIX", "Anonym")
 
     builder.SetDeviceName(prefix)
+
+    initialize_cavity_pvs(builder)  # Initialize cavity-related PVs
+    initialize_master_clock_pvs(builder)  # Initialize additional PVs such as master clock, dummy data
+    initialize_other_pvs(builder, prefix)  # Initialize additional PVs such as master clock, dummy data
+
     # Initialize PVs for various accelerator components
     initialize_power_converter_pvs(builder, prefix)  # Initialize power converters and linked magnets
     initialize_orbit_pvs(builder)  # Initialize orbit-related PVs
     initialize_bpm_pvs(builder)  # Initialize Beam Position Monitor PVs
     initialize_twiss_pvs(builder)  # Initialize Twiss parameter PVs
-    initialize_cavity_pvs(builder)  # Initialize cavity-related PVs
-    initialize_other_pvs(builder, prefix)  # Initialize additional PVs such as master clock, dummy data
 
     # Load the database of PVs defined above into the SoftIOC server
     builder.LoadDatabase()
