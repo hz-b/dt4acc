@@ -89,21 +89,21 @@ def magnet_infos_from_db() -> Sequence[MagnetElementSetup]:
     return [MagnetElementSetup(**remove_id(info)) for info in get_magnets().to_list()]
 
 
-def element_method(element_name):
-    if name_matches_horizontal_steerer_name(element_name):
+def element_method(element_name: str, yp: YellowPages):
+    if element_name in yp.horizontal_steerer_names():
         return "x_kick"
-    elif name_matches_vertical_steerer_name(element_name):
+    elif element_name in yp.vertical_steerer_names():
         return "y_kick"
-    elif name_matches_quadrupole_name(element_name):
+    elif element_name in yp.quadrupole_names():
         return "K"
-    elif name_matches_sextupole_name(element_name):
+    elif element_name in yp.sextupole_names():
         return "H"
     else:
         raise AssertionError(f"Don't know how to handle {element_name}")
 
 
-def extract_host_element_name(element_name: str) -> str:
-    if name_matches_steerer_name(element_name):
+def extract_host_element_name(element_name: str, yp: YellowPages) -> str:
+    if element_name in yp.vertical_steerer_names() or element_name in yp.horizontal_steerer_names():
         return element_name[1:]
     return element_name
 
@@ -266,8 +266,8 @@ def build_managers(
     translator_lut = {
         ConversionID(
             LatticeElementPropertyID(
-                element_name=extract_host_element_name(info.name),
-                property=element_method(info.name),
+                element_name=extract_host_element_name(info.name, yp=yp),
+                property=element_method(info.name, yp=yp),
             ),
             DevicePropertyID(device_name=info.pc, property="set_current"),
         ):
@@ -280,7 +280,7 @@ def build_managers(
         {
             ConversionID(
                 LatticeElementPropertyID(
-                    element_name=extract_host_element_name(info.name),
+                    element_name=extract_host_element_name(info.name, yp=yp),
                     property="main_strength",
                 ),
                 DevicePropertyID(device_name=info.pc, property="set_current"),
