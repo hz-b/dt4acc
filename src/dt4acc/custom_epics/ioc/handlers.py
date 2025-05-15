@@ -1,7 +1,8 @@
-from bact_twin_bessyii_impl.bl.command_rewritter import CommandRewriter
-from dt4acc.custom_epics.ioc.liasion_translation_manager import build_managers
+from bact_twin_architecture.bl.command_rewriter import CommandRewriter
+# from dt4acc.custom_epics.ioc.liasion_translation_manager import build_managers
 from p4p.client.asyncio import Context
 
+from .liasion_translation_manager import build_managers
 from ...core.accelerators.pyat_accelerator import setup_accelerator
 from ...core.command import UpdateManager
 from ...core.utils.logger import get_logger
