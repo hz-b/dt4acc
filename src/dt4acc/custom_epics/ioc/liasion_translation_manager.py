@@ -13,7 +13,7 @@ from bact_twin_architecture.utils.unit_conversion import (
     LinearUnitConversion,
     EnergyIndependentLinearUnitConversion,
 )
-from bact_twin_bessyii_impl.bl.bessyii_yellow_pages import YellowPages, bessyii_yellow_pages
+from bact_twin_architecture.bl.bessyii_yellow_pages import YellowPages, bessyii_yellow_pages
 
 from ..data.querries import get_magnets
 from ..data.constants import ring_parameters, cavity_names
