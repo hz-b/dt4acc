@@ -3,7 +3,7 @@ from ..accelerators.accelerator_impl import AcceleratorImpl
 from ..calculations.pyat_calculator import PyAtTwissCalculator, PyAtOrbitCalculator
 from ..utils.logger import get_logger
 from ...custom_epics.utils.bpm_mimicry import BPMMimicry
-from ...custom_epics.views.shared_view import get_view_instance
+from ..views.shared_view import get_view_instance
 
 logger = get_logger()
 
