@@ -18,7 +18,7 @@ from .pv_setup import (
 dispatcher = asyncio_dispatcher.AsyncioDispatcher()
 
 
-def main():
+def startup():
     """
     Main function to initialize all the process variables (PVs) and start the IOC server.
     """
@@ -46,9 +46,13 @@ def main():
     asyncio.create_task(monitor_heartbeat())
 
 
-# Entry point of the script
-if __name__ == "__main__":
+def main():
     # Start the IOC server by dispatching the main function
-    dispatcher(main)
+    dispatcher(startup)
     # Start the interactive IOC shell, allowing interaction with the server
     softioc.interactive_ioc(globals())
+
+
+# Entry point of the script
+if __name__ == "__main__":
+    main()
