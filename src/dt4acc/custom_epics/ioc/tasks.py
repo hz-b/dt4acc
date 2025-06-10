@@ -1,6 +1,6 @@
 import asyncio
 
-from src.dt4acc.core.views.shared_view import get_view_instance
+from ...core.views.shared_view import get_view_instance
 from ...core.utils.logger import get_logger
 
 
