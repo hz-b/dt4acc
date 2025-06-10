@@ -20,6 +20,9 @@ classifiers = [
      "Topic :: Scientific/Engineering :: Physics"
 ]
 
+[tool.poetry.scripts]
+dt4acc_softioc = { reference = "scripts/dt4acc_softioc.py", type = "file"}
+
 [tool.poetry.dependencies]
 python = ">=3.7"
 accelerator-toolbox="*"
