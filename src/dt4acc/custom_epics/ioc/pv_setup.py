@@ -50,7 +50,7 @@ def initialize_magnet_pvs(builder, magnet):
         r = await handle_device_update(device_id=device_id, property_id=property_id, value=value)
         logger.info("%s:%s setting setpoint val=%s", device_id, property_id, value)
         rdbk.set(value)
-        logger.warning("%s:%s set readback  val=%s", device_id, property_id,value)
+        logger.info("%s:%s set readback  val=%s", device_id, property_id,value)
         return r
 
     builder.aOut(
