@@ -66,9 +66,8 @@ class BPMMimicry:
             for name in self.bpm_names
         ])
 
-    def extract_bpm_legacy_data(self, orbit_result: Orbit):
-        """
-        Publish BPM data to EPICS.
+    def extract_bpm_legacy_data_to_df(self, orbit_result: Orbit) -> pd.DataFrame:
+        """Publish BPM data to EPICS.
 
         Args:
             orbit_result (OrbitResult): Result of the orbit calculation.
@@ -89,7 +88,7 @@ class BPMMimicry:
         bpm_names_as_index = pd.Series([f"empty_{cnt:03d}" for cnt in np.arange(128)])
         bpm_names_as_index.iloc[bpm_config["idx"]] = bpm_config["name"]
         df_bpm = pd.DataFrame(columns=["x", "y", "intensity_z", "intensity_s", "status", "x_rms", "y_rms"],
-                              index=bpm_names_as_index)
+                              index=bpm_names_as_index, dtype=float)
 
         # Waring: order is lost!!!
         known_bpm_names = list(set(bpm_config["name"]).intersection(orbit_result.names))
@@ -98,7 +97,7 @@ class BPMMimicry:
         assert df_bpm.shape[0] == 128
 
         # default values
-        fill_value = 2 ** 15 - 1
+        fill_value = np.nan
         df_bpm.loc[:, "x"] = fill_value
         df_bpm.loc[:, "y"] = fill_value
         df_bpm.loc[:, "y_rms"] = 0
@@ -118,8 +117,10 @@ class BPMMimicry:
         # needs to be at least a bit in 16 ...
         df_bpm.loc[known_bpm_names, "x_rms"] = 1
         df_bpm.loc[known_bpm_names, "y_rms"] = 1
+        return df_bpm
 
-        tmp = np.empty([len(df_bpm), 8], dtype=np.int16)
+    def bpm_legacy_data_df_to_array(self, bpm_data: pd.DataFrame) -> np.ndarray[np.int16]:
+        tmp = np.empty([len(bpm_data), 8], dtype=np.int16)
         tmp.fill(0)
         mm2cnts = 2 ** 15 / 10
 
@@ -128,19 +129,24 @@ class BPMMimicry:
             """
             Todo: add test for maximum acceptable range
             """
-            r = np.clip(-2 ** 15 + 1, 2 ** 15 - 1, vec * mm2cnts)
+            # mark invalid data
+            tmp = vec.copy()
+            tmp[np.isnan(vec)] = 2 ** 15 - 1
+            r = np.clip(-2 ** 15 + 1, 2 ** 15 - 1, tmp * mm2cnts)
             return r.astype(np.int16)
 
-        tmp[:, 0] = convert(df_bpm.x)
-        tmp[:, 1] = convert(df_bpm.y)
-        tmp[:, 4] = df_bpm.status
-        tmp[:, 6] = convert(df_bpm.x_rms)
-        tmp[:, 7] = convert(df_bpm.y_rms)
+        tmp[:, 0] = convert(bpm_data.x.values)
+        tmp[:, 1] = convert(bpm_data.y.values)
+        tmp[:, 4] = bpm_data.status
+        tmp[:, 6] = convert(bpm_data.x_rms.values)
+        tmp[:, 7] = convert(bpm_data.y_rms.values)
         bpm_legacy_data_vector = np.zeros([2048], np.int16)
         bpm_legacy_data_vector[:1024] = tmp.transpose().ravel()
 
         return bpm_legacy_data_vector
 
+    def extract_bpm_legacy_data(self, orbit_result: Orbit):
+        raise NotImplementedError("why still needed?")
 
 @functools.lru_cache(maxsize=1)
 def create_bpm_config():
