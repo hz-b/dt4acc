@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Sequence
 
 import numpy as np
+import pandas as pd
 from p4p.client.asyncio import Context
 
 from ...core.model.element_upate import ElementUpdate
@@ -100,11 +101,27 @@ class ResultView:
             raise ValueError("BPM Mimicry not set in ResultView")
         try:
             logger.warning(f"pushing legacy bpm data")
-            bpm_legacy_data = self.bpm_mimicry.extract_bpm_legacy_data(orbit_data)
+            df_bpm = self.bpm_mimicry.extract_bpm_legacy_data_to_df(orbit_data)
+            bpm_legacy_data = self.bpm_mimicry.bpm_legacy_data_df_to_array(df_bpm)
             self.default_bpm_legacy_data = bpm_legacy_data
             await self.push_legacy_bpm_data(bpm_legacy_data)
+            df_for_orbit = df_bpm.copy()
+            mm2nm = 1e6
+            df_for_orbit.x = df_bpm.x * mm2nm
+            df_for_orbit.y = df_bpm.y * mm2nm
+            await self.push_orbit_object(df_for_orbit)
         except Exception as e:
             logger.error(f"Error processing orbit data: {e}")
+
+    async def push_orbit_object(self, bpm_data: pd.DataFrame):
+        try:
+            prefix = f"{self.prefix}:ORBITCC"
+            # Todo: check that the dimensions are properly made
+            pos = np.array(bpm_data.loc[:, ["x", "y"]]).ravel()
+            await ctx.put(f"{prefix}:rdPos", pos)
+            await ctx.put(f"{prefix}:rdBpmNames", [str(val) for val in bpm_data.index])
+        except Exception as e:
+            logger.error(f"Error processing orbit object data: {e}")
 
     async def push_legacy_bpm_data(self, bpm_legacy_data: Sequence[np.int16] = None):
         """
