@@ -46,11 +46,14 @@ def initialize_magnet_pvs(builder, magnet):
         on_update=lambda val: handle_device_update(magnet_name, "K", val),
     )
     rdbk = builder.aIn(f"{magnet_name}:Cm:rdbk", initial_value=val)
+
     async def handle_magnet_update(device_id: str, property_id: str, value: float):
-        r = await handle_device_update(device_id=device_id, property_id=property_id, value=value)
+        r = await handle_device_update(
+            device_id=device_id, property_id=property_id, value=value
+        )
         logger.info("%s:%s setting setpoint val=%s", device_id, property_id, value)
         rdbk.set(value)
-        logger.info("%s:%s set readback  val=%s", device_id, property_id,value)
+        logger.info("%s:%s set readback  val=%s", device_id, property_id, value)
         return r
 
     builder.aOut(
@@ -111,9 +114,12 @@ def add_pc_pvs(builder, pc_name, prefix):
     )
     start_val = np.asarray(vals).mean()
     rdbk = builder.aOut(f"{pc_name}:rdbk", initial_value=start_val)
+
     async def handle_pc_update(device_id: str, property_id: str, value: float):
         logger.debug("%s:%s updating setpoint val=%s", device_id, property_id, value)
-        r = await handle_device_update(device_id=device_id, property_id=property_id, value=value)
+        r = await handle_device_update(
+            device_id=device_id, property_id=property_id, value=value
+        )
         logger.debug("%s:%s updating rdbk val=%s", device_id, property_id, value)
         rdbk.set(value)
         return r
@@ -216,6 +222,18 @@ def initialize_bpm_pvs(builder):
         f"{special_pvs['bpm_pv']}:bdata", initial_value=tmp, length=len(tmp)
     )
     builder.longOut(f"{special_pvs['bpm_pv']}:count", initial_value=0)
+
+
+def initialize_orbit_object_pvs(builder):
+    n_bpms = 128
+    tmp = np.ravel(np.empty([n_bpms, 2], float))
+    tmp.fill(np.nan)
+    builder.WaveformOut("ORBITCC:rdPos", initial_value=tmp, length=len(tmp))
+    tmp = np.ravel(np.empty([n_bpms, 4], float))
+    tmp.fill(np.nan)
+    builder.WaveformOut("ORBITCC:rdButtons", initial_value=tmp, length=len(tmp))
+    builder.WaveformOut("ORBITCC:rdBpmNames", initial_value=[""], length=n_bpms)
+    builder.longOut("ORBITCC:count", initial_value=0)
 
 
 def initialize_cavity_pvs(builder):
