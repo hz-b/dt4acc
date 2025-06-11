@@ -10,6 +10,7 @@ from .pv_setup import (
     initialize_master_clock_pvs,
     initialize_orbit_pvs,
     initialize_bpm_pvs,
+    initialize_orbit_object_pvs,
     initialize_twiss_pvs,
     initialize_other_pvs,
 )
@@ -35,6 +36,7 @@ def startup():
     initialize_power_converter_pvs(builder, prefix)  # Initialize power converters and linked magnets
     initialize_orbit_pvs(builder)  # Initialize orbit-related PVs
     initialize_bpm_pvs(builder)  # Initialize Beam Position Monitor PVs
+    initialize_orbit_object_pvs(builder)  # Initialize PV's of the new orbit object ... collection of bpms
     initialize_twiss_pvs(builder)  # Initialize Twiss parameter PVs
 
     # Load the database of PVs defined above into the SoftIOC server
