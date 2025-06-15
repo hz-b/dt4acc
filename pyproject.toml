@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "dt4acc"
-version = "0.0.3"
+version = "0.0.4"
 description = "digital twin for accelerators"
 authors = [  "Waheedullah Sulaiman Khail", "Pierre Schnizer"]
 license = "GPL-3.0"
@@ -20,6 +20,9 @@ classifiers = [
      "Topic :: Scientific/Engineering :: Physics"
 ]
 
+[tool.poetry.scripts]
+dt4acc_softioc = { reference = "scripts/dt4acc_softioc.py", type = "file"}
+
 [tool.poetry.dependencies]
 python = ">=3.7"
 accelerator-toolbox="*"
@@ -32,6 +35,7 @@ softioc=">4.1"
 p4p="*"
 bact_device_models="*"
 pandas="*"
+bact-twin-architecture="*"
 # jsons="*"
 # fastapi="*"
 # pydantic="*"

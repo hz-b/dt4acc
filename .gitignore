@@ -21,6 +21,7 @@ __pycache__/
 
 # Directories created by the build process
 bin/
+dist/
 lib/
 include/
 dbd/
