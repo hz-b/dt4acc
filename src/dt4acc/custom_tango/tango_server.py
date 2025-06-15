@@ -1,91 +1,82 @@
 import os
 import sys
 import time
+import asyncio
+import threading
 from tango.server import run
 from tango import Database, DbDevInfo, DbDatum, DevFailed
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.utils.device_initializer import DeviceInitializer
+from dt4acc.custom_tango.config import (
+    SERVER_NAME,
+    SERVER_CLASS,
+    SERVER_INSTANCE,
+    DEVICE_CLASSES
+)
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dt4acc.custom_tango.ioc.devices.power_converter_device import PowerConverterDevice
 from dt4acc.custom_tango.ioc.devices.magnet_device import MagnetDevice
-from dt4acc.custom_tango.server_config import (
-    SERVER_NAME,
-    SERVER_CLASS,
-    SERVER_INSTANCE
-)
+from dt4acc.custom_tango.ioc.devices.twiss_orbit_device import TwissOrbitDevice
+from dt4acc.custom_tango.ioc.devices.bpm_device import BPMDevice
+from dt4acc.custom_tango.ioc.BPM_setup import setup_bpm_device
 
 logger = get_logger()
 
-def list_server_devices():
-    """
-    List all devices registered with the server.
-    """
+def register_server():
     try:
         db = Database()
-        device_list = db.get_device_name(SERVER_INSTANCE, "*")
-        print("\nRegistered devices:")
-        print("-" * 50)
-        for device in device_list:
-            print(f"Device: {device}")
-        print("-" * 50)
-        return device_list
+        if SERVER_INSTANCE in db.get_server_list():
+            logger.info(f"Server {SERVER_INSTANCE} already exists")
+            return
+        server_info = DbDevInfo()
+        server_info._class = SERVER_CLASS
+        server_info.server = SERVER_INSTANCE
+        server_info.name = f"{SERVER_NAME}/{SERVER_INSTANCE}/{SERVER_CLASS}"
+        db.add_device(server_info)
+        logger.info(f"Server {SERVER_INSTANCE} registered successfully")
     except Exception as e:
-        print(f"Error listing devices: {e}")
-        return []
-
-def start_tango_server():
-    """
-    Start the Tango server and initialize all devices.
-    """
-    try:
-        # Initialize database
-        db = Database()
-        
-        # Initialize device initializer
-        initializer = DeviceInitializer()
-        
-        # Initialize all devices
-        devices = initializer.initialize_all_devices()
-        
-        logger.info(f"Tango server started with {len(devices)} devices")
-        return devices
-        
-    except Exception as e:
-        logger.error(f"Error starting Tango server: {str(e)}")
+        logger.error(f"Failed to register server: {e}")
         raise
 
-def main():
-
-    print(f"Starting Tango server: {SERVER_NAME}")
-    
-    # Create Tango database
-    db = Database()
-    
+def register_devices():
     try:
-        server_list = db.get_server_list()
-        if SERVER_INSTANCE in server_list:
-            print(f"Server {SERVER_INSTANCE} already exists, skipping registration")
-            list_server_devices()
-        else:
+        db = Database()
+        for device_type, device_class in DEVICE_CLASSES.items():
             device_info = DbDevInfo()
-            device_info._class = SERVER_CLASS
+            device_info._class = device_class
             device_info.server = SERVER_INSTANCE
-            device_info.name = SERVER_NAME
-            
+            device_info.name = f"{SERVER_NAME}/{SERVER_INSTANCE}/{device_class}"
             try:
                 db.add_device(device_info)
-                print("Server registered in database successfully")
+                print(f"Registered device class: {device_class}")
             except Exception as e:
-                print(f"Warning: Server registration error: {e}")
+                print(f"Device class {device_class} already registered: {e}")
     except Exception as e:
-        print(f"Warning: Could not check server existence: {e}")
-    
-    device_classes = [PowerConverterDevice, MagnetDevice]
-    
-    print("Starting server...")
-    run(device_classes)
+        logger.error(f"Failed to register devices: {e}")
+        raise
+
+class TangoServer:
+    def __init__(self):
+        self.device_classes = [TwissOrbitDevice, BPMDevice,PowerConverterDevice,MagnetDevice]
+
+    def run_server(self):
+        try:
+            print("Starting Tango server initialization...")
+            register_server()
+            register_devices()
+            print("Starting server with devices:")
+            for device_class in self.device_classes:
+                print(f"  - {device_class.__name__}")
+            print("Starting Tango server...")
+            run(self.device_classes)
+        except Exception as e:
+            print(f"Failed to start server: {e}")
+            raise
+
+def main():
+    TangoServer().run_server()
 
 if __name__ == "__main__":
-    main() 
+    main()

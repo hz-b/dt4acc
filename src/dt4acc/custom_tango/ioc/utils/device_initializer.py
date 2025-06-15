@@ -14,6 +14,7 @@ from dt4acc.custom_tango.server_config import (
     DEVICE_NAME_FORMAT,
     FULL_DEVICE_NAME_FORMAT
 )
+import time
 
 logger = get_logger()
 
@@ -29,7 +30,7 @@ class DeviceInitializer:
         self.device_cache: Dict[str, DeviceProxy] = {}
         # Initialize database
         try:
-            # Try connecting to the database using the correct format
+
             self.db = Database()
             logger.info("Connected to Tango database using default connection")
         except Exception as e:
@@ -41,6 +42,17 @@ class DeviceInitializer:
         print(f"\n[DEBUG] Formatting device name:")
         print(f"  - Input name: {name}")
         print(f"  - Device type: {device_type}")
+        
+
+        device_type = device_type.strip()
+        if device_type.lower() == "powerconverterdevice":
+            device_type = "PowerConverterDevice"
+        elif device_type.lower() == "magnetdevice":
+            device_type = "MagnetDevice"
+        elif device_type.lower() == "twissorbitdevice":
+            device_type = "TwissOrbitDevice"
+        elif device_type.lower() == "bpmdevice":
+            device_type = "BPMDevice"
         
         device_name = DEVICE_NAME_FORMAT.format(device_type=device_type, name=name)
         print(f"  - After DEVICE_NAME_FORMAT: {device_name}")
@@ -67,9 +79,9 @@ class DeviceInitializer:
             dev_info._class = device_class
             dev_info.server = SERVER_INSTANCE
             
-            # Set device properties
+
             dev_info.properties = {
-                "name": [device_name],  # Required property
+                "name": [device_name],
                 "magnet_list": []  # Will be set later if needed
             }
             
@@ -85,26 +97,38 @@ class DeviceInitializer:
             print("  - Device added to database successfully")
             
             # Create device proxy and wait for it to be ready
-            device = DeviceProxy(formatted_name)
-            device.ping()  # Wait for device to be ready
-            print(f"  - Device proxy created and pinged successfully")
+            max_retries = 3
+            retry_delay = 1  # seconds
             
-            # Set properties on the device
+            for attempt in range(max_retries):
+                try:
+                    device = DeviceProxy(formatted_name)
+                    device.ping()
+                    print(f"  - Device proxy created and pinged successfully")
+                    break
+                except DevFailed as e:
+                    if "Device not exported" in str(e) and attempt < max_retries - 1:
+                        print(f"  - Device not ready, retrying in {retry_delay} seconds...")
+                        time.sleep(retry_delay)
+                        retry_delay *= 2
+                    else:
+                        raise
+            
             try:
                 print(f"  - Setting device properties:")
                 print(f"    * Setting name property to: {device_name}")
-                # First try to set properties using put_property
+
                 device.put_property({"name": [device_name]})
                 print(f"    * Name property set successfully")
                 
-                # Verify property was set
+
                 props = device.get_property(["name"])
                 print(f"    * Retrieved properties: {props}")
                 if "name" in props and props["name"]:
                     print(f"    * Name property verified: {props['name']}")
                 else:
                     print(f"    * WARNING: Name property not found in retrieved properties")
-                    # Try alternative method to set property
+
                     print(f"    * Trying alternative method to set property")
                     self.db.put_device_property(formatted_name, {"name": [device_name]})
                     print(f"    * Property set using database method")
@@ -130,7 +154,7 @@ class DeviceInitializer:
             else:
                 value_list = [str(prop_value)]
                 
-            # Set the property directly on the device
+
             device.put_property({prop_name: value_list})
             logger.info(f"Set property {prop_name} to {prop_value} for device {device.dev_name()}")
             

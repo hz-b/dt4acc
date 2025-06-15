@@ -209,7 +209,7 @@ class MagnetDevice(Device):
                 print(f"Updating power converter {self._power_converter} set_current to {value}")
                 self._run_async_update(handle_device_update(self._power_converter, "set_current", value))
                 
-                # Update readback to match EPICS behavior
+
                 self._magnetic_strength_readback = value
                 logger.info(f"Updated magnetic strength to {value} using power converter {self._power_converter}")
                 
@@ -241,7 +241,7 @@ class MagnetDevice(Device):
         """Set current (im:I in EPICS)."""
         try:
             self._current = float(value)
-            # Use EPICS update handler with set_current property
+
             if self._power_converter:
                 self._run_async_update(handle_device_update(self._power_converter, "set_current", value))
             logger.info(f"Updated current to {value}")
@@ -264,7 +264,7 @@ class MagnetDevice(Device):
         """Set x position (x:set in EPICS)."""
         try:
             self._x_position = float(value)
-            # Use EPICS update handler with x_kick property
+
             self._run_async_update(handle_device_update(self.name, "x_kick", value))
             logger.info(f"Updated x position to {value}")
         except Exception as e:
@@ -314,9 +314,9 @@ class MagnetDevice(Device):
     def calibrate(self):
         """Calibrate the magnet."""
         try:
-            # Here you would implement the actual calibration logic
+
             logger.info(f"Magnet {self.name}: Calibration started")
-            # Simulate calibration
+
             self._magnetic_strength_readback = self._magnetic_strength
             logger.info(f"Magnet {self.name}: Calibration completed")
         except Exception as e:
