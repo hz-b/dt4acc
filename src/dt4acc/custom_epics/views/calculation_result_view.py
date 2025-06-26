@@ -1,3 +1,4 @@
+import itertools
 from datetime import datetime
 from typing import Sequence
 
@@ -30,15 +31,21 @@ async def update_orbit_pv(pv_name, orbit_result):
 
 
 async def update_twiss_pv(pv_name, twiss_result):
+    logger.warning(f"Updating twiss values {twiss_result.x.alpha}")
     try:
+        # todo: use translation service to provide the calc
+        await ctx.put(f"{pv_name}:x:tune", float(twiss_result.x.tune) )
         await ctx.put(f"{pv_name}:x:alpha", twiss_result.x.alpha)
         await ctx.put(f"{pv_name}:x:beta", twiss_result.x.beta)
         await ctx.put(f"{pv_name}:x:nu", twiss_result.x.nu)
+        await ctx.put(f"{pv_name}:y:tune", float(twiss_result.y.tune) )
         await ctx.put(f"{pv_name}:y:alpha", twiss_result.y.alpha)
         await ctx.put(f"{pv_name}:y:beta", twiss_result.y.beta)
         await ctx.put(f"{pv_name}:y:nu", twiss_result.y.nu)
+        logger.warning("Updated twiss values")
         # await ctx.put(f"{pv_name}:names", twiss_result.names)
     except Exception as e:
+        logger.warning("FAILED Updated twiss values: %s", e)
         logger.error(f"Failed to update or create twiss PV {pv_name}: {e}")
     try:
 

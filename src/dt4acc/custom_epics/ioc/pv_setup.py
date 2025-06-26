@@ -164,6 +164,7 @@ def initialize_twiss_pvs(builder):
         builder.WaveformOut(
             f"beam:twiss:{axis}:nu", initial_value=[0.0], length=config.n_elements
         )
+        builder.aOut(f"beam:twiss:{axis}:tune", initial_value=0.0, PREC=8)
     builder.WaveformOut(
         f"beam:twiss:names", initial_value=[""], length=config.n_elements
     )
