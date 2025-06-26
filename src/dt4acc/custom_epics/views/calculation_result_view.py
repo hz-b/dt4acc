@@ -8,7 +8,7 @@ from p4p.client.asyncio import Context
 
 from ...core.model.element_upate import ElementUpdate
 from ...core.model.orbit import Orbit
-from ...core.model.twiss import TwissWithAggregatedKValues
+from ...core.model.twiss import TwissWithAggregatedKValues, TwissForPlane, Twiss
 from ...core.utils.logger import get_logger
 from ..data.constants import special_pvs
 from ..views.bpm_data import BeamPositionPVs
@@ -31,14 +31,23 @@ async def update_orbit_pv(pv_name, orbit_result):
 
 
 async def update_twiss_pv(pv_name, twiss_result):
-    logger.warning(f"Updating twiss values {twiss_result.x.alpha}")
+    tune_x = float(twiss_result.x.tune)
+    tune_y = float(twiss_result.y.tune)
+
+    # todo: remove me
+    # currently adding very small noise to get data republished
+    # need to check softioc what its records can do
+    tune_x += np.random.uniform(-1e-12, 1e-12)
+    tune_y += np.random.uniform(-1e-12, 1e-12)
+
+    logger.warning(f"Updating twiss values {tune_x, tune_y}")
     try:
         # todo: use translation service to provide the calc
-        await ctx.put(f"{pv_name}:x:tune", float(twiss_result.x.tune) )
+        await ctx.put(f"{pv_name}:x:tune", tune_x)
         await ctx.put(f"{pv_name}:x:alpha", twiss_result.x.alpha)
         await ctx.put(f"{pv_name}:x:beta", twiss_result.x.beta)
         await ctx.put(f"{pv_name}:x:nu", twiss_result.x.nu)
-        await ctx.put(f"{pv_name}:y:tune", float(twiss_result.y.tune) )
+        await ctx.put(f"{pv_name}:y:tune", tune_y )
         await ctx.put(f"{pv_name}:y:alpha", twiss_result.y.alpha)
         await ctx.put(f"{pv_name}:y:beta", twiss_result.y.beta)
         await ctx.put(f"{pv_name}:y:nu", twiss_result.y.nu)
@@ -53,6 +62,8 @@ async def update_twiss_pv(pv_name, twiss_result):
     except Exception as e:
         logger.error(f"Failed to update or create magnet_strength PV {pv_name}: {e}")
 
+# Todo: a better mimicry
+counter = itertools.count()
 
 class ResultView:
     def __init__(self, *, prefix):
@@ -61,6 +72,7 @@ class ResultView:
         tmp = np.empty([2048], np.int16)
         tmp.fill(-2 ** 15 + 1)
         self.default_bpm_legacy_data = tmp
+        self.default_twiss = None
         self.bpm_mimicry = None
 
     # dependency injection (push bpm mimicry when it is available
@@ -98,6 +110,9 @@ class ResultView:
         # Define the PV name for the structured Twiss data
         pv_name = f"{self.prefix}:beam:twiss"
 
+        if twiss_result is None:
+            return
+        self.default_twiss = twiss_result
         # Use the bulk update function to update the structured PV
         await update_twiss_pv(pv_name, twiss_result)
         logger.warning('Twiss pushed view')
@@ -127,6 +142,7 @@ class ResultView:
             pos = np.array(bpm_data.loc[:, ["x", "y"]]).ravel()
             await ctx.put(f"{prefix}:rdPos", pos)
             await ctx.put(f"{prefix}:rdBpmNames", [str(val) for val in bpm_data.index])
+            await ctx.put(f"{prefix}:count", next(counter))
         except Exception as e:
             logger.error(f"Error processing orbit object data: {e}")
 
@@ -146,4 +162,5 @@ class ResultView:
 
         # logger.warning(f"view heartbeat {datetime.now()}")
         await self.push_legacy_bpm_data(self.default_bpm_legacy_data)
+        await self.push_twiss(self.default_twiss)
         await self.bpm_pvs.heart_beat()
