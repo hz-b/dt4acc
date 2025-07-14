@@ -1,0 +1,235 @@
+[{
+  "_id": {
+    "$oid": "6716279ff80af49298848a3a"
+  },
+  "type": "Quadrupole",
+  "name": "Q1MT",
+  "magnetic_strength": -0.260939,
+  "pc": "Q1PT",
+  "k": null
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a3b"
+  },
+  "type": "Quadrupole",
+  "name": "Q2MT",
+  "magnetic_strength": -0.260939,
+  "pc": "Q2PT",
+  "k": null
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a3c"
+  },
+  "type": "Quadrupole",
+  "name": "Q3MT",
+  "magnetic_strength": 0.260939,
+  "pc": "Q3PT",
+  "k": null
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a3d"
+  },
+  "type": "Quadrupole",
+  "name": "Q4MT",
+  "magnetic_strength": 0.260939,
+  "pc": "Q4PT",
+  "k": null
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a3e"
+  },
+  "type": "Quadrupole",
+  "name": "Q5MT",
+  "magnetic_strength": -0.260939,
+  "pc": "Q5PT",
+  "k": null
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a3f"
+  },
+  "type": "Quadrupole",
+  "name": "Q7MT",
+  "magnetic_strength": -0.260939,
+  "pc": "Q7PT",
+  "k": null
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a40"
+  },
+  "type": "Quadrupole",
+  "name": "Q8MT",
+  "magnetic_strength": 0.260939,
+  "pc": "Q8PT",
+  "k": null
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a41"
+  },
+  "type": "Quadrupole",
+  "name": "Q9MT",
+  "magnetic_strength": -0.260939,
+  "pc": "Q9PT",
+  "k": null
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a42"
+  },
+  "type": "Quadrupole",
+  "name": "Q10MT",
+  "magnetic_strength": -0.261705,
+  "pc": "Q10PT",
+  "k": null
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a43"
+  },
+  "type": "Quadrupole",
+  "name": "Q11MT",
+  "magnetic_strength": -0.261705,
+  "pc": "Q11PT",
+  "k": null
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a44"
+  },
+  "type": "Quadrupole",
+  "name": "Q12MT",
+  "magnetic_strength": 0.261705,
+  "pc": "Q12PT",
+  "k": null
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a45"
+  },
+  "type": "Steerer",
+  "name": "H1MT",
+  "magnetic_strength": -0.000661307,
+  "pc": "H1PT",
+  "k": 0
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a46"
+  },
+  "type": "Steerer",
+  "name": "H2MT",
+  "magnetic_strength": -0.000661307,
+  "pc": "H2PT",
+  "k": 0
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a47"
+  },
+  "type": "Steerer",
+  "name": "H3MT",
+  "magnetic_strength": -0.000661307,
+  "pc": "H3PT",
+  "k": 0
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a48"
+  },
+  "type": "Steerer",
+  "name": "H4MT",
+  "magnetic_strength": -0.000661307,
+  "pc": "H4PT",
+  "k": 0
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a49"
+  },
+  "type": "Steerer",
+  "name": "H5MT",
+  "magnetic_strength": -0.000661307,
+  "pc": "H5PT",
+  "k": 0
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a4a"
+  },
+  "type": "Steerer",
+  "name": "H6MT",
+  "magnetic_strength": -0.000661307,
+  "pc": "H6PT",
+  "k": 0
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a4b"
+  },
+  "type": "Steerer",
+  "name": "H7MT",
+  "magnetic_strength": -0.000661307,
+  "pc": "H7PT",
+  "k": 0
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a4c"
+  },
+  "type": "Steerer",
+  "name": "V1MT",
+  "magnetic_strength": 0.000661307,
+  "pc": "V1PT",
+  "k": 0
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a4d"
+  },
+  "type": "Steerer",
+  "name": "V2MT",
+  "magnetic_strength": 0.000661307,
+  "pc": "V2PT",
+  "k": 0
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a4e"
+  },
+  "type": "Steerer",
+  "name": "V3MT",
+  "magnetic_strength": 0.000661307,
+  "pc": "V3PT",
+  "k": 0
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a4f"
+  },
+  "type": "Steerer",
+  "name": "V4MT",
+  "magnetic_strength": 0.000661307,
+  "pc": "V4PT",
+  "k": 0
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a50"
+  },
+  "type": "Steerer",
+  "name": "V5MT",
+  "magnetic_strength": 0.000661307,
+  "pc": "V5PT",
+  "k": 0
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a51"
+  },
+  "type": "Steerer",
+  "name": "V6MT",
+  "magnetic_strength": 0.000661307,
+  "pc": "V6PT",
+  "k": 0
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a52"
+  },
+  "type": "Steerer",
+  "name": "V7MT",
+  "magnetic_strength": 0.000661307,
+  "pc": "V7PT",
+  "k": 0
+},{
+  "_id": {
+    "$oid": "6716279ff80af49298848a53"
+  },
+  "type": "Steerer",
+  "name": "V8MT",
+  "magnetic_strength": 0.000661307,
+  "pc": "V8PT",
+  "k": 0
+}]
