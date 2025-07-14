@@ -1,0 +1,188 @@
+[{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05ae6"
+  },
+  "bpm_name": "FOMZ1T",
+  "x_state": 0,
+  "y_state": 0,
+  "ds": 0,
+  "idx": 2,
+  "scale_x": 1,
+  "scale_y": 1
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05ae7"
+  },
+  "bpm_name": "FOMZ2T",
+  "x_state": 0,
+  "y_state": 0,
+  "ds": 0,
+  "idx": 6,
+  "scale_x": 1,
+  "scale_y": 1
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05ae8"
+  },
+  "bpm_name": "BPMZ1T",
+  "x_state": 0,
+  "y_state": 0,
+  "ds": 0,
+  "idx": 8,
+  "scale_x": 1,
+  "scale_y": 1
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05ae9"
+  },
+  "bpm_name": "SLZ1T",
+  "x_state": 0,
+  "y_state": 0,
+  "ds": 0,
+  "idx": 15,
+  "scale_x": 1,
+  "scale_y": 1
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05aea"
+  },
+  "bpm_name": "SLZ2T",
+  "x_state": 0,
+  "y_state": 0,
+  "ds": 0,
+  "idx": 19,
+  "scale_x": 1,
+  "scale_y": 1
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05aeb"
+  },
+  "bpm_name": "FOMZ3T",
+  "x_state": 0,
+  "y_state": 0,
+  "ds": 0,
+  "idx": 23,
+  "scale_x": 1,
+  "scale_y": 1
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05aec"
+  },
+  "bpm_name": "BPMZ2T",
+  "x_state": 0,
+  "y_state": 0,
+  "ds": 0,
+  "idx": 25,
+  "scale_x": 1,
+  "scale_y": 1
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05aed"
+  },
+  "bpm_name": "FOMZ4T",
+  "x_state": 0,
+  "y_state": 0,
+  "ds": 0,
+  "idx": 32,
+  "scale_x": 1,
+  "scale_y": 1
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05aee"
+  },
+  "bpm_name": "BPMZ3T",
+  "x_state": 0,
+  "y_state": 0,
+  "ds": 0,
+  "idx": 34,
+  "scale_x": 1,
+  "scale_y": 1
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05aef"
+  },
+  "bpm_name": "FOMZ5T",
+  "x_state": 0,
+  "y_state": 0,
+  "ds": 0,
+  "idx": 49,
+  "scale_x": 1,
+  "scale_y": 1
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05af0"
+  },
+  "bpm_name": "BPMZ4T",
+  "x_state": 0,
+  "y_state": 0,
+  "ds": 0,
+  "idx": 51,
+  "scale_x": 1,
+  "scale_y": 1
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05af1"
+  },
+  "bpm_name": "FOMZ6T",
+  "x_state": 0,
+  "y_state": 0,
+  "ds": 0,
+  "idx": 62,
+  "scale_x": 1,
+  "scale_y": 1
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05af2"
+  },
+  "bpm_name": "BPMZ5T",
+  "x_state": 0,
+  "y_state": 0,
+  "ds": 0,
+  "idx": 64,
+  "scale_x": 1,
+  "scale_y": 1
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05af3"
+  },
+  "bpm_name": "FOMZ7T",
+  "x_state": 0,
+  "y_state": 0,
+  "ds": 0,
+  "idx": 78,
+  "scale_x": 1,
+  "scale_y": 1
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05af4"
+  },
+  "bpm_name": "SLZ3T",
+  "x_state": 0,
+  "y_state": 0,
+  "ds": 0,
+  "idx": 84,
+  "scale_x": 1,
+  "scale_y": 1
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05af5"
+  },
+  "bpm_name": "FOMZ8T",
+  "x_state": 0,
+  "y_state": 0,
+  "ds": 0,
+  "idx": 86,
+  "scale_x": 1,
+  "scale_y": 1
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05af6"
+  },
+  "bpm_name": "FOMZ2D1R",
+  "x_state": 0,
+  "y_state": 0,
+  "ds": 0,
+  "idx": 92,
+  "scale_x": 1,
+  "scale_y": 1
+}]

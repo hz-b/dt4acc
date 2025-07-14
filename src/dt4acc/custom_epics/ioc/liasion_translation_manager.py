@@ -86,7 +86,7 @@ def remove_id(d: Dict) -> Dict:
 
 
 def magnet_infos_from_db() -> Sequence[MagnetElementSetup]:
-    return [MagnetElementSetup(**remove_id(info)) for info in get_magnets().to_list()]
+    return [MagnetElementSetup(**remove_id(info)) for info in get_magnets()]
 
 
 def element_method(element_name: str, yp: YellowPages):

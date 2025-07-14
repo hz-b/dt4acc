@@ -1,6 +1,9 @@
 import functools
 import os
 
+import json
+from pathlib import Path
+from typing import Iterable, List, Dict, Any
 import numpy as np
 import pandas as pd
 import pymongo
@@ -148,6 +151,18 @@ class BPMMimicry:
     def extract_bpm_legacy_data(self, orbit_result: Orbit):
         raise NotImplementedError("why still needed?")
 
+def get_data_file(name: str = "bpm_config") -> Path:
+    _DATA_FILE= (
+        Path(__file__).resolve()
+        .parent          # …/utils
+        .parent          # …/custom_epics
+        / "data"
+        / "standard"
+        / f"{name}.json"
+    )
+    with _DATA_FILE.open() as fp:
+        _DATA: List[Dict[str, Any]] = json.load(fp)
+    return _DATA
 @functools.lru_cache(maxsize=1)
 def create_bpm_config():
     '''Beam position monitor as an array of records
@@ -183,6 +198,8 @@ def create_bpm_config():
                   a mapping from raw_value to physics_value.
     '''
 
+    bpm_conf_docs = get_data_file("bpm_config")  # default → bpm_config.json
+    bpm_offset_data = get_data_file("bpm_offset")
     # fmt: off
     t_names = ['name', 'x_state', 'y_state', 's', 'idx']
     formats = ['U20', np.bool_, np.bool_, float, int]
@@ -191,9 +208,12 @@ def create_bpm_config():
     dtypes = np.dtype({'names': t_names, 'formats': formats})
 
     # Fetch BPM configuration data from MongoDB
-    bpm_conf_docs = list(db['bpm.config'].find())
-    bpm_offset_docs = {doc['bpm_name']: (doc['offset_x'], doc['offset_y']) for doc in db['bpm.offset'].find()}
-
+    # bpm_conf_docs = list(db['bpm.config'].find())
+    # bpm_offset_docs = {doc['bpm_name']: (doc['offset_x'], doc['offset_y']) for doc in db['bpm.offset'].find()}
+    bpm_offset_docs = {
+        doc['bpm_name']: (doc['offset_x'], doc['offset_y'])
+        for doc in bpm_offset_data
+    }
     n_bpms = len(bpm_conf_docs)
     data = np.zeros((n_bpms,), dtype=dtypes)
 
