@@ -11,6 +11,7 @@ class TwissForPlane:
     alpha: Sequence[float]
     beta: Sequence[float]
     nu: Sequence[float]
+    tune: float
 
 @dataclass
 class MainValue:

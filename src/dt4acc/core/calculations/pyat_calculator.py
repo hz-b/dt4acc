@@ -71,15 +71,15 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
         }
         try:
             if self.machine.closed:  # this means it is a ring
-                _, __, twiss = self.acc.get_optics(at.All)
+                _, summary, twiss = self.acc.get_optics(at.All)
             else:
-                _, __, twiss = self.acc.get_optics(at.All, twiss_in=twiss_in)  # for transfer line
+                _, summary, twiss = self.acc.get_optics(at.All, twiss_in=twiss_in)  # for transfer line
 
             main_values = self._extract_pv_values()
 
             return TwissWithAggregatedKValues(
-                x=TwissForPlane(alpha=twiss["alpha"][:, 0], beta=twiss["beta"][:, 0], nu=twiss["mu"][:, 0]),
-                y=TwissForPlane(alpha=twiss["alpha"][:, 1], beta=twiss["beta"][:, 1], nu=twiss["mu"][:, 1]),
+                x=TwissForPlane(alpha=twiss["alpha"][:, 0], beta=twiss["beta"][:, 0], nu=twiss["mu"][:, 0], tune= summary["tune"][0]),
+                y=TwissForPlane(alpha=twiss["alpha"][:, 1], beta=twiss["beta"][:, 1], nu=twiss["mu"][:, 1], tune= summary["tune"][1]),
                 names=_construct_name_list(self.acc),
                 main_values=main_values
             )
