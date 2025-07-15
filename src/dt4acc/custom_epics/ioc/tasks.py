@@ -1,9 +1,11 @@
 import asyncio
 
+from p4p.client.asyncio import Context
+
 from ...core.views.shared_view import get_view_instance
 from ...core.utils.logger import get_logger
 
-
+ctx = Context("pva")
 logger = get_logger()
 view = get_view_instance()
 heartbeat_task = None  # Global variable to store the heartbeat task reference
@@ -18,6 +20,9 @@ async def monitor_heartbeat():
     global heartbeat_task
     while True:
         if heartbeat_task is None or heartbeat_task.done():
+            # todo hardcode the setpoint to a value, so real calculation runs. this needs to be addressed differently
+            await ctx.put('Anonym:VS3P2T5R:set', 1e-3)
+            await ctx.put('Anonym:VS3P2T5R:set', 0e-3)
             logger.warning("Heartbeat loop initial start or it was terminated unexpectedly. Restarting...")
             heartbeat_task = asyncio.create_task(heartbeat_loop())
         await asyncio.sleep(1)
