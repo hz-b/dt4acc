@@ -23,8 +23,8 @@ def startup():
     """
     Main function to initialize all the process variables (PVs) and start the IOC server.
     """
-    # Retrieve the device name prefix from the environment, defaulting to "Anonym" if not set
-    prefix = os.environ.get("DT4ACC_PREFIX", "Anonym")
+    # Retrieve the device name prefix from the environment, defaulting to os.getlogin() if not set
+    prefix = os.environ.get("DT4ACC_PREFIX", os.getlogin())
 
     builder.SetDeviceName(prefix)
 

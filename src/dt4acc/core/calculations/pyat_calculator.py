@@ -95,7 +95,7 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
             tuple: PV names and their corresponding K values.
         """
         main_values = []
-        prefix = os.environ.get('DT4ACC_PREFIX', 'Anonym')
+        prefix = os.environ.get('DT4ACC_PREFIX', os.getlogin())
         for element in self.acc:
             if element.__class__.__name__ == "Quadrupole":
                 main_values.append(

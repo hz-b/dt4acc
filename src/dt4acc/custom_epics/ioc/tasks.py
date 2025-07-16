@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 from p4p.client.asyncio import Context
 
@@ -21,8 +22,8 @@ async def monitor_heartbeat():
     while True:
         if heartbeat_task is None or heartbeat_task.done():
             # todo hardcode the setpoint to a value, so real calculation runs. this needs to be addressed differently
-            await ctx.put('Anonym:VS3P2T5R:set', 1e-3)
-            await ctx.put('Anonym:VS3P2T5R:set', 0e-3)
+            await ctx.put(f'{os.getlogin()}:VS3P2T5R:set', 1e-3)
+            await ctx.put(f'{os.getlogin()}:VS3P2T5R:set', 0e-3)
             logger.warning("Heartbeat loop initial start or it was terminated unexpectedly. Restarting...")
             heartbeat_task = asyncio.create_task(heartbeat_loop())
         await asyncio.sleep(1)
