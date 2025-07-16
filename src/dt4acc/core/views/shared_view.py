@@ -1,3 +1,4 @@
+import getpass
 import os
 
 from ..utils.logger import get_logger
@@ -16,7 +17,7 @@ def get_view_instance():
     if _view_instance is not None:
         return _view_instance
 
-    prefix = os.environ.get("DT4ACC_PREFIX", os.getlogin())
+    prefix = os.environ.get("DT4ACC_PREFIX", getpass.getuser())
     server_type = os.environ.get("server", "epics").lower()
 
     if server_type == "tango":

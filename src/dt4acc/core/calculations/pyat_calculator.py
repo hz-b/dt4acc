@@ -1,3 +1,4 @@
+import getpass
 import os
 from abc import ABCMeta
 from concurrent.futures import ThreadPoolExecutor
@@ -95,7 +96,7 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
             tuple: PV names and their corresponding K values.
         """
         main_values = []
-        prefix = os.environ.get('DT4ACC_PREFIX', os.getlogin())
+        prefix = os.environ.get('DT4ACC_PREFIX', getpass.getuser())
         for element in self.acc:
             if element.__class__.__name__ == "Quadrupole":
                 main_values.append(
