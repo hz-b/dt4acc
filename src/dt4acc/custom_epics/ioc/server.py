@@ -1,5 +1,6 @@
 import asyncio
 import os
+import getpass
 
 from softioc import softioc, builder, asyncio_dispatcher
 
@@ -23,8 +24,8 @@ def startup():
     """
     Main function to initialize all the process variables (PVs) and start the IOC server.
     """
-    # Retrieve the device name prefix from the environment, defaulting to os.getlogin() if not set
-    prefix = os.environ.get("DT4ACC_PREFIX", os.getlogin())
+    # Retrieve the device name prefix from the environment, defaulting to getpass.getuser() if not set
+    prefix = os.environ.get("DT4ACC_PREFIX", getpass.getuser())
 
     builder.SetDeviceName(prefix)
 
