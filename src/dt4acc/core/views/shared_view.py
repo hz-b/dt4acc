@@ -16,7 +16,7 @@ def get_view_instance():
     if _view_instance is not None:
         return _view_instance
 
-    prefix = os.environ.get("DT4ACC_PREFIX", "Anonym")
+    prefix = os.environ.get("DT4ACC_PREFIX", os.getlogin())
     server_type = os.environ.get("server", "epics").lower()
 
     if server_type == "tango":

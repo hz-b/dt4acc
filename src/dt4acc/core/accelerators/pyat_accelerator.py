@@ -13,7 +13,7 @@ def setup_accelerator():
     Returns:
         AcceleratorManager: Singleton instance of the accelerator manager.
     """
-    prefix = os.getenv("DT4ACC_PREFIX", "Anonym")
+    prefix = os.getenv("DT4ACC_PREFIX", os.getlogin())
     manager = AcceleratorManager(prefix=prefix)
     manager.initialize()
     return manager
