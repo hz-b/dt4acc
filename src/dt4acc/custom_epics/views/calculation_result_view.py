@@ -40,7 +40,7 @@ async def update_twiss_pv(pv_name, twiss_result):
     tune_x += np.random.uniform(-1e-12, 1e-12)
     tune_y += np.random.uniform(-1e-12, 1e-12)
 
-    logger.warning(f"Updating twiss values {tune_x, tune_y}")
+    # logger.warning(f"Updating twiss values {tune_x, tune_y}")
     try:
         # todo: use translation service to provide the calc
         await ctx.put(f"{pv_name}:x:tune", tune_x)
@@ -51,7 +51,7 @@ async def update_twiss_pv(pv_name, twiss_result):
         await ctx.put(f"{pv_name}:y:alpha", twiss_result.y.alpha)
         await ctx.put(f"{pv_name}:y:beta", twiss_result.y.beta)
         await ctx.put(f"{pv_name}:y:nu", twiss_result.y.nu)
-        logger.warning("Updated twiss values")
+        logger.debug("Updated twiss values")
         # await ctx.put(f"{pv_name}:names", twiss_result.names)
     except Exception as e:
         logger.warning("FAILED Updated twiss values: %s", e)
@@ -90,7 +90,7 @@ class ResultView:
             await update_or_create_pv(elm_update, label, elm_update.value, 'float', 'd')
 
     async def push_orbit(self, orbit_result: Orbit):
-        logger.warning('Orbit pushing view')
+        logger.info('Orbit pushing view')
 
         # Define the PV name for the structured Orbit data
         pv_name = f"{self.prefix}:beam:orbit"
@@ -102,10 +102,10 @@ class ResultView:
             logger.warning('Orbit view pushing failed: %s', exc)
             raise exc
         else:
-            logger.warning('Orbit pushed view')
+            logger.info('Orbit pushed view')
 
     async def push_twiss(self, twiss_result: TwissWithAggregatedKValues):
-        logger.warning('Twiss pushing view')
+        # logger.warning('Twiss pushing view')
 
         # Define the PV name for the structured Twiss data
         pv_name = f"{self.prefix}:beam:twiss"
@@ -115,14 +115,14 @@ class ResultView:
         self.default_twiss = twiss_result
         # Use the bulk update function to update the structured PV
         await update_twiss_pv(pv_name, twiss_result)
-        logger.warning('Twiss pushed view')
+        logger.info('Twiss pushed view')
 
     # bessy specific way of setting bpm and pushing it
     async def push_bpms(self, orbit_data):
         if not self.bpm_mimicry:
             raise ValueError("BPM Mimicry not set in ResultView")
         try:
-            logger.warning(f"pushing legacy bpm data")
+            logger.info(f"pushing legacy bpm data")
             df_bpm = self.bpm_mimicry.extract_bpm_legacy_data_to_df(orbit_data)
             bpm_legacy_data = self.bpm_mimicry.bpm_legacy_data_df_to_array(df_bpm)
             self.default_bpm_legacy_data = bpm_legacy_data

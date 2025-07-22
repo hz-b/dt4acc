@@ -1,0 +1,120 @@
+[{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05af7"
+  },
+  "bpm_name": "FOMZ1T",
+  "offset_x": 0,
+  "offset_y": 0
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05af8"
+  },
+  "bpm_name": "FOMZ2T",
+  "offset_x": 0,
+  "offset_y": 0
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05af9"
+  },
+  "bpm_name": "BPMZ1T",
+  "offset_x": 0,
+  "offset_y": 0
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05afa"
+  },
+  "bpm_name": "SLZ1T",
+  "offset_x": 0,
+  "offset_y": 0
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05afb"
+  },
+  "bpm_name": "SLZ2T",
+  "offset_x": 0,
+  "offset_y": 0
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05afc"
+  },
+  "bpm_name": "FOMZ3T",
+  "offset_x": 0,
+  "offset_y": 0
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05afd"
+  },
+  "bpm_name": "BPMZ2T",
+  "offset_x": 0,
+  "offset_y": 0
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05afe"
+  },
+  "bpm_name": "FOMZ4T",
+  "offset_x": 0,
+  "offset_y": 0
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05aff"
+  },
+  "bpm_name": "BPMZ3T",
+  "offset_x": 0,
+  "offset_y": 0
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05b00"
+  },
+  "bpm_name": "FOMZ5T",
+  "offset_x": 0,
+  "offset_y": 0
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05b01"
+  },
+  "bpm_name": "BPMZ4T",
+  "offset_x": 0,
+  "offset_y": 0
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05b02"
+  },
+  "bpm_name": "FOMZ6T",
+  "offset_x": 0,
+  "offset_y": 0
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05b03"
+  },
+  "bpm_name": "BPMZ5T",
+  "offset_x": 0,
+  "offset_y": 0
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05b04"
+  },
+  "bpm_name": "FOMZ7T",
+  "offset_x": 0,
+  "offset_y": 0
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05b05"
+  },
+  "bpm_name": "SLZ3T",
+  "offset_x": 0,
+  "offset_y": 0
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05b06"
+  },
+  "bpm_name": "FOMZ8T",
+  "offset_x": 0,
+  "offset_y": 0
+},{
+  "_id": {
+    "$oid": "6716274cca15dc3efdb05b07"
+  },
+  "bpm_name": "FOMZ2D1R",
+  "offset_x": 0,
+  "offset_y": 0
+}]

@@ -1,0 +1,820 @@
+[{
+  "_id": {
+    "$oid": "671625e528e98a786d32a165"
+  },
+  "bpm_name": "BPMZ5D1R",
+  "offset_x": 0.08572389,
+  "offset_y": 0.1305237
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a166"
+  },
+  "bpm_name": "BPMZ6D1R",
+  "offset_x": 0.005065918,
+  "offset_y": 0.1847534
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a167"
+  },
+  "bpm_name": "BPMZ7D1R",
+  "offset_x": -0.2597351,
+  "offset_y": -0.04180909
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a168"
+  },
+  "bpm_name": "BPMZ1T1R",
+  "offset_x": -0.573761,
+  "offset_y": -0.5375977
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a169"
+  },
+  "bpm_name": "BPMZ2T1R",
+  "offset_x": 0.2298584,
+  "offset_y": 0.6159974
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a16a"
+  },
+  "bpm_name": "BPMZ3T1R",
+  "offset_x": -0.1924133,
+  "offset_y": 0.03427124
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a16b"
+  },
+  "bpm_name": "BPMZ4T1R",
+  "offset_x": 0.07855225,
+  "offset_y": 0.6583558
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a16c"
+  },
+  "bpm_name": "BPMZ5T1R",
+  "offset_x": 0.2110901,
+  "offset_y": 0.2242432
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a16d"
+  },
+  "bpm_name": "BPMZ6T1R",
+  "offset_x": -0.08889771,
+  "offset_y": -0.01785278
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a16e"
+  },
+  "bpm_name": "BPMZ7T1R",
+  "offset_x": -0.1879883,
+  "offset_y": 0.0643921
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a16f"
+  },
+  "bpm_name": "BPMZ1D2R",
+  "offset_x": -0.08673097,
+  "offset_y": -0.06567383
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a170"
+  },
+  "bpm_name": "BPMZ2D2R",
+  "offset_x": -0.4776612,
+  "offset_y": 0.1669312
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a171"
+  },
+  "bpm_name": "BPMZ3D2R",
+  "offset_x": 1.83728,
+  "offset_y": -0.02185059
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a172"
+  },
+  "bpm_name": "BPMZ4D2R",
+  "offset_x": -0.09219361,
+  "offset_y": -0.9320374
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a173"
+  },
+  "bpm_name": "BPMZ5D2R",
+  "offset_x": 0.2213135,
+  "offset_y": -0.00668335
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a174"
+  },
+  "bpm_name": "BPMZ6D2R",
+  "offset_x": -0.3485413,
+  "offset_y": 0.2243347
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a175"
+  },
+  "bpm_name": "BPMZ7D2R",
+  "offset_x": 0.07864381,
+  "offset_y": 0.9281617
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a176"
+  },
+  "bpm_name": "BPMZ1T2R",
+  "offset_x": -0.3635559,
+  "offset_y": 0.3040161
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a177"
+  },
+  "bpm_name": "BPMZ2T2R",
+  "offset_x": -0.1441345,
+  "offset_y": -0.09020997
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a178"
+  },
+  "bpm_name": "BPMZ3T2R",
+  "offset_x": -0.2761231,
+  "offset_y": 1.039978
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a179"
+  },
+  "bpm_name": "BPMZ4T2R",
+  "offset_x": 0.006134034,
+  "offset_y": 0.197937
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a17a"
+  },
+  "bpm_name": "BPMZ5T2R",
+  "offset_x": -0.2450562,
+  "offset_y": -0.1566773
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a17b"
+  },
+  "bpm_name": "BPMZ6T2R",
+  "offset_x": -1.353729,
+  "offset_y": -0.3336792
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a17c"
+  },
+  "bpm_name": "BPMZ7T2R",
+  "offset_x": -0.6777039,
+  "offset_y": 1.466675
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a17d"
+  },
+  "bpm_name": "BPMZ1D3R",
+  "offset_x": -0.1396485,
+  "offset_y": 0.3710633
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a17e"
+  },
+  "bpm_name": "BPMZ2D3R",
+  "offset_x": -0.5334778,
+  "offset_y": 0.7468262
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a17f"
+  },
+  "bpm_name": "BPMZ3D3R",
+  "offset_x": 0.1851196,
+  "offset_y": 0.5698243
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a180"
+  },
+  "bpm_name": "BPMZ4D3R",
+  "offset_x": -0.07366944,
+  "offset_y": 1.447357
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a181"
+  },
+  "bpm_name": "BPMZ5D3R",
+  "offset_x": -0.02111817,
+  "offset_y": -0.08096314
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a182"
+  },
+  "bpm_name": "BPMZ6D3R",
+  "offset_x": 0.1455994,
+  "offset_y": 0.77417
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a183"
+  },
+  "bpm_name": "BPMZ7D3R",
+  "offset_x": -0.1789246,
+  "offset_y": 1.286194
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a184"
+  },
+  "bpm_name": "BPMZ1T3R",
+  "offset_x": -0.01168823,
+  "offset_y": 0.9161073
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a185"
+  },
+  "bpm_name": "BPMZ2T3R",
+  "offset_x": -0.2044068,
+  "offset_y": 0.9848939
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a186"
+  },
+  "bpm_name": "BPMZ3T3R",
+  "offset_x": -0.0762024,
+  "offset_y": 0.5366211
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a187"
+  },
+  "bpm_name": "BPMZ4T3R",
+  "offset_x": 0.09170533,
+  "offset_y": -0.1529846
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a188"
+  },
+  "bpm_name": "BPMZ41T3R",
+  "offset_x": 0,
+  "offset_y": 0
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a189"
+  },
+  "bpm_name": "BPMZ42T3R",
+  "offset_x": -3.385681,
+  "offset_y": -0.6215821
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a18a"
+  },
+  "bpm_name": "BPMZ5T3R",
+  "offset_x": 0.4514466,
+  "offset_y": 0.2631836
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a18b"
+  },
+  "bpm_name": "BPMZ6T3R",
+  "offset_x": 0.2129212,
+  "offset_y": 0.7211915
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a18c"
+  },
+  "bpm_name": "BPMZ7T3R",
+  "offset_x": -0.3752442,
+  "offset_y": 0.1543884
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a18d"
+  },
+  "bpm_name": "BPMZ1D4R",
+  "offset_x": -0.2127075,
+  "offset_y": 0.7131654
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a18e"
+  },
+  "bpm_name": "BPMZ2D4R",
+  "offset_x": 0.1662293,
+  "offset_y": 0.750702
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a18f"
+  },
+  "bpm_name": "BPMZ3D4R",
+  "offset_x": 0.0234375,
+  "offset_y": 0.1400452
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a190"
+  },
+  "bpm_name": "BPMZ4D4R",
+  "offset_x": -0.7766724,
+  "offset_y": -0.5275269
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a191"
+  },
+  "bpm_name": "BPMZ5D4R",
+  "offset_x": 0.07461549,
+  "offset_y": -0.1444092
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a192"
+  },
+  "bpm_name": "BPMZ6D4R",
+  "offset_x": 0.02593994,
+  "offset_y": 0.348816
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a193"
+  },
+  "bpm_name": "BPMZ7D4R",
+  "offset_x": -0.4403687,
+  "offset_y": 0.8380128
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a194"
+  },
+  "bpm_name": "BPMZ1T4R",
+  "offset_x": 0.2537232,
+  "offset_y": 0.4276123
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a195"
+  },
+  "bpm_name": "BPMZ2T4R",
+  "offset_x": -0.3957215,
+  "offset_y": 0.3467102
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a196"
+  },
+  "bpm_name": "BPMZ3T4R",
+  "offset_x": -0.3501892,
+  "offset_y": 0.1967468
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a197"
+  },
+  "bpm_name": "BPMZ4T4R",
+  "offset_x": 1.244995,
+  "offset_y": -0.4516907
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a198"
+  },
+  "bpm_name": "BPMZ5T4R",
+  "offset_x": 0.1890564,
+  "offset_y": 0.1924439
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a199"
+  },
+  "bpm_name": "BPMZ6T4R",
+  "offset_x": -0.1688538,
+  "offset_y": 0.9369203
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a19a"
+  },
+  "bpm_name": "BPMZ7T4R",
+  "offset_x": 0.3420105,
+  "offset_y": 0.3723755
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a19b"
+  },
+  "bpm_name": "BPMZ1D5R",
+  "offset_x": 0.01766968,
+  "offset_y": 0.3218689
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a19c"
+  },
+  "bpm_name": "BPMZ2D5R",
+  "offset_x": 0.1686707,
+  "offset_y": 0.2336731
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a19d"
+  },
+  "bpm_name": "BPMZ3D5R",
+  "offset_x": -0.1739197,
+  "offset_y": 0.5980836
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a19e"
+  },
+  "bpm_name": "BPMZ4D5R",
+  "offset_x": 1.19812,
+  "offset_y": -0.4138794
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a19f"
+  },
+  "bpm_name": "BPMZ5D5R",
+  "offset_x": 1.508728,
+  "offset_y": 1.019074
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1a0"
+  },
+  "bpm_name": "BPMZ6D5R",
+  "offset_x": -0.2634278,
+  "offset_y": 0.5680543
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1a1"
+  },
+  "bpm_name": "BPMZ7D5R",
+  "offset_x": 0.1289673,
+  "offset_y": 0.7442322
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1a2"
+  },
+  "bpm_name": "BPMZ1T5R",
+  "offset_x": 0.3658448,
+  "offset_y": 0.278656
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1a3"
+  },
+  "bpm_name": "BPMZ2T5R",
+  "offset_x": 0.2992554,
+  "offset_y": 0.8110658
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1a4"
+  },
+  "bpm_name": "BPMZ3T5R",
+  "offset_x": -0.02423096,
+  "offset_y": 0.9699098
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1a5"
+  },
+  "bpm_name": "BPMZ4T5R",
+  "offset_x": 0.0701294,
+  "offset_y": 0.4854126
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1a6"
+  },
+  "bpm_name": "BPMZ5T5R",
+  "offset_x": 0.4101563,
+  "offset_y": 1.472839
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1a7"
+  },
+  "bpm_name": "BPMZ6T5R",
+  "offset_x": 0.3638001,
+  "offset_y": 0.5737916
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1a8"
+  },
+  "bpm_name": "BPMZ7T5R",
+  "offset_x": -0.1661987,
+  "offset_y": 0.04782105
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1a9"
+  },
+  "bpm_name": "BPMZ1D6R",
+  "offset_x": -0.3457032,
+  "offset_y": 0.2858887
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1aa"
+  },
+  "bpm_name": "BPMZ2D6R",
+  "offset_x": -0.2120972,
+  "offset_y": 0.4269104
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1ab"
+  },
+  "bpm_name": "BPMZ3D6R",
+  "offset_x": 0.6620789,
+  "offset_y": -0.3117981
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1ac"
+  },
+  "bpm_name": "BPMZ4D6R",
+  "offset_x": -1.999146,
+  "offset_y": -0.2272949
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1ad"
+  },
+  "bpm_name": "BPMZ41D6R",
+  "offset_x": -0.0322876,
+  "offset_y": 0.01174927
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1ae"
+  },
+  "bpm_name": "BPMZ42D6R",
+  "offset_x": -0.6603089,
+  "offset_y": 0.2397766
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1af"
+  },
+  "bpm_name": "BPMZ43D6R",
+  "offset_x": -0.5000611,
+  "offset_y": -0.1469727
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1b0"
+  },
+  "bpm_name": "BPMZ44D6R",
+  "offset_x": 1.23465,
+  "offset_y": 0.02380371
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1b1"
+  },
+  "bpm_name": "BPMZ6D6R",
+  "offset_x": -2.841126,
+  "offset_y": -1.057678
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1b2"
+  },
+  "bpm_name": "BPMZ7D6R",
+  "offset_x": -0.7184754,
+  "offset_y": -0.2219544
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1b3"
+  },
+  "bpm_name": "BPMZ1T6R",
+  "offset_x": 0.06591798,
+  "offset_y": -0.08316041
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1b4"
+  },
+  "bpm_name": "BPMZ2T6R",
+  "offset_x": -0.3171082,
+  "offset_y": 0.1875611
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1b5"
+  },
+  "bpm_name": "BPMZ3T6R",
+  "offset_x": 0.1168518,
+  "offset_y": -0.1887512
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1b6"
+  },
+  "bpm_name": "BPMZ4T6R",
+  "offset_x": -0.006317139,
+  "offset_y": 0.04818726
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1b7"
+  },
+  "bpm_name": "BPMZ5T6R",
+  "offset_x": -0.07608033,
+  "offset_y": 0.2179871
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1b8"
+  },
+  "bpm_name": "BPMZ6T6R",
+  "offset_x": -0.001220703,
+  "offset_y": 0.2339173
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1b9"
+  },
+  "bpm_name": "BPMZ7T6R",
+  "offset_x": -0.2859497,
+  "offset_y": 0.2878113
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1ba"
+  },
+  "bpm_name": "BPMZ1D7R",
+  "offset_x": -0.1840515,
+  "offset_y": 0.2254639
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1bb"
+  },
+  "bpm_name": "BPMZ2D7R",
+  "offset_x": 0.08889771,
+  "offset_y": 0.5613404
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1bc"
+  },
+  "bpm_name": "BPMZ3D7R",
+  "offset_x": 0.4471436,
+  "offset_y": -0.1090393
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1bd"
+  },
+  "bpm_name": "BPMZ4D7R",
+  "offset_x": -0.18573,
+  "offset_y": 0.08807374
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1be"
+  },
+  "bpm_name": "BPMZ5D7R",
+  "offset_x": 0.1996765,
+  "offset_y": 0.9813844
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1bf"
+  },
+  "bpm_name": "BPMZ6D7R",
+  "offset_x": -0.5879212,
+  "offset_y": 0.6875916
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1c0"
+  },
+  "bpm_name": "BPMZ7D7R",
+  "offset_x": 0.00769043,
+  "offset_y": -0.5588074
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1c1"
+  },
+  "bpm_name": "BPMZ1T7R",
+  "offset_x": 0.3641053,
+  "offset_y": 0.3431702
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1c2"
+  },
+  "bpm_name": "BPMZ2T7R",
+  "offset_x": -0.4783631,
+  "offset_y": 0.4029236
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1c3"
+  },
+  "bpm_name": "BPMZ3T7R",
+  "offset_x": 0.3749695,
+  "offset_y": -0.578949
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1c4"
+  },
+  "bpm_name": "BPMZ4T7R",
+  "offset_x": -0.1642151,
+  "offset_y": 0.2694702
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1c5"
+  },
+  "bpm_name": "BPMZ5T7R",
+  "offset_x": -0.06607056,
+  "offset_y": 0.03268433
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1c6"
+  },
+  "bpm_name": "BPMZ6T7R",
+  "offset_x": -0.8050538,
+  "offset_y": -0.3223267
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1c7"
+  },
+  "bpm_name": "BPMZ7T7R",
+  "offset_x": 0.1220398,
+  "offset_y": -0.3091431
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1c8"
+  },
+  "bpm_name": "BPMZ1D8R",
+  "offset_x": 0.2545166,
+  "offset_y": 0.3302002
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1c9"
+  },
+  "bpm_name": "BPMZ2D8R",
+  "offset_x": 0.1212769,
+  "offset_y": 0.5897217
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1ca"
+  },
+  "bpm_name": "BPMZ3D8R",
+  "offset_x": 0.08132935,
+  "offset_y": 0.456543
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1cb"
+  },
+  "bpm_name": "BPMZ4D8R",
+  "offset_x": -0.1436768,
+  "offset_y": 0.2376709
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1cc"
+  },
+  "bpm_name": "BPMZ5D8R",
+  "offset_x": -0.4596253,
+  "offset_y": 0.008605958
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1cd"
+  },
+  "bpm_name": "BPMZ6D8R",
+  "offset_x": -0.1896057,
+  "offset_y": -0.2800598
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1ce"
+  },
+  "bpm_name": "BPMZ7D8R",
+  "offset_x": 0.1693421,
+  "offset_y": 0.3395996
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1cf"
+  },
+  "bpm_name": "BPMZ1T8R",
+  "offset_x": 0.325409,
+  "offset_y": -0.250824
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1d0"
+  },
+  "bpm_name": "BPMZ2T8R",
+  "offset_x": -0.2835083,
+  "offset_y": 0.5869141
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1d1"
+  },
+  "bpm_name": "BPMZ3T8R",
+  "offset_x": 0.3128357,
+  "offset_y": -0.4053345
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1d2"
+  },
+  "bpm_name": "BPMZ4T8R",
+  "offset_x": -0.2307129,
+  "offset_y": 0.8888551
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1d3"
+  },
+  "bpm_name": "BPMZ5T8R",
+  "offset_x": 0.01965332,
+  "offset_y": 0.08676148
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1d4"
+  },
+  "bpm_name": "BPMZ6T8R",
+  "offset_x": 0.02188111,
+  "offset_y": -0.7896729
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1d5"
+  },
+  "bpm_name": "BPMZ7T8R",
+  "offset_x": -0.1533508,
+  "offset_y": -0.1950684
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1d6"
+  },
+  "bpm_name": "BPMZ1D1R",
+  "offset_x": -0.05117798,
+  "offset_y": 0.5253907
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1d7"
+  },
+  "bpm_name": "BPMZ2D1R",
+  "offset_x": 0.04290772,
+  "offset_y": -0.06027222
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1d8"
+  },
+  "bpm_name": "BPMZ3D1R",
+  "offset_x": -0.025177,
+  "offset_y": -0.608429
+},{
+  "_id": {
+    "$oid": "671625e528e98a786d32a1d9"
+  },
+  "bpm_name": "BPMZ4D1R",
+  "offset_x": -0.02322388,
+  "offset_y": -0.6217347
+}]

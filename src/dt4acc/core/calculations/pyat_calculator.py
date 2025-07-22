@@ -1,3 +1,4 @@
+import getpass
 import os
 from abc import ABCMeta
 from concurrent.futures import ThreadPoolExecutor
@@ -62,7 +63,7 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
             RuntimeError: If the calculation fails due to invalid input.
         """
 
-        logger.warning("Starting Twiss calculation (get_optics)")
+        logger.info("Starting Twiss calculation (get_optics)")
 
         twiss_in = {
             'beta': np.array([8.860461, 4.03432]),
@@ -95,7 +96,7 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
             tuple: PV names and their corresponding K values.
         """
         main_values = []
-        prefix = os.environ.get('DT4ACC_PREFIX', 'Anonym')
+        prefix = os.environ.get('DT4ACC_PREFIX', getpass.getuser())
         for element in self.acc:
             if element.__class__.__name__ == "Quadrupole":
                 main_values.append(
@@ -143,7 +144,7 @@ class PyAtOrbitCalculator(OrbitCalculator, metaclass=ABCMeta):
         Raises:
             RuntimeError: If the calculation fails.
         """
-        logger.warning("Starting orbit calculation (find_orbit)")
+        logger.info("Starting orbit calculation (find_orbit)")
 
         try:
             x0, orbit = self.acc.find_orbit(at.All)
