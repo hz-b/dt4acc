@@ -1,3 +1,15 @@
+"""
+
+Todo:
+    improve periodic update of data e.g. orbit data
+    * Should that be provided by an periodic publisher?
+    * Should there be a central instance that informs
+      periodic publishers that
+      * calculations have been requested: i.e. update
+        was called
+      * that these cache data internally until it needs
+        being republished
+"""
 import itertools
 from datetime import datetime
 from typing import Sequence
@@ -72,6 +84,7 @@ class ResultView:
         tmp = np.empty([2048], np.int16)
         tmp.fill(-2 ** 15 + 1)
         self.default_bpm_legacy_data = tmp
+        self.orbit_object_data = None
         self.default_twiss = None
         self.bpm_mimicry = None
 
@@ -80,7 +93,6 @@ class ResultView:
         self.bpm_mimicry = bpm_mimicry
 
     async def push_value(self, elm_update: ElementUpdate):
-        elm_update
         if elm_update.property_name == "K":
             pass
         else:
@@ -127,11 +139,12 @@ class ResultView:
             bpm_legacy_data = self.bpm_mimicry.bpm_legacy_data_df_to_array(df_bpm)
             self.default_bpm_legacy_data = bpm_legacy_data
             await self.push_legacy_bpm_data(bpm_legacy_data)
-            df_for_orbit = df_bpm.copy()
+            orbit_object_data = df_bpm.copy()
             mm2nm = 1e6
-            df_for_orbit.x = df_bpm.x * mm2nm
-            df_for_orbit.y = df_bpm.y * mm2nm
-            await self.push_orbit_object(df_for_orbit)
+            orbit_object_data.x = df_bpm.x * mm2nm
+            orbit_object_data.y = df_bpm.y * mm2nm
+            self.orbit_object_data = orbit_object_data
+            await self.push_orbit_object(self.orbit_object_data)
         except Exception as e:
             logger.error(f"Error processing orbit data: {e}")
 
@@ -151,9 +164,14 @@ class ResultView:
         Push BPM data to EPICS. If no data is provided, push the default data.
         """
         if bpm_legacy_data is None:
+            logger.info(f"Pushing legacy BPM data at {datetime.now()}")
             bpm_legacy_data = self.default_bpm_legacy_data
-        logger.info(f"Pushing legacy BPM data at {datetime.now()}")
         await self.bpm_pvs.set_data(bpm_legacy_data)
+
+        if self.orbit_object_data is None:
+            return
+        logger.info(f"Pushing orbit object data at {datetime.now()}")
+        await self.push_orbit_object(self.orbit_object_data)
 
     async def heart_beat(self):
         """
@@ -163,4 +181,7 @@ class ResultView:
         # logger.warning(f"view heartbeat {datetime.now()}")
         await self.push_legacy_bpm_data(self.default_bpm_legacy_data)
         await self.push_twiss(self.default_twiss)
-        await self.bpm_pvs.heart_beat()
+        # Todo: remove this duplication ...
+        #       currently
+        #
+        # await self.bpm_pvs.heart_beat()
