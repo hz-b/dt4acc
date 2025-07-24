@@ -2,7 +2,7 @@ import numpy as np
 from typing import Dict, List, Optional
 from tango import DeviceProxy, DevFailed, Database, DbDevInfo, DbDatum
 from dt4acc.core.utils.logger import get_logger
-from dt4acc.data_model.identifiers import LatticeElementPropertyID, DevicePropertyID
+from dt4acc.custom_epics.ioc.liasion_translation_manager import LatticeElementPropertyID, DevicePropertyID
 from dt4acc.custom_epics.data.querries import get_unique_power_converters, get_magnets_per_power_converters
 from dt4acc.custom_epics.ioc.handlers import update_manager, handle_device_update
 from dt4acc.custom_tango.ioc.devices.magnet_device import MagnetDevice
@@ -62,7 +62,7 @@ class DeviceInitializer:
         
         return full_name
         
-    def _create_device(self, device_name: str, device_class: str) -> DeviceProxy:
+    def _create_device(self, device_name: str, device_class: str) -> None:
         """Create a Tango device in the database."""
         try:
             print(f"\n[DEBUG] Creating device:")
@@ -96,48 +96,14 @@ class DeviceInitializer:
             self.db.add_device(dev_info)
             print("  - Device added to database successfully")
             
-            # Create device proxy and wait for it to be ready
-            max_retries = 3
-            retry_delay = 1  # seconds
+            # Note: DeviceProxy creation is deferred until server is running
+            # The device is now registered in the database and will be available
+            # when the Tango server starts
+            print("  - Device registered in database (proxy creation deferred)")
             
-            for attempt in range(max_retries):
-                try:
-                    device = DeviceProxy(formatted_name)
-                    device.ping()
-                    print(f"  - Device proxy created and pinged successfully")
-                    break
-                except DevFailed as e:
-                    if "Device not exported" in str(e) and attempt < max_retries - 1:
-                        print(f"  - Device not ready, retrying in {retry_delay} seconds...")
-                        time.sleep(retry_delay)
-                        retry_delay *= 2
-                    else:
-                        raise
-            
-            try:
-                print(f"  - Setting device properties:")
-                print(f"    * Setting name property to: {device_name}")
-
-                device.put_property({"name": [device_name]})
-                print(f"    * Name property set successfully")
-                
-
-                props = device.get_property(["name"])
-                print(f"    * Retrieved properties: {props}")
-                if "name" in props and props["name"]:
-                    print(f"    * Name property verified: {props['name']}")
-                else:
-                    print(f"    * WARNING: Name property not found in retrieved properties")
-
-                    print(f"    * Trying alternative method to set property")
-                    self.db.put_device_property(formatted_name, {"name": [device_name]})
-                    print(f"    * Property set using database method")
-            except Exception as e:
-                print(f"  - ERROR: Could not set name property: {str(e)}")
-                raise
-            
-            self.device_cache[device_name] = device
-            return device
+            # DeviceProxy creation is deferred until server is running
+            # For now, just return None to indicate successful registration
+            return None
             
         except Exception as e:
             print(f"\n[ERROR] Failed to create device:")
@@ -167,21 +133,21 @@ class DeviceInitializer:
         Initializes all power converters and their associated magnets.
         same like to EPICS initialize_power_converter_pvs.
         """
-        devices = {}
+        device_count = 0
         try:
             for pc_name in get_unique_power_converters():
                 magnets = get_magnets_per_power_converters(pc_name)
-                pc = self.initialize_power_converter_device(pc_name, magnets)
-                devices[pc_name] = pc
+                self.initialize_power_converter_device(pc_name, magnets)
+                device_count += 1
                 
-            logger.info(f"Initialized {len(devices)} power converter devices")
-            return devices
+            logger.info(f"Registered {device_count} power converter devices in database")
+            return {"status": "registered", "count": device_count}
             
         except Exception as e:
             logger.error(f"Error initializing devices: {str(e)}")
             raise
         
-    def initialize_magnet_device(self, device_name: str, magnet_data: dict) -> DeviceProxy:
+    def initialize_magnet_device(self, device_name: str, magnet_data: dict) -> None:
         """
         Initializes a magnet device with the given configuration.
         same as  to EPICS initialize_magnet_pvs.
@@ -191,25 +157,14 @@ class DeviceInitializer:
             print(f"  - Device name: {device_name}")
             print(f"  - Magnet data: {magnet_data}")
             
-            # Create device
-            device = self._create_device(device_name, "MagnetDevice")
-            print(f"  - Device created successfully")
+            # Create device (registration only)
+            self._create_device(device_name, "MagnetDevice")
+            print(f"  - Device registered successfully")
             
-            # Set properties
-            self._set_device_property(device, "name", device_name)
-            self._set_device_property(device, "type", magnet_data.get("type", "unknown"))
-            print(f"  - Properties set successfully")
+            # Note: Properties and attributes will be set when server is running
+            print(f"  - Properties and attributes will be set when server is running")
             
-            # Initialize attributes
-            device.write_attribute("magnetic_strength", 0.0)
-            device.write_attribute("magnetic_strength_readback", 0.0)
-            device.write_attribute("current", 0.0)
-            device.write_attribute("power_supply_current", 0.0)
-            device.write_attribute("x_position", 0.0)
-            device.write_attribute("y_position", 0.0)
-            print(f"  - Attributes initialized successfully")
-            
-            return device
+            return None
             
         except Exception as e:
             print(f"\n[ERROR] Failed to initialize magnet device:")
@@ -217,7 +172,7 @@ class DeviceInitializer:
             logger.error(f"Error initializing magnet device {device_name}: {str(e)}")
             raise
     
-    def initialize_power_converter_device(self, pc_name: str, associated_magnets: List[dict]) -> DeviceProxy:
+    def initialize_power_converter_device(self, pc_name: str, associated_magnets: List[dict]) -> None:
         """
         Initializes a power converter device and its associated magnets.
         as like  to EPICS add_pc_pvs.
@@ -228,38 +183,19 @@ class DeviceInitializer:
             print(f"  - PC name: {pc_name}")
             print(f"  - Associated magnets: {associated_magnets}")
             
-            # Create device
-            device = self._create_device(pc_name, "PowerConverterDevice")
-            print(f"  - Device created successfully")
+            # Create device (registration only)
+            self._create_device(pc_name, "PowerConverterDevice")
+            print(f"  - Device registered successfully")
             
-            # Set properties
-            try:
-                print(f"  - Setting device properties:")
-                props = {
-                    "name": [pc_name],
-                    "magnet_list": [magnet["name"] for magnet in associated_magnets]
-                }
-                print(f"    * Properties to set: {props}")
-                device.put_property(props)
-                print(f"    * Properties set successfully")
-                
-                # Verify properties were set
-                retrieved_props = device.get_property(["name", "magnet_list"])
-                print(f"    * Retrieved properties: {retrieved_props}")
-                if "name" in retrieved_props and retrieved_props["name"]:
-                    print(f"    * Name property verified: {retrieved_props['name']}")
-                else:
-                    print(f"    * WARNING: Name property not found in retrieved properties")
-            except Exception as e:
-                print(f"  - ERROR: Could not set properties: {str(e)}")
-                raise
+            # Note: Properties will be set when server is running
+            print(f"  - Properties will be set when server is running")
             
             # Initialize associated magnets
             for magnet_data in associated_magnets:
                 self.initialize_magnet_device(magnet_data["name"], magnet_data)
                 
             logger.info(f"Initialized power converter device {pc_name} with {len(associated_magnets)} associated magnets")
-            return device
+            return None
             
         except Exception as e:
             print(f"\n[ERROR] Failed to initialize power converter device:")

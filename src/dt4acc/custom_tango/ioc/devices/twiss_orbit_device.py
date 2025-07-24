@@ -41,6 +41,10 @@ class TwissOrbitDevice(Device):
         self._twiss_nu_y = np.zeros(config.n_elements, dtype=float)
         self._twiss_names = np.array([""] * config.n_elements, dtype=str)
         
+        # Initialize tune values (matching EPICS PV structure)
+        self._twiss_x_tune = 0.0
+        self._twiss_y_tune = 0.0
+        
         # Initialize BPM data
         self._bpm_data = np.empty([2048], np.int16)
         self._bpm_data.fill(-2 ** 15 + 1)
@@ -259,6 +263,37 @@ class TwissOrbitDevice(Device):
         self._validate_array_length(value, "twiss_names")
         self._twiss_names = np.array(value, dtype=str)
         logger.info("Updated twiss_names")
+
+    # Tune attributes (matching EPICS PV structure)
+    @attribute(
+        name="beam/twiss/x/tune",
+        dtype=float,
+        access=AttrWriteType.READ_WRITE,
+        label="X tune",
+        format="%8.6f",
+    )
+    def twiss_x_tune(self) -> float:
+        return self._twiss_x_tune
+
+    @twiss_x_tune.write
+    def twiss_x_tune(self, value: float):
+        self._twiss_x_tune = float(value)
+        logger.info("Updated twiss_x_tune")
+
+    @attribute(
+        name="beam/twiss/y/tune",
+        dtype=float,
+        access=AttrWriteType.READ_WRITE,
+        label="Y tune",
+        format="%8.6f",
+    )
+    def twiss_y_tune(self) -> float:
+        return self._twiss_y_tune
+
+    @twiss_y_tune.write
+    def twiss_y_tune(self, value: float):
+        self._twiss_y_tune = float(value)
+        logger.info("Updated twiss_y_tune")
 
     # BPM attributes
     @attribute(

@@ -2,6 +2,8 @@ from datetime import datetime
 from typing import Sequence, List, Union, Optional
 import time
 import asyncio
+import itertools
+import pandas as pd
 
 import numpy as np
 from tango import DeviceProxy, DevFailed, Database, DevState
@@ -16,6 +18,9 @@ from ...custom_epics.utils.bpm_mimicry import BPMMimicry
 from .bpm_data import BeamPositionPVs
 
 logger = get_logger()
+
+# Counter for orbit object updates (matching EPICS implementation)
+counter = itertools.count()
 
 def convert_to_list(data: Union[Sequence, np.ndarray]) -> List:
     """Convert sequence or numpy array to list with proper type handling"""
@@ -53,6 +58,11 @@ def update_twiss_device(device_name: str, twiss_result: TwissWithAggregatedKValu
         device.write_attribute("twiss_nu_y", convert_to_list(twiss_result.y.nu))
         device.write_attribute("twiss_names", convert_to_list(twiss_result.names))
         
+        # Add tune values (missing in current Tango implementation)
+        tune_x = float(twiss_result.x.tune) + np.random.uniform(-1e-12, 1e-12)  # Match EPICS noise
+        tune_y = float(twiss_result.y.tune) + np.random.uniform(-1e-12, 1e-12)
+        device.write_attribute("twiss_x_tune", tune_x)
+        device.write_attribute("twiss_y_tune", tune_y)
 
         if hasattr(twiss_result, 'main_values') and twiss_result.main_values:
             for k in twiss_result.main_values:
@@ -71,245 +81,8 @@ def update_twiss_device(device_name: str, twiss_result: TwissWithAggregatedKValu
 
 
 
-
-
-
-# class TwissOrbitView:
-#     def __init__(self, *, device_name: str):
-#         self.device_name = device_name
-#         self.device = DeviceProxy(device_name)
-#         self.default_bpm_data = np.empty([2048], np.int16)
-#         self.default_bpm_data.fill(-2 ** 15 + 1)
-#         self.bpm_mimicry = None
-
-#     def set_bpm_mimicry(self, bpm_mimicry):
-#         """Set BPM mimicry for legacy data handling."""
-#         self.bpm_mimicry = bpm_mimicry
-
-#     def push_value(self, elm_update: ElementUpdate):
-#         """Push a single element update to the device."""
-#         if elm_update.property_name == "K":
-#             return
-        
-#         property_name = 'x:set' if 'x' in elm_update.property_name else (
-#             'y:set' if 'dy' in elm_update.property_name else elm_update.property_name)
-        
-#         try:
-#             self.device.write_attribute(f"{elm_update.element_id}:{property_name}", elm_update.value)
-#             logger.info(f"Updated {elm_update.element_id}:{property_name}")
-#         except Exception as e:
-#             logger.error(f"Failed to update {elm_update.element_id}:{property_name}: {e}")
-
-#     def _check_bpm_attributes(self, device):
-#         """Check all BPM device attributes."""
-#         try:
-#             print("\nChecking BPM device attributes:")
-#             # Get list of all attributes
-#             attr_list = device.get_attribute_list()
-#             print(f"Available attributes: {attr_list}")
-            
-#             # Try to read each attribute
-#             for attr_name in attr_list:
-#                 try:
-#                     attr_value = device.read_attribute(attr_name)
-#                     print(f"Attribute: {attr_name}")
-#                     print(f"  - Value: {attr_value.value}")
-#                     print(f"  - Type: {type(attr_value.value)}")
-#                     print(f"  - Quality: {attr_value.quality}")
-#                 except Exception as e:
-#                     print(f"  - Error reading {attr_name}: {e}")
-#             print("\n")
-#         except Exception as e:
-#             print(f"Error checking BPM attributes: {e}")
-
-#     async def push_orbit(self, orbit: Orbit):
-#         """Push orbit data to the device."""
-#         try:
-#             logger.info("Pushing orbit data to device")
-#             device = await self._get_device()
-#             print(f"orbit.found: {orbit.found}")
-#             print("device is", device)
-#             print(f"type of orbit.found: {type(orbit.found)}")
-#             print("***")
-            
-#             # Check BPM device attributes before writing
-#             self._check_bpm_attributes(device)
-            
-#             # Pad arrays to match expected length
-#             def pad_array(arr, target_length=config.n_elements):
-#                 if len(arr) < target_length:
-#                     return np.pad(arr, (0, target_length - len(arr)), mode='constant', constant_values=0)
-#                 return arr[:target_length]  # Truncate if longer
-            
-#             # Convert and pad orbit data
-#             orbit_x = pad_array(convert_to_list(orbit.x))
-#             orbit_y = pad_array(convert_to_list(orbit.y))
-#             orbit_x0 = pad_array(convert_to_list(orbit.x0))
-#             orbit_names = pad_array(convert_to_list(orbit.names))
-            
-#             # Write attributes
-#             print("writing attributes...")
-#             print(f"Type orbit.x: {type(orbit.x)}")
-#             device.write_attribute("beam/orbit/x", orbit_x)
-#             print("wrote the x")
-#             device.write_attribute("beam/orbit/y", orbit_y)
-#             device.write_attribute("beam/orbit/x0", orbit_x0)
-#             device.write_attribute("beam/orbit/names", orbit_names)
-#             print("now writing found")
-#             # Convert found to proper boolean type
-#             found_value = bool(orbit.found) if isinstance(orbit.found, (int, float)) else orbit.found
-#             device.write_attribute("beam/orbit/found", found_value)
-#             print("write the found*")
-            
-#             # Check BPM device attributes after writing
-#             self._check_bpm_attributes(device)
-            
-#             # Try to read back the found attribute to verify
-#             try:
-#                 found_value = device.read_attribute("beam/orbit/found").value
-#                 print(f"Successfully wrote and read back found attribute: {found_value}")
-#             except Exception as e:
-#                 print(f"Warning: Could not read back found attribute: {e}")
-            
-#             logger.info("Orbit data pushed successfully")
-#         except Exception as exc:
-#             logger.error(f"Orbit view pushing failed: {exc}")
-#             raise exc
-
-#     def push_twiss(self, twiss_result: TwissWithAggregatedKValues):
-#         """Push Twiss data to the device."""
-#         logger.info('Pushing Twiss data')
-#         try:
-#             # Push Twiss parameters
-#             self.device.write_attribute("beam/twiss/x/alpha", twiss_result.x.alpha)
-#             self.device.write_attribute("beam/twiss/x/beta", twiss_result.x.beta)
-#             self.device.write_attribute("beam/twiss/x/nu", twiss_result.x.nu)
-#             self.device.write_attribute("beam/twiss/y/alpha", twiss_result.y.alpha)
-#             self.device.write_attribute("beam/twiss/y/beta", twiss_result.y.beta)
-#             self.device.write_attribute("beam/twiss/y/nu", twiss_result.y.nu)
-            
-#             # Push magnet strengths
-#             if twiss_result.main_values:
-#                 pv_names = [k.pv_name for k in twiss_result.main_values]
-#                 values = [k.value for k in twiss_result.main_values]
-#                 self.device.update_magnet_strengths(pv_names, values)
-            
-#             logger.info('Twiss data pushed successfully')
-#         except Exception as e:
-#             logger.error(f'Failed to push Twiss data: {e}')
-#             raise
-
-#     async def push_bpms(self, orbit: Orbit):
-#         """Push BPM data to the device."""
-#         try:
-#             logger.info("Pushing BPM data to device")
-#             device = await self._get_device()
-            
-#             # Initialize BPM data if not already done
-#             if self.bpm_data is None:
-#                 self.bpm_data = BeamPositionPVs(prefix=self.device_name)
-            
-#             # Create BPM data array with fixed length of 2048
-#             bpm_data = np.zeros(2048, dtype=np.int16)
-            
-#             # Fill the first part with orbit data converted to microns
-#             for i in range(min(len(orbit.x), 2048)):
-#                 bpm_data[i] = int(orbit.x[i] * 1000)  # Convert to microns
-            
-#             # Set BPM data
-#             await self.bpm_data.set_data(bpm_data)
-#             logger.info("BPM data pushed successfully")
-            
-#         except Exception as exc:
-#             logger.error(f"BPM data pushing failed: {exc}")
-#             raise exc
-
-#     async def push_legacy_bpm_data(self, bpm_legacy_data: Optional[Sequence[np.int16]] = None):
-#         """Push BPM data to the device"""
-#         if bpm_legacy_data is None:
-#             bpm_legacy_data = self.default_bpm_data
-            
-#         try:
-#             # Ensure data is in the correct format
-#             if not isinstance(bpm_legacy_data, np.ndarray):
-#                 bpm_legacy_data = np.asarray(bpm_legacy_data, dtype=np.int16)
-#             elif bpm_legacy_data.dtype != np.int16:
-#                 bpm_legacy_data = bpm_legacy_data.astype(np.int16)
-                
-#             # Ensure data has correct shape
-#             if bpm_legacy_data.shape != (2048,):
-#                 logger.warning(f"Reshaping BPM data from {bpm_legacy_data.shape} to (2048,)")
-#                 if len(bpm_legacy_data) > 2048:
-#                     bpm_legacy_data = bpm_legacy_data[:2048]
-#                 else:
-#                     padded_data = np.zeros(2048, dtype=np.int16)
-#                     padded_data[:len(bpm_legacy_data)] = bpm_legacy_data
-#                     bpm_legacy_data = padded_data
-            
-#             logger.info(f"Pushing legacy BPM data at {datetime.now()}")
-#             # Use BeamPositionPVs to set data
-#             await self.bpm_data.set_data(bpm_legacy_data)
-#             logger.info("BPM data pushed successfully")
-#         except Exception as e:
-#             logger.error(f"Failed to push BPM data: {e}")
-#             raise
-
-#     async def heart_beat(self):
-#         """Periodic heartbeat function"""
-#         try:
-#             # Use BeamPositionPVs heartbeat
-#             await self.bpm_data.heart_beat()
-#             # Also ping the TwissOrbit device
-#             device = self.device
-#             device.ping()
-#             logger.debug(f"Heartbeat check at {datetime.now()}")
-#         except Exception as e:
-#             logger.error(f"Heartbeat check failed: {e}")
-
-#     def _check_server_running(self):
-#         """Check if the Tango server is running."""
-#         try:
-#             db = Database()
-#             server_list = db.get_server_list()
-#             if SERVER_INSTANCE not in server_list:
-#                 logger.error(f"Tango server {SERVER_INSTANCE} is not running")
-#                 raise RuntimeError(f"Tango server {SERVER_INSTANCE} is not running")
-#             logger.info(f"Tango server {SERVER_INSTANCE} is running")
-#         except Exception as e:
-#             logger.error(f"Failed to check server status: {e}")
-#             raise
-
-#     def _get_device(self):
-#         """Get the TwissOrbit device proxy with retry mechanism."""
-#         # First check if server is running
-#         self._check_server_running()
-        
-#         max_retries = 3
-#         retry_delay = 1  # seconds
-        
-#         for attempt in range(max_retries):
-#             try:
-#                 device = DeviceProxy(self.device_name)
-#                 # Test connection
-#                 device.ping()
-#                 print(f"Successfully connected to device {self.device_name}")
-#                 return device
-#             except Exception as e:
-#                 if attempt < max_retries - 1:
-#                     logger.warning(f"Attempt {attempt + 1} failed to connect to device {self.device_name}: {e}")
-#                     logger.info(f"Retrying in {retry_delay} seconds...")
-#                     time.sleep(retry_delay)
-#                 else:
-#                     logger.error(f"Failed to connect to device {self.device_name} after {max_retries} attempts: {e}")
-#                     raise
-
-
-
-
-
-
 class ResultView:
-    def __init__(self, prefix: str):
+    def __init__(self, *, prefix):
         """Initialize the ResultView with a prefix."""
         self.prefix = prefix
 
@@ -330,6 +103,10 @@ class ResultView:
         self._reconnect_attempts = 0
         self._max_reconnect_attempts = 3
         self._reconnect_delay = 1.0  # seconds
+        
+        # Add missing attributes to match EPICS implementation
+        self.orbit_object_data = None
+        self.default_twiss = None
 
     async def initialize(self):
         """Initialize the view and establish device connection."""
@@ -382,39 +159,30 @@ class ResultView:
                 await asyncio.sleep(1.0)  # Longer sleep on error
 
     async def heart_beat(self):
-        """Enhanced periodic heartbeat function with comprehensive checks."""
+        """
+        Periodic heartbeat function to push default BPM data.
+        Matches EPICS implementation behavior.
+        """
         try:
-
-            device = await self._get_device()
+            # Push default BPM data (matching EPICS behavior)
+            try:
+                await self.push_legacy_bpm_data(self.default_bpm_legacy_data)
+            except Exception as e:
+                logger.warning(f"BPM data push failed in heartbeat: {e}")
             
-            # Check BPM device
-            if not self.bpm_data:
-                logger.warning("BPM device not connected, attempting to reconnect...")
-                await self.bpm_data.initialize()
+            # Push default Twiss data if available (matching EPICS behavior)
+            if hasattr(self, 'default_twiss') and self.default_twiss is not None:
+                try:
+                    await self.push_twiss(self.default_twiss)
+                except Exception as e:
+                    logger.warning(f"Twiss data push failed in heartbeat: {e}")
             
-            # Perform heartbeat checks
-            await self.bpm_data.heart_beat()
-            device.ping()
-            
-            # Verify device state
-            state = device.state()
-            if state != DevState.ON:
-                logger.warning(f"Device not in ON state: {state}")
-            
-            # Check last update time
-            if self._last_update:
-                time_since_update = time.time() - self._last_update
-                if time_since_update > self._update_interval * 2:
-                    logger.warning(f"Long delay since last update: {time_since_update:.1f}s")
-            
-            logger.debug(f"Heartbeat check successful at {datetime.now()}")
+            logger.debug(f"Heartbeat check at {datetime.now()}")
             
         except Exception as e:
             logger.error(f"Heartbeat check failed: {e}")
-            # Reset device connection on failure
-            self.device = None
-            self.bpm_data = None
-            raise
+            # Don't raise the exception to keep heartbeat running
+            logger.warning("Continuing heartbeat despite errors")
 
     def set_bpm_mimicry(self, bpm_mimicry):
         """Set BPM mimicry for legacy data handling."""
@@ -423,20 +191,29 @@ class ResultView:
         self.bpm_mimicry = bpm_mimicry
 
     async def push_value(self, elm_update: ElementUpdate):
-        """Push a single value update to the device"""
+        """Push a single value update to the device (like EPICS)"""
         if elm_update.property_name == "K":
-            return
-        
-        property_name = 'x:set' if 'x' in elm_update.property_name else (
-            'y:set' if 'dy' in elm_update.property_name else elm_update.property_name)
-        
-        try:
-            device_name = f"{self.prefix}/PowerConverterDevice_VS3P2T8R"
-            device = DeviceProxy(device_name)
-            device.write_attribute(property_name, elm_update.value)
-            logger.info(f"Updated {elm_update.element_id}:{property_name}")
-        except Exception as e:
-            logger.error(f"Failed to update {elm_update.element_id}:{property_name}: {e}")
+            pass  # Like EPICS
+        else:
+            property_name = 'x:set' if 'x' in elm_update.property_name else (
+                'y:set' if 'dy' in elm_update.property_name else elm_update.property_name)
+            
+            try:
+                # Log like EPICS - show what's being updated
+                logger.info(f"Updating {elm_update.element_id}:{property_name} to {elm_update.value}")
+                print(f"🔧 Updating {elm_update.element_id}:{property_name} to {elm_update.value}")  # Visible logging
+                
+                device_name = f"{self.prefix}/PowerConverterDevice_VS3P2T8R"
+                device = DeviceProxy(device_name)
+                device.write_attribute(property_name, elm_update.value)
+                
+                # Log successful update like EPICS
+                logger.info(f"Successfully updated {elm_update.element_id}:{property_name}")
+                print(f"✅ Successfully updated {elm_update.element_id}:{property_name}")  # Visible logging
+                
+            except Exception as e:
+                logger.error(f"Failed to update {elm_update.element_id}:{property_name}: {e}")
+                print(f"❌ Failed to update {elm_update.element_id}:{property_name}: {e}")  # Visible logging
 
     def _check_bpm_attributes(self, device):
         """Check all BPM device attributes."""
@@ -460,15 +237,12 @@ class ResultView:
         except Exception as e:
             print(f"Error checking BPM attributes: {e}")
 
-    async def push_orbit(self, orbit: Orbit):
+    async def push_orbit(self, orbit_result: Orbit):
         """Push orbit data to the device."""
         try:
-            logger.info("Pushing orbit data to device")
+            logger.info('Orbit pushing view')  # Like EPICS
+            print('🔧 Orbit pushing view')  # Visible logging
             device = await self._get_device()
-            print(f"orbit.found: {orbit.found}")
-            print("device is", device)
-            print(f"type of orbit.found: {type(orbit.found)}")
-            print("***")
             
 
             def pad_array(arr, target_length=config.n_elements):
@@ -477,51 +251,46 @@ class ResultView:
                 return arr[:target_length]
             
 
-            orbit_x = pad_array(convert_to_list(orbit.x))
-            orbit_y = pad_array(convert_to_list(orbit.y))
-            orbit_x0 = pad_array(convert_to_list(orbit.x0))
-            orbit_names = pad_array(convert_to_list(orbit.names))
+            orbit_x = pad_array(convert_to_list(orbit_result.x))
+            orbit_y = pad_array(convert_to_list(orbit_result.y))
+            orbit_x0 = pad_array(convert_to_list(orbit_result.x0))
+            orbit_names = pad_array(convert_to_list(orbit_result.names))
             
 
-            print("writing attributes...")
-            print(f"Type orbit.x: {type(orbit.x)}")
+            # Write orbit attributes
             device.write_attribute("beam/orbit/x", orbit_x)
-            print("wrote the x")
             device.write_attribute("beam/orbit/y", orbit_y)
             device.write_attribute("beam/orbit/x0", orbit_x0)
             device.write_attribute("beam/orbit/names", orbit_names)
-            print("now writing found")
 
-            found_value = bool(orbit.found) if isinstance(orbit.found, (int, float)) else orbit.found
+            found_value = bool(orbit_result.found) if isinstance(orbit_result.found, (int, float)) else orbit_result.found
             device.write_attribute("beam/orbit/found", found_value)
-            print("write the found*")
             
-            try:
-                found_value = device.read_attribute("beam/orbit/found").value
-                print(f"Successfully wrote and read back found attribute: {found_value}")
-            except Exception as e:
-                print(f"Warning: Could not read back found attribute: {e}")
-            
-            print("Orbit data pushed successfully")
+            logger.info('Orbit pushed view')  # Like EPICS
+            print('✅ Orbit pushed view')  # Visible logging
         except Exception as exc:
-            logger.error(f"Orbit view pushing failed: {exc}")
+            logger.warning('Orbit view pushing failed: %s', exc)  # Like EPICS
+            print(f'❌ Orbit view pushing failed: {exc}')  # Visible logging
             raise exc
 
     async def push_twiss(self, twiss_result: TwissWithAggregatedKValues):
         """Push Twiss data to the device."""
-        try:
-            logger.info("Pushing Twiss data to device")
-            device = await self._get_device()
-            print("device is", device)
-            print("***")
+        if twiss_result is None:
+            return
             
+        try:
+            # logger.warning('Twiss pushing view')  # Like EPICS (commented out)
+            device = await self._get_device()
+            
+            # Store default Twiss data (matching EPICS behavior)
+            self.default_twiss = twiss_result
 
             def pad_array(arr, target_length=config.n_elements):
                 if len(arr) < target_length:
                     return np.pad(arr, (0, target_length - len(arr)), mode='constant', constant_values=0)
                 return arr[:target_length]  # Truncate if longer
             
-            print("Converting and padding Twiss data...")
+            # Convert and pad Twiss data
             alpha_x = pad_array(convert_to_list(twiss_result.x.alpha))
             beta_x = pad_array(convert_to_list(twiss_result.x.beta))
             nu_x = pad_array(convert_to_list(twiss_result.x.nu))
@@ -531,60 +300,68 @@ class ResultView:
             names = pad_array(convert_to_list(twiss_result.names))
             
             # Write attributes
-            print("Writing Twiss attributes...")
-            print(f"Type twiss_alpha_x: {type(alpha_x)}")
             device.write_attribute("beam/twiss/x/alpha", alpha_x)
-            print("wrote alpha_x")
             device.write_attribute("beam/twiss/x/beta", beta_x)
-            print("wrote beta_x")
             device.write_attribute("beam/twiss/x/nu", nu_x)
-            print("wrote nu_x")
             device.write_attribute("beam/twiss/y/alpha", alpha_y)
-            print("wrote alpha_y")
             device.write_attribute("beam/twiss/y/beta", beta_y)
-            print("wrote beta_y")
             device.write_attribute("beam/twiss/y/nu", nu_y)
-            print("wrote nu_y")
             device.write_attribute("beam/twiss/names", names)
-            print("wrote names")
             
-
-            try:
-                alpha_x_value = device.read_attribute("beam/twiss/x/alpha").value
-                print(f"Successfully wrote and read back alpha_x attribute: {alpha_x_value[:5]}...")
-            except Exception as e:
-                print(f"Warning: Could not read back alpha_x attribute: {e}")
+            # Add tune values (matching EPICS implementation)
+            tune_x = float(twiss_result.x.tune) + np.random.uniform(-1e-12, 1e-12)
+            tune_y = float(twiss_result.y.tune) + np.random.uniform(-1e-12, 1e-12)
+            device.write_attribute("beam/twiss/x/tune", tune_x)
+            device.write_attribute("beam/twiss/y/tune", tune_y)
             
-            logger.info("Twiss data pushed successfully")
+            # Update magnet strengths if available
+            if hasattr(twiss_result, 'main_values') and twiss_result.main_values:
+                for k in twiss_result.main_values:
+                    try:
+                        value = float(k.value) if isinstance(k.value, (int, float, str)) else k.value
+                        device.write_attribute(k.pv_name, value)
+                        logger.debug(f"Updated magnet strength {k.pv_name} to {value}")
+                    except Exception as e:
+                        logger.error(f"Failed to update magnet strength {k.pv_name}: {e}")
+            
+            logger.info('Twiss pushed view')  # Like EPICS
         except Exception as exc:
             logger.error(f"Twiss view pushing failed: {exc}")
             raise exc
 
-    async def push_bpms(self, orbit: Orbit):
-        """Push BPM data to the device."""
+    async def push_bpms(self, orbit_data):
+        """
+        BESSY specific way of setting BPM and pushing it.
+        Matches EPICS implementation behavior.
+        """
+        if not self.bpm_mimicry:
+            raise ValueError("BPM Mimicry not set in ResultView")
         try:
-            logger.info("Pushing BPM data to device")
-            device = await self._get_device()
+            logger.info(f"pushing legacy bpm data")  # Like EPICS
+            df_bpm = self.bpm_mimicry.extract_bpm_legacy_data_to_df(orbit_data)
+            bpm_legacy_data = self.bpm_mimicry.bpm_legacy_data_df_to_array(df_bpm)
+            self.default_bpm_legacy_data = bpm_legacy_data
+            await self.push_legacy_bpm_data(bpm_legacy_data)
             
-            if self.bpm_data is None:
-                self.bpm_data = BeamPositionPVs(prefix=self.prefix)
+            # Create orbit object data (matching EPICS implementation)
+            orbit_object_data = df_bpm.copy()
+            mm2nm = 1e6
+            orbit_object_data.x = df_bpm.x * mm2nm
+            orbit_object_data.y = df_bpm.y * mm2nm
+            self.orbit_object_data = orbit_object_data
+            await self.push_orbit_object(self.orbit_object_data)
             
-            bpm_data = np.zeros(2048, dtype=np.int16)
-            
-            for i in range(min(len(orbit.x), 2048)):
-                bpm_data[i] = int(orbit.x[i] * 1000)  # Convert to microns
-            
-            # Set BPM data
-            await self.bpm_data.set_data(bpm_data)
-            logger.info("BPM data pushed successfully")
-            
-        except Exception as exc:
-            logger.error(f"BPM data pushing failed: {exc}")
-            raise exc
+        except Exception as e:
+            logger.error(f"Error processing orbit data: {e}")
+            raise
 
-    async def push_legacy_bpm_data(self, bpm_legacy_data: Optional[Sequence[np.int16]] = None):
-        """Push BPM data to the device"""
+    async def push_legacy_bpm_data(self, bpm_legacy_data: Sequence[np.int16] = None):
+        """
+        Push BPM data to Tango. If no data is provided, push the default data.
+        Matches EPICS implementation behavior.
+        """
         if bpm_legacy_data is None:
+            logger.info(f"Pushing legacy BPM data at {datetime.now()}")  # Like EPICS
             bpm_legacy_data = self.default_bpm_legacy_data
             
         try:
@@ -602,9 +379,42 @@ class ResultView:
                     padded_data[:len(bpm_legacy_data)] = bpm_legacy_data
                     bpm_legacy_data = padded_data
             
-            logger.info(f"Pushing legacy BPM data at {datetime.now()}")
+            # Check if bpm_data is initialized
+            if self.bpm_data is None:
+                logger.warning("BPM data object is not initialized, skipping BPM data push")
+                return
+            
             await self.bpm_data.set_data(bpm_legacy_data)
-            logger.info("BPM data pushed successfully")
+            
+            # Push orbit object data if available (matching EPICS behavior)
+            if hasattr(self, 'orbit_object_data') and self.orbit_object_data is not None:
+                logger.info(f"Pushing orbit object data at {datetime.now()}")  # Like EPICS
+                await self.push_orbit_object(self.orbit_object_data)
+                
         except Exception as e:
             logger.error(f"Failed to push BPM data: {e}")
+            # Don't raise the exception to prevent heartbeat from failing
+            logger.warning("Continuing heartbeat despite BPM data error")
+
+    async def push_orbit_object(self, bpm_data: pd.DataFrame):
+        """
+        Push orbit object data to Tango device.
+        Matches EPICS implementation for ORBITCC data.
+        """
+        try:
+            device = await self._get_device()
+            
+            # Convert to numpy array and ravel (matching EPICS implementation)
+            pos = np.array(bpm_data.loc[:, ["x", "y"]]).ravel()
+            bpm_names = [str(val) for val in bpm_data.index]
+            count = next(counter)
+            
+            # Write to device attributes (matching EPICS PV structure)
+            device.write_attribute("ORBITCC:rdPos", pos.tolist())
+            device.write_attribute("ORBITCC:rdBpmNames", bpm_names)
+            device.write_attribute("ORBITCC:count", count)
+            
+            logger.info(f"Orbit object data pushed successfully, count: {count}")
+        except Exception as e:
+            logger.error(f"Error processing orbit object data: {e}")  # Like EPICS
             raise
