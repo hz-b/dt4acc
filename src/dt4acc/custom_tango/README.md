@@ -154,7 +154,7 @@ src/dt4acc/custom_tango/
   - Error handling and recovery
   - Timeout management
 
-## 🚀 Implementation Guide
+## Implementation Guide
 
 ### Step 1: Basic Setup
 
