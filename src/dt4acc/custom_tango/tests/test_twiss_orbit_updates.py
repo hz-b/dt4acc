@@ -33,9 +33,7 @@ def test_twiss_orbit_updates():
     print("===================================")
     
     try:
-        # Test 1: Update and verify orbit data
 
-        # Read back and verify
         read_orbit_x = device.read_attribute("beam/orbit/x").value
         read_orbit_y = device.read_attribute("beam/orbit/y").value
         read_orbit_x0 = device.read_attribute("beam/orbit/x0").value

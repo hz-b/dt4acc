@@ -18,7 +18,6 @@ class BeamPositionPVs:
         self._initialized = False
         self.bdata_cache = None
         self.counter = itertools.count()
-        # Use correct device name format
         self.device_name = "tango_server/test/TwissOrbitDevice_MAIN"
 
     def set_data_sync(self, data):

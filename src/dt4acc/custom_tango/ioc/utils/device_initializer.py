@@ -28,7 +28,6 @@ class DeviceInitializer:
     def __init__(self):
         self.element_cache: Dict[str, Dict] = {}
         self.device_cache: Dict[str, DeviceProxy] = {}
-        # Initialize database
         try:
 
             self.db = Database()
@@ -69,11 +68,9 @@ class DeviceInitializer:
             print(f"  - Input device_name: {device_name}")
             print(f"  - Input device_class: {device_class}")
             
-            # Format device name according to Tango convention
             formatted_name = self._format_device_name(device_name, device_class)
             print(f"  - Formatted name: {formatted_name}")
             
-            # Create device info
             dev_info = DbDevInfo()
             dev_info.name = formatted_name
             dev_info._class = device_class
@@ -82,7 +79,7 @@ class DeviceInitializer:
 
             dev_info.properties = {
                 "name": [device_name],
-                "magnet_list": []  # Will be set later if needed
+                "magnet_list": []  
             }
             
             print(f"  - Server instance: {SERVER_INSTANCE}")
@@ -96,13 +93,9 @@ class DeviceInitializer:
             self.db.add_device(dev_info)
             print("  - Device added to database successfully")
             
-            # Note: DeviceProxy creation is deferred until server is running
-            # The device is now registered in the database and will be available
-            # when the Tango server starts
+           
             print("  - Device registered in database (proxy creation deferred)")
             
-            # DeviceProxy creation is deferred until server is running
-            # For now, just return None to indicate successful registration
             return None
             
         except Exception as e:
@@ -114,7 +107,6 @@ class DeviceInitializer:
     def _set_device_property(self, device: DeviceProxy, prop_name: str, prop_value: any):
         """Set a device property using the device update method."""
         try:
-            # Convert value to string list properly
             if isinstance(prop_value, list):
                 value_list = [str(v) for v in prop_value]
             else:
@@ -157,11 +149,9 @@ class DeviceInitializer:
             print(f"  - Device name: {device_name}")
             print(f"  - Magnet data: {magnet_data}")
             
-            # Create device (registration only)
             self._create_device(device_name, "MagnetDevice")
             print(f"  - Device registered successfully")
             
-            # Note: Properties and attributes will be set when server is running
             print(f"  - Properties and attributes will be set when server is running")
             
             return None
@@ -183,14 +173,11 @@ class DeviceInitializer:
             print(f"  - PC name: {pc_name}")
             print(f"  - Associated magnets: {associated_magnets}")
             
-            # Create device (registration only)
             self._create_device(pc_name, "PowerConverterDevice")
             print(f"  - Device registered successfully")
             
-            # Note: Properties will be set when server is running
             print(f"  - Properties will be set when server is running")
             
-            # Initialize associated magnets
             for magnet_data in associated_magnets:
                 self.initialize_magnet_device(magnet_data["name"], magnet_data)
                 
@@ -219,13 +206,10 @@ class DeviceInitializer:
 
         """
         try:
-            # Update the value in the update manager
             update_manager.update_value(device_name, property_id, value)
             
-            # Get device proxy
             device = self._get_device_proxy(device_name)
             
-            # Update device attribute based on property_id
             if property_id == "set_current":
                 device.write_attribute("current_setpoint", value)
                 device.write_attribute("current_readback", value)
@@ -255,15 +239,12 @@ def initialize_magnet_device(device_name: str, magnet_data: dict) -> DeviceProxy
         magnet_name = magnet_data["name"]
         k_value = magnet_data.get("k", 0.0)
         
-        # Get initial values from update manager
         val = update_manager.peek_engine(
             LatticeElementPropertyID(element_name=magnet_name, property="main_strength")
         )
         
-        # Create device in database
         device = DeviceProxy(f"tango_server/test/MagnetDevice_{magnet_name}")
         
-        # Initialize attributes
         device.write_attribute("magnetic_strength", k_value)
         device.write_attribute("magnetic_strength_readback", val)
         device.write_attribute("current", 0.0)
@@ -285,7 +266,6 @@ def initialize_power_converter_device(pc_name: str, associated_magnets: List[dic
     i will enhacn this more
     """
     try:
-        # Get initial current value from update manager
         vals = update_manager.device_value_from_peeking_engine(
             DevicePropertyID(device_name=pc_name, property="set_current")
         )
@@ -293,14 +273,12 @@ def initialize_power_converter_device(pc_name: str, associated_magnets: List[dic
         
         device = DeviceProxy(f"tango_server/test/PowerConverterDevice_{pc_name}")
         
-        # Initialize attributes
         device.write_attribute("current_setpoint", start_val)
         device.write_attribute("current_readback", start_val)
         device.write_attribute("voltage", 0.0)
         device.write_attribute("status", "OFF")
         device.write_attribute("frequency", 0.0)
         
-        # Initialize associated magnets
         for magnet_data in associated_magnets:
             initialize_magnet_device(pc_name, magnet_data)
             

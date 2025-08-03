@@ -45,14 +45,11 @@ class MagnetDevice(Device):
             dev_prop = self.get_device_properties()
             print(f"  - Device properties: {dev_prop}")
             
-            # Get device name from properties
             if not hasattr(dev_prop, 'name') or not dev_prop.name:
                 print("  - ERROR: Device name property not set")
-                # Try to get name from device name
                 device_name = self.get_name()
                 print(f"  - Device name from get_name(): {device_name}")
                 if device_name:
-                    # Extract name from device name (format: tango_server/test/MagnetDevice_HS1MD4R)
                     try:
                         self.name = device_name.split('_')[-1]
                         print(f"  - Extracted name from device name: {self.name}")
@@ -64,7 +61,7 @@ class MagnetDevice(Device):
             
             print(f"  - Device name: {self.name}")
             
-            # Initialize attributes
+            
             try:
                 print("  - Initializing attributes")
                 self._init_attributes()
@@ -73,11 +70,11 @@ class MagnetDevice(Device):
                 print(f"  - ERROR: Failed to initialize attributes: {str(e)}")
                 raise
             
-            # Initialize event loop
+            
             try:
                 self._loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(self._loop)
-                # Start event loop in a separate thread
+                
                 self._loop_thread = threading.Thread(target=self._run_event_loop, daemon=True)
                 self._loop_thread.start()
                 print("  - Event loop initialized successfully")
@@ -102,7 +99,7 @@ class MagnetDevice(Device):
         try:
             print("  - Initializing device attributes")
             
-            # Get initial values from update manager
+            
             try:
                 val = update_manager.peek_engine(
                     LatticeElementPropertyID(element_name=self.name, property="main_strength")
@@ -112,18 +109,18 @@ class MagnetDevice(Device):
                 logger.warning(f"Could not get initial values from update manager: {str(e)}")
                 val = 0.0
             
-            # Get associated power converter from EPICS query
+            
             try:
                 print(f"    * Looking up power converter for magnet {self.name}")
                 power_converters = get_unique_power_converters()
                 print(f"    * Found {len(power_converters)} power converters")
                 
-                # Debug print all power converters and their magnets
+                
                 for pc in power_converters:
                     magnets = get_magnets_per_power_converters(pc)
                     print(f"    * Power converter {pc} has magnets: {[m['name'] for m in magnets]}")
                 
-                # Find power converter for this magnet
+                
                 self._power_converter = None
                 for pc in power_converters:
                     magnets = get_magnets_per_power_converters(pc)
@@ -142,13 +139,13 @@ class MagnetDevice(Device):
                 logger.warning(f"Could not get power converter from EPICS query: {str(e)}")
                 self._power_converter = None
             
-            # Initialize attributes with default values
-            self._magnetic_strength = self.k_value or 0.0  # as like Cm:set in EPICS
-            self._magnetic_strength_readback = val  # like Cm:rdbk in EPICS
-            self._current = 0.0  # im:I in EPICS
+            
+            self._magnetic_strength = self.k_value or 0.0  
+            self._magnetic_strength_readback = val 
+            self._current = 0.0  
             self._power_supply_current = 0.0
-            self._x_position = 0.0  # x:set like  in EPICS
-            self._y_position = 0.0  # y:set like  in EPICS
+            self._x_position = 0.0  
+            self._y_position = 0.0  
             self._cm_set = val
             
             print("    * All attributes initialized successfully")
@@ -205,7 +202,7 @@ class MagnetDevice(Device):
             
             try:
                 # Update only the power converter's set_current
-                # The LiaisonManager will handle mapping this to the appropriate lattice property
+                # The LiaisonManager  mapping this to the appropriate lattice property
                 print(f"Updating power converter {self._power_converter} set_current to {value}")
                 self._run_async_update(handle_device_update(self._power_converter, "set_current", value))
                 
@@ -281,7 +278,7 @@ class MagnetDevice(Device):
         """Set y position (y:set in EPICS)."""
         try:
             self._y_position = float(value)
-            # Use EPICS update handler with y_kick property
+            #  EPICS update handler with y_kick property
             self._run_async_update(handle_device_update(self.name, "y_kick", value))
             logger.info(f"Updated y position to {value}")
         except Exception as e:

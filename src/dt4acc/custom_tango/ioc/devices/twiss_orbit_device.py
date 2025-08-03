@@ -15,7 +15,6 @@ logger = get_logger()
 class TwissOrbitDevice(Device):
     """Tango device for managing Twiss parameters and beam orbit measurements."""
 
-    # Device properties
     Host = device_property(dtype=str, default_value="localhost")
     Port = device_property(dtype=int, default_value=10000)
     Prefix = device_property(dtype=str, default_value="beam")
@@ -25,14 +24,12 @@ class TwissOrbitDevice(Device):
         Device.init_device(self)
         self.set_state(DevState.ON)
         
-        # Initialize orbit arrays
         self._orbit_x = np.zeros(config.n_elements, dtype=float)
         self._orbit_y = np.zeros(config.n_elements, dtype=float)
         self._orbit_x0 = np.zeros(config.n_elements, dtype=float)
         self._orbit_names = np.array([""] * config.n_elements, dtype=str)
         self._orbit_found = 0
 
-        # Initialize Twiss parameters
         self._twiss_alpha_x = np.zeros(config.n_elements, dtype=float)
         self._twiss_beta_x = np.zeros(config.n_elements, dtype=float)
         self._twiss_nu_x = np.zeros(config.n_elements, dtype=float)
@@ -41,16 +38,13 @@ class TwissOrbitDevice(Device):
         self._twiss_nu_y = np.zeros(config.n_elements, dtype=float)
         self._twiss_names = np.array([""] * config.n_elements, dtype=str)
         
-        # Initialize tune values (matching EPICS PV structure)
         self._twiss_x_tune = 0.0
         self._twiss_y_tune = 0.0
         
-        # Initialize BPM data
         self._bpm_data = np.empty([2048], np.int16)
         self._bpm_data.fill(-2 ** 15 + 1)
         self._bpm_counter = itertools.count()
         
-        # Initialize magnet strengths
         self._magnet_strengths = {}
         
         logger.info("Device initialized successfully")
@@ -60,7 +54,6 @@ class TwissOrbitDevice(Device):
         if len(data) != config.n_elements:
             raise ValueError(f"{name} must have length {config.n_elements}, got {len(data)}")
 
-    # Orbit attributes
     @attribute(
         name="beam/orbit/x",
         dtype=('double',),
@@ -145,7 +138,6 @@ class TwissOrbitDevice(Device):
         self._orbit_found = 1 if value else 0
         logger.info("Updated orbit_found")
 
-    # Twiss attributes
     @attribute(
         name="beam/twiss/x/alpha",
         dtype=('double',),

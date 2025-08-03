@@ -95,7 +95,7 @@ async def heartbeat_loop():
         except Exception as exc:
             print(f"[HEARTBEAT FAIL] {exc}. Resetting device and waiting...")
             view.bpm_pvs.device = None
-        await asyncio.sleep(2)  # Maintain at least 2s delay between pings
+        await asyncio.sleep(2)  
 
     logger.info("Heartbeat loop stopped")
 

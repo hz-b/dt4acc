@@ -15,39 +15,28 @@ def test_cm_set(magnet_name: str = "PQIPT6R"):
     try:
         print(f"\n[TEST] Testing Cm:set property for magnet: {magnet_name}")
         
-        # Create device of the device
         device = DeviceProxy(f"tango_server/test/PowerConverterDevice_{magnet_name}")
         device.set_timeout_millis(10000)
         print(f"  - Connected to device: {device.dev_name()}")
         
-        # initial values
         initial_strength = device.magnetic_strength
         initial_readback = device.magnetic_strength_readback
         print(f"\nInitial state:")
         print(f"  - Cm:set = {initial_strength}")
         print(f"  - Cm:rdbk = {initial_readback}")
         
-        # Test  of values
         test_values = [1.5, 2.0, 1.0, initial_strength]
         
         for value in test_values:
             print(f"\nSetting Cm:set to {value}")
             try:
-                # Setting new value
                 device.magnetic_strength = value
                 
-                # Waiting for update to complete
                 time.sleep(1.0)
                 
-                # Get updatedate values
                 current_strength = device.magnetic_strength
                 current_readback = device.magnetic_strength_readback
                 
-                print(f"Updated state:")
-                print(f"  - Cm:set = {current_strength}")
-                print(f"  - Cm:rdbk = {current_readback}")
-                
-                # Verify values
                 if abs(current_strength - value) > 1e-6:
                     print(f"  - WARNING: Cm:set value mismatch. Expected {value}, got {current_strength}")
                 if abs(current_readback - value) > 1e-6:

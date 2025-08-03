@@ -10,7 +10,6 @@ import threading
 from typing import Dict, List, Optional
 from tango import Database, DbDevInfo, DevFailed
 
-# Add src to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dt4acc.core.utils.logger import get_logger
@@ -26,7 +25,7 @@ class CompleteDeviceExporter:
     
     def __init__(self, timeout_seconds: int = 60, batch_size: int = 50):
         self.timeout_seconds = timeout_seconds
-        self.batch_size = batch_size  # Process devices in batches
+        self.batch_size = batch_size  
         self.exported_devices = []
         self.db = None
         self._init_database()
@@ -36,16 +35,14 @@ class CompleteDeviceExporter:
         try:
             logger.info("🔗 Initializing database connection...")
             self.db = Database()
-            # Test connection
             servers = self.db.get_server_list()
-            logger.info(f"✅ Database connected, found {len(servers)} servers")
+            logger.info(f"Database connected, found {len(servers)} servers")
         except Exception as e:
-            logger.error(f"❌ Database connection failed: {e}")
+            logger.error(f"Database connection failed: {e}")
             raise
     
     def _format_device_name(self, name: str, device_type: str) -> str:
         """Format device name according to Tango conventions."""
-        # Clean the name and make it Tango-compatible
         clean_name = name.replace(" ", "_").replace("-", "_").upper()
         return f"{device_type}_{clean_name}"
     
@@ -80,22 +77,21 @@ class CompleteDeviceExporter:
     def _export_devices_in_batches(self, devices: List[str], device_type: str, device_class) -> int:
         """Export devices in batches to avoid overwhelming the system."""
         if not devices:
-            logger.warning(f"⚠️ No {device_type} devices found")
+            logger.warning(f" No {device_type} devices found")
             return 0
         
-        logger.info(f"📊 Found {len(devices)} {device_type} devices")
-        logger.info(f"🔄 Exporting in batches of {self.batch_size}...")
+        logger.info(f" Found {len(devices)} {device_type} devices")
+        logger.info(f"Exporting in batches of {self.batch_size}...")
         
         exported_count = 0
         failed_count = 0
         
-        # Process devices in batches
         for i in range(0, len(devices), self.batch_size):
             batch = devices[i:i + self.batch_size]
             batch_num = (i // self.batch_size) + 1
             total_batches = (len(devices) + self.batch_size - 1) // self.batch_size
             
-            logger.info(f"📦 Processing batch {batch_num}/{total_batches} ({len(batch)} devices)...")
+            logger.info(f"Processing batch {batch_num}/{total_batches} ({len(batch)} devices)...")
             
             for device_name in batch:
                 try:
@@ -109,35 +105,30 @@ class CompleteDeviceExporter:
                     self.exported_devices.append(device_info.name)
                     exported_count += 1
                     
-                    # Log progress every 10 devices
                     if exported_count % 10 == 0:
-                        logger.info(f"✅ Exported {exported_count} {device_type} devices so far...")
+                        logger.info(f" Exported {exported_count} {device_type} devices so far...")
                     
                 except Exception as e:
                     failed_count += 1
-                    logger.warning(f"⚠️ Failed to export {device_type} {device_name}: {e}")
+                    logger.warning(f" Failed to export {device_type} {device_name}: {e}")
                     continue
             
-            # Small delay between batches to avoid overwhelming the system
             if i + self.batch_size < len(devices):
                 time.sleep(0.1)
         
-        logger.info(f"✅ Exported {exported_count} {device_type} devices")
+        logger.info(f"Exported {exported_count} {device_type} devices")
         if failed_count > 0:
-            logger.warning(f"⚠️ Failed to export {failed_count} {device_type} devices")
+            logger.warning(f" Failed to export {failed_count} {device_type} devices")
         
         return exported_count
     
     def export_magnet_devices(self) -> int:
         """Export ALL magnet devices with timeout protection."""
         try:
-            logger.info("🔧 Exporting ALL magnet devices...")
             
-            # Get magnet data with timeout
             def get_magnet_data():
                 from dt4acc.custom_epics.data.querries import get_magnets
                 magnets = list(get_magnets())
-                # Extract unique magnet names
                 unique_magnets = list(set(magnet.get('name', '') for magnet in magnets if magnet.get('name')))
                 return unique_magnets
             
@@ -150,7 +141,7 @@ class CompleteDeviceExporter:
             return self._export_devices_in_batches(magnets, "MagnetDevice", MagnetDevice)
             
         except Exception as e:
-            logger.error(f"❌ Magnet export failed: {e}")
+            logger.error(f"Magnet export failed: {e}")
             return 0
     
     def export_power_converter_devices(self) -> int:
@@ -158,7 +149,6 @@ class CompleteDeviceExporter:
         try:
             logger.info("🔧 Exporting ALL power converter devices...")
             
-            # Get power converter data with timeout
             def get_pc_data():
                 from dt4acc.custom_epics.data.querries import get_unique_power_converters
                 return get_unique_power_converters()
@@ -172,13 +162,13 @@ class CompleteDeviceExporter:
             return self._export_devices_in_batches(power_converters, "PowerConverterDevice", PowerConverterDevice)
             
         except Exception as e:
-            logger.error(f"❌ Power converter export failed: {e}")
+            logger.error(f" Power converter export failed: {e}")
             return 0
     
     def export_twiss_orbit_device(self) -> int:
         """Export TwissOrbit device."""
         try:
-            logger.info("🔧 Exporting TwissOrbit device...")
+            logger.info("Exporting TwissOrbit device...")
             
             device_info = DbDevInfo()
             device_info._class = TwissOrbitDevice.__name__
@@ -188,17 +178,17 @@ class CompleteDeviceExporter:
             self.db.add_device(device_info)
             self.exported_devices.append(device_info.name)
             
-            logger.info("✅ Exported TwissOrbitDevice_MAIN")
+            logger.info("Exported TwissOrbitDevice_MAIN")
             return 1
             
         except Exception as e:
-            logger.error(f"❌ TwissOrbit device export failed: {e}")
+            logger.error(f"TwissOrbit device export failed: {e}")
             return 0
     
     def export_bpm_device(self) -> int:
         """Export BPM device."""
         try:
-            logger.info("🔧 Exporting BPM device...")
+            logger.info(" Exporting BPM device...")
             
             device_info = DbDevInfo()
             device_info._class = BPMDevice.__name__
@@ -208,16 +198,16 @@ class CompleteDeviceExporter:
             self.db.add_device(device_info)
             self.exported_devices.append(device_info.name)
             
-            logger.info("✅ Exported BPMDevice_MAIN")
+            logger.info(" Exported BPMDevice_MAIN")
             return 1
             
         except Exception as e:
-            logger.error(f"❌ BPM device export failed: {e}")
+            logger.error(f" BPM device export failed: {e}")
             return 0
     
     def export_all_devices(self) -> Dict[str, int]:
         """Export ALL devices with comprehensive error handling."""
-        logger.info("🚀 Starting COMPLETE device export...")
+        logger.info("Starting COMPLETE device export...")
         start_time = time.time()
         
         results = {
@@ -229,20 +219,14 @@ class CompleteDeviceExporter:
         }
         
         try:
-            # Export each device type with individual error handling
-            logger.info("📦 Exporting ALL power converters...")
             results['power_converters'] = self.export_power_converter_devices()
             
-            logger.info("📦 Exporting ALL magnets...")
             results['magnets'] = self.export_magnet_devices()
             
-            logger.info("📦 Exporting TwissOrbit device...")
             results['twiss_orbit'] = self.export_twiss_orbit_device()
             
-            logger.info("📦 Exporting BPM device...")
             results['bpm'] = self.export_bpm_device()
             
-            # Calculate total
             results['total'] = sum([
                 results['power_converters'],
                 results['magnets'],
@@ -253,12 +237,10 @@ class CompleteDeviceExporter:
             end_time = time.time()
             duration = end_time - start_time
             
-            logger.info(f"✅ COMPLETE device export finished in {duration:.2f} seconds")
-            logger.info(f"📊 TOTAL DEVICES EXPORTED: {results['total']}")
+          
             return results
             
         except Exception as e:
-            logger.error(f"❌ Complete device export failed: {e}")
             return results
     
     def get_exported_devices(self) -> List[str]:
