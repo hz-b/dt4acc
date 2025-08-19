@@ -12,6 +12,11 @@ ctx = Context("pva")
 
 
 class BeamPositionPVs:
+    """
+    Todo:
+        not required any more? already superseeded
+        by periodic publish
+    """
     def __init__(self, prefix: str):
         self.prefix = prefix
         self.counter = itertools.count()
