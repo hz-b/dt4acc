@@ -113,7 +113,7 @@ def add_pc_pvs(builder, pc_name, prefix):
         DevicePropertyID(device_name=pc_name, property="set_current")
     )
     start_val = np.asarray(vals).mean()
-    rdbk = builder.aOut(f"{pc_name}:rdbk", initial_value=start_val)
+    rdbk = builder.aOut(f"{pc_name}:rdbk", initial_value=start_val, PREC=2)
 
     async def handle_pc_update(device_id: str, property_id: str, value: float):
         logger.debug("%s:%s updating setpoint val=%s", device_id, property_id, value)
@@ -128,6 +128,7 @@ def add_pc_pvs(builder, pc_name, prefix):
         f"{pc_name}:set",
         initial_value=start_val,
         on_update=lambda val: handle_pc_update(pc_name, "set_current", val),
+        PREC = 2,
     )
 
 
