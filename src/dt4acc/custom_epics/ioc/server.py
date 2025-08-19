@@ -4,6 +4,7 @@ import getpass
 
 from softioc import softioc, builder, asyncio_dispatcher
 
+from ...core.utils.logger import get_logger
 from .tasks import monitor_heartbeat
 from .pv_setup import (
     initialize_power_converter_pvs,
@@ -13,8 +14,11 @@ from .pv_setup import (
     initialize_bpm_pvs,
     initialize_orbit_object_pvs,
     initialize_twiss_pvs,
+    initialize_tune_pvs,
     initialize_other_pvs,
 )
+
+logger = get_logger()
 
 # Create an asyncio dispatcher to handle asynchronous PV updates
 dispatcher = asyncio_dispatcher.AsyncioDispatcher()
@@ -39,6 +43,8 @@ def startup():
     initialize_bpm_pvs(builder)  # Initialize Beam Position Monitor PVs
     initialize_orbit_object_pvs(builder)  # Initialize PV's of the new orbit object ... collection of bpms
     initialize_twiss_pvs(builder)  # Initialize Twiss parameter PVs
+    initialize_tune_pvs(builder)
+    logger.warning("All pvs set up")
 
     # Load the database of PVs defined above into the SoftIOC server
     builder.LoadDatabase()
@@ -46,7 +52,7 @@ def startup():
     softioc.iocInit(dispatcher)
 
     # Start monitoring the heartbeat to ensure the server is running correctly
-    asyncio.create_task(monitor_heartbeat())
+    asyncio.create_task(monitor_heartbeat(), name="server-heartbeat-loop")
 
 
 def main():

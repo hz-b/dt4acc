@@ -39,7 +39,7 @@ class DelayExecution:
             self.pending_task.cancel()
 
         # Schedule a new execution task after the delay
-        self.pending_task = asyncio.create_task(self._delayed_execution())
+        self.pending_task = asyncio.create_task(self._delayed_execution(), name="delayed-execution")
 
     async def _delayed_execution(self):
         """
