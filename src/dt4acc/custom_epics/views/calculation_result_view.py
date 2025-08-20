@@ -13,8 +13,8 @@ Todo:
 import asyncio
 
 import numpy as np
-from p4p.client.asyncio import Context
 
+from ..utils.context_proxy import ContextProxy
 from ...core.model.element_upate import ElementUpdate
 from ...core.model.orbit import Orbit
 from ...core.model.twiss import TwissWithAggregatedKValues
@@ -23,7 +23,7 @@ from ..views.create_or_update_pv import update_or_create_pv
 
 logger = get_logger()
 
-ctx = Context("pva")
+ctx = ContextProxy("pva")
 
 
 async def update_orbit_pv(pv_name, orbit_result):

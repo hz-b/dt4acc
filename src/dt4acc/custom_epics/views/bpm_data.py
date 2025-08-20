@@ -2,13 +2,13 @@ import itertools
 from typing import Sequence
 
 import numpy as np
-from p4p.client.asyncio import Context
 
+from ..utils.context_proxy import ContextProxy
 from ...core.utils.logger import get_logger
 
 logger = get_logger()
 
-ctx = Context("pva")
+ctx = ContextProxy("pva")
 
 
 class BeamPositionPVs:

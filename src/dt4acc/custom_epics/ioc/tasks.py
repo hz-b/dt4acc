@@ -2,12 +2,11 @@ import asyncio
 import getpass
 from datetime import datetime
 
-from p4p.client.asyncio import Context
-
+from ..utils.context_proxy import ContextProxy
 from ...core.utils.logger import get_logger
 from ...core.views.shared_view import get_view_instance
 
-ctx = Context("pva")
+ctx = ContextProxy("pva")
 logger = get_logger()
 view = get_view_instance()
 heartbeat_task = None  # Global variable to store the heartbeat task reference

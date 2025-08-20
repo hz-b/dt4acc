@@ -3,17 +3,18 @@ import itertools
 from datetime import datetime
 import numpy as np
 
+from ..utils.context_proxy import ContextProxy
 from ...core.interfaces.view_interface import ViewInterface
 from ...core.model.orbit import Orbit
 from ...core.model.twiss import TwissWithAggregatedKValues, TuneData
 from ...core.utils.logger import get_logger
 from ...core.utils.periodic_publisher import PeriodicPublisher
 from ..data.constants import special_pvs
-from p4p.client.asyncio import Context
+
 
 logger = get_logger()
 
-ctx = Context("pva")
+ctx = ContextProxy("pva")
 
 
 class ExtractBPMFromOrbitFilter:
