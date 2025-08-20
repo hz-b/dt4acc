@@ -1,15 +1,15 @@
 from bact_twin_architecture.bl.command_rewriter import CommandRewriter
 # from dt4acc.custom_epics.ioc.liasion_translation_manager import build_managers
-from p4p.client.asyncio import Context
 
 from .liasion_translation_manager import build_managers
+from ..utils.context_proxy import ContextProxy
 from ...core.accelerators.pyat_accelerator import setup_accelerator
 from ...core.command import UpdateManager
 from ...core.utils.logger import get_logger
 
 logger = get_logger()
 
-ctx = Context("pva")  # Create a context for EPICS PVA (PV Access)
+ctx = ContextProxy("pva")  # Create a context for EPICS PVA (PV Access)
 
 #: todo replace soon by database service
 

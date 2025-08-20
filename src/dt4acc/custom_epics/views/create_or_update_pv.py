@@ -1,9 +1,8 @@
-from p4p.client.asyncio import Context
-
+from ..utils.context_proxy import ContextProxy
 from ...core.utils.logger import get_logger
 logger = get_logger()
 
-ctx = Context("pva")
+ctx = ContextProxy("pva")
 
 
 async def update_or_create_pv(element, pv_name, value, value_type, initial_type):
