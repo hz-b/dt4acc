@@ -18,7 +18,7 @@ class BeamPositionPVs:
         self._initialized = False
         self.bdata_cache = None
         self.counter = itertools.count()
-        self.device_name = "tango_server/test/TwissOrbitDevice_MAIN"
+        self.device_name = "SimpleTangoServer/test/twiss_orbit_twiss_device"
 
     def set_data_sync(self, data):
         """Set BPM data synchronously."""
@@ -29,6 +29,17 @@ class BeamPositionPVs:
             data_array = np.asarray(data, dtype=np.float32)
             data_array = np.nan_to_num(data_array, nan=0.0, posinf=0.0, neginf=0.0)
             data_array = data_array.astype(np.int16)
+            
+            # Pad or truncate to required length (2048 elements)
+            if len(data_array) < 2048:
+                # Pad with zeros to reach target length
+                padded = np.zeros(2048, dtype=np.int16)
+                padded[:len(data_array)] = data_array
+                data_array = padded
+            elif len(data_array) > 2048:
+                # Truncate to target length
+                data_array = data_array[:2048]
+            
             self.device.write_attribute("beam/bpm/data", data_array.tolist())
             self._initialized = True
             logger.info("BPM data set successfully")

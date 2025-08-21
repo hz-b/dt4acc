@@ -1,0 +1,3725 @@
+[{
+  "_id": {
+    "$oid": "670f80c21c338a567fb5f7dd"
+  },
+  "id": "7fbb99b3-57bd-4e4d-ab4b-4fa08eb8298e",
+  "name": "bessy2Lattice_4",
+  "sequences": [
+    {
+      "type": "Dipole",
+      "MaxOrder": 0,
+      "passmethod": "BndMPoleSymplectic4Pass",
+      "tags": [
+        ""
+      ],
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "SEK1S12B",
+      "length": 0.7,
+      "fringeint1": null,
+      "fringeint2": null,
+      "fullgap": null,
+      "entranceangle": 0,
+      "exitangle": 0,
+      "bending_angle": -0.1249041095890411,
+      "index": 0
+    },
+    {
+      "type": "Drift",
+      "name": "DU_FOMZ1T",
+      "length": 0.075,
+      "passmethod": "DriftPass",
+      "index": 1,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Monitor",
+      "name": "FOMZ1T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 2
+    },
+    {
+      "type": "Drift",
+      "name": "DU_SEK2S12B",
+      "length": 0.075,
+      "passmethod": "DriftPass",
+      "index": 3,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Dipole",
+      "MaxOrder": 0,
+      "passmethod": "BndMPoleSymplectic4Pass",
+      "tags": [
+        ""
+      ],
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "SEK2S12B",
+      "length": 0.7,
+      "fringeint1": null,
+      "fringeint2": null,
+      "fullgap": null,
+      "entranceangle": 0,
+      "exitangle": 0,
+      "bending_angle": -0.06909589041095891,
+      "index": 4
+    },
+    {
+      "type": "Drift",
+      "name": "DU_FOMZ2T",
+      "length": 0.258,
+      "passmethod": "DriftPass",
+      "index": 5,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Monitor",
+      "name": "FOMZ2T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 6
+    },
+    {
+      "type": "Drift",
+      "name": "DU_BPMZ1T",
+      "length": 0.065,
+      "passmethod": "DriftPass",
+      "index": 7,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Monitor",
+      "name": "BPMZ1T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 8
+    },
+    {
+      "type": "Drift",
+      "name": "DU_H1MT",
+      "length": 0.965,
+      "passmethod": "DriftPass",
+      "index": 9,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": -0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "H1MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 10
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": 0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "V1MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 11
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q1MT",
+      "length": 0.31405,
+      "passmethod": "DriftPass",
+      "index": 12,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": -1,
+      "grad_per_amp": 0.26093928980526915,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q1MT",
+      "length": 0.2619,
+      "tags": [
+        ""
+      ],
+      "index": 13
+    },
+    {
+      "type": "Drift",
+      "name": "DU_SLZ1T",
+      "length": 0.14405,
+      "passmethod": "DriftPass",
+      "index": 14,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Monitor",
+      "name": "SLZ1T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 15
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q2MT",
+      "length": 0.14405,
+      "passmethod": "DriftPass",
+      "index": 16,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": 1,
+      "grad_per_amp": 0.26093928980526915,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q2MT",
+      "length": 0.2619,
+      "tags": [
+        ""
+      ],
+      "index": 17
+    },
+    {
+      "type": "Drift",
+      "name": "DU_SLZ2T",
+      "length": 0.14405,
+      "passmethod": "DriftPass",
+      "index": 18,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Monitor",
+      "name": "SLZ2T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 19
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q3MT",
+      "length": 0.14405,
+      "passmethod": "DriftPass",
+      "index": 20,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": 1,
+      "grad_per_amp": 0.26093928980526915,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q3MT",
+      "length": 0.2619,
+      "tags": [
+        ""
+      ],
+      "index": 21
+    },
+    {
+      "type": "Drift",
+      "name": "DU_FOMZ3T",
+      "length": 0.19905,
+      "passmethod": "DriftPass",
+      "index": 22,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Monitor",
+      "name": "FOMZ3T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 23
+    },
+    {
+      "type": "Drift",
+      "name": "DU_BPMZ2T",
+      "length": 0.09,
+      "passmethod": "DriftPass",
+      "index": 24,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Monitor",
+      "name": "BPMZ2T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 25
+    },
+    {
+      "type": "Drift",
+      "name": "DU_H2MT",
+      "length": 0.075,
+      "passmethod": "DriftPass",
+      "index": 26,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": -0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "H2MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 27
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": 0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "V2MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 28
+    },
+    {
+      "type": "Drift",
+      "name": "DU_B1M1T",
+      "length": 0.235,
+      "passmethod": "DriftPass",
+      "index": 29,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Dipole",
+      "MaxOrder": 0,
+      "passmethod": "BndMPoleSymplectic4Pass",
+      "tags": [
+        ""
+      ],
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "B1M1T",
+      "length": 1.778,
+      "fringeint1": null,
+      "fringeint2": null,
+      "fullgap": null,
+      "entranceangle": 0.19198621771937624,
+      "exitangle": 0.19198621771937624,
+      "bending_angle": 0.3839724354387525,
+      "index": 30
+    },
+    {
+      "type": "Drift",
+      "name": "DU_FOMZ4T",
+      "length": 0.288,
+      "passmethod": "DriftPass",
+      "index": 31,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Monitor",
+      "name": "FOMZ4T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 32
+    },
+    {
+      "type": "Drift",
+      "name": "DU_BPMZ3T",
+      "length": 0.065,
+      "passmethod": "DriftPass",
+      "index": 33,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Monitor",
+      "name": "BPMZ3T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 34
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q4MT",
+      "length": 0.14105,
+      "passmethod": "DriftPass",
+      "index": 35,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": 1,
+      "grad_per_amp": 0.26093928980526915,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q4MT",
+      "length": 0.2619,
+      "tags": [
+        ""
+      ],
+      "index": 36
+    },
+    {
+      "type": "Drift",
+      "name": "DU_H3MT",
+      "length": 0.04305,
+      "passmethod": "DriftPass",
+      "index": 37,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": -0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "H3MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 38
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": 0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "V3MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 39
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q5MT",
+      "length": 0.04505,
+      "passmethod": "DriftPass",
+      "index": 40,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": -1,
+      "grad_per_amp": 0.26093928980526915,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q5MT",
+      "length": 0.2619,
+      "tags": [
+        ""
+      ],
+      "index": 41
+    },
+    {
+      "type": "Drift",
+      "name": "DU_H4MT",
+      "length": 3.09705,
+      "passmethod": "DriftPass",
+      "index": 42,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": -0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "H4MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 43
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": 0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "V4MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 44
+    },
+    {
+      "type": "Drift",
+      "name": "DU_H5MT",
+      "length": 1.601,
+      "passmethod": "DriftPass",
+      "index": 45,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": -0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "H5MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 46
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": 0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "V5MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 47
+    },
+    {
+      "type": "Drift",
+      "name": "DU_FOMZ5T",
+      "length": 0.171,
+      "passmethod": "DriftPass",
+      "index": 48,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Monitor",
+      "name": "FOMZ5T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 49
+    },
+    {
+      "type": "Drift",
+      "name": "DU_BPMZ4T",
+      "length": 0.065,
+      "passmethod": "DriftPass",
+      "index": 50,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Monitor",
+      "name": "BPMZ4T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 51
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q7MT",
+      "length": 0.12905,
+      "passmethod": "DriftPass",
+      "index": 52,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": -1,
+      "grad_per_amp": 0.26093928980526915,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q7MT",
+      "length": 0.2619,
+      "tags": [
+        ""
+      ],
+      "index": 53
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q8MT",
+      "length": 0.2881,
+      "passmethod": "DriftPass",
+      "index": 54,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": 1,
+      "grad_per_amp": 0.26093928980526915,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q8MT",
+      "length": 0.2619,
+      "tags": [
+        ""
+      ],
+      "index": 55
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q9MT",
+      "length": 0.2881,
+      "passmethod": "DriftPass",
+      "index": 56,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": -1,
+      "grad_per_amp": 0.26093928980526915,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q9MT",
+      "length": 0.2619,
+      "tags": [
+        ""
+      ],
+      "index": 57
+    },
+    {
+      "type": "Drift",
+      "name": "DU_H6MT",
+      "length": 0.58505,
+      "passmethod": "DriftPass",
+      "index": 58,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": -0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "H6MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 59
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": 0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "V6MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 60
+    },
+    {
+      "type": "Drift",
+      "name": "DU_FOMZ6T",
+      "length": 0.22,
+      "passmethod": "DriftPass",
+      "index": 61,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Monitor",
+      "name": "FOMZ6T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 62
+    },
+    {
+      "type": "Drift",
+      "name": "DU_BPMZ5T",
+      "length": 0.065,
+      "passmethod": "DriftPass",
+      "index": 63,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Monitor",
+      "name": "BPMZ5T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 64
+    },
+    {
+      "type": "Drift",
+      "name": "DU_B1M2T",
+      "length": 0.224,
+      "passmethod": "DriftPass",
+      "index": 65,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Dipole",
+      "MaxOrder": 0,
+      "passmethod": "BndMPoleSymplectic4Pass",
+      "tags": [
+        ""
+      ],
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "B1M2T",
+      "length": 1.778,
+      "fringeint1": null,
+      "fringeint2": null,
+      "fullgap": null,
+      "entranceangle": 0.19198621771937624,
+      "exitangle": 0.19198621771937624,
+      "bending_angle": 0.3839724354387525,
+      "index": 66
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q10MT",
+      "length": 0.24385,
+      "passmethod": "DriftPass",
+      "index": 67,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": -1,
+      "grad_per_amp": 0.26170513424399433,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q10MT",
+      "length": 0.2123,
+      "tags": [
+        ""
+      ],
+      "index": 68
+    },
+    {
+      "type": "Drift",
+      "name": "DU_H7MT",
+      "length": 0.02785,
+      "passmethod": "DriftPass",
+      "index": 69,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": -0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "H7MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 70
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q11MT",
+      "length": 0.05985,
+      "passmethod": "DriftPass",
+      "index": 71,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": -1,
+      "grad_per_amp": 0.26170513424399433,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q11MT",
+      "length": 0.2123,
+      "tags": [
+        ""
+      ],
+      "index": 72
+    },
+    {
+      "type": "Drift",
+      "name": "DU_V7MT",
+      "length": 0.02785,
+      "passmethod": "DriftPass",
+      "index": 73,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": 0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "V7MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 74
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q12MT",
+      "length": 0.05985,
+      "passmethod": "DriftPass",
+      "index": 75,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": 1,
+      "grad_per_amp": 0.26170513424399433,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q12MT",
+      "length": 0.2123,
+      "tags": [
+        ""
+      ],
+      "index": 76
+    },
+    {
+      "type": "Drift",
+      "name": "DU_FOMZ7T",
+      "length": 0.14285,
+      "passmethod": "DriftPass",
+      "index": 77,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Monitor",
+      "name": "FOMZ7T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 78
+    },
+    {
+      "type": "Drift",
+      "name": "DU_B2MT",
+      "length": 0.167,
+      "passmethod": "DriftPass",
+      "index": 79,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Dipole",
+      "MaxOrder": 0,
+      "passmethod": "BndMPoleSymplectic4Pass",
+      "tags": [
+        ""
+      ],
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "B2MT",
+      "length": 1.02,
+      "fringeint1": null,
+      "fringeint2": null,
+      "fullgap": null,
+      "entranceangle": 0.0676,
+      "exitangle": 0.0676,
+      "bending_angle": 0.1352,
+      "index": 80
+    },
+    {
+      "type": "Drift",
+      "name": "DU_V8MT",
+      "length": 0.231,
+      "passmethod": "DriftPass",
+      "index": 81,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": 0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "V8MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 82
+    },
+    {
+      "type": "Drift",
+      "name": "DU_SLZ3T",
+      "length": 0.169,
+      "passmethod": "DriftPass",
+      "index": 83,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Monitor",
+      "name": "SLZ3T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 84
+    },
+    {
+      "type": "Drift",
+      "name": "DU_FOMZ8T",
+      "length": 0.336,
+      "passmethod": "DriftPass",
+      "index": 85,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Monitor",
+      "name": "FOMZ8T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 86
+    },
+    {
+      "type": "Drift",
+      "name": "DU_SEK1D1R",
+      "length": 0.2554,
+      "passmethod": "DriftPass",
+      "index": 87,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Dipole",
+      "MaxOrder": 0,
+      "passmethod": "BndMPoleSymplectic4Pass",
+      "tags": [
+        ""
+      ],
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "SEK1D1R",
+      "length": 0.555,
+      "fringeint1": null,
+      "fringeint2": null,
+      "fullgap": null,
+      "entranceangle": 0,
+      "exitangle": 0,
+      "bending_angle": 0.06581636609270616,
+      "index": 88
+    },
+    {
+      "type": "Drift",
+      "name": "DU_SEK2D2R",
+      "length": 0.093,
+      "passmethod": "DriftPass",
+      "index": 89,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Dipole",
+      "MaxOrder": 0,
+      "passmethod": "BndMPoleSymplectic4Pass",
+      "tags": [
+        ""
+      ],
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "SEK2D2R",
+      "length": 0.555,
+      "fringeint1": null,
+      "fringeint2": null,
+      "fullgap": null,
+      "entranceangle": 0,
+      "exitangle": 0,
+      "bending_angle": 0.0667588438887831,
+      "index": 90
+    },
+    {
+      "type": "Drift",
+      "name": "DU_FOMZ2D1R",
+      "length": 0.0515,
+      "passmethod": "DriftPass",
+      "index": 91,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Monitor",
+      "name": "FOMZ2D1R",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 92
+    },
+    {
+      "type": "Drift",
+      "name": "DU_KIK3D1R",
+      "length": 0.2635,
+      "passmethod": "DriftPass",
+      "index": 93,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Dipole",
+      "MaxOrder": 0,
+      "passmethod": "BndMPoleSymplectic4Pass",
+      "tags": [
+        ""
+      ],
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "KIK3D1R",
+      "length": 0.595,
+      "fringeint1": null,
+      "fringeint2": null,
+      "fullgap": null,
+      "entranceangle": 0,
+      "exitangle": 0,
+      "bending_angle": -0.01,
+      "index": 94
+    },
+    {
+      "type": "Drift",
+      "name": "DU_KIK4D1R",
+      "length": 0.456,
+      "passmethod": "DriftPass",
+      "index": 95,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Dipole",
+      "MaxOrder": 0,
+      "passmethod": "BndMPoleSymplectic4Pass",
+      "tags": [
+        ""
+      ],
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "KIK4D1R",
+      "length": 0.595,
+      "fringeint1": null,
+      "fringeint2": null,
+      "fullgap": null,
+      "entranceangle": 0,
+      "exitangle": 0,
+      "bending_angle": 0.01,
+      "index": 96
+    }
+  ],
+  "quadrupoles": [
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": -1,
+      "grad_per_amp": 0.26093928980526915,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q1MT",
+      "length": 0.2619,
+      "tags": [
+        ""
+      ],
+      "index": 13
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": 1,
+      "grad_per_amp": 0.26093928980526915,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q2MT",
+      "length": 0.2619,
+      "tags": [
+        ""
+      ],
+      "index": 17
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": 1,
+      "grad_per_amp": 0.26093928980526915,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q3MT",
+      "length": 0.2619,
+      "tags": [
+        ""
+      ],
+      "index": 21
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": 1,
+      "grad_per_amp": 0.26093928980526915,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q4MT",
+      "length": 0.2619,
+      "tags": [
+        ""
+      ],
+      "index": 36
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": -1,
+      "grad_per_amp": 0.26093928980526915,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q5MT",
+      "length": 0.2619,
+      "tags": [
+        ""
+      ],
+      "index": 41
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": -1,
+      "grad_per_amp": 0.26093928980526915,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q7MT",
+      "length": 0.2619,
+      "tags": [
+        ""
+      ],
+      "index": 53
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": 1,
+      "grad_per_amp": 0.26093928980526915,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q8MT",
+      "length": 0.2619,
+      "tags": [
+        ""
+      ],
+      "index": 55
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": -1,
+      "grad_per_amp": 0.26093928980526915,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q9MT",
+      "length": 0.2619,
+      "tags": [
+        ""
+      ],
+      "index": 57
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": -1,
+      "grad_per_amp": 0.26170513424399433,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q10MT",
+      "length": 0.2123,
+      "tags": [
+        ""
+      ],
+      "index": 68
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": -1,
+      "grad_per_amp": 0.26170513424399433,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q11MT",
+      "length": 0.2123,
+      "tags": [
+        ""
+      ],
+      "index": 72
+    },
+    {
+      "type": "Quadrupole",
+      "MaxOrder": 1,
+      "polarity": 1,
+      "grad_per_amp": 0.26170513424399433,
+      "passmethod": "StrMPoleSymplectic4Pass",
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "Q12MT",
+      "length": 0.2123,
+      "tags": [
+        ""
+      ],
+      "index": 76
+    }
+  ],
+  "sextupoles": [],
+  "drifts": [
+    {
+      "type": "Drift",
+      "name": "DU_FOMZ1T",
+      "length": 0.075,
+      "passmethod": "DriftPass",
+      "index": 1,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_SEK2S12B",
+      "length": 0.075,
+      "passmethod": "DriftPass",
+      "index": 3,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_FOMZ2T",
+      "length": 0.258,
+      "passmethod": "DriftPass",
+      "index": 5,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_BPMZ1T",
+      "length": 0.065,
+      "passmethod": "DriftPass",
+      "index": 7,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_H1MT",
+      "length": 0.965,
+      "passmethod": "DriftPass",
+      "index": 9,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q1MT",
+      "length": 0.31405,
+      "passmethod": "DriftPass",
+      "index": 12,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_SLZ1T",
+      "length": 0.14405,
+      "passmethod": "DriftPass",
+      "index": 14,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q2MT",
+      "length": 0.14405,
+      "passmethod": "DriftPass",
+      "index": 16,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_SLZ2T",
+      "length": 0.14405,
+      "passmethod": "DriftPass",
+      "index": 18,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q3MT",
+      "length": 0.14405,
+      "passmethod": "DriftPass",
+      "index": 20,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_FOMZ3T",
+      "length": 0.19905,
+      "passmethod": "DriftPass",
+      "index": 22,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_BPMZ2T",
+      "length": 0.09,
+      "passmethod": "DriftPass",
+      "index": 24,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_H2MT",
+      "length": 0.075,
+      "passmethod": "DriftPass",
+      "index": 26,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_B1M1T",
+      "length": 0.235,
+      "passmethod": "DriftPass",
+      "index": 29,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_FOMZ4T",
+      "length": 0.288,
+      "passmethod": "DriftPass",
+      "index": 31,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_BPMZ3T",
+      "length": 0.065,
+      "passmethod": "DriftPass",
+      "index": 33,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q4MT",
+      "length": 0.14105,
+      "passmethod": "DriftPass",
+      "index": 35,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_H3MT",
+      "length": 0.04305,
+      "passmethod": "DriftPass",
+      "index": 37,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q5MT",
+      "length": 0.04505,
+      "passmethod": "DriftPass",
+      "index": 40,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_H4MT",
+      "length": 3.09705,
+      "passmethod": "DriftPass",
+      "index": 42,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_H5MT",
+      "length": 1.601,
+      "passmethod": "DriftPass",
+      "index": 45,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_FOMZ5T",
+      "length": 0.171,
+      "passmethod": "DriftPass",
+      "index": 48,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_BPMZ4T",
+      "length": 0.065,
+      "passmethod": "DriftPass",
+      "index": 50,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q7MT",
+      "length": 0.12905,
+      "passmethod": "DriftPass",
+      "index": 52,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q8MT",
+      "length": 0.2881,
+      "passmethod": "DriftPass",
+      "index": 54,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q9MT",
+      "length": 0.2881,
+      "passmethod": "DriftPass",
+      "index": 56,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_H6MT",
+      "length": 0.58505,
+      "passmethod": "DriftPass",
+      "index": 58,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_FOMZ6T",
+      "length": 0.22,
+      "passmethod": "DriftPass",
+      "index": 61,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_BPMZ5T",
+      "length": 0.065,
+      "passmethod": "DriftPass",
+      "index": 63,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_B1M2T",
+      "length": 0.224,
+      "passmethod": "DriftPass",
+      "index": 65,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q10MT",
+      "length": 0.24385,
+      "passmethod": "DriftPass",
+      "index": 67,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_H7MT",
+      "length": 0.02785,
+      "passmethod": "DriftPass",
+      "index": 69,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q11MT",
+      "length": 0.05985,
+      "passmethod": "DriftPass",
+      "index": 71,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_V7MT",
+      "length": 0.02785,
+      "passmethod": "DriftPass",
+      "index": 73,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_Q12MT",
+      "length": 0.05985,
+      "passmethod": "DriftPass",
+      "index": 75,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_FOMZ7T",
+      "length": 0.14285,
+      "passmethod": "DriftPass",
+      "index": 77,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_B2MT",
+      "length": 0.167,
+      "passmethod": "DriftPass",
+      "index": 79,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_V8MT",
+      "length": 0.231,
+      "passmethod": "DriftPass",
+      "index": 81,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_SLZ3T",
+      "length": 0.169,
+      "passmethod": "DriftPass",
+      "index": 83,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_FOMZ8T",
+      "length": 0.336,
+      "passmethod": "DriftPass",
+      "index": 85,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_SEK1D1R",
+      "length": 0.2554,
+      "passmethod": "DriftPass",
+      "index": 87,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_SEK2D2R",
+      "length": 0.093,
+      "passmethod": "DriftPass",
+      "index": 89,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_FOMZ2D1R",
+      "length": 0.0515,
+      "passmethod": "DriftPass",
+      "index": 91,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_KIK3D1R",
+      "length": 0.2635,
+      "passmethod": "DriftPass",
+      "index": 93,
+      "tags": [
+        ""
+      ]
+    },
+    {
+      "type": "Drift",
+      "name": "DU_KIK4D1R",
+      "length": 0.456,
+      "passmethod": "DriftPass",
+      "index": 95,
+      "tags": [
+        ""
+      ]
+    }
+  ],
+  "bendings": [
+    {
+      "type": "Dipole",
+      "MaxOrder": 0,
+      "passmethod": "BndMPoleSymplectic4Pass",
+      "tags": [
+        ""
+      ],
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "SEK1S12B",
+      "length": 0.7,
+      "fringeint1": null,
+      "fringeint2": null,
+      "fullgap": null,
+      "entranceangle": 0,
+      "exitangle": 0,
+      "bending_angle": -0.1249041095890411,
+      "index": 0
+    },
+    {
+      "type": "Dipole",
+      "MaxOrder": 0,
+      "passmethod": "BndMPoleSymplectic4Pass",
+      "tags": [
+        ""
+      ],
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "SEK2S12B",
+      "length": 0.7,
+      "fringeint1": null,
+      "fringeint2": null,
+      "fullgap": null,
+      "entranceangle": 0,
+      "exitangle": 0,
+      "bending_angle": -0.06909589041095891,
+      "index": 4
+    },
+    {
+      "type": "Dipole",
+      "MaxOrder": 0,
+      "passmethod": "BndMPoleSymplectic4Pass",
+      "tags": [
+        ""
+      ],
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "B1M1T",
+      "length": 1.778,
+      "fringeint1": null,
+      "fringeint2": null,
+      "fullgap": null,
+      "entranceangle": 0.19198621771937624,
+      "exitangle": 0.19198621771937624,
+      "bending_angle": 0.3839724354387525,
+      "index": 30
+    },
+    {
+      "type": "Dipole",
+      "MaxOrder": 0,
+      "passmethod": "BndMPoleSymplectic4Pass",
+      "tags": [
+        ""
+      ],
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "B1M2T",
+      "length": 1.778,
+      "fringeint1": null,
+      "fringeint2": null,
+      "fullgap": null,
+      "entranceangle": 0.19198621771937624,
+      "exitangle": 0.19198621771937624,
+      "bending_angle": 0.3839724354387525,
+      "index": 66
+    },
+    {
+      "type": "Dipole",
+      "MaxOrder": 0,
+      "passmethod": "BndMPoleSymplectic4Pass",
+      "tags": [
+        ""
+      ],
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "B2MT",
+      "length": 1.02,
+      "fringeint1": null,
+      "fringeint2": null,
+      "fullgap": null,
+      "entranceangle": 0.0676,
+      "exitangle": 0.0676,
+      "bending_angle": 0.1352,
+      "index": 80
+    },
+    {
+      "type": "Dipole",
+      "MaxOrder": 0,
+      "passmethod": "BndMPoleSymplectic4Pass",
+      "tags": [
+        ""
+      ],
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "SEK1D1R",
+      "length": 0.555,
+      "fringeint1": null,
+      "fringeint2": null,
+      "fullgap": null,
+      "entranceangle": 0,
+      "exitangle": 0,
+      "bending_angle": 0.06581636609270616,
+      "index": 88
+    },
+    {
+      "type": "Dipole",
+      "MaxOrder": 0,
+      "passmethod": "BndMPoleSymplectic4Pass",
+      "tags": [
+        ""
+      ],
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "SEK2D2R",
+      "length": 0.555,
+      "fringeint1": null,
+      "fringeint2": null,
+      "fullgap": null,
+      "entranceangle": 0,
+      "exitangle": 0,
+      "bending_angle": 0.0667588438887831,
+      "index": 90
+    },
+    {
+      "type": "Dipole",
+      "MaxOrder": 0,
+      "passmethod": "BndMPoleSymplectic4Pass",
+      "tags": [
+        ""
+      ],
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "KIK3D1R",
+      "length": 0.595,
+      "fringeint1": null,
+      "fringeint2": null,
+      "fullgap": null,
+      "entranceangle": 0,
+      "exitangle": 0,
+      "bending_angle": -0.01,
+      "index": 94
+    },
+    {
+      "type": "Dipole",
+      "MaxOrder": 0,
+      "passmethod": "BndMPoleSymplectic4Pass",
+      "tags": [
+        ""
+      ],
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": 10,
+      "name": "KIK4D1R",
+      "length": 0.595,
+      "fringeint1": null,
+      "fringeint2": null,
+      "fullgap": null,
+      "entranceangle": 0,
+      "exitangle": 0,
+      "bending_angle": 0.01,
+      "index": 96
+    }
+  ],
+  "markers": [],
+  "beam_position_monitors": [
+    {
+      "type": "Monitor",
+      "name": "FOMZ1T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 2
+    },
+    {
+      "type": "Monitor",
+      "name": "FOMZ2T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 6
+    },
+    {
+      "type": "Monitor",
+      "name": "BPMZ1T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 8
+    },
+    {
+      "type": "Monitor",
+      "name": "SLZ1T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 15
+    },
+    {
+      "type": "Monitor",
+      "name": "SLZ2T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 19
+    },
+    {
+      "type": "Monitor",
+      "name": "FOMZ3T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 23
+    },
+    {
+      "type": "Monitor",
+      "name": "BPMZ2T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 25
+    },
+    {
+      "type": "Monitor",
+      "name": "FOMZ4T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 32
+    },
+    {
+      "type": "Monitor",
+      "name": "BPMZ3T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 34
+    },
+    {
+      "type": "Monitor",
+      "name": "FOMZ5T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 49
+    },
+    {
+      "type": "Monitor",
+      "name": "BPMZ4T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 51
+    },
+    {
+      "type": "Monitor",
+      "name": "FOMZ6T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 62
+    },
+    {
+      "type": "Monitor",
+      "name": "BPMZ5T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 64
+    },
+    {
+      "type": "Monitor",
+      "name": "FOMZ7T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 78
+    },
+    {
+      "type": "Monitor",
+      "name": "SLZ3T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 84
+    },
+    {
+      "type": "Monitor",
+      "name": "FOMZ8T",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 86
+    },
+    {
+      "type": "Monitor",
+      "name": "FOMZ2D1R",
+      "length": 0,
+      "passmethod": "IdentityPass",
+      "tags": [
+        ""
+      ],
+      "index": 92
+    }
+  ],
+  "cavities": [],
+  "closed": false,
+  "steerers": [
+    {
+      "type": "Corrector",
+      "rad_per_amp": -0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "H1MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 10
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": 0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "V1MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 11
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": -0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "H2MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 27
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": 0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "V2MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 28
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": -0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "H3MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 38
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": 0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "V3MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 39
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": -0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "H4MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 43
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": 0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "V4MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 44
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": -0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "H5MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 46
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": 0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "V5MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 47
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": -0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "H6MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 59
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": 0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "V6MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 60
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": -0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "H7MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 70
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": 0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "V7MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 74
+    },
+    {
+      "type": "Corrector",
+      "rad_per_amp": 0.0006617,
+      "element_configuration": {
+        "magnetic_element": {
+          "coeffs": {
+            "normal_coefficients": [
+              0,
+              0
+            ],
+            "skew_coefficients": [
+              0,
+              0
+            ]
+          },
+          "main_multipole_index": null,
+          "main_multipole_strength": null
+        },
+        "kickangle": {
+          "x": 0,
+          "y": 0
+        },
+        "correctors": null
+      },
+      "number_of_integration_steps": null,
+      "name": "V8MT",
+      "length": 0.1,
+      "passmethod": "CorrectorPass",
+      "tags": [
+        ""
+      ],
+      "index": 82
+    }
+  ]
+}]

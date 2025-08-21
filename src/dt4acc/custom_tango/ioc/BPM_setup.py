@@ -20,7 +20,6 @@ def register_bpm_device(bpm_name: str):
         dev_info.server = f"{SERVER_NAME}/{SERVER_INSTANCE}"
         
         db.add_device(dev_info)
-        print(f"Successfully registered BPM device: {dev_info.name}")
         
     except Exception as e:
         logger.error(f"Failed to register BPM device: {e}")

@@ -40,11 +40,9 @@ def cleanup():
         view.bpm_pvs.device = None
     except Exception:
         pass
-    print("Cleanup completed and heartbeat stopped")
 
 
 def signal_handler(signum, frame):
-    print(f"Received signal {signum}, initiating cleanup...")
     cleanup()
     try:
         stop_event.set()
