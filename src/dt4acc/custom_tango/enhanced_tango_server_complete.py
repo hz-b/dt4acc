@@ -32,7 +32,8 @@ def force_exit(signum, frame):
     """Force exit immediately without cleanup."""
     print(f"🛑 Force exit signal {signum} received!")
     print("🚀 Exiting immediately...")
-    os._exit(1)
+    import sys
+    sys.exit(1)
 
 def force_shutdown():
     """Force shutdown immediately without waiting."""
@@ -44,7 +45,8 @@ def force_shutdown():
     
     # Force exit immediately
     print("🚀 Force exiting...")
-    os._exit(1)
+    import sys
+    sys.exit(1)
 
 def signal_handler(signum, frame):
     """Handle shutdown signals gracefully."""
@@ -73,8 +75,9 @@ signal.signal(signal.SIGUSR2, force_exit)  # Force exit signal
 # Handle SIGALRM for timeout-based shutdown
 def alarm_handler(signum, frame):
     """Handle alarm signal for timeout-based shutdown."""
-    print("⏰ Alarm timeout - forcing exit...")
-    os._exit(1)
+    print("Alarm timeout - forcing exit...")
+    import sys
+    sys.exit(1)
 
 signal.signal(signal.SIGALRM, alarm_handler)
 
@@ -89,7 +92,7 @@ def cleanup_and_exit():
     # Wait for threads to finish (with shorter timeout)
     if tango_server_thread and tango_server_thread.is_alive():
         print("⏳ Waiting for Tango server thread to finish...")
-        tango_server_thread.join(timeout=2)  # Reduced timeout
+        tango_server_thread.join(timeout=10)  # Reduced timeout
         
         # Force kill if still alive
         if tango_server_thread.is_alive():
@@ -118,7 +121,10 @@ def cleanup_and_exit():
     
     # Force exit immediately to prevent blocking
     print("🚀 Force exiting to prevent blocking...")
-    os._exit(0)
+    import sys
+    print("✅ Exiting gracefully")
+    import sys
+    sys.exit(1)
 
 def start_tango_server():
     """Start the Tango server in a separate thread."""
@@ -150,7 +156,8 @@ def start_tango_server():
             logger.info("🚀 Tango server worker thread ending")
     
     # Start Tango server in background thread
-    thread = threading.Thread(target=server_worker, daemon=True)
+    #thread = threading.Thread(target=server_worker, daemon=True)
+    thread = threading.Thread(target=server_worker, daemon=False)
     thread.start()
     
     print(f"🚀 Tango server thread created: {thread.name}")
@@ -263,16 +270,16 @@ def main():
         if "DT4ACC_PREFIX" not in os.environ:
             default_prefix = "BESSY"  # Default prefix for BESSY
             os.environ["DT4ACC_PREFIX"] = default_prefix
-            print(f"🔧 Setting DT4ACC_PREFIX to default: {default_prefix}")
+            print(f"Setting DT4ACC_PREFIX to default: {default_prefix}")
             logger.info(f"Setting DT4ACC_PREFIX to default: {default_prefix}")
         else:
-            print(f"🔧 Using existing DT4ACC_PREFIX: {os.environ['DT4ACC_PREFIX']}")
+            print(f" Using existing DT4ACC_PREFIX: {os.environ['DT4ACC_PREFIX']}")
             logger.info(f"Using existing DT4ACC_PREFIX: {os.environ['DT4ACC_PREFIX']}")
         
-        print("🚀 Starting DT4ACC Enhanced Tango Server...")
-        logger.info("🚀 Starting DT4ACC Enhanced Tango Server...")
         
-        # Set up alarm for auto-shutdown after 8 hours (prevent hanging)
+        
+        
+        
         signal.alarm(8 * 60 * 60)  # 8 hours
         
         # Initialize accelerator manager for Twiss data
@@ -284,6 +291,7 @@ def main():
         print("=" * 50)
         global tango_server_thread
         tango_server_thread = start_tango_server()
+        time.sleep(2)   
         
         # STEP 2: Wait for Tango server to be ready
         print("=" * 50)
@@ -291,8 +299,8 @@ def main():
         print("=" * 50)
         if not wait_for_tango_server_ready():
             print("❌ Cannot continue - Tango server not ready")
-            cleanup_and_exit()
-            return
+            #cleanup_and_exit()
+            #return
         
         # STEP 2.5: Wait additional 25 seconds for server to be completely stable
         print("=" * 50)
@@ -314,8 +322,8 @@ def main():
         print("=" * 50)
         if not wait_for_devices_ready():
             print("❌ Cannot continue - Critical devices not accessible")
-            cleanup_and_exit()
-            return
+            #cleanup_and_exit()
+            #return
         
         # STEP 3: Heartbeat monitoring is now in separate file
         print("=" * 50)

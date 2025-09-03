@@ -165,6 +165,9 @@ class ElementProxy(ElementInterface):
 
         await self.on_update_finished.trigger(None)
 
+
+
+
     def peek(self, property_id: str) -> float:
         if property_id in ["K", "H", "main_strength"]:
             return self.peek_main_strength(property_id)
