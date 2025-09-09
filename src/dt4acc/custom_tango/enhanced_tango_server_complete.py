@@ -30,7 +30,7 @@ global_event_loop = None  # Global reference to the event loop for DelayExecutio
 
 def force_exit(signum, frame):
     """Force exit immediately without cleanup."""
-    print(f"🛑 Force exit signal {signum} received!")
+    print(f" Force exit signal {signum} received!")
     print("🚀 Exiting immediately...")
     import sys
     sys.exit(1)
@@ -50,13 +50,13 @@ def force_shutdown():
 
 def signal_handler(signum, frame):
     """Handle shutdown signals gracefully."""
-    print(f"🛑 Received signal {signum}, shutting down gracefully...")
+    print(f" Received signal {signum}, shutting down gracefully...")
     
     # Set a timeout for graceful shutdown
     import threading
     def timeout_shutdown():
         time.sleep(3)  # Wait 3 seconds for graceful shutdown
-        print("⏰ Graceful shutdown timeout - forcing exit...")
+        print(" Graceful shutdown timeout - forcing exit...")
         force_shutdown()
     
     # Start timeout thread
@@ -83,8 +83,8 @@ signal.signal(signal.SIGALRM, alarm_handler)
 
 def cleanup_and_exit():
     """Cleanup function to properly shut down all threads."""
-    print("🛑 Shutting down gracefully...")
-    logger.info("🛑 Shutting down gracefully...")
+    print(" Shutting down gracefully...")
+    logger.info(" Shutting down gracefully...")
     
     # Signal shutdown to all threads
     shutdown_event.set()
@@ -106,8 +106,8 @@ def cleanup_and_exit():
     global original_create_task
     if 'original_create_task' in globals():
         asyncio.create_task = original_create_task
-        print("✅ Restored original asyncio.create_task")
-        logger.info("✅ Restored original asyncio.create_task")
+        print(" Restored original asyncio.create_task")
+        logger.info(" Restored original asyncio.create_task")
     
     # Stop global event loop if running
     global global_event_loop
@@ -116,13 +116,13 @@ def cleanup_and_exit():
         logger.info("⏳ Stopping global event loop...")
         global_event_loop.stop()
         global_event_loop.close()
-        print("✅ Global event loop stopped")
-        logger.info("✅ Global event loop stopped")
+        print(" Global event loop stopped")
+        logger.info(" Global event loop stopped")
     
     # Force exit immediately to prevent blocking
     print("🚀 Force exiting to prevent blocking...")
     import sys
-    print("✅ Exiting gracefully")
+    print(" Exiting gracefully")
     import sys
     sys.exit(1)
 
@@ -131,18 +131,18 @@ def start_tango_server():
     def server_worker():
         """Worker function that runs the Tango server."""
         print("🚀 Tango server worker thread started")
-        logger.info("🚀 Tango server worker thread started")
+        logger.info(" Tango server worker thread started")
         
         try:
-            print("🔧 Registering Tango devices...")
-            logger.info("🔧 Registering Tango devices...")
+            print(" Registering Tango devices...")
+            logger.info(" Registering Tango devices...")
             register_all_devices("SimpleTangoServer", "test")
             
-            print("🚀 Tango server initialized and ready!")
-            logger.info("🚀 Tango server initialized and ready!")
+            print(" Tango server initialized and ready!")
+            logger.info(" Tango server initialized and ready!")
             
-            print("🚀 Starting Tango server...")
-            logger.info("🚀 Starting Tango server...")
+            print(" Starting Tango server...")
+            logger.info(" Starting Tango server...")
             
             # Get device classes and start the Tango server
             device_classes = get_all_device_classes()
@@ -152,8 +152,8 @@ def start_tango_server():
             print(f"❌ Tango server worker thread failed: {e}")
             logger.error(f"❌ Tango server worker thread failed: {e}")
         finally:
-            print("🚀 Tango server worker thread ending")
-            logger.info("🚀 Tango server worker thread ending")
+            print(" Tango server worker thread ending")
+            logger.info(" Tango server worker thread ending")
     
     # Start Tango server in background thread
     #thread = threading.Thread(target=server_worker, daemon=True)
@@ -178,8 +178,8 @@ def wait_for_tango_server_ready():
             from tango import Database
             db = Database()
             db.get_device_info("SimpleTangoServer/test/twiss_orbit_twiss_device")
-            print("✅ Tango server is ready and responding!")
-            logger.info("✅ Tango server is ready and responding!")
+            print(" Tango server is ready and responding!")
+            logger.info(" Tango server is ready and responding!")
             return True
             
         except Exception as e:
@@ -217,15 +217,15 @@ def wait_for_devices_ready():
                     device = DeviceProxy(device_name)
                     # Try to read a simple attribute to verify device is working
                     device.ping()
-                    print(f"✅ Device {device_name} is accessible")
+                    print(f" Device {device_name} is accessible")
                 except Exception as e:
-                    print(f"⏳ Device {device_name} not ready yet: {e}")
+                    print(f" Device {device_name} not ready yet: {e}")
                     all_devices_ready = False
                     break
             
             if all_devices_ready:
-                print("✅ All critical devices are accessible!")
-                logger.info("✅ All critical devices are accessible!")
+                print(" All critical devices are accessible!")
+                logger.info("All critical devices are accessible!")
                 return True
                 
         except Exception as e:
@@ -248,12 +248,12 @@ def shutdown_helper():
     try:
         # Try to send SIGTERM to the main process
         main_pid = os.getpid()
-        print(f"🛑 Sending shutdown signal to process {main_pid}")
+        print(f" Sending shutdown signal to process {main_pid}")
         os.kill(main_pid, signal.SIGTERM)
         
         # Wait a moment, then force kill if needed
         time.sleep(2)
-        print("🚀 Force killing process...")
+        print(" Force killing process...")
         os.kill(main_pid, signal.SIGKILL)
         
     except Exception as e:
@@ -337,10 +337,10 @@ def main():
         print("=" * 50)
         print("STEP 4: Starting Global Event Loop (EPICS-style)")
         print("=" * 50)
-        print("✅ Tango server started successfully!")
-        print("🔄 Starting global event loop for DelayExecution tasks...")
-        logger.info("✅ Tango server started successfully!")
-        logger.info("🔄 Starting global event loop for DelayExecution tasks...")
+        print(" Tango server started successfully!")
+        print(" Starting global event loop for DelayExecution tasks...")
+        logger.info(" Tango server started successfully!")
+        logger.info(" Starting global event loop for DelayExecution tasks...")
         
         # Set environment variable for Tango mode
         os.environ["server"] = "tango"
@@ -355,8 +355,8 @@ def main():
             """Run the global event loop for DelayExecution tasks (EPICS-style)."""
             try:
                 asyncio.set_event_loop(global_event_loop)
-                print("🔄 Global event loop started in background thread")
-                logger.info("🔄 Global event loop started in background thread")
+                print(" Global event loop started in background thread")
+                logger.info(" Global event loop started in background thread")
                 
                 # Run the event loop forever (like EPICS dispatcher)
                 global_event_loop.run_forever()
@@ -368,16 +368,16 @@ def main():
         # Start global event loop thread
         global_loop_thread = threading.Thread(target=run_global_event_loop, daemon=True)
         global_loop_thread.start()
-        print("✅ Global event loop thread started")
-        logger.info("✅ Global event loop thread started")
+        print(" Global event loop thread started")
+        logger.info(" Global event loop thread started")
         
         # Wait a moment for the event loop to be ready
         time.sleep(1)
         
         # Verify event loop is running
         if global_event_loop.is_running():
-            print("✅ Global event loop is running and ready")
-            logger.info("✅ Global event loop is running and ready")
+            print(" Global event loop is running and ready")
+            logger.info("Global event loop is running and ready")
         else:
             print("⚠️ Global event loop not running yet, waiting...")
             logger.warning("⚠️ Global event loop not running yet, waiting...")
@@ -402,33 +402,33 @@ def main():
         
         # Apply the monkey patch
         asyncio.create_task = tango_create_task
-        print("✅ Monkey-patched asyncio.create_task for Tango compatibility")
-        logger.info("✅ Monkey-patched asyncio.create_task for Tango compatibility")
+        print("Monkey-patched asyncio.create_task for Tango compatibility")
+        logger.info(" Monkey-patched asyncio.create_task for Tango compatibility")
         
         # Test the global event loop with a simple task
         async def test_global_event_loop():
             """Test function to verify global event loop is working."""
-            print("🧪 Test task started in global event loop")
+            print(" Test task started in global event loop")
             await asyncio.sleep(0.1)
-            print("🧪 Test task completed successfully")
+            print(" Test task completed successfully")
             return "test_success"
         
         try:
             # Test scheduling a task in the global event loop
             test_future = asyncio.create_task(test_global_event_loop())
-            print(f"🧪 Test task scheduled: {test_future}")
-            logger.info(f"🧪 Test task scheduled: {test_future}")
+            print(f"Test task scheduled: {test_future}")
+            logger.info(f" Test task scheduled: {test_future}")
             
             # Wait a moment for the task to complete
             time.sleep(0.2)
             
             if test_future.done():
                 result = test_future.result()
-                print(f"🧪 Test task result: {result}")
-                logger.info(f"🧪 Test task result: {result}")
+                print(f" Test task result: {result}")
+                logger.info(f" Test task result: {result}")
             else:
-                print("⚠️ Test task did not complete within timeout")
-                logger.warning("⚠️ Test task did not complete within timeout")
+                print(" Test task did not complete within timeout")
+                logger.warning(" Test task did not complete within timeout")
                 
         except Exception as e:
             print(f"⚠️ Test task failed: {e}")
@@ -438,8 +438,8 @@ def main():
         print("=" * 50)
         print("STEP 5: Monitoring Tango Server and Global Event Loop")
         print("=" * 50)
-        print("👀 Main thread monitoring Tango server and global event loop...")
-        logger.info("👀 Main thread monitoring Tango server and global event loop...")
+        print("Main thread monitoring Tango server and global event loop...")
+        logger.info(" Main thread monitoring Tango server and global event loop...")
         
         try:
             # Keep main thread alive and monitor both threads
@@ -465,7 +465,7 @@ def main():
                 time.sleep(10)  # Check every 10 seconds
                 
         except KeyboardInterrupt:
-            print("🛑 Keyboard interrupt received...")
+            print(" Keyboard interrupt received...")
             cleanup_and_exit()
         except Exception as e:
             print(f"❌ Server monitoring failed: {e}")
@@ -473,7 +473,7 @@ def main():
             cleanup_and_exit()
         finally:
             # Ensure cleanup happens even on normal exit
-            print("🔄 Final cleanup...")
+            print("Final cleanup...")
             cleanup_and_exit()
         
     except Exception as e:
