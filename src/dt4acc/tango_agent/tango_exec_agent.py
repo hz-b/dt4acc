@@ -1042,8 +1042,7 @@ def build_agent(model: str = "llama-3.3-70b-versatile") -> Any:
     groq_api_key = os.getenv("GROQ_API_KEY")
     if not groq_api_key:
         # Fallback to hardcoded key for testing
-        raise ValueError("GROQ_API_KEY is not set")
-        
+        groq_api_key = "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"
         
 
     llm = ChatGroq(
