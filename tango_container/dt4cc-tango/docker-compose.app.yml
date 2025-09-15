@@ -1,0 +1,31 @@
+# docker-compose.app.yml
+# Use this together with tango_mysql/compose.yaml to run only the app container.
+# Assumes the DB service is named "mysql" on network "tango-net".
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+      args:
+        CONDA_ENV: tangoenv1
+    container_name: tango_app
+    environment:
+      CONDA_ENV: tangoenv1
+      TANGO_HOST: databaseds:10000
+      DB_HOST: mysql           
+      DB_NAME: tango
+      DB_USER: tango
+      DB_PASSWORD: ${DB_APP_PASSWORD:-Tango@1234!}
+    networks:
+      - tango-net
+    volumes:
+      - app_data:/workspace
+    command: ["bash", "-lc", "tail -f /dev/null"]
+
+networks:
+  tango-net:
+    external: true
+
+volumes:
+  app_data:

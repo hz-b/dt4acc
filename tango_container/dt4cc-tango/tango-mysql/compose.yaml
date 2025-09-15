@@ -1,0 +1,58 @@
+name: tango-mysql
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      # This mirrors your manual setup (root + tango user/db)
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: tango
+      MYSQL_USER: tango
+      MYSQL_PASSWORD: "Tango@1234!"
+    ports:
+      - "3306:3306"            # expose if you want local mysql client access
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d:ro   # runs 00-*, 01-*, 10-* in order
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-proot"]
+      start_period: 10s
+      interval: 1s
+      timeout: 3s
+      retries: 30
+    networks: [tango-net]
+
+  databaseds:
+    networks: [tango-net]
+    image: artefact.skao.int/ska-tango-images-tango-databaseds:5.23.3
+    # We only use SKA's *DataBaseds* image here; DB is official MySQL 8.
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # TANGO_HOST must match the ORB endpoint port
+      TANGO_HOST: databaseds:10000
+      MYSQL_HOST: mysql:3306
+      MYSQL_USER: tango
+      MYSQL_PASSWORD: "Tango@1234!"
+      MYSQL_DATABASE: tango
+    command:
+      - "2"
+      - "-ORBendPoint"
+      - "giop:tcp::10000"
+    ports:
+      - "10000:10000"
+    healthcheck:
+      test: ["CMD", "sh", "-c", "/usr/local/bin/tango_admin --ping-database || exit 1"]
+      start_period: 10s
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+networks:
+  tango-net:
+    name: tango-net
+    driver: bridge
+
+volumes:
+  db-data:
