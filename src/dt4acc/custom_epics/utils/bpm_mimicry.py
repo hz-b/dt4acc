@@ -88,7 +88,7 @@ class BPMMimicry:
 
         # find indices where the names are ..
         df = pd.DataFrame(index=["x", "y"], columns=orbit_result.names, data=[orbit_result.x, orbit_result.y]).T
-        bpm_names_as_index = pd.Series([f"empty_{cnt:03d}" for cnt in np.arange(128)])
+        bpm_names_as_index = pd.Series([f"empty_{cnt:03d}" for cnt in np.arange(len(bpm_config)+1)])
         bpm_names_as_index.iloc[bpm_config["idx"]] = bpm_config["name"]
         df_bpm = pd.DataFrame(columns=["x", "y", "intensity_z", "intensity_s", "status", "x_rms", "y_rms"],
                               index=bpm_names_as_index, dtype=float)
@@ -97,7 +97,7 @@ class BPMMimicry:
         known_bpm_names = list(set(bpm_config["name"]).intersection(orbit_result.names))
         assert len(known_bpm_names) > 1
         #: todo  BESSY II specific
-        assert df_bpm.shape[0] == 128
+        assert df_bpm.shape[0] == len(bpm_config) +1
 
         # default values
         fill_value = np.nan
