@@ -150,7 +150,7 @@ class ResultView:
 
     async def push_orbit_object(self, bpm_data: pd.DataFrame):
         try:
-            prefix = f"{self.prefix}:ORBITCC"
+            prefix = f"{self.prefix}:ORBITCCP"
             # Todo: check that the dimensions are properly made
             pos = np.array(bpm_data.loc[:, ["x", "y"]]).ravel()
             await ctx.put(f"{prefix}:rdPos", pos)

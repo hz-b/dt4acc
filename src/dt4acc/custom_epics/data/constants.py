@@ -13,8 +13,8 @@ ring_parameters = Ringparameters(freq=0.0, brho=5.67229387129245, energy=629e6)
 
 special_pvs = {
     "bpm_pv": "MDIZ2T5G",
-    "master_clock": "MCLKHX251C",
-    "current": "MDIZ3T5G",
+    "master_clock": "MCLKHGP",
+    "current": "CUM1ZK3RP",
 }
 
 @dataclass

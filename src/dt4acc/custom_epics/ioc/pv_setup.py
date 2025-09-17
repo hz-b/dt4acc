@@ -40,11 +40,11 @@ def initialize_magnet_pvs(builder, magnet):
         LatticeElementPropertyID(element_name=magnet_name, property="main_strength")
     )
     builder.aOut(
-        f"{magnet_name}:Cm:set",
+        f"{magnet_name}:Cm:setCur",
         initial_value=magnet["k"] or 0
         # on_update=lambda val: handle_device_update(magnet_name, type_value, val),
     )
-    rdbk = builder.aIn(f"{magnet_name}:Cm:rdbk", initial_value=val)
+    rdbk = builder.aIn(f"{magnet_name}:Cm:rdCur", initial_value=val)
 
     async def handle_magnet_update(device_id: str, property_id: str, value: float):
         r = await handle_device_update(
@@ -65,12 +65,12 @@ def initialize_magnet_pvs(builder, magnet):
         ),
     )
     builder.aOut(
-        f"{magnet_name}:x:set",
+        f"{magnet_name}:x:setCur",
         initial_value=0.0,
         on_update=lambda val: handle_device_update(magnet_name, "x", val),
     )
     builder.aOut(
-        f"{magnet_name}:y:set",
+        f"{magnet_name}:y:setCur",
         initial_value=0.0,
         on_update=lambda val: handle_device_update(magnet_name, "y", val),
     )
@@ -112,7 +112,7 @@ def add_pc_pvs(builder, pc_name, prefix):
         DevicePropertyID(device_name=pc_name, property="set_current")
     )
     start_val = np.asarray(vals).mean()
-    rdbk = builder.aOut(f"{pc_name}:rdbk", initial_value=start_val, PREC=2)
+    rdbk = builder.aOut(f"{pc_name}:rdCur", initial_value=start_val, PREC=2)
 
     async def handle_pc_update(device_id: str, property_id: str, value: float):
         logger.debug("%s:%s updating setpoint val=%s", device_id, property_id, value)
@@ -124,7 +124,7 @@ def add_pc_pvs(builder, pc_name, prefix):
         return r
 
     builder.aOut(
-        f"{pc_name}:set",
+        f"{pc_name}:setCur",
         initial_value=start_val,
         on_update=lambda val: handle_pc_update(pc_name, "set_current", val),
         PREC=2,
@@ -186,7 +186,7 @@ def initialize_master_clock_pvs(builder):
     )
     start_val = np.asarray(vals).mean()
     builder.aOut(
-        f"{special_pvs['master_clock']}:freq",
+        f"{special_pvs['master_clock']}:rdFrq",
         initial_value=start_val,
         always_update=True,
         EGU="kHz",
@@ -212,7 +212,7 @@ def initialize_other_pvs(builder, prefix):
     """
     builder.aOut(f"dummy:x", initial_value=0)
     builder.aOut(f"dummy:y", initial_value=0)
-    builder.aOut(f"{special_pvs['current']}:current", initial_value=0)
+    builder.aOut(f"{special_pvs['current']}:rdCur", initial_value=0)
 
 
 def initialize_bpm_pvs(builder):
@@ -229,12 +229,12 @@ def initialize_orbit_object_pvs(builder):
     n_bpms = 128
     tmp = np.ravel(np.empty([n_bpms, 2], float))
     tmp.fill(np.nan)
-    builder.WaveformOut("ORBITCC:rdPos", initial_value=tmp, length=len(tmp))
+    builder.WaveformOut("ORBITCCP:rdPos", initial_value=tmp, length=len(tmp))
     tmp = np.ravel(np.empty([n_bpms, 4], float))
     tmp.fill(np.nan)
-    builder.WaveformOut("ORBITCC:rdButtons", initial_value=tmp, length=len(tmp))
-    builder.WaveformOut("ORBITCC:rdBpmNames", initial_value=[""], length=n_bpms)
-    builder.longOut("ORBITCC:count", initial_value=0)
+    builder.WaveformOut("ORBITCCP:rdButtons", initial_value=tmp, length=len(tmp))
+    builder.WaveformOut("ORBITCCP:rdBpmNames", initial_value=[""], length=n_bpms)
+    builder.longOut("ORBITCCP:count", initial_value=0)
 
 
 def initialize_cavity_pvs(builder):
