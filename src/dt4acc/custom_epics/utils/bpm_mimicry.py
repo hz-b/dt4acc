@@ -88,8 +88,12 @@ class BPMMimicry:
 
         # find indices where the names are ..
         df = pd.DataFrame(index=["x", "y"], columns=orbit_result.names, data=[orbit_result.x, orbit_result.y]).T
-        bpm_names_as_index = pd.Series([f"empty_{cnt:03d}" for cnt in np.arange(128)])
-        bpm_names_as_index.iloc[bpm_config["idx"]] = bpm_config["name"]
+        bpm_names_as_index = pd.Series([f"empty_{cnt:03d}" for cnt in np.arange(len(bpm_config))])
+        idx = np.asarray(bpm_config["idx"])
+        order = np.argsort(idx)  # indices that would sort by idx
+        rank = np.empty_like(order)  # rank[i] = position of item i after sorting
+        rank[order] = np.arange(len(bpm_config))
+        bpm_names_as_index.iloc[rank] = bpm_config["name"]
         df_bpm = pd.DataFrame(columns=["x", "y", "intensity_z", "intensity_s", "status", "x_rms", "y_rms"],
                               index=bpm_names_as_index, dtype=float)
 
@@ -97,7 +101,7 @@ class BPMMimicry:
         known_bpm_names = list(set(bpm_config["name"]).intersection(orbit_result.names))
         assert len(known_bpm_names) > 1
         #: todo  BESSY II specific
-        assert df_bpm.shape[0] == 128
+        assert df_bpm.shape[0] == len(bpm_config)
 
         # default values
         fill_value = np.nan
@@ -157,7 +161,7 @@ def get_data_file(name: str = "bpm_config") -> Path:
         .parent          # …/utils
         .parent          # …/custom_epics
         / "data"
-        / "standard"
+        / "mls"
         / f"{name}.json"
     )
     with _DATA_FILE.open() as fp:
@@ -226,8 +230,14 @@ def create_bpm_config():
     data["x_state"] = True
     data["y_state"] = True
 
-    data['x_scale'] = 1 / data['x_scale']
-    data['y_scale'] = 1 / data['y_scale']
+    # avoid division by zero
+    with np.errstate(divide='ignore', invalid='ignore'):
+        data['x_scale'] = np.where(data['x_scale'] != 0,
+                                   1 / data['x_scale'],
+                                   np.inf)  # or np.nan if you prefer
+        data['y_scale'] = np.where(data['y_scale'] != 0,
+                                   1 / data['y_scale'],
+                                   np.inf)
 
     for name, (x_offset, y_offset) in bpm_offset_docs.items():
         idx = data['name'] == name

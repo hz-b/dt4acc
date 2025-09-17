@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-cavity_names = ["CAVH4T8R", "CAVH3T8R", "CAVH2T8R", "CAVH1T8R"]
+cavity_names = ["CAV"]
 #bessy ii defaults
 
 @dataclass
@@ -9,7 +9,7 @@ class Ringparameters:
     brho: float
     energy: float
 
-ring_parameters = Ringparameters(freq=0.0, brho=5.67229387129245, energy=1.7e9)
+ring_parameters = Ringparameters(freq=0.0, brho=5.67229387129245, energy=629e6)
 
 special_pvs = {
     "bpm_pv": "MDIZ2T5G",

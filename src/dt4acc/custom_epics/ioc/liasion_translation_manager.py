@@ -90,20 +90,20 @@ def magnet_infos_from_db() -> Sequence[MagnetElementSetup]:
 
 
 def element_method(element_name: str, yp: YellowPages):
-    if element_name in yp.horizontal_steerer_names():
+    if element_name in yp['horizontal_steerers']:
         return "x_kick"
-    elif element_name in yp.vertical_steerer_names():
+    elif element_name in yp['vertical_steerers']:# _names():
         return "y_kick"
-    elif element_name in yp.quadrupole_names():
+    elif element_name in yp['quadrupoles']:#_names():
         return "K"
-    elif element_name in yp.sextupole_names():
+    elif element_name in yp['sextupoles']:#_names():
         return "H"
     else:
         raise AssertionError(f"Don't know how to handle {element_name}")
 
 
 def extract_host_element_name(element_name: str, yp: YellowPages) -> str:
-    if element_name in yp.vertical_steerer_names() or element_name in yp.horizontal_steerer_names():
+    if element_name in yp['vertical_steerers']  or element_name in yp['horizontal_steerers']:#_names():
         return element_name[1:]
     return element_name
 
@@ -119,7 +119,7 @@ def construct_energy_independent_linear_conversion(
 
 
 def build_managers(
-    yp: YellowPages = bessyii_yellow_pages(),
+    yp: YellowPages = None,
 ) -> (LiaisonManagerBase, TranslatorServiceBase):
     """A first poor mans implementation of liasion manager and Translation service for BessyII
 
@@ -144,6 +144,7 @@ def build_managers(
 
     magnet_lut = {info.name: info for info in infos}
     # todo: check if property must be different for the different magnets ...
+    yp = {k: [i.name for i in infos if i.type.lower() == t and (not p or i.name.upper().startswith(p))] for k,t,p in [("quadrupoles","quadrupole",""),("sextupoles","sextupole",""),("horizontal_steerers","steerer","HS"),("vertical_steerers","steerer","VS")]}
 
     # first for steerers : for AT these are angles applied to the host magnet
     # I use that I know one pc goes to one steerer
@@ -152,7 +153,7 @@ def build_managers(
             LatticeElementPropertyID(element_name=info.name[1:], property="x_kick"),
         )
         for info in infos
-        if info.name in yp.horizontal_steerer_names()
+        if info.name in yp['horizontal_steerers']
     }
     inverse_lut.update(
         {
@@ -160,7 +161,7 @@ def build_managers(
                 LatticeElementPropertyID(element_name=info.name[1:], property="y_kick"),
             )
             for info in infos
-            if info.name in yp.vertical_steerer_names()
+            if info.name in yp['vertical_steerers']
         }
     )
 
@@ -181,7 +182,7 @@ def build_managers(
                 [
                     LatticeElementPropertyID(element_name=magnet_name, property="K")
                     for magnet_name in magnet_names
-                    if magnet_name in yp.quadrupole_names()
+                    if magnet_name in yp['quadrupoles']
                 ]
             )
             for pc_name, magnet_names in power_converter_feeds.items()
@@ -194,7 +195,7 @@ def build_managers(
                 [
                     LatticeElementPropertyID(element_name=magnet_name, property="H")
                     for magnet_name in magnet_names
-                    if magnet_name in yp.sextupole_names()
+                    if magnet_name in yp['sextupoles']#_names()
                 ]
             )
             for pc_name, magnet_names in power_converter_feeds.items()

@@ -1,0 +1,762 @@
+[
+  {
+    "_id": {
+      "$oid": "43a9e8e8bab948087cba9596"
+    },
+    "type": "Steerer",
+    "name": "HS3M2K1RP",
+    "pc": "HS3P2K1RP",
+    "magnetic_strength": 0.00268011,
+    "k": 0.00268011
+  },
+  {
+    "_id": {
+      "$oid": "6708293ac58a0897fa141440"
+    },
+    "type": "Steerer",
+    "name": "HS1M2K1RP",
+    "pc": "HS1P2K1RP",
+    "magnetic_strength": 0.00268011,
+    "k": 0.00268011
+  },
+  {
+    "_id": {
+      "$oid": "c10e70cd95435e50e946c3e3"
+    },
+    "type": "Steerer",
+    "name": "HS3M1L2RP",
+    "pc": "HS3P1L2RP",
+    "magnetic_strength": 0.00268011,
+    "k": 0.00268011
+  },
+  {
+    "_id": {
+      "$oid": "dcd436155cd14edbb40430d3"
+    },
+    "type": "Steerer",
+    "name": "HS3M2L2RP",
+    "pc": "HS3P2L2RP",
+    "magnetic_strength": 0.00268011,
+    "k": 0.00268011
+  },
+  {
+    "_id": {
+      "$oid": "81b4733ff26a1a72a00cdce2"
+    },
+    "type": "Steerer",
+    "name": "HS1M1K3RP",
+    "pc": "HS1P1K3RP",
+    "magnetic_strength": 0.00268011,
+    "k": 0.00268011
+  },
+  {
+    "_id": {
+      "$oid": "ecaf2afd78e60a58923ca4d0"
+    },
+    "type": "Steerer",
+    "name": "HS3M1K3RP",
+    "pc": "HS3P1K3RP",
+    "magnetic_strength": 0.00268011,
+    "k": 0.00268011
+  },
+  {
+    "_id": {
+      "$oid": "5d4874e142e97e21c8e11efe"
+    },
+    "type": "Steerer",
+    "name": "HS3M2K3RP",
+    "pc": "HS3P2K3RP",
+    "magnetic_strength": 0.00268011,
+    "k": 0.00268011
+  },
+  {
+    "_id": {
+      "$oid": "5d967ad6188c1f0a418fe892"
+    },
+    "type": "Steerer",
+    "name": "HS1M2K3RP",
+    "pc": "HS1P2K3RP",
+    "magnetic_strength": 0.00268011,
+    "k": 0.00268011
+  },
+  {
+    "_id": {
+      "$oid": "73193b41e6fe32b8d8d3d3f8"
+    },
+    "type": "Steerer",
+    "name": "HS3M1L4RP",
+    "pc": "HS3P1L4RP",
+    "magnetic_strength": 0.00268011,
+    "k": 0.00268011
+  },
+  {
+    "_id": {
+      "$oid": "c4ab37971ed5be83875610b1"
+    },
+    "type": "Steerer",
+    "name": "HS3M2L4RP",
+    "pc": "HS3P2L4RP",
+    "magnetic_strength": 0.00268011,
+    "k": 0.00268011
+  },
+  {
+    "_id": {
+      "$oid": "e9587cdff82ffacee1d1a0cd"
+    },
+    "type": "Steerer",
+    "name": "HS1M1K1RP",
+    "pc": "HS1P1K1RP",
+    "magnetic_strength": 0.00268011,
+    "k": 0.00268011
+  },
+  {
+    "_id": {
+      "$oid": "82d385cf1df7f10ec7e1740d"
+    },
+    "type": "Steerer",
+    "name": "HS3M1K1RP",
+    "pc": "HS3P1K1RP",
+    "magnetic_strength": 0.00268011,
+    "k": 0.00268011
+  },
+  {
+    "_id": {
+      "$oid": "feb5e7bde5b1134bed5004d0"
+    },
+    "type": "Steerer",
+    "name": "VS3M2K1RP",
+    "pc": "VS3P2K1RP",
+    "magnetic_strength": 0.00201269,
+    "k": 0.00201269
+  },
+  {
+    "_id": {
+      "$oid": "900528bef3594979c4e94194"
+    },
+    "type": "Steerer",
+    "name": "VS2M2K1RP",
+    "pc": "VS2P2K1RP",
+    "magnetic_strength": 0.00201269,
+    "k": 0.00201269
+  },
+  {
+    "_id": {
+      "$oid": "426b6baadfd6f890cdc36783"
+    },
+    "type": "Steerer",
+    "name": "VS2M1L2RP",
+    "pc": "VS2P1L2RP",
+    "magnetic_strength": 0.00201269,
+    "k": 0.00201269
+  },
+  {
+    "_id": {
+      "$oid": "8c2181d2a7ec5c4c02b11fd4"
+    },
+    "type": "Steerer",
+    "name": "VS3M1L2RP",
+    "pc": "VS3P1L2RP",
+    "magnetic_strength": 0.00201269,
+    "k": 0.00201269
+  },
+  {
+    "_id": {
+      "$oid": "b6e79c2518351263c84da0a2"
+    },
+    "type": "Steerer",
+    "name": "VS3M2L2RP",
+    "pc": "VS3P2L2RP",
+    "magnetic_strength": 0.00201269,
+    "k": 0.00201269
+  },
+  {
+    "_id": {
+      "$oid": "643cd8df82f922b1f5f61a46"
+    },
+    "type": "Steerer",
+    "name": "VS2M2L2RP",
+    "pc": "VS2P2L2RP",
+    "magnetic_strength": 0.00201269,
+    "k": 0.00201269
+  },
+  {
+    "_id": {
+      "$oid": "e163ce389c75c7e06da5e020"
+    },
+    "type": "Steerer",
+    "name": "VS2M1K3RP",
+    "pc": "VS2P1K3RP",
+    "magnetic_strength": 0.00201269,
+    "k": 0.00201269
+  },
+  {
+    "_id": {
+      "$oid": "f1ed0f6a38f47e033850a39e"
+    },
+    "type": "Steerer",
+    "name": "VS3M1K3RP",
+    "pc": "VS3P1K3RP",
+    "magnetic_strength": 0.00201269,
+    "k": 0.00201269
+  },
+  {
+    "_id": {
+      "$oid": "4cc35a9616548f4496e29803"
+    },
+    "type": "Steerer",
+    "name": "VS3M2K3RP",
+    "pc": "VS3P2K3RP",
+    "magnetic_strength": 0.00201269,
+    "k": 0.00201269
+  },
+  {
+    "_id": {
+      "$oid": "43367d8d866fcbefede59db8"
+    },
+    "type": "Steerer",
+    "name": "VS2M2K3RP",
+    "pc": "VS2P2K3RP",
+    "magnetic_strength": 0.00201269,
+    "k": 0.00201269
+  },
+  {
+    "_id": {
+      "$oid": "b46165b50f4166664f1250f0"
+    },
+    "type": "Steerer",
+    "name": "VS2M1L4RP",
+    "pc": "VS2P1L4RP",
+    "magnetic_strength": 0.00201269,
+    "k": 0.00201269
+  },
+  {
+    "_id": {
+      "$oid": "27fe997af74beb267d507f6f"
+    },
+    "type": "Steerer",
+    "name": "VS3M1L4RP",
+    "pc": "VS3P1L4RP",
+    "magnetic_strength": 0.00201269,
+    "k": 0.00201269
+  },
+  {
+    "_id": {
+      "$oid": "0ba76bb4437d11241ddd2578"
+    },
+    "type": "Steerer",
+    "name": "VS3M2L4RP",
+    "pc": "VS3P2L4RP",
+    "magnetic_strength": 0.00201269,
+    "k": 0.00201269
+  },
+  {
+    "_id": {
+      "$oid": "ee7142094b927d8872a0ea39"
+    },
+    "type": "Steerer",
+    "name": "VS2M2L4RP",
+    "pc": "VS2P2L4RP",
+    "magnetic_strength": 0.00201269,
+    "k": 0.00201269
+  },
+  {
+    "_id": {
+      "$oid": "bfe5c47ccd9854fbb5a00e5f"
+    },
+    "type": "Steerer",
+    "name": "VS2M1K1RP",
+    "pc": "VS2P1K1RP",
+    "magnetic_strength": 0.00201269,
+    "k": 0.00201269
+  },
+  {
+    "_id": {
+      "$oid": "b4f4143a5e5c6b4ec83915ea"
+    },
+    "type": "Steerer",
+    "name": "VS3M1K1RP",
+    "pc": "VS3P1K1RP",
+    "magnetic_strength": 0.00201269,
+    "k": 0.00201269
+  },
+  {
+    "_id": {
+      "$oid": "9f4e822491a31fef2cd3123f"
+    },
+    "type": "Sextupole",
+    "name": "S1M2K1RP",
+    "pc": "S1P1RP",
+    "magnetic_strength": -1.7066e-08,
+    "k": -1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "6e4dbf42f86669a72b3d0828"
+    },
+    "type": "Sextupole",
+    "name": "S1M1L2RP",
+    "pc": "S1P1RP",
+    "magnetic_strength": -1.7066e-08,
+    "k": -1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "90ad62288a360c2ad7e5f890"
+    },
+    "type": "Sextupole",
+    "name": "S1M2L4RP",
+    "pc": "S1P1RP",
+    "magnetic_strength": -1.7066e-08,
+    "k": -1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "7a2405fb2d68900f8c6e73e1"
+    },
+    "type": "Sextupole",
+    "name": "S1M1K1RP",
+    "pc": "S1P1RP",
+    "magnetic_strength": -1.7066e-08,
+    "k": -1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "ad13818936117b579253d330"
+    },
+    "type": "Sextupole",
+    "name": "S1M2L2RP",
+    "pc": "S1P2RP",
+    "magnetic_strength": -1.7066e-08,
+    "k": -1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "18e56e711547d41c65f67c4e"
+    },
+    "type": "Sextupole",
+    "name": "S1M1K3RP",
+    "pc": "S1P2RP",
+    "magnetic_strength": -1.7066e-08,
+    "k": -1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "d110602d2296bbc3212436e8"
+    },
+    "type": "Sextupole",
+    "name": "S1M2K3RP",
+    "pc": "S1P2RP",
+    "magnetic_strength": -1.7066e-08,
+    "k": -1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "93bedde52db1a988ddd4bcfb"
+    },
+    "type": "Sextupole",
+    "name": "S1M1L4RP",
+    "pc": "S1P2RP",
+    "magnetic_strength": -1.7066e-08,
+    "k": -1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "6ff006adb6eb58c7c433d6d1"
+    },
+    "type": "Sextupole",
+    "name": "S2M2K1RP",
+    "pc": "S2P1RP",
+    "magnetic_strength": 1.7066e-08,
+    "k": 1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "3030cec3006a17637aa8e0ac"
+    },
+    "type": "Sextupole",
+    "name": "S2M1L2RP",
+    "pc": "S2P1RP",
+    "magnetic_strength": 1.7066e-08,
+    "k": 1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "54de3ce3ddad77c81e12232e"
+    },
+    "type": "Sextupole",
+    "name": "S2M2L4RP",
+    "pc": "S2P1RP",
+    "magnetic_strength": 1.7066e-08,
+    "k": 1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "1e95a6670460b94d3d58983f"
+    },
+    "type": "Sextupole",
+    "name": "S2M1K1RP",
+    "pc": "S2P1RP",
+    "magnetic_strength": 1.7066e-08,
+    "k": 1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "08b93707170b6d0d23d4da5c"
+    },
+    "type": "Sextupole",
+    "name": "S2M2L2RP",
+    "pc": "S2P2LRP",
+    "magnetic_strength": 1.7066e-08,
+    "k": 1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "cdf132a5b89fbcdafca2cfdb"
+    },
+    "type": "Sextupole",
+    "name": "S2M1K3RP",
+    "pc": "S2P2KRP",
+    "magnetic_strength": 1.7066e-08,
+    "k": 1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "058aa7594fc4e224e022ea4f"
+    },
+    "type": "Sextupole",
+    "name": "S2M2K3RP",
+    "pc": "S2P2KRP",
+    "magnetic_strength": 1.7066e-08,
+    "k": 1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "0a6227820945a6ef247afe87"
+    },
+    "type": "Sextupole",
+    "name": "S2M1L4RP",
+    "pc": "S2P2LRP",
+    "magnetic_strength": 1.7066e-08,
+    "k": 1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "ab5a94c5868da6f25c240ba8"
+    },
+    "type": "Sextupole",
+    "name": "S3M2K1RP",
+    "pc": "S3P1RP",
+    "magnetic_strength": 1.7066e-08,
+    "k": 1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "3ba43dd0634f0b3446fbacd7"
+    },
+    "type": "Sextupole",
+    "name": "S3M1L2RP",
+    "pc": "S3P1RP",
+    "magnetic_strength": 1.7066e-08,
+    "k": 1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "51bce5d62a9d93c1e7268788"
+    },
+    "type": "Sextupole",
+    "name": "S3M2L4RP",
+    "pc": "S3P1RP",
+    "magnetic_strength": 1.7066e-08,
+    "k": 1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "8118b4dd1fe451b3a1515436"
+    },
+    "type": "Sextupole",
+    "name": "S3M1K1RP",
+    "pc": "S3P1RP",
+    "magnetic_strength": 1.7066e-08,
+    "k": 1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "efbb23e41633608afe48efe1"
+    },
+    "type": "Sextupole",
+    "name": "S3M2L2RP",
+    "pc": "S3P2RP",
+    "magnetic_strength": 1.7066e-08,
+    "k": 1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "76a72cb7e657398127fad55a"
+    },
+    "type": "Sextupole",
+    "name": "S3M1K3RP",
+    "pc": "S3P2RP",
+    "magnetic_strength": 1.7066e-08,
+    "k": 1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "647048185680fcdc2083da15"
+    },
+    "type": "Sextupole",
+    "name": "S3M2K3RP",
+    "pc": "S3P2RP",
+    "magnetic_strength": 1.7066e-08,
+    "k": 1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "2550e7d81eee8c009e7848b8"
+    },
+    "type": "Sextupole",
+    "name": "S3M1L4RP",
+    "pc": "S3P2RP",
+    "magnetic_strength": 1.7066e-08,
+    "k": 1.7066e-08
+  },
+  {
+    "_id": {
+      "$oid": "ae10713b3fb7982784c16277"
+    },
+    "type": "Quadrupole",
+    "name": "Q3M2K1RP",
+    "pc": "Q3P2K1RP",
+    "magnetic_strength": 0.134965,
+    "k": 0.134965
+  },
+  {
+    "_id": {
+      "$oid": "52d16544d735f8d158ddaaab"
+    },
+    "type": "Quadrupole",
+    "name": "Q3M1L2RP",
+    "pc": "Q3P1L2RP",
+    "magnetic_strength": 0.134206,
+    "k": 0.134206
+  },
+  {
+    "_id": {
+      "$oid": "d216de15d581bdab50c8c27a"
+    },
+    "type": "Quadrupole",
+    "name": "Q3M2L2RP",
+    "pc": "Q3P2L2RP",
+    "magnetic_strength": 0.134206,
+    "k": 0.134206
+  },
+  {
+    "_id": {
+      "$oid": "adb1e1e3ca2c94b4950ce037"
+    },
+    "type": "Quadrupole",
+    "name": "Q3M1K3RP",
+    "pc": "Q3P1K3RP",
+    "magnetic_strength": 0.134965,
+    "k": 0.134965
+  },
+  {
+    "_id": {
+      "$oid": "e15b75da7cb65c7ef691d79f"
+    },
+    "type": "Quadrupole",
+    "name": "Q3M2K3RP",
+    "pc": "Q3P2K3RP",
+    "magnetic_strength": 0.134965,
+    "k": 0.134965
+  },
+  {
+    "_id": {
+      "$oid": "1216f273b6357f3c49ffc71c"
+    },
+    "type": "Quadrupole",
+    "name": "Q3M1L4RP",
+    "pc": "Q3P1L4RP",
+    "magnetic_strength": 0.134554,
+    "k": 0.134554
+  },
+  {
+    "_id": {
+      "$oid": "8b55922fdd5d41cd461d7c2b"
+    },
+    "type": "Quadrupole",
+    "name": "Q3M2L4RP",
+    "pc": "Q3P2L4RP",
+    "magnetic_strength": 0.134554,
+    "k": 0.134554
+  },
+  {
+    "_id": {
+      "$oid": "afbea8d2a09e6ab53efd68df"
+    },
+    "type": "Quadrupole",
+    "name": "Q3M1K1RP",
+    "pc": "Q3P1K1RP",
+    "magnetic_strength": 0.134965,
+    "k": 0.134965
+  },
+  {
+    "_id": {
+      "$oid": "2b89c2a44ef53c9126afb270"
+    },
+    "type": "Quadrupole",
+    "name": "Q2M2K1RP",
+    "pc": "Q2P2K1RP",
+    "magnetic_strength": -0.132293,
+    "k": -0.132293
+  },
+  {
+    "_id": {
+      "$oid": "f9ff378e86cc37da2494f3c7"
+    },
+    "type": "Quadrupole",
+    "name": "Q2M1L2RP",
+    "pc": "Q2P1L2RP",
+    "magnetic_strength": -0.131491,
+    "k": -0.131491
+  },
+  {
+    "_id": {
+      "$oid": "093e5c3b32023302fe0e6db1"
+    },
+    "type": "Quadrupole",
+    "name": "Q2M2L2RP",
+    "pc": "Q2P2L2RP",
+    "magnetic_strength": -0.131491,
+    "k": -0.131491
+  },
+  {
+    "_id": {
+      "$oid": "f0583c043027f5ad85a04565"
+    },
+    "type": "Quadrupole",
+    "name": "Q2M1K3RP",
+    "pc": "Q2P1K3RP",
+    "magnetic_strength": -0.132293,
+    "k": -0.132293
+  },
+  {
+    "_id": {
+      "$oid": "831c8d1fc26505c2480a3057"
+    },
+    "type": "Quadrupole",
+    "name": "Q2M2K3RP",
+    "pc": "Q2P2K3RP",
+    "magnetic_strength": -0.132293,
+    "k": -0.132293
+  },
+  {
+    "_id": {
+      "$oid": "79e5e210daf3a0f40d8d3d5b"
+    },
+    "type": "Quadrupole",
+    "name": "Q2M1L4RP",
+    "pc": "Q2P1L4RP",
+    "magnetic_strength": -0.132159,
+    "k": -0.132159
+  },
+  {
+    "_id": {
+      "$oid": "de2e51c8fc04d3d1798513fc"
+    },
+    "type": "Quadrupole",
+    "name": "Q2M2L4RP",
+    "pc": "Q2P2L4RP",
+    "magnetic_strength": -0.132159,
+    "k": -0.132159
+  },
+  {
+    "_id": {
+      "$oid": "b67062dfcc0a4fc0b924e8f8"
+    },
+    "type": "Quadrupole",
+    "name": "Q2M1K1RP",
+    "pc": "Q2P1K1RP",
+    "magnetic_strength": -0.132293,
+    "k": -0.132293
+  },
+  {
+    "_id": {
+      "$oid": "55f84ebe3169d3916ac6aa23"
+    },
+    "type": "Quadrupole",
+    "name": "Q1M2K1RP",
+    "pc": "Q1P2K1RP",
+    "magnetic_strength": 0.138213,
+    "k": 0.138213
+  },
+  {
+    "_id": {
+      "$oid": "2848b9616ec57c51532c4553"
+    },
+    "type": "Quadrupole",
+    "name": "Q1M1L2RP",
+    "pc": "Q1P1L2RP",
+    "magnetic_strength": 0.138213,
+    "k": 0.138213
+  },
+  {
+    "_id": {
+      "$oid": "43f2097fdff718f469e1868a"
+    },
+    "type": "Quadrupole",
+    "name": "Q1M2L2RP",
+    "pc": "Q1P2L2RP",
+    "magnetic_strength": 0.138213,
+    "k": 0.138213
+  },
+  {
+    "_id": {
+      "$oid": "bb5e430f96db6fa86eadc4f8"
+    },
+    "type": "Quadrupole",
+    "name": "Q1M1K3RP",
+    "pc": "Q1P1K3RP",
+    "magnetic_strength": 0.138213,
+    "k": 0.138213
+  },
+  {
+    "_id": {
+      "$oid": "5ad1ac3052d5b03006342c7a"
+    },
+    "type": "Quadrupole",
+    "name": "Q1M2K3RP",
+    "pc": "Q1P2K3RP",
+    "magnetic_strength": 0.138213,
+    "k": 0.138213
+  },
+  {
+    "_id": {
+      "$oid": "f4c61b0aefc1df4d6e811779"
+    },
+    "type": "Quadrupole",
+    "name": "Q1M1L4RP",
+    "pc": "Q1P1L4RP",
+    "magnetic_strength": 0.138213,
+    "k": 0.138213
+  },
+  {
+    "_id": {
+      "$oid": "86f7c267029050c916510967"
+    },
+    "type": "Quadrupole",
+    "name": "Q1M2L4RP",
+    "pc": "Q1P2L4RP",
+    "magnetic_strength": 0.138213,
+    "k": 0.138213
+  },
+  {
+    "_id": {
+      "$oid": "53c13ea1620b7b41a6b4c8ec"
+    },
+    "type": "Quadrupole",
+    "name": "Q1M1K1RP",
+    "pc": "Q1P1K1RP",
+    "magnetic_strength": 0.138213,
+    "k": 0.138213
+  }
+]

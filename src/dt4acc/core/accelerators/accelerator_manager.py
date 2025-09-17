@@ -46,7 +46,7 @@ class AcceleratorManager:
         """
         try:
             from lat2db.model.accelerator import Accelerator
-            acc_model = Accelerator(file_name ="bessyii_lattice_json.json", from_json= True)
+            acc_model = Accelerator(file_name ="mls_lattice_json.json", from_json= True)
 
             # Initialize the accelerator with required components
             self.accelerator = AcceleratorImpl(
