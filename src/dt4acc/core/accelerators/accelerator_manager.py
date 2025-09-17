@@ -81,5 +81,5 @@ class AcceleratorManager:
         self.accelerator.on_new_twiss.subscribe(self.view.push_twiss)
         self.accelerator.on_new_orbit.subscribe(self.view.push_orbit)
 
-        self.accelerator.on_new_orbit.subscribe(self.view.push_bpms)
+        # self.accelerator.on_new_orbit.subscribe(self.view.push_bpms)
         self.accelerator.on_changed_value.subscribe(self.view.push_value)

@@ -3,7 +3,6 @@ from bact_twin_architecture.data_model.identifiers import (
     LatticeElementPropertyID,
     DevicePropertyID,
 )
-from p4p.asLib.yacc import start
 
 from .handlers import handle_device_update, update_manager
 from ..data.constants import config, special_pvs, cavity_names
@@ -42,8 +41,8 @@ def initialize_magnet_pvs(builder, magnet):
     )
     builder.aOut(
         f"{magnet_name}:Cm:set",
-        initial_value=magnet["k"] or 0,
-        on_update=lambda val: handle_device_update(magnet_name, "K", val),
+        initial_value=magnet["k"] or 0
+        # on_update=lambda val: handle_device_update(magnet_name, type_value, val),
     )
     rdbk = builder.aIn(f"{magnet_name}:Cm:rdbk", initial_value=val)
 
@@ -128,7 +127,7 @@ def add_pc_pvs(builder, pc_name, prefix):
         f"{pc_name}:set",
         initial_value=start_val,
         on_update=lambda val: handle_pc_update(pc_name, "set_current", val),
-        PREC = 2,
+        PREC=2,
     )
 
 
