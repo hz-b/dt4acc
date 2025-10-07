@@ -9,7 +9,7 @@ class Ringparameters:
     brho: float
     energy: float
 
-ring_parameters = Ringparameters(freq=0.0, brho=5.67229387129245, energy=629e6)
+ring_parameters = Ringparameters(freq=0.0, brho=2.0981174664255757, energy=629e6)
 
 special_pvs = {
     "bpm_pv": "MDIZ2T5G",

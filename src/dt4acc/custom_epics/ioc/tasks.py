@@ -22,7 +22,7 @@ async def monitor_heartbeat():
     while True:
         if heartbeat_task is None or heartbeat_task.done():
             # todo hardcode the setpoint to a value, so real calculation runs. this needs to be addressed differently
-            await ctx.put(f'{getpass.getuser()}:Q2P1L2RP:setCur', 99)
+            await ctx.put(f'{getpass.getuser()}:Q2P1L2RP:setCur', 60)
             # await ctx.put(f'{getpass.getuser()}:VS2P2L2RP:rdCur', 0e-3)
             logger.warning("Heartbeat loop initial start or it was terminated unexpectedly. Restarting...")
             heartbeat_task = asyncio.create_task(heartbeat_loop())
