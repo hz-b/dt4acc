@@ -101,7 +101,13 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
             if element.__class__.__name__ == "Quadrupole":
                 main_values.append(
                     MainValue(
-                        pv_name=(f"{prefix}:{element.FamName}:Cm:set"),
+                        pv_name=(f"{prefix}:{element.FamName}:Cm:setCur"),
+                        value=element.K
+                    )
+                )
+                main_values.append(
+                    MainValue(
+                        pv_name=(f"{prefix}:{element.FamName}:Cm:rdCur"),
                         value=element.K
                     )
                 )
@@ -113,7 +119,13 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
                     raise
                 main_values.append(
                     MainValue(
-                        pv_name=(f"{prefix}:{element.FamName}:Cm:set"),
+                        pv_name=(f"{prefix}:{element.FamName}:Cm:setCur"),
+                        value=element.H
+                    )
+                )
+                main_values.append(
+                    MainValue(
+                        pv_name=(f"{prefix}:{element.FamName}:Cm:rdCur"),
                         value=element.H
                     )
                 )

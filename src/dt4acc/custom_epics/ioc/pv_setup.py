@@ -44,7 +44,7 @@ def initialize_magnet_pvs(builder, magnet):
         initial_value=magnet["k"] or 0
         # on_update=lambda val: handle_device_update(magnet_name, type_value, val),
     )
-    rdbk = builder.aIn(f"{magnet_name}:Cm:rdCur", initial_value=val)
+    rdbk = builder.aOut(f"{magnet_name}:Cm:rdCur", initial_value=val)
 
     async def handle_magnet_update(device_id: str, property_id: str, value: float):
         r = await handle_device_update(
