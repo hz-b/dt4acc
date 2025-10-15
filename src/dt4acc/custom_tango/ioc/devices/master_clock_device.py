@@ -33,7 +33,7 @@ class MasterClockDevice(Device):
         logger.warning(f"  - Device properties: {self._frequency=}, {self._ref_freq=}, {self._ref_freq_khz_up=}, {self._ref_freq_khz_frac=}")
         # logger.info("MasterClockDevice initialized successfully")
 
-        logger.warning(f"  - Device name from get_name(): {self.name}")
+        # logger.warning(f"  - Device name from get_name(): {self.name}")
     def _initialize_master_clock_data(self):
         """Initialize master clock data matching EPICS initialize_master_clock_pvs()."""
         try:
