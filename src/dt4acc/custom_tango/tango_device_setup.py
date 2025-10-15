@@ -27,6 +27,7 @@ from dt4acc.custom_tango.ioc.devices.bpm_device import BPMDevice
 from dt4acc.custom_tango.ioc.devices.cavity_device import CavityDevice
 from dt4acc.custom_tango.ioc.devices.master_clock_device import MasterClockDevice
 from dt4acc.custom_tango.ioc.devices.other_pvs_device import OtherPVsDevice
+from dt4acc.custom_tango.ioc.devices.tune_device import TuneDevice
 
 logger = get_logger()
 
@@ -216,6 +217,17 @@ def register_all_devices(server_name="SimpleTangoServer", instance_name="test"):
             except Exception as e:
                 logger.info(f"  ⚠️ Cavity device {device_name} already registered: {e}")
         
+        # Register Tune device (dedicated device for tune measurements)
+        db_device_info = DbDevInfo()
+        db_device_info._class = "TuneDevice"
+        db_device_info.server = f"{server_name}/{instance_name}"
+        db_device_info.name = f"{server_name}/{instance_name}/tune_device"
+        try:
+            db.add_device(db_device_info)
+            logger.info("  ✅ Registered Tune device")
+        except Exception as e:
+            logger.info(f"  ⚠️ Tune device already registered: {e}")
+        
         logger.info("✅ All devices registered successfully")
         print("✅ All devices registered successfully")
         
@@ -247,6 +259,7 @@ def get_all_device_classes():
             CavityDevice,  # Dedicated device for cavity management
             MasterClockDevice,  # Dedicated device for master clock management
             OtherPVsDevice,  # Dedicated device for other PVs (dummy, current)
+            TuneDevice,  # Dedicated device for tune measurements
         ])
         
         logger.info(f"✅ Collected {len(device_classes)} device classes")

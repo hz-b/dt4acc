@@ -95,54 +95,48 @@ class MasterClockDevice(Device):
     @attribute(
         name="lattice_info/ref_freq",
         dtype=float,
-        access=AttrWriteType.READ_WRITE,
+        access=AttrWriteType.READ,
         label="Lattice reference frequency",
         unit="kHz",
         format="%8.1f",
     )
     def ref_freq(self) -> float:
-        """Reference frequency - equivalent to EPICS lattice_info:ref_freq."""
+        """Reference frequency - equivalent to EPICS lattice_info:ref_freq (READ-ONLY).
+        
+        This value is automatically updated when the main frequency is changed.
+        In EPICS, this is implemented as aIn (analog input - read-only).
+        """
         return self._ref_freq
-
-    @ref_freq.write
-    def ref_freq(self, value: float):
-        """Set reference frequency."""
-        self._ref_freq = float(value)
-        logger.info(f"Updated reference frequency to {value}")
 
     @attribute(
         name="lattice_info/ref_freq/khz/up",
         dtype=int,
-        access=AttrWriteType.READ_WRITE,
+        access=AttrWriteType.READ,
         label="Lattice ref freq integer part",
         unit="kHz",
     )
     def ref_freq_khz_up(self) -> int:
-        """Reference frequency integer part - equivalent to EPICS lattice_info:ref_freq:khz:up."""
+        """Reference frequency integer part - equivalent to EPICS lattice_info:ref_freq:khz:up (READ-ONLY).
+        
+        This value is automatically updated when the main frequency is changed.
+        In EPICS, this is implemented as longIn (long integer input - read-only).
+        """
         return self._ref_freq_khz_up
-
-    @ref_freq_khz_up.write
-    def ref_freq_khz_up(self, value: int):
-        """Set reference frequency integer part."""
-        self._ref_freq_khz_up = int(value)
-        logger.info(f"Updated ref freq integer part to {value}")
 
     @attribute(
         name="lattice_info/ref_freq/khz/frac",
         dtype=int,
-        access=AttrWriteType.READ_WRITE,
+        access=AttrWriteType.READ,
         label="Lattice ref freq fractional part",
         unit="mHz",
     )
     def ref_freq_khz_frac(self) -> int:
-        """Reference frequency fractional part - equivalent to EPICS lattice_info:ref_freq:khz:frac."""
+        """Reference frequency fractional part - equivalent to EPICS lattice_info:ref_freq:khz:frac (READ-ONLY).
+        
+        This value is automatically updated when the main frequency is changed.
+        In EPICS, this is implemented as longIn (long integer input - read-only).
+        """
         return self._ref_freq_khz_frac
-
-    @ref_freq_khz_frac.write
-    def ref_freq_khz_frac(self, value: int):
-        """Set reference frequency fractional part."""
-        self._ref_freq_khz_frac = int(value)
-        logger.info(f"Updated ref freq fractional part to {value}")
 
     @command(dtype_in=None, doc_in="Reset master clock to initial values")
     def reset(self):
