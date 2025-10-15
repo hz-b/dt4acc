@@ -22,14 +22,18 @@ class MasterClockDevice(Device):
 
     def init_device(self):
         """Initialize the device with default values matching EPICS master clock PV setup."""
+
+        logger.warning("\n[DEBUG] Master Clock Device initialized successfully:")
         Device.init_device(self)
         self.set_state(DevState.ON)
-        
+
         # Initialize master clock data matching EPICS initialize_master_clock_pvs()
         self._initialize_master_clock_data()
-        
-        logger.info("MasterClockDevice initialized successfully")
 
+        logger.warning(f"  - Device properties: {self._frequency=}, {self._ref_freq=}, {self._ref_freq_khz_up=}, {self._ref_freq_khz_frac=}")
+        # logger.info("MasterClockDevice initialized successfully")
+
+        logger.warning(f"  - Device name from get_name(): {self.name}")
     def _initialize_master_clock_data(self):
         """Initialize master clock data matching EPICS initialize_master_clock_pvs()."""
         try:

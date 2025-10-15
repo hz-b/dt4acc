@@ -1,5 +1,8 @@
+import functools
 import logging
+logging.basicConfig(level=logging.INFO)
 
+@functools.lru_cache(maxsize=None)
 def setup_logger(name):
     """
     Setup and return a logger.
@@ -13,4 +16,5 @@ def setup_logger(name):
     return logger
 
 def get_logger():
-    return logging.getLogger("dt4acc")
+    return setup_logger("dt4acc")
+    # return logging.getLogger("dt4acc")

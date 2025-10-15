@@ -31,7 +31,8 @@ class TuneDevice(Device):
         self._tune_y = 0.0
         self._count = 0
         
-        logger.info("TuneDevice initialized successfully")
+        logger.warning("TuneDevice initialized successfully")
+
 
     @attribute(
         name="TUNECC/x",
@@ -48,7 +49,7 @@ class TuneDevice(Device):
     def tune_x(self, value: float):
         """Set tune X value."""
         self._tune_x = float(value)
-        logger.info(f"Updated tune X to {value}")
+        logger.warning(f"Updated tune X to {value}")
 
     @attribute(
         name="TUNECC/y",
@@ -65,7 +66,7 @@ class TuneDevice(Device):
     def tune_y(self, value: float):
         """Set tune Y value."""
         self._tune_y = float(value)
-        logger.info(f"Updated tune Y to {value}")
+        logger.warning(f"Updated tune Y to {value}")
 
     @attribute(
         name="TUNECC/count",
@@ -81,7 +82,7 @@ class TuneDevice(Device):
     def count(self, value: int):
         """Set tune count."""
         self._count = int(value)
-        logger.info(f"Updated tune count to {value}")
+        logger.warning(f"Updated tune count to {value}")
 
     @command(dtype_in=None, doc_in="Reset tune values to defaults")
     def reset(self):
@@ -89,7 +90,7 @@ class TuneDevice(Device):
         self._tune_x = 0.0
         self._tune_y = 0.0
         self._count = 0
-        logger.info("Tune device reset to default values")
+        logger.warning("Tune device reset to default values")
         return "Tune device reset to default values"
 
     @command(dtype_in=None, doc_in="Get tune information")
