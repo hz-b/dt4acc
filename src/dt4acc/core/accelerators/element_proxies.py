@@ -165,6 +165,48 @@ class ElementProxy(ElementInterface):
 
         await self.on_update_finished.trigger(None)
 
+    def peek(self, property_id: str) -> float:
+        if property_id in ["K", "H", "main_strength"]:
+            return self.peek_main_strength(property_id)
+        elif property_id in ["x_kick", "y_kick"]:
+            return self.peek_kick(property_id)
+        elif property_id in ["frequency"]:
+            return self.peek_frequency()
+        else:
+            raise NotImplementedError(
+                f"handling property {property_id} not (yet) implemented"
+            )
+
+    def peek_frequency(self):
+        (element,) = self._obj
+        return element.Frequency
+
+    def peek_main_strength(self, property_id: str):
+        (element,) = self._obj
+        element_type = element.__class__.__name__
+        if element_type == "Quadrupole":
+            assert property_id in ["K", "main_strength"]
+            return element.K
+        elif element_type == "Sextupole":
+            if property_id not in ["H", "main_strength"]:
+                raise AssertionError(
+                    f"Not handling {property_id} for element {element_type}"
+                )
+            return element.H
+        else:
+            raise NotImplementedError(
+                f"main strength not implemented for element {element_type}"
+            )
+
+    def peek_kick(self, property_id: str):
+        (element,) = self._obj
+        lut = dict(x_kick=0, y_kick=1)
+        try:
+            idx = lut[property_id]
+        except KeyError as ke:
+            raise AssertionError(f"Did not expect kick {property_id}")
+        return element.KickAngle[idx]
+
 
 
 

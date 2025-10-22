@@ -41,3 +41,10 @@ class Twiss:
             return self.y
         else:
             raise AssertionError("How could I end up here")
+
+@dataclass
+class TuneData:
+    """extracted tune data for the tune device
+    """
+    x: float
+    y: float

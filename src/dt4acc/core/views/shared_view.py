@@ -23,7 +23,7 @@ def get_view_instance():
     if server_type == "tango":
         from ...custom_tango.views.calculation_result_view import ResultView
     elif server_type == "epics":
-        from ...custom_epics.views.calculation_result_view import ResultView
+        from ...custom_epics.views.result_view import ResultView
     else:
         raise ValueError(f"Unsupported server type: {server_type}")
 

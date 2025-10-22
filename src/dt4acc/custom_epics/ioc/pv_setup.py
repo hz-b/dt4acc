@@ -3,7 +3,6 @@ from bact_twin_architecture.data_model.identifiers import (
     LatticeElementPropertyID,
     DevicePropertyID,
 )
-from p4p.asLib.yacc import start
 
 from .handlers import handle_device_update, update_manager
 from ..data.constants import config, special_pvs, cavity_names
@@ -113,10 +112,10 @@ def add_pc_pvs(builder, pc_name, prefix):
         DevicePropertyID(device_name=pc_name, property="set_current")
     )
     start_val = np.asarray(vals).mean()
-    rdbk = builder.aOut(f"{pc_name}:rdbk", initial_value=start_val)
+    rdbk = builder.aOut(f"{pc_name}:rdbk", initial_value=start_val, PREC=2)
 
     async def handle_pc_update(device_id: str, property_id: str, value: float):
-        logger.debug("%s:%s updating setpoint val=%s", device_id, property_id, value)
+        logger.warning("%s:%s updating setpoint val=%s", device_id, property_id, value)
         r = await handle_device_update(
             device_id=device_id, property_id=property_id, value=value
         )
@@ -128,6 +127,7 @@ def add_pc_pvs(builder, pc_name, prefix):
         f"{pc_name}:set",
         initial_value=start_val,
         on_update=lambda val: handle_pc_update(pc_name, "set_current", val),
+        PREC = 2,
     )
 
 
@@ -145,6 +145,12 @@ def initialize_orbit_pvs(builder):
         f"beam:orbit:names", initial_value=[""], length=config.n_elements
     )
     builder.aOut(f"beam:orbit:found", initial_value=0)
+
+
+def initialize_tune_pvs(builder):
+    for axis in ["x", "y"]:
+        builder.aOut(f"TUNECC:{axis}", initial_value=0.0, PREC=9)
+    builder.longOut(f"TUNECC:count", initial_value=0)
 
 
 def initialize_twiss_pvs(builder):

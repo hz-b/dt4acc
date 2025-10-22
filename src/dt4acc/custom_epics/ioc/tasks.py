@@ -1,12 +1,12 @@
 import asyncio
 import getpass
+from datetime import datetime
 
-from p4p.client.asyncio import Context
-
+from ..utils.context_proxy import ContextProxy
 from ...core.utils.logger import get_logger
 from ...core.views.shared_view import get_view_instance
 
-ctx = Context("pva")
+ctx = ContextProxy("pva")
 logger = get_logger()
 view = get_view_instance()
 heartbeat_task = None  # Global variable to store the heartbeat task reference
@@ -25,7 +25,7 @@ async def monitor_heartbeat():
             await ctx.put(f'{getpass.getuser()}:VS3P2T5R:set', 1e-3)
             await ctx.put(f'{getpass.getuser()}:VS3P2T5R:set', 0e-3)
             logger.warning("Heartbeat loop initial start or it was terminated unexpectedly. Restarting...")
-            heartbeat_task = asyncio.create_task(heartbeat_loop())
+            heartbeat_task = asyncio.create_task(heartbeat_loop(), name="heart-beat-loop")
         await asyncio.sleep(1)
 
 
@@ -36,12 +36,14 @@ async def heartbeat_loop():
     Runs indefinitely and logs any errors encountered.
     """
     while True:
+        logger.info(f"Heart beat loop executing at  {datetime.now()}")
         try:
             await asyncio.sleep(1)  # Run every second
-            # logger.warning("Heartbeat loop was running ...")
+            logger.debug(f"Heart beat loop executed at {datetime.now()}")
             await view.heart_beat()
         except asyncio.CancelledError:
             logger.warning("Heartbeat loop was cancelled.")
             break  # Exit cleanly on cancellation
         except Exception as exc:
             logger.error(f"Heartbeat encountered an error: {exc}")
+            raise exc
