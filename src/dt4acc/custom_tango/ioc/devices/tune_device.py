@@ -35,7 +35,7 @@ class TuneDevice(Device):
 
 
     @attribute(
-        name="TUNECC/x",
+        name="x",
         dtype=float,
         access=AttrWriteType.READ_WRITE,
         label="Tune X",
@@ -52,7 +52,7 @@ class TuneDevice(Device):
         logger.warning(f"Updated tune X to {value}")
 
     @attribute(
-        name="TUNECC/y",
+        name="y",
         dtype=float,
         access=AttrWriteType.READ_WRITE,
         label="Tune Y",
@@ -69,7 +69,7 @@ class TuneDevice(Device):
         logger.warning(f"Updated tune Y to {value}")
 
     @attribute(
-        name="TUNECC/count",
+        name="count",
         dtype=int,
         access=AttrWriteType.READ_WRITE,
         label="Tune count",
