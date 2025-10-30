@@ -21,7 +21,7 @@ def get_view_instance():
     server_type = os.environ.get("server", "epics").lower()
 
     if server_type == "tango":
-        from ...custom_tango.views.calculation_result_view import ResultView
+        from ...custom_tango.views.result_view import ResultView
     elif server_type == "epics":
         from ...custom_epics.views.result_view import ResultView
     else:
