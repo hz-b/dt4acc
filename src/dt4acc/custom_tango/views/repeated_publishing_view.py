@@ -45,6 +45,7 @@ class RepeatedResultView:
         tmp = np.empty([2048], np.int16)
         tmp.fill(-2 ** 15 + 1)
         self.tune_publisher = PeriodicPublisher(view=TuneView(prefix=prefix), name="tune")
+        self.bpm_mimicry = None
 
     async def heart_beat(self):
         """
