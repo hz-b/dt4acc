@@ -7,6 +7,7 @@ from dt4acc.custom_epics.ioc.handlers import update_manager, handle_device_updat
 from dt4acc.custom_epics.data.constants import special_pvs, cavity_names
 from dt4acc.core.command import UpdateManager
 from bact_twin_architecture.data_model.identifiers import DevicePropertyID
+from dt4acc.custom_tango.ioc.devices.async_wrapper import run_async_in_background
 
 logger = get_logger()
 
@@ -195,8 +196,8 @@ class PowerConverterDevice(Device):
         """Set current setpoint (:set in EPICS)."""
         try:
             self._current_setpoint = float(value)
-            # Use EPICS update handler
-            handle_device_update(self.name, "set_current", value)
+            # Use EPICS update handler with async wrapper to avoid coroutine warning
+            run_async_in_background(handle_device_update)(self.name, "set_current", value)
             # Update readback to match EPICS behavior
             self._current_readback = value
             logger.info(f"Updated current setpoint to {value}")
@@ -230,8 +231,8 @@ class PowerConverterDevice(Device):
         try:
             if self.name in cavity_names:
                 self._frequency = float(value)
-                # Use EPICS update handler for master clock
-                handle_device_update("master_clock", "reference_frequency", value)
+                # Use EPICS update handler for master clock with async wrapper to avoid coroutine warning
+                run_async_in_background(handle_device_update)("master_clock", "reference_frequency", value)
                 logger.info(f"Updated frequency to {value}")
             else:
                 logger.warning(f"Frequency control not available for non-cavity power converter {self.name}")

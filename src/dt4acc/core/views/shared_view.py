@@ -22,8 +22,15 @@ def get_view_instance():
 
     if server_type == "tango":
         from ...custom_tango.views.result_view import ResultView
+        # For Tango, prefix must be in format: server_name/instance_name
+        # Check for TANGO_SERVER_NAME and TANGO_INSTANCE_NAME env vars first
+        server_name = os.environ.get("TANGO_SERVER_NAME", "SimpleTangoServer")
+        instance_name = os.environ.get("TANGO_INSTANCE_NAME", "test")
+        prefix = f"{server_name}/{instance_name}"
     elif server_type == "epics":
         from ...custom_epics.views.result_view import ResultView
+        # For EPICS, use DT4ACC_PREFIX or username
+        prefix = os.environ.get("DT4ACC_PREFIX", getpass.getuser())
     else:
         raise ValueError(f"Unsupported server type: {server_type}")
 

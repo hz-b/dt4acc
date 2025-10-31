@@ -122,6 +122,14 @@ def main():
         # Ensure server type is set for shared view system
         os.environ["server"] = "tango"
         
+        # Set Tango server/instance names for view prefix (required for device names)
+        server_name = os.environ.get("TANGO_SERVER_NAME", "SimpleTangoServer")
+        instance_name = os.environ.get("TANGO_INSTANCE_NAME", "test")
+        os.environ["TANGO_SERVER_NAME"] = server_name
+        os.environ["TANGO_INSTANCE_NAME"] = instance_name
+        print(f"🔧 Setting Tango server name: {server_name}/{instance_name}")
+        logger.info(f"Setting Tango server name: {server_name}/{instance_name}")
+        
         # Set DT4ACC_PREFIX for PV naming - use a sensible default if not set
         if "DT4ACC_PREFIX" not in os.environ:
             default_prefix = "BESSY"  # Default prefix for BESSY
