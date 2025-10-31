@@ -65,7 +65,7 @@ class LegacyBPMView(ViewInterface):
             # Note: count attribute is READ_ONLY, so we only write bdata
             bdata_attr_name = f"{special_pvs['bpm_pv']}/bdata"
             
-            # Clean data and ensure proper format
+            
             if isinstance(data, np.ndarray):
                 # Clean NaN/INF values and convert to int16
                 data_clean = np.nan_to_num(data, nan=-2**15+1, posinf=-2**15+1, neginf=-2**15+1)
@@ -94,7 +94,6 @@ class OrbitView(ViewInterface):
             return
 
         try:
-            prefix = f"{self.prefix}:ORBITCC"
             # Todo: check that the dimensions are properly made
             # Extract x and y positions
             x_positions = data.loc[:, "x"].fillna(0.0).values  # Replace NaN with 0.0
@@ -142,13 +141,7 @@ class TuneView(ViewInterface):
         tune_x = float(data.x)
         tune_y = float(data.y)
 
-        # currently adding very small noise to get data republished
-        # need to check softioc what its records can do
-        tune_x += np.random.uniform(-1e-12, 1e-12)
-        tune_y += np.random.uniform(-1e-12, 1e-12)
-
         try:
-            prefix = f"{self.prefix}:TUNECC"
             device_name = f"{self.prefix}/tune_device"
             device = DeviceProxy(device_name)
             
@@ -160,11 +153,7 @@ class TuneView(ViewInterface):
                 None,
                 lambda: device.write_attribute("y", tune_y)
             )
-            #await asyncio.get_event_loop().run_in_executor(
-            #    None,
-            #    lambda: device.write_attribute(f"{prefix}:count", int(next(self.counter)))
-            #)
-            # Todo: check that the dimensions are properly made
+        
         except Exception as e:
             logger.error(f"Error processing tune object data: {e}")
 
@@ -180,7 +169,7 @@ class RepeatedResultView:
         self.legacy_bpm_publisher.set_data(tmp)
         self.orbit_object_publisher = PeriodicPublisher(view=OrbitView(prefix=prefix), name="orbit")
         self.tune_publisher = PeriodicPublisher(view=TuneView(prefix=prefix), name="tune")
-        # todo: fix this design flaw
+        
         self.bpm_mimicry = None
         self.bpm_filter = ExtractBPMFromOrbitFilter()
 

@@ -24,6 +24,8 @@ def get_view_instance():
         from ...custom_tango.views.result_view import ResultView
         # For Tango, prefix must be in format: server_name/instance_name
         # Check for TANGO_SERVER_NAME and TANGO_INSTANCE_NAME env vars first
+        # waheed ! only one changes need be adjusted wiht epics and env variables 
+        # i have set the server name and instance name in the tango_server.py file please check it if not feasible you can change it and let me know
         server_name = os.environ.get("TANGO_SERVER_NAME", "SimpleTangoServer")
         instance_name = os.environ.get("TANGO_INSTANCE_NAME", "test")
         prefix = f"{server_name}/{instance_name}"

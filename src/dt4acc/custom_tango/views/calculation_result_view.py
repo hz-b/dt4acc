@@ -40,7 +40,7 @@ async def update_twiss_pv(pv_name, twiss_result):
 
     # logger.warning(f"Updating twiss values {tune_x, tune_y}")
     try:
-        # todo: use translation service to provide the calc
+        # todo: use translation service to provide the calc may be i will ask waheed on this 
         from .create_or_update_pv import update_twiss_pv as _update_twiss_pv
         await _update_twiss_pv(pv_name, twiss_result)
         logger.debug("Updated twiss values")
@@ -55,7 +55,7 @@ class CalculationResultView:
 
     async def push_value(self, elm_update: ElementUpdate):
         if elm_update.property_name == "K":
-            # to create a future
+            
             await asyncio.sleep(0.0)
         else:
             property_name = 'x:set' if 'x' in elm_update.property_name else (
@@ -68,10 +68,10 @@ class CalculationResultView:
         logger.warning(
             f"{self.__class__.__name__} Orbit pushing view orbit result is none ? {orbit_result is None}")
 
-        # Define the device name for Tango (prefix is already server_name/instance_name)
+        # Define the device name for Tango (prefix is already server_name/instance_name) becuase already defined in the prefix and during the initialization of the view
         device_name = f"{self.prefix}/twiss_orbit_device"
 
-        # Use the new function to update the structured Orbit PV
+        
         try:
             await update_orbit_pv(device_name, orbit_result)
         except Exception as exc:
@@ -81,13 +81,11 @@ class CalculationResultView:
             logger.info('Orbit pushed view')
 
     async def push_twiss(self, twiss_result: TwissWithAggregatedKValues):
-        # logger.warning('Twiss pushing view')
-
-        # Define the device name for Tango (prefix is already server_name/instance_name)
+        
         device_name = f"{self.prefix}/twiss_orbit_device"
 
         if twiss_result is None:
             return
-        # Use the bulk update function to update the structured PV
+        
         await update_twiss_pv(device_name, twiss_result)
         logger.info('Twiss pushed view')
