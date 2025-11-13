@@ -44,7 +44,7 @@ class ExtractBPMFromOrbitFilter:
 class LegacyBPMView(ViewInterface):
     def __init__(self, prefix):
         # For Tango, prefix is like "server_name/instance_name:bpm_pv_name"
-        # We need to extract the server/instance part and construct the device name
+       
         self.prefix = prefix
         self.counter = itertools.count()
         # Extract base prefix (server_name/instance_name) by splitting on ':'
@@ -144,6 +144,8 @@ class TuneView(ViewInterface):
             device_name = f"{self.prefix}/tune_device"
             device = DeviceProxy(device_name)
             
+            logger.debug(f"TuneView.push: Writing tune X={tune_x:.10f}, Y={tune_y:.10f} to {device_name}")
+            
             await asyncio.get_event_loop().run_in_executor(
                 None,
                 lambda: device.write_attribute("x", tune_x)
@@ -152,9 +154,11 @@ class TuneView(ViewInterface):
                 None,
                 lambda: device.write_attribute("y", tune_y)
             )
+            
+            logger.info(f"TuneView.push: >>>>>>>> Successfully wrote tune X={tune_x:.10f}, Y={tune_y:.10f}")
         
         except Exception as e:
-            logger.error(f"Error processing tune object data: {e}")
+            logger.error(f"TuneView.push: ❌ Error writing tune values: {e}")
 
 
 class RepeatedResultView:
@@ -178,15 +182,23 @@ class RepeatedResultView:
     async def heart_beat(self):
         """
         Periodic heartbeat function to push default BPM data.
+        
+        Note: We do NOT republish tune here because tune values should only
+        be published when fresh calculations are complete. Republishing cached
+        tune values would overwrite fresh values with stale ones.
         """
-        logger.debug(f"{self.__class__.__name__} heartbeat {datetime.now()}, publishing bpm, orbit, twiss")
+        logger.debug(f"{self.__class__.__name__} heartbeat {datetime.now()}, publishing bpm, orbit")
         await self.orbit_object_publisher.publish()
-        await self.tune_publisher.publish()
+        # DO NOT publish tune here - it's published by push_twiss() with fresh values
+        # await self.tune_publisher.publish()  # ← REMOVED: This was overwriting fresh tune values with stale cache
         await self.legacy_bpm_publisher.publish()
-        logger.info(f"{self.__class__.__name__} view heartbeat {datetime.now()}, published bpm, orbit, twiss")
+        logger.info(f"{self.__class__.__name__} view heartbeat {datetime.now()}, published bpm, orbit")
 
     async def push_twiss(self, twiss_result: TwissWithAggregatedKValues):
-        self.tune_publisher.set_data(TuneData(x=twiss_result.x.tune, y=twiss_result.y.tune))
+        tune_x = float(twiss_result.x.tune)
+        tune_y = float(twiss_result.y.tune)
+        logger.info(f"RepeatedResultView.push_twiss: Publishing FRESH tune values X={tune_x:.10f}, Y={tune_y:.10f}")
+        self.tune_publisher.set_data(TuneData(x=tune_x, y=tune_y))
         await self.tune_publisher.publish()
 
     async def push_orbit(self, orbit_result: Orbit):
