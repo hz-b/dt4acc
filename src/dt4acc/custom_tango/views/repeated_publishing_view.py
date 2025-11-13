@@ -122,8 +122,7 @@ class OrbitView(ViewInterface):
                 None,
                 lambda: device.write_attribute("ORBITCC/rdBpmNames", [str(val) for val in data.index])
             )
-            # Note: ORBITCC/count is read-only, so we skip writing it
-            # The counter is still incremented for logging purposes
+          
             _ = next(self.counter)
         except Exception as e:
             logger.error(f"Error processing orbit object data: {e}")

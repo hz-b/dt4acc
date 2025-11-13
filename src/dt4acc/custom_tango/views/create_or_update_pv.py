@@ -16,7 +16,7 @@ async def update_or_create_pv(element, pv_name, value, value_type, initial_type)
     Equivalent to EPICS update_or_create_pv function.
     """
     try:
-        # Note: For Tango, device updates are typically done through
+        # Note: For Tango device updates are typically done through
         # the ResultView.push_value method which handles device naming
         await asyncio.sleep(0.0)
         logger.debug(f"update_or_create_pv called for {pv_name} = {value}")
@@ -76,9 +76,7 @@ async def update_twiss_pv(pv_name, twiss_result):
         logger.warning("FAILED Updated twiss values: %s", e)
         logger.error(f"Failed to update or create twiss PV {pv_name}: {e}")
     
-    # Note: Tango device doesn't have main_values attributes (unlike EPICS)
-    # These values are typically handled through individual magnet devices
-    # So we skip writing main_values to avoid errors
+ 
     if twiss_result.main_values:
         logger.debug(f"Twiss main_values available but not written to Tango device (not supported)")
 
