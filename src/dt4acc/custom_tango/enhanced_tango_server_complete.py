@@ -353,9 +353,8 @@ def main():
         # Set environment variable for Tango mode
         os.environ["server"] = "tango"
         
-        # Create global event loop (similar to EPICS asyncio_dispatcher)
-        # global global_event_loop
-        global_event_loop = asyncio.get_event_loop_policy().get_event_loop()
+        global global_event_loop
+        global_event_loop = asyncio.new_event_loop()
         asyncio.set_event_loop(global_event_loop)
         
         # Start the global event loop in a separate thread (EPICS-style)
