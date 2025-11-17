@@ -3,7 +3,7 @@
 Enhanced Tango Server (Complete) - Full EPICS alignment with heartbeat monitoring
 Mirrors EPICS server.py structure exactly.
 """
-
+import functools
 import os
 import getpass
 import asyncio
@@ -260,6 +260,8 @@ def shutdown_helper():
         print(f"❌ Failed to shutdown: {e}")
         os._exit(1)
 
+
+@functools.lru_cache(maxsize=1)
 def main():
     """Main function to start services sequentially."""
     try:

@@ -1,3 +1,5 @@
+import functools
+
 import numpy as np
 import asyncio
 from tango import AttrWriteType, DevState, DevFailed
@@ -50,6 +52,7 @@ class MasterClockDevice(Device):
         self._ref_freq_khz_up = int(start_val)
         self._ref_freq_khz_frac = int((start_val % 1) * 1e6)
 
+    @functools.lru_cache(maxsize=1)
     def _run_async_update(self, update_func):
         """Helper method to run async updates."""
         try:

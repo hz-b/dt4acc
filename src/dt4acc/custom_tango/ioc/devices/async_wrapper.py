@@ -4,6 +4,7 @@ This provides a clean way to call async functions from sync methods.
 """
 
 import asyncio
+import functools
 import threading
 from functools import wraps
 from dt4acc.core.utils.logger import get_logger
@@ -58,6 +59,7 @@ def run_async_sync(func):
     This blocks until the async function completes.
     """
     @wraps(func)
+    @functools.lru_cache(maxsize=1)
     def wrapper(*args, **kwargs):
         try:
             # Try to get the current event loop

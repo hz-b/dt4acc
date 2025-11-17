@@ -1,3 +1,5 @@
+import functools
+
 from tango import DeviceProxy, DevState, AttrWriteType, AttrDataFormat, DevString, DevFailed
 from tango.server import Device, attribute, command, device_property
 import numpy as np
@@ -36,7 +38,8 @@ class MagnetDevice(Device):
         default_value="unknown",
         doc="Magnet type"
     )
-    
+
+    @functools.lru_cache(maxsize=1)
     def init_device(self):
         """Initialize the device."""
         try:
