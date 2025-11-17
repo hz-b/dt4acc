@@ -260,8 +260,6 @@ def shutdown_helper():
         print(f"❌ Failed to shutdown: {e}")
         os._exit(1)
 
-
-@functools.lru_cache(maxsize=1)
 def main():
     """Main function to start services sequentially."""
     try:
@@ -356,8 +354,8 @@ def main():
         os.environ["server"] = "tango"
         
         # Create global event loop (similar to EPICS asyncio_dispatcher)
-        global global_event_loop
-        global_event_loop = asyncio.new_event_loop()
+        # global global_event_loop
+        global_event_loop = asyncio.get_event_loop_policy().get_event_loop()
         asyncio.set_event_loop(global_event_loop)
         
         # Start the global event loop in a separate thread (EPICS-style)

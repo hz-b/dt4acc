@@ -73,7 +73,7 @@ def run_async_sync(func):
                     def run_in_thread():
                         nonlocal result, exception
                         try:
-                            new_loop = asyncio.new_event_loop()
+                            new_loop = asyncio.get_event_loop_policy().get_event_loop()
                             asyncio.set_event_loop(new_loop)
                             result = new_loop.run_until_complete(func(*args, **kwargs))
                         except Exception as e:

@@ -78,7 +78,7 @@ class MagnetDevice(Device):
             
             # Initialize event loop
             try:
-                self._loop = asyncio.new_event_loop()
+                self._loop = asyncio.get_event_loop_policy().get_event_loop()
                 asyncio.set_event_loop(self._loop)
                 # Start event loop in a separate thread
                 self._loop_thread = threading.Thread(target=self._run_event_loop, daemon=True)
