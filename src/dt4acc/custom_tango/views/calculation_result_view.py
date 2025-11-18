@@ -43,7 +43,7 @@ async def update_twiss_pv(pv_name, twiss_result):
         # todo: use translation service to provide the calc may be i will ask waheed on this 
         from .create_or_update_pv import update_twiss_pv as _update_twiss_pv
         await _update_twiss_pv(pv_name, twiss_result)
-        logger.debug("Updated twiss values")
+        #logger.debug("Updated twiss values")
     except Exception as e:
         logger.warning("FAILED Updated twiss values: %s", e)
         logger.error(f"Failed to update or create twiss PV {pv_name}: {e}")
@@ -65,8 +65,8 @@ class CalculationResultView:
 
     async def push_orbit(self, orbit_result: Orbit):
 
-        logger.warning(
-            f"{self.__class__.__name__} Orbit pushing view orbit result is none ? {orbit_result is None}")
+        #logger.warning(
+            #f"{self.__class__.__name__} Orbit pushing view orbit result is none ? {orbit_result is None}")
 
         # Define the device name for Tango (prefix is already server_name/instance_name) becuase already defined in the prefix and during the initialization of the view
         device_name = f"{self.prefix}/twiss_orbit_device"
@@ -88,4 +88,4 @@ class CalculationResultView:
             return
         
         await update_twiss_pv(device_name, twiss_result)
-        logger.info('Twiss pushed view')
+        #logger.info('Twiss pushed view')

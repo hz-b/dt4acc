@@ -1,6 +1,6 @@
 import functools
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 
 @functools.lru_cache(maxsize=None)
 def setup_logger(name):
@@ -8,7 +8,7 @@ def setup_logger(name):
     Setup and return a logger.
     """
     logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.WARNING)
     handler = logging.StreamHandler()
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)

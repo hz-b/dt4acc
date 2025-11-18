@@ -102,7 +102,7 @@ class TwissOrbitDevice(Device):
             Cleaned numpy array with NaN/INF replaced by 0.0
         """
         if data is None:
-            logger.warning(f"{name}: Data is None, returning empty array")
+            logger.info(f"{name}: Data is None, returning empty array")
             return np.array([])
         
         # Convert to numpy array if it isn't already
@@ -114,7 +114,7 @@ class TwissOrbitDevice(Device):
         inf_count = np.isinf(data).sum()
         
         if nan_count > 0 or inf_count > 0:
-            logger.warning(f"{name}: Found {nan_count} NaN and {inf_count} INF values, cleaning data")
+            logger.info(f"{name}: Found {nan_count} NaN and {inf_count} INF values, cleaning data")
             
             # Replace NaN with 0.0
             data = np.nan_to_num(data, nan=0.0, posinf=0.0, neginf=0.0)
@@ -134,7 +134,7 @@ class TwissOrbitDevice(Device):
         
         # If the data length doesn't match config.n_elements, log a warning but accept it
         if len(data) != config.n_elements:
-            logger.warning(f"{name} expected length {config.n_elements}, got {len(data)} - adjusting device storage")
+            logger.info(f"{name} expected length {config.n_elements}, got {len(data)} - adjusting device storage")
             
             # Resize the internal storage to match the actual data
             if name == "twiss_alpha_x":

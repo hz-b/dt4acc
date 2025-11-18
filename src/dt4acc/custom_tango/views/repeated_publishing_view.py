@@ -55,10 +55,11 @@ class LegacyBPMView(ViewInterface):
 
     async def push(self, data):
         if data is None:
-            logger.warning(f"{self.__class__.__name__} can't publish, data is None")
+            pass
+            #logger.warning(f"{self.__class__.__name__} can't publish, data is None")
         await asyncio.sleep(0.0)
         # data = np.asarray(data, dtype=np.int16)
-        logger.debug(f"{self.__class__.__name__} publishing to {self.prefix}")
+        #logger.debug(f"{self.__class__.__name__} publishing to {self.prefix}")
         try:
             device = DeviceProxy(f"{self.base_prefix}/bpm_device")
             # Use the special_pvs attribute names
@@ -77,7 +78,7 @@ class LegacyBPMView(ViewInterface):
                 None,
                 lambda: device.write_attribute(bdata_attr_name, data_clean.tolist() if hasattr(data_clean, 'tolist') else list(data_clean))
             )
-            logger.info(f"{self.__class__.__name__} published to {self.prefix}")
+            #logger.info(f"{self.__class__.__name__} published to {self.prefix}")
         except Exception as e:
             logger.error(f"Failed to publish BPM data: {e}")
 
@@ -89,7 +90,7 @@ class OrbitView(ViewInterface):
 
     async def push(self, data):
         if data is None:
-            logger.warning(f"{self.__class__.__name__} data is None!")
+            #logger.warning(f"{self.__class__.__name__} data is None!")
             await asyncio.sleep(0.0)
             return
 
@@ -108,7 +109,7 @@ class OrbitView(ViewInterface):
             
             # Additional safety check - ensure no NaN/INF remain
             if np.isnan(pos).any() or np.isinf(pos).any():
-                logger.warning(f"Found NaN/INF in orbit data after cleaning, replacing with zeros")
+                #logger.warning(f"Found NaN/INF in orbit data after cleaning, replacing with zeros")
                 pos = np.nan_to_num(pos, nan=0.0, posinf=0.0, neginf=0.0)
             
             device_name = f"{self.prefix}/twiss_orbit_device"
@@ -135,7 +136,7 @@ class TuneView(ViewInterface):
 
     async def push(self, data: TuneData):
         if data is None:
-            logger.warning("tune data is None")
+            #logger.warning("tune data is None")
             return
         tune_x = float(data.x)
         tune_y = float(data.y)
@@ -187,17 +188,17 @@ class RepeatedResultView:
         be published when fresh calculations are complete. Republishing cached
         tune values would overwrite fresh values with stale ones.
         """
-        logger.debug(f"{self.__class__.__name__} heartbeat {datetime.now()}, publishing bpm, orbit")
+        #logger.debug(f"{self.__class__.__name__} heartbeat {datetime.now()}, publishing bpm, orbit")
         await self.orbit_object_publisher.publish()
         # DO NOT publish tune here - it's published by push_twiss() with fresh values
         # await self.tune_publisher.publish()  # ← REMOVED: This was overwriting fresh tune values with stale cache
         await self.legacy_bpm_publisher.publish()
-        logger.info(f"{self.__class__.__name__} view heartbeat {datetime.now()}, published bpm, orbit")
+        #logger.info(f"{self.__class__.__name__} view heartbeat {datetime.now()}, published bpm, orbit")
 
     async def push_twiss(self, twiss_result: TwissWithAggregatedKValues):
         tune_x = float(twiss_result.x.tune)
         tune_y = float(twiss_result.y.tune)
-        logger.info(f"RepeatedResultView.push_twiss: Publishing FRESH tune values X={tune_x:.10f}, Y={tune_y:.10f}")
+        #logger.info(f"RepeatedResultView.push_twiss: Publishing FRESH tune values X={tune_x:.10f}, Y={tune_y:.10f}")
         self.tune_publisher.set_data(TuneData(x=tune_x, y=tune_y))
         await self.tune_publisher.publish()
 
@@ -206,21 +207,22 @@ class RepeatedResultView:
 
     async def push_bpms(self, orbit_data: Orbit):
         if not self.bpm_filter.is_ready():
-            logger.warning("Can not publish bpm data as bpm_filter is not ready")
+            #logger.warning("Can not publish bpm data as bpm_filter is not ready")
             await asyncio.sleep(0.0)
             return
 
         try:
             bpm_legacy_data, orbit_object_data = self.bpm_filter.process(orbit_data)
             if bpm_legacy_data is None:
-                logger.error("BPM Legacy data is None, not setting it")
+                pass
+                #logger.error("BPM Legacy data is None, not setting it")
             else:
                 self.legacy_bpm_publisher.set_data(bpm_legacy_data)
             self.orbit_object_publisher.set_data(orbit_object_data)
 
             await self.legacy_bpm_publisher.publish()
             await self.orbit_object_publisher.publish()
-            logger.warning("Pushed bpm / orbit data")
+            #logger.warning("Pushed bpm / orbit data")
             await asyncio.sleep(0.0)
             return
         except Exception as e:
