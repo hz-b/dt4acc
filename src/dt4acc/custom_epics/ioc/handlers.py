@@ -4,6 +4,7 @@ from bact_twin_architecture.bl.command_rewriter import CommandRewriter
 from .liasion_translation_manager import build_managers
 from ..utils.context_proxy import ContextProxy
 from ...core.accelerators.pyat_accelerator import setup_accelerator
+from ...core.bl.behavior_tree import handle_power_converter_set_with_bt
 from ...core.command import UpdateManager
 from ...core.utils.logger import get_logger
 
@@ -45,7 +46,13 @@ async def handle_device_update(device_id: str, property_id: str, value: float):
     """
     try:
         # Call the command update function to apply the value to the model
-        await update_manager.update(device_id=device_id, property_name=property_id, value=value)
+        await handle_power_converter_set_with_bt(
+            update_manager=update_manager,
+            acc_mgr=update_manager.acc_mgr,
+            pc_name=device_id,
+            property_name=property_id,
+            value=value)
+        # await update_manager.update(device_id=device_id, property_name=property_id, value=value)
     except Exception as e:
         logger.warning(f"Error in updating element {device_id} with property_name: {property_id} value {value}")
 
