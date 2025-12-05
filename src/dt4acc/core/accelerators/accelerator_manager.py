@@ -1,3 +1,4 @@
+from .insert_scraper import insert_scraper
 from .proxy_factory import PyATProxyFactory
 from ..accelerators.accelerator_impl import AcceleratorImpl
 from ..calculations.pyat_calculator import PyAtTwissCalculator, PyAtOrbitCalculator
@@ -47,7 +48,7 @@ class AcceleratorManager:
         try:
             from lat2db.model.accelerator import Accelerator
             acc_model = Accelerator(file_name ="mls_lattice_json.json", from_json= True)
-
+            acc_model.ring = insert_scraper(acc_model.ring, 91)
             # Initialize the accelerator with required components
             self.accelerator = AcceleratorImpl(
                 acc_model.ring,
