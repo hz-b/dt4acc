@@ -1,5 +1,5 @@
-from .magnet_device1 import MagnetDevice
-from .power_converter_device1 import PowerConverterDevice
+from .magnet_device import MagnetDevice
+from .power_converter_device import PowerConverterDevice
 
 __all__ = [
     'MagnetDevice',
