@@ -29,12 +29,12 @@ class TuneDevice(Device):
         """Initialize the device with default values matching EPICS tune PV setup."""
         Device.init_device(self)
         self.set_state(DevState.ON)
-        
+
         # Initialize tune data matching EPICS initialize_tune_pvs()
         self._tune_x = 0.0
         self._tune_y = 0.0
         self._count = 0
-        
+
         logger.warning("TuneDevice initialized successfully")
 
 
