@@ -33,8 +33,8 @@ def startup():
 
     builder.SetDeviceName(prefix)
 
-    initialize_cavity_pvs(builder)  # Initialize cavity-related PVs
-    initialize_master_clock_pvs(builder)  # Initialize additional PVs such as master clock, dummy data
+    # initialize_cavity_pvs(builder)  # Initialize cavity-related PVs
+    # initialize_master_clock_pvs(builder)  # Initialize additional PVs such as master clock, dummy data
     initialize_other_pvs(builder, prefix)  # Initialize additional PVs such as master clock, dummy data
 
     # Initialize PVs for various accelerator components

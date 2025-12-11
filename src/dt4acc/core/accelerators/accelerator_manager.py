@@ -1,3 +1,7 @@
+from pathlib import Path
+
+import at
+
 from .proxy_factory import PyATProxyFactory
 from ..accelerators.accelerator_impl import AcceleratorImpl
 from ..calculations.pyat_calculator import PyAtTwissCalculator, PyAtOrbitCalculator
@@ -7,6 +11,8 @@ from ..views.shared_view import get_view_instance
 
 logger = get_logger()
 
+
+data_file = Path.home() / "Documents" / "soleil" / "SOLEIL_II_V3631_sym1_V001_database.m"
 
 class AcceleratorManager:
     """
@@ -48,12 +54,25 @@ class AcceleratorManager:
             from lat2db.model.accelerator import Accelerator
             acc_model = Accelerator(file_name ="bessyii_lattice_json.json", from_json= True)
 
+            bessyii_json_file = data_file
+            # with open(bessyii_json_file, "rt") as fp:
+            #     ring_lattice = json.load(fp)
+            #
+            # converted_ring = []
+            # for elem in ring_lattice:
+            #     new_elem = convert_element(elem)
+            #     if new_elem is not None:
+            #         converted_ring.append(new_elem)
+
+            acc_model = at.load_m(bessyii_json_file)
+            print("Loaded ring with", len(acc_model), "elements.")
+            # acc_model = at.load_json(ring_lattice)
             # Initialize the accelerator with required components
             self.accelerator = AcceleratorImpl(
-                acc_model.ring,
-                PyATProxyFactory(lattice_model=None, at_lattice=acc_model.ring),
+                acc_model,
+                PyATProxyFactory(lattice_model=None, at_lattice=acc_model),
                 PyAtTwissCalculator(acc_model),
-                PyAtOrbitCalculator(acc_model.ring)
+                PyAtOrbitCalculator(acc_model)
             )
 
             # Extract BPM elements from the accelerator and create BPM mimicry

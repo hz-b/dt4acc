@@ -47,8 +47,8 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
     """
 
     def __init__(self, acc):
-        self.acc = acc.ring
-        self.machine = acc.machine
+        self.acc = acc
+        # self.machine = acc.machine
         self.executor = ThreadPoolExecutor(max_workers=2)  # Limit to prevent over-utilization
 
 
@@ -71,7 +71,7 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
             'dispersion': np.array([0.013117, -0.031177, 0, 0])
         }
         try:
-            if self.machine.closed:  # this means it is a ring
+            if True:  # this means it is a ring
                 _, summary, twiss = self.acc.get_optics(at.All)
             else:
                 _, summary, twiss = self.acc.get_optics(at.All, twiss_in=twiss_in)  # for transfer line

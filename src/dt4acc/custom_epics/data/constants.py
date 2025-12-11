@@ -16,6 +16,10 @@ special_pvs = {
     "master_clock": "MCLKHX251C",
     "current": "MDIZ3T5G",
 }
+global_settings = {
+    "dummy_x": "DUMMY_X",
+    "dummy_y": "DUMMY_Y"
+}
 
 @dataclass
 class Config:

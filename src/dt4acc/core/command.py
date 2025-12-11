@@ -1,9 +1,8 @@
+from dataclasses import dataclass
 from typing import Sequence
 
 from bact_twin_architecture.data_model.command import Command, BehaviourOnError
 from bact_twin_architecture.data_model.identifiers import (
-    LatticeElementPropertyID,
-    DevicePropertyID,
     ConversionID,
 )
 from bact_twin_architecture.interfaces.command_rewritter import CommandRewriterBase
@@ -13,6 +12,17 @@ from bact_twin_architecture.interfaces.translator_service import TranslatorServi
 from .accelerators.accelerator_manager import AcceleratorManager
 from .update_context_manager import UpdateContext
 from ..custom_epics.ioc.liasion_translation_manager import TranslatorService
+@dataclass(frozen=True)
+class LatticeElementPropertyID:
+    element_name: str
+    property: str
+    uuid:str
+
+@dataclass(frozen=True)
+class DevicePropertyID:
+    device_name: str
+    property: str
+    uuid:str
 
 
 class UpdateManager:
@@ -49,6 +59,7 @@ class UpdateManager:
         """
         if dev_prop.device_name[:3].upper() == "CAV":
             pass
+
         lat_props = self.liaison_manager.inverse(dev_prop)
         if lat_props is None:
             raise AssertionError(
@@ -65,13 +76,14 @@ class UpdateManager:
         values = [convert(lat_prop) for lat_prop in lat_props]
         return values
 
-    def peek_engine(self, lat_elem_prop: LatticeElementPropertyID) -> object:
+    def peek_engine(self, lat_elem_prop:LatticeElementPropertyID) -> object:
         """peek into underlaying engine to get value
 
         Todo:
             resolve layring violation
         """
-        proxy = self.acc_mgr.accelerator.proxy_factory.get(lat_elem_prop.element_name)
+        uuid = getattr(lat_elem_prop, "uuid", None)
+        proxy = self.acc_mgr.accelerator.proxy_factory.get(lat_elem_prop.element_name,uuid=uuid)
         val = proxy.peek(property_id=lat_elem_prop.property)
         return val
 

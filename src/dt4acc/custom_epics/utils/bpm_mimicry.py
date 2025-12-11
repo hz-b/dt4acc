@@ -157,9 +157,10 @@ def get_data_file(name: str = "bpm_config") -> Path:
         .parent          # …/utils
         .parent          # …/custom_epics
         / "data"
-        / "standard"
+        / "soleil"
         / f"{name}.json"
     )
+
     with _DATA_FILE.open() as fp:
         _DATA: List[Dict[str, Any]] = json.load(fp)
     return _DATA

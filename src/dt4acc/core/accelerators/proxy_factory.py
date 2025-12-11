@@ -1,3 +1,7 @@
+import json
+from pathlib import Path
+from typing import List, Dict, Any
+
 from .element_proxies import ElementProxy, KickAngleCorrectorProxy
 from ..interfaces.proxy_factory_interface import ProxyFactoryInterface
 
@@ -29,7 +33,36 @@ class PyATProxyFactory(ProxyFactoryInterface):
         """
         self.acc = at_lattice
 
-    def get(self, element_id):
+    def get_element_by_uuid(self, uuid):
+        for elem in self.acc:
+            if getattr(elem, "UUID", None) == uuid:
+                return elem
+        return None
+
+    def get_uuid(self, element_id):
+        """
+        Extracts the UUID from the element ID if present.
+
+        Args:
+            element_id (str): The ID of the element.
+        """
+
+        data_file = Path.home() / "Documents" / "soleil" / "accelerator_setup.json"
+
+        with data_file.open() as fp:
+            data: List[Dict[str, Any]] = json.load(fp)
+            # ---- SEARCH FOR MATCHING NAME ----
+            for entry in data:
+                if entry.get("name") == element_id:
+                    return entry.get("uuid")
+
+            # If we reach here → not found
+            return None
+
+
+
+
+    def get(self, element_id,uuid=None):
         """
         Retrieve an element proxy based on the given element ID.
 
@@ -42,8 +75,10 @@ class PyATProxyFactory(ProxyFactoryInterface):
         Raises:
             ValueError: If the element is not found in the lattice.
         """
-
-        sub_lattice = self.acc[element_id]
+        if uuid is not None:
+            sub_lattice = (self.get_element_by_uuid(uuid),)
+        else:
+            sub_lattice = self.acc[element_id]
         # single element expected in sub lattice
         try:
             (_,) = sub_lattice
@@ -53,11 +88,13 @@ class PyATProxyFactory(ProxyFactoryInterface):
 
         if found_sub_lattice and sub_lattice:
             return ElementProxy(sub_lattice, element_id=element_id)
-
-        host_element_id = self.get_element_id_of_host(element_id)
-        sub_lattice = self.acc[host_element_id]
+        uuid_ = self.get_uuid(element_id)
+        host_element_id = uuid_ #self.get_element_id_of_host(element_id)
+        sub_lattice = (self.get_element_by_uuid(uuid_),)
+        # sub_lattice = self.acc[host_element_id]
         # single element expected in sublattice
         (_,) = sub_lattice
+        return ElementProxy(sub_lattice, element_id=element_id)
         if not sub_lattice:
             raise ValueError(f"Element with ID {element_id} not found")
 
@@ -79,6 +116,7 @@ class PyATProxyFactory(ProxyFactoryInterface):
         Raises:
             ValueError: If the element ID cannot be processed.
         """
+        return (element_id,)
         if element_id.startswith("H") or element_id.startswith("V"):
             return element_id[1:]
 

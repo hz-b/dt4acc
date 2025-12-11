@@ -1,8 +1,7 @@
+from dataclasses import dataclass
+
 import numpy as np
-from bact_twin_architecture.data_model.identifiers import (
-    LatticeElementPropertyID,
-    DevicePropertyID,
-)
+from bact_twin_architecture.data_model.identifiers import DevicePropertyID
 
 from .handlers import handle_device_update, update_manager
 from ..data.constants import config, special_pvs, cavity_names
@@ -17,7 +16,11 @@ logger = get_logger()
 
 def flag_not_handling(pv_name: str, val: object):
     logger.warning("Not handling update of pv %s to %s", pv_name, val)
-
+@dataclass(frozen=True)
+class LatticeElementPropertyID:
+    element_name: str
+    property: str
+    uuid:str
 
 def initialize_magnet_pvs(builder, magnet):
     """
@@ -37,7 +40,7 @@ def initialize_magnet_pvs(builder, magnet):
     # Create an element representing the magnet
     # Create PVs and link to update logic
     val = update_manager.peek_engine(
-        LatticeElementPropertyID(element_name=magnet_name, property="main_strength")
+        LatticeElementPropertyID(element_name=magnet_name, property="main_strength",uuid=magnet["uuid"])
     )
     builder.aOut(
         f"{magnet_name}:Cm:set",
