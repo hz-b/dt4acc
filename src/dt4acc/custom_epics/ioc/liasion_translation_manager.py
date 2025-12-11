@@ -13,7 +13,7 @@ from bact_twin_architecture.utils.unit_conversion import (
     LinearUnitConversion,
     EnergyIndependentLinearUnitConversion,
 )
-from bact_twin_architecture.bl.bessyii_yellow_pages import YellowPages, bessyii_yellow_pages
+from bact_twin_architecture.bl.soleil_yellow_pages import YellowPages, soleil_yellow_pages as bessyii_yellow_pages
 
 from ..data.querries import get_magnets
 from ..data.constants import ring_parameters, cavity_names
@@ -103,8 +103,27 @@ def element_method(element_name: str, yp: YellowPages):
 
 
 def extract_host_element_name(element_name: str, yp: YellowPages) -> str:
-    if element_name in yp.vertical_steerer_names() or element_name in yp.horizontal_steerer_names():
-        return element_name[1:]
+    """
+    If element_name is a horizontal or vertical steerer, return the
+    corresponding sextupole name (host element). Otherwise return
+    element_name unchanged.
+    """
+
+    # steerer → map to its host sextupole
+    if (element_name in yp.vertical_steerer_names()
+            or element_name in yp.horizontal_steerer_names()):
+
+        # strip the last "-...." part
+        host_name = element_name.rsplit("-", 1)[0]
+
+        # optionally check that it’s actually a sextupole we know
+        if host_name in yp.sextupole_names():
+            return host_name
+
+        # if for some reason it’s not in the sextupole list, still return the stripped name
+        return host_name
+
+    # non-steerer: host is the element itself
     return element_name
 
 
@@ -147,9 +166,14 @@ def build_managers(
 
     # first for steerers : for AT these are angles applied to the host magnet
     # I use that I know one pc goes to one steerer
+    # first for steerers : for AT these are angles applied to the host magnet
+    # I use that I know one pc goes to one steerer
     inverse_lut = {
         DevicePropertyID(device_name=info.pc, property="set_current"): (
-            LatticeElementPropertyID(element_name=info.name[1:], property="x_kick"),
+            LatticeElementPropertyID(
+                element_name=extract_host_element_name(info.name, yp=yp),
+                property="x_kick",
+            ),
         )
         for info in infos
         if info.name in yp.horizontal_steerer_names()
@@ -157,7 +181,10 @@ def build_managers(
     inverse_lut.update(
         {
             DevicePropertyID(device_name=info.pc, property="set_current"): (
-                LatticeElementPropertyID(element_name=info.name[1:], property="y_kick"),
+                LatticeElementPropertyID(
+                    element_name=extract_host_element_name(info.name, yp=yp),
+                    property="y_kick",
+                ),
             )
             for info in infos
             if info.name in yp.vertical_steerer_names()

@@ -13,6 +13,8 @@ from ...custom_epics.utils.orbit_at_bpms import OrbitAtBPMS
 logger = get_logger()
 
 
+data_file = Path.home() / "Documents" / "soleil" / "SOLEIL_II_V3631_sym1_V001_database.m"
+
 class AcceleratorManager:
     """
     Manages the initialization and event subscription of the accelerator.
@@ -58,6 +60,19 @@ class AcceleratorManager:
             )
             acc_model = Accelerator(file_name=filename, from_json=True, energy=1.7185e9)
 
+            bessyii_json_file = data_file
+            # with open(bessyii_json_file, "rt") as fp:
+            #     ring_lattice = json.load(fp)
+            #
+            # converted_ring = []
+            # for elem in ring_lattice:
+            #     new_elem = convert_element(elem)
+            #     if new_elem is not None:
+            #         converted_ring.append(new_elem)
+
+            acc_model = at.load_m(bessyii_json_file)
+            print("Loaded ring with", len(acc_model), "elements.")
+            # acc_model = at.load_json(ring_lattice)
             # Initialize the accelerator with required components
             self.accelerator = AcceleratorImpl(
                 acc_model.ring,

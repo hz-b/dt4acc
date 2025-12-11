@@ -16,7 +16,8 @@ from .pv_setup import (
     initialize_twiss_pvs,
     initialize_tune_pvs,
     initialize_other_pvs,
-    initialize_machine_info_pvs,
+#: Todo are these required?
+    # initialize_machine_info_pvs,
 )
 
 logger = get_logger()
@@ -34,9 +35,9 @@ def startup():
 
     builder.SetDeviceName(prefix)
 
-    initialize_cavity_pvs(builder)  # Initialize cavity-related PVs
-    initialize_master_clock_pvs(builder)  # Initialize additional PVs such as master clock, dummy data
-    initialize_machine_info_pvs(builder)
+    # initialize_cavity_pvs(builder)  # Initialize cavity-related PVs
+    # initialize_master_clock_pvs(builder)  # Initialize additional PVs such as master clock, dummy data
+    # initialize_machine_info_pvs(builder)
     initialize_other_pvs(builder, prefix)  # Initialize additional PVs such as master clock, dummy data
 
     # Initialize PVs for various accelerator components

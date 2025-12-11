@@ -157,7 +157,7 @@ def get_data_file(name: str = "bpm_config") -> Path:
         .parent          # …/utils
         .parent          # …/custom_epics
         / "data"
-        / "standard"
+        / "soleil"
         / f"{name}.json"
     )
     with data_file.open() as fp:
