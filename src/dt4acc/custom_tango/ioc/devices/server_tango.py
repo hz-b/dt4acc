@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 
-import os
-import sys
-import time
 import threading
-from tango.server import run
-from tango import Database
+import time
 
+from tango.server import run
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.devices.tango_device_setup import (
     register_all_devices,
@@ -16,82 +13,46 @@ from dt4acc.custom_tango.ioc.devices.tango_device_setup import (
 logger = get_logger()
 
 
-# ----------------------------------------------------------------------
-# UTIL: Extract server name and instance from Soleil Tango name
-#
-#   AN10-AR/EM/SCF.11   → server = "AN10-AR/EM"
-#                      → instance = "EM"
-# ----------------------------------------------------------------------
-def extract_server_from_name(device_name: str):
-    parts = device_name.split("/")
-    if len(parts) != 3:
-        raise ValueError(f"Invalid Soleil device name: {device_name}")
-    domain, family, _ = parts
-    return f"{domain}/{family}", family     # server string, instance
+def start_server_for(server_name: str, instance_name: str, device_classes):
+    """
+    Start one Tango server process (thread) for:
+        server_name / instance_name
 
-
-# ----------------------------------------------------------------------
-# START A SINGLE TANGO SERVER
-# ----------------------------------------------------------------------
-def start_server_for(domain, family, device_classes):
-    server = f"{domain}/{family}"
-    instance = family
-
-    logger.info(f"🚀 Starting Tango server {server} (instance={instance})")
-
+    - Example: server_name='AN10-AR', instance_name='EM'
+      -> device server: AN10-AR/EM
+      -> dserver:       dserver/AN10-AR/EM
+    """
+    logger.info(f"🚀 Starting Tango server {server_name}/{instance_name}")
     try:
-        # IMPORTANT:
-        # run() EXPECTS: run(device_classes, args=[server, instance])
-        run(device_classes, args=[server, instance])
+        # Very important: args[0] = server_name, args[1] = instance_name
+        run(device_classes, args=[server_name, instance_name])
     except Exception as e:
-        logger.error(f"❌ Failed to start server {server}: {e}")
+        logger.error(f"❌ Failed to start server {server_name}/{instance_name}: {e}")
 
 
-# ----------------------------------------------------------------------
-# MAIN ENTRYPOINT
-# ----------------------------------------------------------------------
 def main():
     logger.info("📡 Starting Soleil Tango Server Manager")
 
-    # STEP 1 — Register devices into DB
-    logger.info("📡 Registering ALL Soleil devices into Tango DB...")
-    register_all_devices()   # NO server_name/instance_name → Soleil style
-    logger.info("✔ Device registration DONE.")
+    # STEP 1 — Register all devices -> get all (server_name, instance_name) pairs
+    servers = register_all_devices()
+    logger.info(f"✔ Device registration DONE. We have {len(servers)} servers to start.")
 
-    # STEP 2 — Retrieve all Tango devices from DB
-    logger.info("📡 Fetching device list from Tango DB")
-    db = Database()
-    all_devs = [d.name for d in db.get_device_list("*/*/*")]
-
-    # STEP 3 — Determine unique Soleil servers (domain/family pairs)
-    servers = set()
-    for devname in all_devs:
-        try:
-            domain, family, member = devname.split("/")
-            servers.add((domain, family))
-        except ValueError:
-            # Skip virtual (PHYSICS/SOLEIL/...) and dservers
-            continue
-
-    logger.info(f"🔎 Found {len(servers)} Soleil Tango servers to start.")
-
-    # STEP 4 — Start each Soleil server in its own thread
+    # STEP 2 — Get device classes
     device_classes = get_all_device_classes()
 
+    # STEP 3 — Start each server in its own thread
     threads = []
-    for domain, family in servers:
+    for server_name, instance_name in servers:
         t = threading.Thread(
             target=start_server_for,
-            args=(domain, family, device_classes),
+            args=(server_name, instance_name, device_classes),
             daemon=False,
         )
         t.start()
         threads.append(t)
-        time.sleep(0.5)  # small stagger is good for Tango DB load
+        logger.info(f"🚀 Launched server thread for {server_name}/{instance_name}")
+        time.sleep(0.5)  # small stagger for Tango DB
 
-        logger.info(f"🚀 Launched server thread for {domain}/{family}")
-
-    # STEP 5 — Wait for all servers (unless user Ctrl+C)
     logger.info("📡 All servers launched. Waiting for them to run forever.")
     for t in threads:
         t.join()
