@@ -1,179 +1,239 @@
-# tango_device_setup.py  (SOLEIL-style Tango registration)
-#
-# REAL DEVICES:
-#   domain  = ANxx-AR
-#   family  = EM, SD, etc.
-#   member  = e.g. SHF.11, SHF.11-CDLH.03, SHF.11-pc
-#
-# Tango device = "AN10-AR/EM/SHF.11"
-# Tango server = "AN10-AR/EM"
-#
-# VIRTUAL DEVICES (Twiss, Orbit, BPM, Tune, OtherPVs, MasterClock)
-# are placed under a synthetic fixed server, e.g.:
-#   PHYSICS/SOLEIL/TWISS
-#   PHYSICS/SOLEIL/ORBIT
-#   RF/SOLEIL/MASTER_CLOCK
+# tango_device_setup.py
 
 from tango import Database, DbDevInfo, DevFailed
 from dt4acc.core.utils.logger import get_logger
-
 from dt4acc.custom_epics.data.querries import (
     get_unique_power_converters,
     get_magnets_per_power_converters,
 )
 from dt4acc.custom_epics.data.constants import cavity_names
 
-# Import device classes (your existing files)
-from .magnet_device import MagnetDevice
-from .power_converter_device import PowerConverterDevice
-from .virtual_devices import (
-    MasterClockDevice,
-    CavityDevice,
-    TuneDevice,
-    OtherPVsDevice,
-    TwissOrbitDevice,
-    BPMManagerDevice
-)
+from dt4acc.custom_tango.ioc.devices.magnet_device import MagnetDevice
+from dt4acc.custom_tango.ioc.devices.power_converter_device import PowerConverterDevice
+from dt4acc.custom_tango.ioc.devices.virtual_devices import CavityDevice, BPMManagerDevice, TuneDevice, TwissOrbitDevice, OtherPVsDevice, MasterClockDevice
 
 logger = get_logger()
 
 
-# ----------------------------------------------------------------------
-# Helper: extract Tango server & instance from Soleil device name
-# Soleil naming format: "AN10-AR/EM/SCF.11"
-# → domain  = "AN10-AR"
-# → family  = "EM"
-# → member  = "SCF.11"
-# → device full name = "AN10-AR/EM/SCF.11"
-# → server descriptor = "AN10-AR/EM"
-# ----------------------------------------------------------------------
-def split_tango_name(name: str):
-    """Return (domain, family, member)."""
-    parts = name.split("/")
+def _split_domain_family_member(device_name: str):
+    """AN10-AR/EM/SCF.11 -> ('AN10-AR', 'EM', 'SCF.11')"""
+    parts = device_name.split("/")
     if len(parts) != 3:
-        raise ValueError(f"Invalid Soleil Tango name: {name}")
+        raise ValueError(f"Invalid Soleil device name: {device_name}")
     return parts[0], parts[1], parts[2]
 
 
-# ----------------------------------------------------------------------
-# Register a REAL device (magnet or power converter)
-# ----------------------------------------------------------------------
-def register_real_device(db: Database, full_name: str, class_name: str):
+def _register_dservers(db: Database, servers: set[tuple[str, str]]):
     """
-    Create a real Tango device with the correct Soleil naming:
-        server = "domain/family"
-        name   = "domain/family/member"
+    Ensure a DServer device exists for each (server_name, instance_name).
+
+    For (AN10-AR, EM) we create:
+      name   = dserver/AN10-AR/EM
+      server = AN10-AR/EM
+      class  = DServer
     """
-    domain, family, member = split_tango_name(full_name)
-    server_desc = f"{domain}/{family}"
-    device_name = f"{domain}/{family}/{member}"
+    for server_name, instance_name in sorted(servers):
+        dserver_name = f"dserver/{server_name}/{instance_name}"
+        server_str = f"{server_name}/{instance_name}"
 
-    dev = DbDevInfo()
-    dev._class = class_name
-    dev.name = device_name
-    dev.server = server_desc
+        db_dev = DbDevInfo()
+        db_dev._class = "DServer"
+        db_dev.server = server_str
+        db_dev.name = dserver_name
 
-    try:
-        db.add_device(dev)
-        logger.info(f"Registered device: {device_name} (class={class_name})")
-    except DevFailed as e:
-        logger.warning(f"Device {device_name} exists or failed to register: {e}")
-
-    return device_name
-
-
-# ----------------------------------------------------------------------
-# Register a virtual device using a constant server
-# ----------------------------------------------------------------------
-def register_virtual_device(db: Database, device_name: str, class_name: str, server="PHYSICS/SOLEIL"):
-    dev = DbDevInfo()
-    dev._class = class_name
-    dev.name = device_name
-    dev.server = server
-
-    try:
-        db.add_device(dev)
-        logger.info(f"Registered virtual device: {device_name}")
-    except DevFailed as e:
-        logger.warning(f"Virtual device {device_name} exists or failed: {e}")
+        try:
+            db.add_device(db_dev)
+            logger.info(f"🧱 Registered DServer device {dserver_name} (server={server_str})")
+        except DevFailed as e:
+            # Ignore 'already exists' style errors, log others
+            msg = str(e)
+            if "DB_DuplicateKey" in msg or "already" in msg or "Duplicate" in msg:
+                logger.debug(f"DServer {dserver_name} already exists, skipping.")
+            else:
+                logger.error(f"❌ Failed to register DServer {dserver_name}: {e}")
 
 
-# ----------------------------------------------------------------------
-# Write Tango device properties
-# ----------------------------------------------------------------------
-def set_properties(db: Database, device_name: str, props: dict):
-    try:
-        db.put_device_property(device_name, props)
-        logger.info(f"Set properties for {device_name}: {props}")
-    except DevFailed as e:
-        logger.error(f"Failed to write properties for {device_name}: {e}")
-
-
-# ----------------------------------------------------------------------
-# MAIN REGISTRATION FUNCTION
-# ----------------------------------------------------------------------
 def register_all_devices():
     """
-    Register all Soleil devices correctly according to Soleil Tango naming.
-    No global server!! Each ANxx-AR/EM has its own Tango server instance.
+    Register ALL Soleil devices in the Tango DB.
+
+    - Device *names* are the Soleil-style names (AN10-AR/EM/SCF.11, ...).
+    - For each device name:
+        domain  -> server_name
+        family  -> instance_name
+        server  -> f"{server_name}/{instance_name}"
+    - Also registers DServer devices for each (server_name, instance_name).
+
+    Returns:
+        list[(server_name, instance_name)] : all unique device servers to start.
     """
     db = Database()
+    unique_servers: set[tuple[str, str]] = set()
 
-    # -----------------------------
-    # REAL MAGNETS + POWER SUPPLIES
-    # -----------------------------
+    logger.info("📝 Registering ALL Soleil devices into Tango DB...")
+
+    # ------------------------------------------------------------
+    # 1) Magnets & power converters
+    # ------------------------------------------------------------
     for pc_name in get_unique_power_converters():
         magnets = get_magnets_per_power_converters(pc_name)
-        magnet_names = [m["name"] for m in magnets]
 
-        # Register power converter device
-        pc_device_name = register_real_device(db, pc_name, "PowerConverterDevice")
-        set_properties(db, pc_device_name, {
-            "name": [pc_name],
-            "magnet_list": magnet_names,
-        })
+        # Power converter name should already be Soleil-like, e.g. AN10-AR/EM/SCF.11-pc
+        pc_device_name = pc_name
 
-        # Register each magnet device
+        # register PC first
+        try:
+            domain, family, _ = _split_domain_family_member(pc_device_name)
+            server_name = domain
+            instance_name = family
+            server_str = f"{server_name}/{instance_name}"
+            unique_servers.add((server_name, instance_name))
+
+            db_dev = DbDevInfo()
+            db_dev._class = "PowerConverterDevice"
+            db_dev.server = server_str
+            db_dev.name = pc_device_name
+
+            db.add_device(db_dev)
+            logger.info(f"⚡ Registered PC device {db_dev.name} (class=PowerConverterDevice, server={server_str})")
+        except Exception as e:
+            logger.error(f"❌ Failed to register power converter {pc_device_name}: {e}")
+
+        # register magnets driven by this PC
         for m in magnets:
-            magnet_name = m["name"]
-            magnet_type = m.get("type", "unknown")
+            magnet_name = m["name"]  # AN10-AR/EM/SCF.11
+            try:
+                domain, family, _ = _split_domain_family_member(magnet_name)
+                server_name = domain
+                instance_name = family
+                server_str = f"{server_name}/{instance_name}"
+                unique_servers.add((server_name, instance_name))
 
-            magnet_device_name = register_real_device(db, magnet_name, magnet_type)
-            set_properties(db, magnet_device_name, {
-                "name":       [magnet_name],
-                "pc_name":    [pc_name],
-                "type":       [magnet_type],
-            })
+                db_dev = DbDevInfo()
+                db_dev._class = "MagnetDevice"
+                db_dev.server = server_str
+                db_dev.name = magnet_name
 
-    # -----------------------------
-    # VIRTUAL DEVICES (one server)
-    # -----------------------------
-    register_virtual_device(db, "SOLEIL/PHYSICS/TWISS_ORBIT", "TwissOrbitDevice")
-    register_virtual_device(db, "SOLEIL/MONITOR/BPM", "BPMManagerDevice")
-    register_virtual_device(db, "SOLEIL/PHYSICS/OTHER_PVS", "OtherPVsDevice")
-    register_virtual_device(db, "SOLEIL/PHYSICS/TUNE", "TuneDevice")
-    register_virtual_device(db, "SOLEIL/RF/MASTER_CLOCK", "MasterClockDevice", server="RF/SOLEIL")
+                db.add_device(db_dev)
+                logger.info(f"🧲 Registered magnet device {db_dev.name} (class=MagnetDevice, server={server_str})")
+            except Exception as e:
+                logger.error(f"❌ Failed to register magnet {magnet_name}: {e}")
 
-    # Cavity devices
+    # ------------------------------------------------------------
+    # 2) Virtual / physics devices
+    # ------------------------------------------------------------
+
+    # Twiss + orbit + BPM combined device
+    twiss_name = "PHYSICS/SOLEIL/TWISS_ORBIT"
+    try:
+        domain, family, _ = _split_domain_family_member(twiss_name)
+        server_name = domain
+        instance_name = family
+        server_str = f"{server_name}/{instance_name}"
+        unique_servers.add((server_name, instance_name))
+
+        db_dev = DbDevInfo()
+        db_dev._class = "TwissOrbitDevice"
+        db_dev.server = server_str
+        db_dev.name = twiss_name
+        db.add_device(db_dev)
+        logger.info(f"📈 Registered virtual device {twiss_name} (class=TwissOrbitDevice, server={server_str})")
+    except Exception as e:
+        logger.error(f"❌ Failed to register TwissOrbitDevice: {e}")
+
+    # Master clock
+    mc_name = "PHYSICS/SOLEIL/MASTER_CLOCK"
+    try:
+        domain, family, _ = _split_domain_family_member(mc_name)
+        server_name = domain
+        instance_name = family
+        server_str = f"{server_name}/{instance_name}"
+        unique_servers.add((server_name, instance_name))
+
+        db_dev = DbDevInfo()
+        db_dev._class = "MasterClockDevice"
+        db_dev.server = server_str
+        db_dev.name = mc_name
+        db.add_device(db_dev)
+        logger.info(f"⏱ Registered virtual device {mc_name} (class=MasterClockDevice, server={server_str})")
+    except Exception as e:
+        logger.error(f"❌ Failed to register MasterClockDevice: {e}")
+
+    # OtherPVs
+    other_name = "PHYSICS/SOLEIL/OTHERS"
+    try:
+        domain, family, _ = _split_domain_family_member(other_name)
+        server_name = domain
+        instance_name = family
+        server_str = f"{server_name}/{instance_name}"
+        unique_servers.add((server_name, instance_name))
+
+        db_dev = DbDevInfo()
+        db_dev._class = "OtherPVsDevice"
+        db_dev.server = server_str
+        db_dev.name = other_name
+        db.add_device(db_dev)
+        logger.info(f"📦 Registered virtual device {other_name} (class=OtherPVsDevice, server={server_str})")
+    except Exception as e:
+        logger.error(f"❌ Failed to register OtherPVsDevice: {e}")
+
+    # Tune device
+    tune_name = "PHYSICS/SOLEIL/TUNE"
+    try:
+        domain, family, _ = _split_domain_family_member(tune_name)
+        server_name = domain
+        instance_name = family
+        server_str = f"{server_name}/{instance_name}"
+        unique_servers.add((server_name, instance_name))
+
+        db_dev = DbDevInfo()
+        db_dev._class = "TuneDevice"
+        db_dev.server = server_str
+        db_dev.name = tune_name
+        db.add_device(db_dev)
+        logger.info(f"🎯 Registered virtual device {tune_name} (class=TuneDevice, server={server_str})")
+    except Exception as e:
+        logger.error(f"❌ Failed to register TuneDevice: {e}")
+
+    # Cavities: SOLEIL/RF/CAVH1T8R, etc.
     for cav in cavity_names:
         cav_name = f"SOLEIL/RF/{cav}"
-        register_virtual_device(db, cav_name, "CavityDevice", server="RF/SOLEIL")
-        set_properties(db, cav_name, {"name": [cav]})
+        try:
+            domain, family, _ = _split_domain_family_member(cav_name)
+            server_name = domain
+            instance_name = family
+            server_str = f"{server_name}/{instance_name}"
+            unique_servers.add((server_name, instance_name))
 
-    logger.info("✔ All Soleil devices registered successfully.")
+            db_dev = DbDevInfo()
+            db_dev._class = "CavityDevice"
+            db_dev.server = server_str
+            db_dev.name = cav_name
+            db.add_device(db_dev)
+            logger.info(f"📡 Registered virtual device {cav_name} (class=CavityDevice, server={server_str})")
+        except Exception as e:
+            logger.error(f"❌ Failed to register CavityDevice {cav_name}: {e}")
+
+    logger.info(f"✔ Unique (server_name, instance_name) pairs: {unique_servers}")
+    logger.info(f"✔ Device registration DONE. We have {len(unique_servers)} servers to start.")
+
+    # ------------------------------------------------------------
+    # 3) Make sure dserver/<server_name>/<instance_name> exists
+    # ------------------------------------------------------------
+    _register_dservers(db, unique_servers)
+
+    return sorted(unique_servers)
 
 
-# ----------------------------------------------------------------------
-# SERVER MUST KNOW WHICH CLASSES CAN BE RUN
-# ----------------------------------------------------------------------
 def get_all_device_classes():
+    """Return all device classes used by the servers."""
     return [
         MagnetDevice,
         PowerConverterDevice,
         TwissOrbitDevice,
         BPMManagerDevice,
-        MasterClockDevice,
         CavityDevice,
-        TuneDevice,
+        MasterClockDevice,
         OtherPVsDevice,
+        TuneDevice,
     ]
