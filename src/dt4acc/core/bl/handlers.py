@@ -1,11 +1,11 @@
 from bact_twin_architecture.bl.command_rewriter import CommandRewriter
 # from dt4acc.custom_epics.ioc.liasion_translation_manager import build_managers
 
-from .liasion_translation_manager import build_managers
-from ..utils.context_proxy import ContextProxy
-from ...core.accelerators.pyat_accelerator import setup_accelerator
-from ...core.command import UpdateManager
-from ...core.utils.logger import get_logger
+from dt4acc.custom_epics.ioc.liasion_translation_manager import build_managers
+from dt4acc.custom_epics.utils.context_proxy import ContextProxy
+from dt4acc.core.accelerators.pyat_accelerator import setup_accelerator
+from dt4acc.core.command import UpdateManager
+from dt4acc.core.utils.logger import get_logger
 
 logger = get_logger()
 

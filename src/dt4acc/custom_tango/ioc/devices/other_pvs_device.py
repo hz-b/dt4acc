@@ -1,10 +1,8 @@
-import numpy as np
 from tango import AttrWriteType, DevState
 from tango.server import Device, attribute, command
 
 from ....core.utils.logger import get_logger
 from ....custom_epics.data.constants import special_pvs
-from ....custom_epics.ioc.handlers import update_manager, handle_device_update
 
 logger = get_logger()
 

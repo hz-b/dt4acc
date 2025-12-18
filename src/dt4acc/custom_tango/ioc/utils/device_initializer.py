@@ -1,15 +1,11 @@
 import numpy as np
-from typing import Dict, List, Optional
-from tango import DeviceProxy, DevFailed, Database, DbDevInfo, DbDatum
-from dt4acc.core.utils.logger import get_logger
+from typing import Dict, List
+from tango import DeviceProxy, Database, DbDevInfo
+from ....core.utils.logger import get_logger
 from dt4acc.data_model.identifiers import LatticeElementPropertyID, DevicePropertyID
 from dt4acc.custom_epics.data.querries import get_unique_power_converters, get_magnets_per_power_converters
-from dt4acc.custom_epics.ioc.handlers import update_manager, handle_device_update
-from dt4acc.custom_tango.ioc.devices.magnet_device1 import MagnetDevice
-from dt4acc.custom_tango.ioc.devices.power_converter_device import PowerConverterDevice
+from dt4acc.core.bl.handlers import update_manager
 from dt4acc.custom_tango.server_config import (
-    SERVER_NAME,
-    SERVER_CLASS,
     SERVER_INSTANCE,
     DEVICE_NAME_FORMAT,
     FULL_DEVICE_NAME_FORMAT
