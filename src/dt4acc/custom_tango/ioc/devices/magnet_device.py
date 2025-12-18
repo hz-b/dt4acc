@@ -4,8 +4,8 @@ from tango.server import Device, attribute, command, device_property, AttrWriteT
 import asyncio
 import threading
 
-from dt4acc.core.utils.logger import get_logger
-from dt4acc.custom_epics.ioc.handlers import update_manager, handle_device_update
+from ....core.utils.logger import get_logger
+from ....core.bl.handlers import update_manager, handle_device_update
 from bact_twin_architecture.data_model.identifiers import LatticeElementPropertyID
 
 logger = get_logger()

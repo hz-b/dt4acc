@@ -3,7 +3,7 @@ from tango.server import Device, attribute, device_property, AttrWriteType
 import numpy as np
 
 from dt4acc.core.utils.logger import get_logger
-from dt4acc.custom_epics.ioc.handlers import update_manager, handle_device_update
+from dt4acc.core.bl.handlers import update_manager, handle_device_update
 from bact_twin_architecture.data_model.identifiers import DevicePropertyID
 
 logger = get_logger()

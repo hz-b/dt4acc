@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import numpy as np
 from bact_twin_architecture.data_model.identifiers import DevicePropertyID
 
-from .handlers import handle_device_update, update_manager
+from ...core.bl.handlers import handle_device_update, update_manager
 from ..data.constants import config, special_pvs, cavity_names
 from ..data.querries import (
     get_unique_power_converters,

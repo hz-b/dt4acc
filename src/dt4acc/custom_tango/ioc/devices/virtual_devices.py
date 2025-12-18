@@ -27,7 +27,6 @@ import numpy as np
 from tango.server import (
     Device,
     attribute,
-    command,
     device_property,
     AttrDataFormat,
     AttrWriteType,
@@ -35,12 +34,12 @@ from tango.server import (
 from tango import DevState, DevFailed
 
 from dt4acc.core.utils.logger import get_logger
-from dt4acc.custom_epics.ioc.handlers import update_manager, handle_device_update
+from dt4acc.core.bl.handlers import update_manager, handle_device_update
 from bact_twin_architecture.data_model.identifiers import (
     LatticeElementPropertyID,
     DevicePropertyID,
 )
-from dt4acc.custom_epics.data.constants import cavity_names, global_settings
+from dt4acc.custom_epics.data.constants import global_settings
 
 logger = get_logger()
 
