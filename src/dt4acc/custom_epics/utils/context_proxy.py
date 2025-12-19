@@ -12,3 +12,11 @@ class ContextProxy:
             self.context.put(*args, **kwargs),
             timeout=timeout
         )
+
+    async def get(self, id_: str, timeout: float = 5) -> [int, float]:
+        """
+
+        Todo:
+            add typing for what all types that could be returned
+        """
+        return await asyncio.wait_for(self.context.get(id_), timeout=timeout)
