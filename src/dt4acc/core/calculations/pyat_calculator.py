@@ -44,11 +44,17 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
         acc (at.Lattice): The AT lattice.
         machine (object): Machine object with properties.
         executor (ThreadPoolExecutor): Executor to handle parallel computation.
+        closed: if the machine is closed
+
+    Todo:
+        review if machine needs to be passed here. The object needs
+        only much less information
     """
 
-    def __init__(self, acc):
+    def __init__(self, acc, closed=True):
         self.acc = acc.ring
         self.machine = acc.machine
+        self.closed=closed
         self.executor = ThreadPoolExecutor(max_workers=2)  # Limit to prevent over-utilization
 
 
@@ -71,7 +77,7 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
             'dispersion': np.array([0.013117, -0.031177, 0, 0])
         }
         try:
-            if self.machine.closed:  # this means it is a ring
+            if self.closed:  # this means it is a ring
                 _, summary, twiss = self.acc.get_optics(at.All)
             else:
                 _, summary, twiss = self.acc.get_optics(at.All, twiss_in=twiss_in)  # for transfer line
