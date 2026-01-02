@@ -286,34 +286,16 @@ class OtherPVsDevice(Device):
 
         self.values = {}
 
-        
-        try:
-            if isinstance(global_settings, list):
-          
-                for entry in global_settings:
-                    if isinstance(entry, dict) and "element" in entry and "property" in entry:
-                        elem = entry["element"]
-                        prop = entry["property"]
-                        try:
-                            val = update_manager.peek_engine(
-                                LatticeElementPropertyID(elem, prop)
-                            )
-                            self.values[prop] = float(val)
-                        except Exception:
-                            self.values[prop] = 0.0
-            elif isinstance(global_settings, dict):
-                self.values = {"temperature": 0.0, "vacuum": 0.0}
-            else:
-                self.values = {"temperature": 0.0, "vacuum": 0.0}
-        except Exception as e:
-          
-            self.values = {"temperature": 0.0, "vacuum": 0.0}
-
-   
-        if "temperature" not in self.values:
-            self.values["temperature"] = 0.0
-        if "vacuum" not in self.values:
-            self.values["vacuum"] = 0.0
+        for entry in global_settings:
+            elem = entry["element"]
+            prop = entry["property"]
+            try:
+                val = update_manager.peek_engine(
+                    LatticeElementPropertyID(elem, prop)
+                )
+                self.values[prop] = float(val)
+            except Exception:
+                self.values[prop] = 0.0
 
         self.set_state(DevState.ON)
 
