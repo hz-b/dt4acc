@@ -18,7 +18,7 @@ def get_view_instance():
         return _view_instance
 
     prefix = os.environ.get("DT4ACC_PREFIX", getpass.getuser())
-    server_type = os.environ.get("server", "epics").lower()
+    server_type = os.environ.get("server", "tango").lower()
 
     if server_type == "tango":
         from ...custom_tango.views.calculation_result_view import ResultView
