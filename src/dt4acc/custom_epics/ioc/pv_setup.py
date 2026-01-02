@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import numpy as np
 from bact_twin_architecture.data_model.identifiers import DevicePropertyID
 
-from ...core.bl.handlers import handle_device_update, update_manager
+from ...core.bl.handlers import handle_device_update, get_update_manager
 from ..data.constants import config, special_pvs, cavity_names
 from ..data.querries import (
     get_unique_power_converters,
@@ -39,6 +39,7 @@ def initialize_magnet_pvs(builder, magnet):
     magnet_name = magnet["name"]
     # Create an element representing the magnet
     # Create PVs and link to update logic
+    update_manager = get_update_manager()
     val = update_manager.peek_engine(
         LatticeElementPropertyID(element_name=magnet_name, property="main_strength",uuid=magnet["uuid"])
     )
@@ -111,6 +112,7 @@ def add_pc_pvs(builder, pc_name, prefix):
 
     # Create power converter setpoint and readback PVs
     # Todo: put it to power converters directly
+    update_manager = get_update_manager()
     vals = update_manager.device_value_from_peeking_engine(
         DevicePropertyID(device_name=pc_name, property="set_current")
     )
@@ -199,6 +201,7 @@ def initialize_master_clock_pvs(builder):
         Foresee dedicated variables for allowing only a difference shift
         Provide the frequency the code starts with
     """
+    update_manager = get_update_manager()
     vals = update_manager.device_value_from_peeking_engine(
         DevicePropertyID(device_name="master_clock", property="reference_frequency")
     )
@@ -268,6 +271,7 @@ def initialize_cavity_pvs(builder):
     """
 
     for cavity_name in cavity_names:
+        update_manager = get_update_manager()
         vals = update_manager.device_value_from_peeking_engine(
             DevicePropertyID(device_name=cavity_name, property="frequency")
         )

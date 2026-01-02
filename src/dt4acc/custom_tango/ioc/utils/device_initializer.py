@@ -4,7 +4,7 @@ from tango import DeviceProxy, Database, DbDevInfo
 from ....core.utils.logger import get_logger
 from dt4acc.data_model.identifiers import LatticeElementPropertyID, DevicePropertyID
 from dt4acc.custom_epics.data.querries import get_unique_power_converters, get_magnets_per_power_converters
-from dt4acc.core.bl.handlers import update_manager
+from dt4acc.core.bl.handlers import get_update_manager
 from dt4acc.custom_tango.server_config import (
     SERVER_INSTANCE,
     DEVICE_NAME_FORMAT,
@@ -256,6 +256,7 @@ class DeviceInitializer:
         """
         try:
             # Update the value in the update manager
+            update_manager = get_update_manager()
             update_manager.update_value(device_name, property_id, value)
             
             # Get device proxy
@@ -292,6 +293,7 @@ def initialize_magnet_device(device_name: str, magnet_data: dict) -> DeviceProxy
         k_value = magnet_data.get("k", 0.0)
         
         # Get initial values from update manager
+        update_manager = get_update_manager()
         val = update_manager.peek_engine(
             LatticeElementPropertyID(element_name=magnet_name, property="main_strength")
         )
@@ -322,6 +324,8 @@ def initialize_power_converter_device(pc_name: str, associated_magnets: List[dic
     """
     try:
         # Get initial current value from update manager
+
+        update_manager = get_update_manager()
         vals = update_manager.device_value_from_peeking_engine(
             DevicePropertyID(device_name=pc_name, property="set_current")
         )

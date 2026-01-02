@@ -34,7 +34,7 @@ from tango.server import (
 from tango import DevState, DevFailed
 
 from dt4acc.core.utils.logger import get_logger
-from dt4acc.core.bl.handlers import update_manager, handle_device_update
+from dt4acc.core.bl.handlers import get_update_manager, handle_device_update
 from bact_twin_architecture.data_model.identifiers import (
     LatticeElementPropertyID,
     DevicePropertyID,
@@ -108,6 +108,7 @@ class TwissOrbitDevice(Device, AsyncMixin):
         Fetch twiss + orbit from dt4acc.
         """
         try:
+            update_manager = get_update_manager()
             self.orbit_x = np.asarray(
                 update_manager.peek_engine(
                     LatticeElementPropertyID("ORBIT", "x")
@@ -203,6 +204,7 @@ class BPMManagerDevice(Device, AsyncMixin):
 
     def _refresh(self):
         try:
+            update_manager = get_update_manager()
             self.bpm_names = update_manager.peek_engine(
                 LatticeElementPropertyID("BPM", "names")
             )
@@ -248,6 +250,7 @@ class TuneDevice(Device):
         logger.info("Initializing TuneDevice")
 
         try:
+            update_manager = get_update_manager()
             self.tune_x = float(
                 update_manager.peek_engine(LatticeElementPropertyID("TUNE", "x"))
             )
@@ -290,6 +293,7 @@ class OtherPVsDevice(Device):
             elem = entry["element"]
             prop = entry["property"]
             try:
+                update_manager = get_update_manager()
                 val = update_manager.peek_engine(
                     LatticeElementPropertyID(elem, prop)
                 )
@@ -324,6 +328,7 @@ class MasterClockDevice(Device):
         logger.info("Initializing MasterClockDevice")
 
         try:
+            update_manager = get_update_manager()
             val = update_manager.device_value_from_peeking_engine(
                 DevicePropertyID("master_clock", "reference_frequency")
             )
@@ -365,6 +370,7 @@ class CavityDevice(Device):
         logger.info(f"Initializing CavityDevice: {self.get_name()}")
 
         try:
+            update_manager = get_update_manager()
             val = update_manager.device_value_from_peeking_engine(
                 DevicePropertyID(self.name, "frequency")
             )

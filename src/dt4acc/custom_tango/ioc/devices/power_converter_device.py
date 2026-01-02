@@ -3,7 +3,7 @@ from tango.server import Device, attribute, device_property, AttrWriteType
 import numpy as np
 
 from dt4acc.core.utils.logger import get_logger
-from dt4acc.core.bl.handlers import update_manager, handle_device_update
+from dt4acc.core.bl.handlers import get_update_manager, handle_device_update
 from bact_twin_architecture.data_model.identifiers import DevicePropertyID
 
 logger = get_logger()
@@ -40,6 +40,7 @@ class PowerConverterDevice(Device):
 
         # Try reading current from dt4acc
         try:
+            update_manager = get_update_manager()
             val = update_manager.device_value_from_peeking_engine(
                 DevicePropertyID(self.pc_name, "set_current")
             )

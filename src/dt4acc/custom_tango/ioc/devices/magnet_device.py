@@ -5,7 +5,7 @@ import asyncio
 import threading
 
 from ....core.utils.logger import get_logger
-from ....core.bl.handlers import update_manager, handle_device_update
+from ....core.bl.handlers import get_update_manager, handle_device_update
 from bact_twin_architecture.data_model.identifiers import LatticeElementPropertyID
 
 logger = get_logger()
@@ -60,6 +60,7 @@ class MagnetDevice(Device):
 
         # Attempt to read main_strength; if missing fallback to 0.0
         try:
+            update_manager = get_update_manager()
             val = update_manager.peek_engine(
                 LatticeElementPropertyID(self.magnet_name, "main_strength")
             )
