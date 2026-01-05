@@ -195,6 +195,24 @@ def register_all_devices():
     except Exception as e:
         logger.error(f"❌ Failed to register TuneDevice: {e}")
 
+    # BPM Manager device
+    bpm_manager_name = "PHYSICS/SOLEIL/BPM_MANAGER"
+    try:
+        domain, family, _ = _split_domain_family_member(bpm_manager_name)
+        server_name = domain
+        instance_name = family
+        server_str = f"{server_name}/{instance_name}"
+        unique_servers.add((server_name, instance_name))
+
+        db_dev = DbDevInfo()
+        db_dev._class = "BPMManagerDevice"
+        db_dev.server = server_str
+        db_dev.name = bpm_manager_name
+        db.add_device(db_dev)
+        logger.info(f" Registered virtual device {bpm_manager_name} (class=BPMManagerDevice, server={server_str})")
+    except Exception as e:
+        logger.error(f" Failed to register BPMManagerDevice: {e}")
+
     # Cavities: SOLEIL/RF/CAVH1T8R, etc.
     for cav in cavity_names:
         cav_name = f"SOLEIL/RF/{cav}"
