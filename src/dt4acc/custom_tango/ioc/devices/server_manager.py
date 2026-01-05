@@ -19,8 +19,12 @@ def main():
 
     # 2) spawn one process per server
     procs = []
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    single_server_path = os.path.join(script_dir, "single_server.py")
+    
     for server_name, instance_name in servers:
-        cmd = [sys.executable, "-u", "single_server.py", server_name, instance_name]
+        cmd = [sys.executable, "-u", single_server_path, server_name, instance_name]
+
         logger.info(f"Starting process: {' '.join(cmd)}")
 
         p = subprocess.Popen(

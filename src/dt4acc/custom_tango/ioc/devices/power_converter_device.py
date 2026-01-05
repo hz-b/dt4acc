@@ -1,10 +1,12 @@
 from tango import DevState, DevFailed
 from tango.server import Device, attribute, device_property, AttrWriteType
 import numpy as np
+import asyncio
 
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.core.bl.handlers import get_update_manager, handle_device_update
 from bact_twin_architecture.data_model.identifiers import DevicePropertyID
+from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
 
 logger = get_logger()
 
@@ -38,7 +40,10 @@ class PowerConverterDevice(Device):
 
         logger.info(f"Initializing PowerConverterDevice: {self.pc_name}")
 
-        # Try reading current from dt4acc
+        # Use shared event loop to avoid exhausting file descriptors
+        self._loop = get_shared_event_loop()
+
+    
         try:
             update_manager = get_update_manager()
             val = update_manager.device_value_from_peeking_engine(
@@ -77,10 +82,20 @@ class PowerConverterDevice(Device):
     def voltage(self):
         return self._voltage
 
+    # ------------------------------------------------------------------
+    # Async helpers
+    # ------------------------------------------------------------------
+    def _async(self, coro):
+        try:
+            fut = asyncio.run_coroutine_threadsafe(coro, self._loop)
+            return fut.result(timeout=10)
+        except Exception as e:
+            raise DevFailed(str(e))
+
     # ------------------------- Helpers -------------------------
 
     def _async_update(self, prop, value):
         try:
-            handle_device_update(self.pc_name, prop, value)
+            self._async(handle_device_update(self.pc_name, prop, value))
         except Exception as e:
             raise DevFailed(str(e))

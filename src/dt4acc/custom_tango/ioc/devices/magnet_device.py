@@ -2,11 +2,11 @@ from tango import DevState, DevFailed
 from tango.server import Device, attribute, command, device_property, AttrWriteType
 
 import asyncio
-import threading
 
 from ....core.utils.logger import get_logger
 from ....core.bl.handlers import get_update_manager, handle_device_update
 from bact_twin_architecture.data_model.identifiers import LatticeElementPropertyID
+from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
 
 logger = get_logger()
 
@@ -53,10 +53,8 @@ class MagnetDevice(Device):
 
         logger.info(f"Initializing MagnetDevice: {self.magnet_name}")
 
-        # Setup async loop for EPICS/dt4acc backend
-        self._loop = asyncio.new_event_loop()
-        self._t = threading.Thread(target=self._run_loop, daemon=True)
-        self._t.start()
+        # Use shared event loop to avoid exhausting file descriptors
+        self._loop = get_shared_event_loop()
 
         # Attempt to read main_strength; if missing fallback to 0.0
         try:
@@ -78,10 +76,6 @@ class MagnetDevice(Device):
     # ------------------------------------------------------------------
     # Async helpers
     # ------------------------------------------------------------------
-    def _run_loop(self):
-        asyncio.set_event_loop(self._loop)
-        self._loop.run_forever()
-
     def _async(self, coro):
         try:
             fut = asyncio.run_coroutine_threadsafe(coro, self._loop)
