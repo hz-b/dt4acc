@@ -20,27 +20,11 @@ These devices:
 
 """
 
-import asyncio
-import threading
-import numpy as np
-
-from tango.server import (
-    Device,
-    attribute,
-    device_property,
-    AttrDataFormat,
-    AttrWriteType,
-)
-from tango import DevState, DevFailed
-
-from dt4acc.core.utils.logger import get_logger
-from dt4acc.core.bl.handlers import get_update_manager, handle_device_update
 from bact_twin_architecture.data_model.identifiers import (
     LatticeElementPropertyID,
     DevicePropertyID,
 )
-from dt4acc.custom_epics.data.constants import global_settings
-from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
+from dt4acc.core.utils.logger import get_logger
 
 logger = get_logger()
 
@@ -48,14 +32,20 @@ logger = get_logger()
 # Helper mixin for all async devices
 # ===============================================================
 
-class AsyncMixin:
-    """
-    Shared async loop helper for virtual devices.
-    Uses a shared event loop to avoid exhausting file descriptors.
-    """
+import numpy as np
+import asyncio
+from tango import DevState, DevFailed, DevDouble, EventType  # <--- Added DevDouble
+from tango.server import Device, attribute, command, AttrDataFormat, device_property, AttrWriteType
 
+from dt4acc.core.bl.handlers import get_update_manager, handle_device_update
+from dt4acc.core.utils.logger import get_logger
+from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
+
+logger = get_logger()
+
+
+class AsyncMixin:
     def _start_async(self):
-        # Use shared event loop instead of creating a new one per device
         self._loop = get_shared_event_loop()
 
     def _async(self, coro):
@@ -66,338 +56,144 @@ class AsyncMixin:
             raise DevFailed(str(e))
 
 
-# ===============================================================
-# 1. TWISS + ORBIT DEVICE
-# ===============================================================
-
 class TwissOrbitDevice(Device, AsyncMixin):
-    """
-    Virtual device for Twiss and Orbit:
+    MAX_ELEMS = 6000
 
-        Tango device: SOLEIL/PHYSICS/TWISS_ORBIT
-        Server:       PHYSICS/SOLEIL
-
-    Provides:
-        orbit_x[], orbit_y[]
-        twiss_beta_x[], twiss_alpha_x[]
-        twiss_beta_y[], twiss_alpha_y[]
-    """
+    def __init__(self, cl, name):
+        super().__init__(cl, name)
+        self._orbit_x = np.array([0.0], dtype=np.float64)
+        self._orbit_y = np.array([0.0], dtype=np.float64)
+        self._beta_x = np.array([0.0], dtype=np.float64)
+        self._alpha_x = np.array([0.0], dtype=np.float64)
+        self._nu_x = np.array([0.0], dtype=np.float64)
+        self._beta_y = np.array([0.0], dtype=np.float64)
+        self._alpha_y = np.array([0.0], dtype=np.float64)
+        self._nu_y = np.array([0.0], dtype=np.float64)
 
     def init_device(self):
         super().init_device()
-        self._start_async()
-
-        logger.info("Initializing TwissOrbitDevice")
-
-        # Initialize empty arrays 
-        self.orbit_x = np.zeros(1)
-        self.orbit_y = np.zeros(1)
-        self.beta_x  = np.zeros(1)
-        self.alpha_x = np.zeros(1)
-        self.beta_y  = np.zeros(1)
-        self.alpha_y = np.zeros(1)
-
-        # Initialize writable attributes 
-        self.beam_orbit_x = np.zeros(1)
-        self.beam_orbit_y = np.zeros(1)
-        self.beam_orbit_names = []
-        self.beam_orbit_found = 0
-        self.beam_orbit_x0 = np.zeros(1)
-        
-        self.beam_twiss_x_tune = 0.0
-        self.beam_twiss_x_alpha = np.zeros(1)
-        self.beam_twiss_x_beta = np.zeros(1)
-        self.beam_twiss_x_nu = np.zeros(1)
-        self.beam_twiss_y_tune = 0.0
-        self.beam_twiss_y_alpha = np.zeros(1)
-        self.beam_twiss_y_beta = np.zeros(1)
-        self.beam_twiss_y_nu = np.zeros(1)
-        self.beam_twiss_names = []
-
-        self._refresh()
         self.set_state(DevState.ON)
 
-    def _refresh(self):
+        # Initialize as lists containing at least one float
+
+        self._orbit_x = np.array([0.0], dtype=np.float64)
+        self._orbit_y = np.array([0.0], dtype=np.float64)
+        self._beta_x = np.array([0.0], dtype=np.float64)
+        self._alpha_x = np.array([0.0], dtype=np.float64)
+        self._nu_x = np.array([0.0], dtype=np.float64)
+        self._beta_y = np.array([0.0], dtype=np.float64)
+        self._alpha_y = np.array([0.0], dtype=np.float64)
+        self._nu_y = np.array([0.0], dtype=np.float64)
+
+        # Enable change events
+        for a in ("orbit_x", "orbit_y", "beta_x", "alpha_x", "nu_x", "beta_y", "alpha_y", "nu_y"):
+            self.set_change_event(a, True, False)
+
+    @staticmethod
+    def _to_float_array(v):
         """
-        Fetch twiss + orbit from dt4acc.
+        Always returns numpy array with dtype=np.float64
         """
+        if v is None:
+            return np.array([0.0], dtype=np.float64)
+
+        if isinstance(v, np.ndarray):
+            return v.astype(np.float64, copy=False).ravel()
+
+        # list/tuple/scalar
         try:
-            update_manager = get_update_manager()
-            self.orbit_x = np.asarray(
-                update_manager.peek_engine(
-                    LatticeElementPropertyID("ORBIT", "x")
-                )
-            )
-            self.orbit_y = np.asarray(
-                update_manager.peek_engine(
-                    LatticeElementPropertyID("ORBIT", "y")
-                )
-            )
+            arr = np.array(v, dtype=np.float64)
+            return arr.ravel() if arr.ndim > 1 else arr
+        except:
+            return np.array([float(v)], dtype=np.float64)
 
-            self.beta_x = np.asarray(
-                update_manager.peek_engine(
-                    LatticeElementPropertyID("TWISS", "beta_x")
-                )
-            )
-            self.alpha_x = np.asarray(
-                update_manager.peek_engine(
-                    LatticeElementPropertyID("TWISS", "alpha_x")
-                )
-            )
+    # -------------------------
+    # Attributes: Explicitly use DevDouble
+    # -------------------------
+    @attribute(dtype=DevDouble, dformat=AttrDataFormat.SPECTRUM, max_dim_x=MAX_ELEMS)
+    def orbit_x(self):
+        return self._orbit_x
 
-            self.beta_y = np.asarray(
-                update_manager.peek_engine(
-                    LatticeElementPropertyID("TWISS", "beta_y")
-                )
-            )
-            self.alpha_y = np.asarray(
-                update_manager.peek_engine(
-                    LatticeElementPropertyID("TWISS", "alpha_y")
-                )
-            )
+    @attribute(dtype=DevDouble, dformat=AttrDataFormat.SPECTRUM, max_dim_x=MAX_ELEMS)
+    def orbit_y(self):
+        return self._orbit_y
 
-        except Exception as e:
-            logger.error(f"TwissOrbitDevice refresh failed: {e}")
+    @attribute(dtype=DevDouble, dformat=AttrDataFormat.SPECTRUM, max_dim_x=MAX_ELEMS)
+    def beta_x(self):
+        return self._beta_x
 
-    # ------- Tango Attributes -------
-    
-    # Read-only attributes (from engine)
-    @attribute(dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM)
-    def orbit_x_attr(self):
-        return self.orbit_x
+    @attribute(dtype=DevDouble, dformat=AttrDataFormat.SPECTRUM, max_dim_x=MAX_ELEMS)
+    def alpha_x(self):
+        return self._alpha_x
 
-    @attribute(dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM)
-    def orbit_y_attr(self):
-        return self.orbit_y
+    @attribute(dtype=DevDouble, dformat=AttrDataFormat.SPECTRUM, max_dim_x=MAX_ELEMS)
+    def nu_x(self):
+        return self._nu_x
 
-    @attribute(dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM)
-    def beta_x_attr(self):
-        return self.beta_x
+    @attribute(dtype=DevDouble, dformat=AttrDataFormat.SPECTRUM, max_dim_x=MAX_ELEMS)
+    def beta_y(self):
+        return self._beta_y
 
-    @attribute(dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM)
-    def alpha_x_attr(self):
-        return self.alpha_x
+    @attribute(dtype=DevDouble, dformat=AttrDataFormat.SPECTRUM, max_dim_x=MAX_ELEMS)
+    def alpha_y(self):
+        return self._alpha_y
 
-    @attribute(dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM)
-    def beta_y_attr(self):
-        return self.beta_y
+    @attribute(dtype=DevDouble, dformat=AttrDataFormat.SPECTRUM, max_dim_x=MAX_ELEMS)
+    def nu_y(self):
+        return self._nu_y
 
-    @attribute(dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM)
-    def alpha_y_attr(self):
-        return self.alpha_y
+    # -------------------------
+    # Commands: STRICT Type Enforcement
+    # -------------------------
 
-    # Writable attributes  Orbit
-    @attribute(name="beam/orbit/x", dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM, access=AttrWriteType.READ_WRITE)
-    def beam_orbit_x_attr(self):
-        if isinstance(self.beam_orbit_x, np.ndarray):
-            return [float(x) for x in self.beam_orbit_x.astype(float).tolist()]
-        else:
-            return [float(x) for x in list(self.beam_orbit_x)]
-    
-    @beam_orbit_x_attr.write
-    def beam_orbit_x_attr(self, value):
-        # Tango passes lists of Python floats for SPECTRUM attributes
-        if isinstance(value, np.ndarray):
-            self.beam_orbit_x = value.astype(np.float64)
-        elif isinstance(value, (list, tuple)):
-            self.beam_orbit_x = np.asarray([float(v) for v in value], dtype=np.float64)
-        else:
-            self.beam_orbit_x = np.asarray([float(value)], dtype=np.float64)
+    @command(dtype_in=(float,))
+    def push_orbit_x(self, values):
+        arr = np.asarray(values, dtype=np.float64).ravel()
+        self._orbit_x = arr
+        self.push_change_event("orbit_x", arr)  # numpy float64 is fine for DevVarDoubleArray
 
-    @attribute(name="beam/orbit/y", dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM, access=AttrWriteType.READ_WRITE)
-    def beam_orbit_y_attr(self):
-        # Ensure pure Python floats not numpy types
-        if isinstance(self.beam_orbit_y, np.ndarray):
-            return [float(x) for x in self.beam_orbit_y.astype(float).tolist()]
-        else:
-            return [float(x) for x in list(self.beam_orbit_y)]
-    
-    @beam_orbit_y_attr.write
-    def beam_orbit_y_attr(self, value):
-        # Tango passes lists of Python floats for SPECTRUM attributes
-        if isinstance(value, np.ndarray):
-            self.beam_orbit_y = value.astype(np.float64)
-        elif isinstance(value, (list, tuple)):
-            self.beam_orbit_y = np.asarray([float(v) for v in value], dtype=np.float64)
-        else:
-            self.beam_orbit_y = np.asarray([float(value)], dtype=np.float64)
+    @command(dtype_in=(float,))
+    def push_orbit_y(self, values):
+        arr = np.asarray(values, dtype=np.float64).ravel()
+        self._orbit_y = arr
+        self.push_change_event("orbit_y", arr)  # numpy float64 is fine for DevVarDoubleArray
 
-    @attribute(name="beam/orbit/names", dtype=str, max_dim_x=4096, format=AttrDataFormat.SPECTRUM, access=AttrWriteType.READ_WRITE)
-    def beam_orbit_names_attr(self):
-        return self.beam_orbit_names
-    
-    @beam_orbit_names_attr.write
-    def beam_orbit_names_attr(self, value):
-        # Tango passes string arrays as list of strings
-        if isinstance(value, (list, tuple)):
-            self.beam_orbit_names = [str(v) for v in value]
-        else:
-            self.beam_orbit_names = [str(value)]
+    @command(dtype_in=(float,))
+    def push_beta_x(self, values):
+        arr = np.asarray(values, dtype=np.float64).ravel()
+        self._beta_x = arr
+        self.push_change_event("beta_x", arr)  # numpy float64 is fine for DevVarDoubleArray
 
-    @attribute(name="beam/orbit/found", dtype=int, access=AttrWriteType.READ_WRITE)
-    def beam_orbit_found_attr(self):
-        return self.beam_orbit_found
-    
-    @beam_orbit_found_attr.write
-    def beam_orbit_found_attr(self, value):
-        self.beam_orbit_found = int(value)
-    
-    @attribute(name="beam/orbit/x0", dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM, access=AttrWriteType.READ_WRITE)
-    def beam_orbit_x0_attr(self):
-        # Ensure pure Python floats, not numpy types
-        if isinstance(self.beam_orbit_x0, np.ndarray):
-            return [float(x) for x in self.beam_orbit_x0.astype(float).tolist()]
-        else:
-            return [float(x) for x in list(self.beam_orbit_x0)]
-    
-    @beam_orbit_x0_attr.write
-    def beam_orbit_x0_attr(self, value):
-        # Tango passes lists of Python floats for SPECTRUM attributes
-        if isinstance(value, np.ndarray):
-            self.beam_orbit_x0 = value.astype(np.float64)
-        elif isinstance(value, (list, tuple)):
-            self.beam_orbit_x0 = np.asarray([float(v) for v in value], dtype=np.float64)
-        else:
-            self.beam_orbit_x0 = np.asarray([float(value)], dtype=np.float64)
+    @command(dtype_in=(float,))
+    def push_alpha_x(self, values):
+        arr = np.asarray(values, dtype=np.float64).ravel()
+        self._alpha_x = arr
+        self.push_change_event("alpha_x", arr)  # numpy float64 is fine for DevVarDoubleArray
 
-    # Writable attributes  - Twiss
-    @attribute(name="beam/twiss/x/tune", dtype=float, access=AttrWriteType.READ_WRITE)
-    def beam_twiss_x_tune_attr(self):
-        return self.beam_twiss_x_tune
-    
-    @beam_twiss_x_tune_attr.write
-    def beam_twiss_x_tune_attr(self, value):
-        self.beam_twiss_x_tune = float(value)
-    
-    @attribute(name="beam/twiss/x/alpha", dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM, access=AttrWriteType.READ_WRITE)
-    def beam_twiss_x_alpha_attr(self):
-        # Ensure pure Python floats, not numpy types
-        if isinstance(self.beam_twiss_x_alpha, np.ndarray):
-            return [float(x) for x in self.beam_twiss_x_alpha.astype(float).tolist()]
-        else:
-            return [float(x) for x in list(self.beam_twiss_x_alpha)]
-    
-    @beam_twiss_x_alpha_attr.write
-    def beam_twiss_x_alpha_attr(self, value):
-        # Tango passes lists of Python floats for SPECTRUM attributes
-        if isinstance(value, np.ndarray):
-            self.beam_twiss_x_alpha = value.astype(np.float64)
-        elif isinstance(value, (list, tuple)):
-            self.beam_twiss_x_alpha = np.asarray([float(v) for v in value], dtype=np.float64)
-        else:
-            self.beam_twiss_x_alpha = np.asarray([float(value)], dtype=np.float64)
-    
-    @attribute(name="beam/twiss/x/beta", dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM, access=AttrWriteType.READ_WRITE)
-    def beam_twiss_x_beta_attr(self):
-        # Ensure pure Python floats, not numpy types
-        if isinstance(self.beam_twiss_x_beta, np.ndarray):
-            return [float(x) for x in self.beam_twiss_x_beta.astype(float).tolist()]
-        else:
-            return [float(x) for x in list(self.beam_twiss_x_beta)]
-    
-    @beam_twiss_x_beta_attr.write
-    def beam_twiss_x_beta_attr(self, value):
-        # Tango passes lists of Python floats for SPECTRUM attributes
-        if isinstance(value, np.ndarray):
-            self.beam_twiss_x_beta = value.astype(np.float64)
-        elif isinstance(value, (list, tuple)):
-            self.beam_twiss_x_beta = np.asarray([float(v) for v in value], dtype=np.float64)
-        else:
-            self.beam_twiss_x_beta = np.asarray([float(value)], dtype=np.float64)
-    
-    @attribute(name="beam/twiss/x/nu", dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM, access=AttrWriteType.READ_WRITE)
-    def beam_twiss_x_nu_attr(self):
-        # Ensure pure Python floats, not numpy types
-        if isinstance(self.beam_twiss_x_nu, np.ndarray):
-            return [float(x) for x in self.beam_twiss_x_nu.astype(float).tolist()]
-        else:
-            return [float(x) for x in list(self.beam_twiss_x_nu)]
-    
-    @beam_twiss_x_nu_attr.write
-    def beam_twiss_x_nu_attr(self, value):
-        # Tango passes lists of Python floats for SPECTRUM attributes
-        if isinstance(value, np.ndarray):
-            self.beam_twiss_x_nu = value.astype(np.float64)
-        elif isinstance(value, (list, tuple)):
-            self.beam_twiss_x_nu = np.asarray([float(v) for v in value], dtype=np.float64)
-        else:
-            self.beam_twiss_x_nu = np.asarray([float(value)], dtype=np.float64)
-    
-    @attribute(name="beam/twiss/y/tune", dtype=float, access=AttrWriteType.READ_WRITE)
-    def beam_twiss_y_tune_attr(self):
-        return self.beam_twiss_y_tune
-    
-    @beam_twiss_y_tune_attr.write
-    def beam_twiss_y_tune_attr(self, value):
-        self.beam_twiss_y_tune = float(value)
-    
-    @attribute(name="beam/twiss/y/alpha", dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM, access=AttrWriteType.READ_WRITE)
-    def beam_twiss_y_alpha_attr(self):
-        # Ensure pure Python floats, not numpy types
-        if isinstance(self.beam_twiss_y_alpha, np.ndarray):
-            return [float(x) for x in self.beam_twiss_y_alpha.astype(float).tolist()]
-        else:
-            return [float(x) for x in list(self.beam_twiss_y_alpha)]
-    
-    @beam_twiss_y_alpha_attr.write
-    def beam_twiss_y_alpha_attr(self, value):
-        # Tango passes lists of Python floats for SPECTRUM attributes
-        if isinstance(value, np.ndarray):
-            self.beam_twiss_y_alpha = value.astype(np.float64)
-        elif isinstance(value, (list, tuple)):
-            self.beam_twiss_y_alpha = np.asarray([float(v) for v in value], dtype=np.float64)
-        else:
-            self.beam_twiss_y_alpha = np.asarray([float(value)], dtype=np.float64)
-    
-    @attribute(name="beam/twiss/y/beta", dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM, access=AttrWriteType.READ_WRITE)
-    def beam_twiss_y_beta_attr(self):
-        # Ensure pure Python floats, not numpy types
-        if isinstance(self.beam_twiss_y_beta, np.ndarray):
-            return [float(x) for x in self.beam_twiss_y_beta.astype(float).tolist()]
-        else:
-            return [float(x) for x in list(self.beam_twiss_y_beta)]
-    
-    @beam_twiss_y_beta_attr.write
-    def beam_twiss_y_beta_attr(self, value):
-        # Tango passes lists of Python floats for SPECTRUM attributes
-        if isinstance(value, np.ndarray):
-            self.beam_twiss_y_beta = value.astype(np.float64)
-        elif isinstance(value, (list, tuple)):
-            self.beam_twiss_y_beta = np.asarray([float(v) for v in value], dtype=np.float64)
-        else:
-            self.beam_twiss_y_beta = np.asarray([float(value)], dtype=np.float64)
-    
-    @attribute(name="beam/twiss/y/nu", dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM, access=AttrWriteType.READ_WRITE)
-    def beam_twiss_y_nu_attr(self):
-        # Ensure pure Python floats, not numpy types
-        if isinstance(self.beam_twiss_y_nu, np.ndarray):
-            return [float(x) for x in self.beam_twiss_y_nu.astype(float).tolist()]
-        else:
-            return [float(x) for x in list(self.beam_twiss_y_nu)]
-    
-    @beam_twiss_y_nu_attr.write
-    def beam_twiss_y_nu_attr(self, value):
-        # Tango passes lists of Python floats for SPECTRUM attributes
-        if isinstance(value, np.ndarray):
-            self.beam_twiss_y_nu = value.astype(np.float64)
-        elif isinstance(value, (list, tuple)):
-            self.beam_twiss_y_nu = np.asarray([float(v) for v in value], dtype=np.float64)
-        else:
-            self.beam_twiss_y_nu = np.asarray([float(value)], dtype=np.float64)
-    
-    @attribute(name="beam/twiss/names", dtype=str, max_dim_x=4096, format=AttrDataFormat.SPECTRUM, access=AttrWriteType.READ_WRITE)
-    def beam_twiss_names_attr(self):
-        return self.beam_twiss_names
-    
-    @beam_twiss_names_attr.write
-    def beam_twiss_names_attr(self, value):
-        # Tango passes string arrays as list of strings
-        if isinstance(value, (list, tuple)):
-            self.beam_twiss_names = [str(v) for v in value]
-        else:
-            self.beam_twiss_names = [str(value)]
+    @command(dtype_in=(float,))
+    def push_nu_x(self, values):
+        arr = np.asarray(values, dtype=np.float64).ravel()
+        self._nu_x = arr
+        self.push_change_event("nu_x", arr)  # numpy float64 is fine for DevVarDoubleArray
+
+    @command(dtype_in=(float,))
+    def push_beta_y(self, values):
+        arr = np.asarray(values, dtype=np.float64).ravel()
+        self._beta_y = arr
+        self.push_change_event("beta_y", arr)  # numpy float64 is fine for DevVarDoubleArray
+
+    @command(dtype_in=(float,))
+    def push_alpha_y(self, values):
+        arr = np.asarray(values, dtype=np.float64).ravel()
+        self._alpha_y = arr
+        self.push_change_event("alpha_y", arr)  # numpy float64 is fine for DevVarDoubleArray
 
 
+    @command(dtype_in=(float,))
+    def push_nu_y(self, values):
+        arr = np.asarray(values, dtype=np.float64).ravel()
+        self._nu_y = arr
+        self.push_change_event("nu_y", arr)  # numpy float64 is fine for DevVarDoubleArray
 
 # ===============================================================
 # 2. BPM MANAGER DEVICE
@@ -448,7 +244,7 @@ class BPMManagerDevice(Device, AsyncMixin):
         except Exception as e:
             logger.error(f"BPMManagerDevice refresh failed: {e}")
 
-    @attribute(dtype=str,  max_dim_x=4096, format=AttrDataFormat.SPECTRUM)
+    @attribute(dtype=str, max_dim_x=4096, format=AttrDataFormat.SPECTRUM)
     def bpm_names_attr(self):
         return self.bpm_names
 
@@ -493,7 +289,7 @@ class TuneDevice(Device):
     @attribute(dtype=float, access=AttrWriteType.READ_WRITE)
     def tune_x_attr(self):
         return self.tune_x
-    
+
     @tune_x_attr.write
     def tune_x_attr(self, value):
         self.tune_x = float(value)
@@ -501,7 +297,7 @@ class TuneDevice(Device):
     @attribute(dtype=float, access=AttrWriteType.READ_WRITE)
     def tune_y_attr(self):
         return self.tune_y
-    
+
     @tune_y_attr.write
     def tune_y_attr(self, value):
         self.tune_y = float(value)
@@ -527,7 +323,7 @@ class OtherPVsDevice(Device):
         self.values["vacuum"] = 0.0
         try:
             update_manager = get_update_manager()
-            
+
             try:
                 val = update_manager.peek_engine(
                     LatticeElementPropertyID("GLOBAL", "temperature")
@@ -535,8 +331,7 @@ class OtherPVsDevice(Device):
                 self.values["temperature"] = float(val)
             except Exception:
                 pass
-            
-           
+
             try:
                 val = update_manager.peek_engine(
                     LatticeElementPropertyID("GLOBAL", "vacuum")

@@ -1,34 +1,75 @@
 import asyncio
+from functools import partial
 
 import numpy as np
+from tango import DeviceProxy
 
+from .create_or_update_pv import update_or_create_pv
 from ...core.model.element_upate import ElementUpdate
 from ...core.model.orbit import Orbit
 from ...core.model.twiss import TwissWithAggregatedKValues
 from ...core.utils.logger import get_logger
-from .create_or_update_pv import update_or_create_pv
 
 logger = get_logger()
 
 
+def to_float_list(x) -> list[float]:
+    """
+    Convert anything array-like to a 1D Python list of Python floats.
+    Also sanitizes NaN/inf to 0.0.
+    """
+    arr = np.asarray(x, dtype=np.float64).ravel()
+    arr = np.nan_to_num(arr, nan=0.0, posinf=0.0, neginf=0.0)
+    # Ensure Python core floats (not numpy.float64) for maximum PyTango compatibility
+    return [float(v) for v in arr]
+
+
 async def update_orbit_pv(pv_name, orbit_result):
+    device = DeviceProxy(pv_name)
+
+    x_payload = to_float_list(orbit_result.x)
+    y_payload = to_float_list(orbit_result.y)
+
+    logger.info(f"orbit_x payload len={len(x_payload)} first3={x_payload[:3]}")
+    logger.info(f"orbit_y payload len={len(y_payload)} first3={y_payload[:3]}")
+
+    loop = asyncio.get_running_loop()
+
     try:
-        from .create_or_update_pv import update_orbit_pv as _update_orbit_pv
-        await _update_orbit_pv(pv_name, orbit_result)
+        await loop.run_in_executor(None, lambda: device.command_inout("push_orbit_x", x_payload))
+        logger.info("push_orbit_x SUCCESS")
     except Exception as e:
-        logger.error(f"Failed to update or create Orbit PV {pv_name}: {e}")
+        logger.error(f"push_orbit_x FAILED: {e}")
+        raise
+
+    try:
+        await loop.run_in_executor(None, lambda: device.command_inout("push_orbit_y", y_payload))
+        logger.info("push_orbit_y SUCCESS")
+    except Exception as e:
+        logger.error(f"push_orbit_y FAILED: {e}")
+        raise
 
 
 async def update_twiss_pv(pv_name, twiss_result):
-    tune_x = float(twiss_result.x.tune)
-    tune_y = float(twiss_result.y.tune)
+    device = DeviceProxy(pv_name)
 
-    try:
-        
-        from .create_or_update_pv import update_twiss_pv as _update_twiss_pv
-        await _update_twiss_pv(pv_name, twiss_result)
-    except Exception as e:
-        logger.warning("FAILED Updated twiss values: %s", e)
+    alpha_x_payload = to_float_list(twiss_result.x.alpha)
+    beta_x_payload  = to_float_list(twiss_result.x.beta)
+    nu_x_payload    = to_float_list(twiss_result.x.nu)
+
+    alpha_y_payload = to_float_list(twiss_result.y.alpha)
+    beta_y_payload  = to_float_list(twiss_result.y.beta)
+    nu_y_payload    = to_float_list(twiss_result.y.nu)
+
+    loop = asyncio.get_running_loop()
+
+    await loop.run_in_executor(None, lambda: device.command_inout("push_alpha_x", alpha_x_payload))
+    await loop.run_in_executor(None, lambda: device.command_inout("push_beta_x",  beta_x_payload))
+    await loop.run_in_executor(None, lambda: device.command_inout("push_nu_x",    nu_x_payload))
+    await loop.run_in_executor(None, lambda: device.command_inout("push_alpha_y", alpha_y_payload))
+    await loop.run_in_executor(None, lambda: device.command_inout("push_beta_y",  beta_y_payload))
+    await loop.run_in_executor(None, lambda: device.command_inout("push_nu_y",    nu_y_payload))
+
 
 
 class CalculationResultView:
@@ -37,7 +78,7 @@ class CalculationResultView:
 
     async def push_value(self, elm_update: ElementUpdate):
         if elm_update.property_name == "K":
-            
+
             await asyncio.sleep(0.0)
         else:
             property_name = 'x:set' if 'x' in elm_update.property_name else (
@@ -53,7 +94,7 @@ class CalculationResultView:
         else:
             # Use the standard registered device name
             device_name = "PHYSICS/SOLEIL/TWISS_ORBIT"
-        
+
         try:
             await update_orbit_pv(device_name, orbit_result)
         except Exception as exc:
@@ -70,5 +111,5 @@ class CalculationResultView:
 
         if twiss_result is None:
             return
-        
+
         await update_twiss_pv(device_name, twiss_result)

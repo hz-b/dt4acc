@@ -71,6 +71,8 @@ async def update_twiss_pv(pv_name, twiss_result):
             nu_y_py = [0.0]
         
         loop = asyncio.get_running_loop()
+        logger.debug(f"twiss result is: {twiss_result}, type: {type(tune_x)}")
+        logger.info(f"info twiss result is: {twiss_result}, type: {type(tune_x)}")
         try:
             await loop.run_in_executor(
                 None,
