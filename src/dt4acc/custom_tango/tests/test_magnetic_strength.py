@@ -1,68 +1,23 @@
-#!/usr/bin/env python3
-import sys
-import time
-from tango import DeviceProxy, DevFailed
-from dt4acc.core.utils.logger import get_logger
-from dt4acc.custom_epics.ioc.liasion_translation_manager import element_method
-from bact_twin_architecture.bl.bessyii_yellow_pages import bessyii_yellow_pages
 
-logger = get_logger()
 
-def test_cm_set(magnet_name: str = "VS3M2T6R"):
-    """
-    Test function
-    """
-    try:
-        print(f"\n[TEST] Testing Cm:set property for magnet: {magnet_name}")
-        
-        # Create device of the device
-        device = DeviceProxy(f"tango_server/test/MagnetDevice_{magnet_name}")
-        device.set_timeout_millis(10000)
-        print(f"  - Connected to device: {device.dev_name()}")
-        
-        # initial values
-        initial_strength = device.magnetic_strength
-        initial_readback = device.magnetic_strength_readback
-        print(f"\nInitial state:")
-        print(f"  - Cm:set = {initial_strength}")
-        print(f"  - Cm:rdbk = {initial_readback}")
-        
-        # Test  of values
-        test_values = [2.4, initial_strength]
-        
-        for value in test_values:
-            print(f"\nSetting Cm:set to {value}")
-            try:
-                # Setting new value
-                device.magnetic_strength = value
-                
-                # Waiting for update to complete
-                time.sleep(1.0)
-                
-                # Get updatedate values
-                current_strength = device.magnetic_strength
-                current_readback = device.magnetic_strength_readback
-                
-                print(f"Updated state:")
-                print(f"  - Cm:set = {current_strength}")
-                print(f"  - Cm:rdbk = {current_readback}")
-                
-                # Verify values
-                if abs(current_strength - value) > 1e-6:
-                    print(f"  - WARNING: Cm:set value mismatch. Expected {value}, got {current_strength}")
-                if abs(current_readback - value) > 1e-6:
-                    print(f"  - WARNING: Cm:rdbk value mismatch. Expected {value}, got {current_readback}")
-                
-            except Exception as e:
-                print(f"  - ERROR: Failed to set value {value}: {str(e)}")
-        
-        print("\n[TEST] Cm:set property test completed")
-        
-    except DevFailed as e:
-        print(f"\n[ERROR] Device error: {str(e)}")
-    except Exception as e:
-        print(f"\n[ERROR] Test failed: {str(e)}")
+from tango import Database
+
+
+def main() -> None:
+    db = Database()
+    devices = db.get_device_name("*", "*")  # all devices in the DB
+
+    removed = 0
+    for dev in devices:
+        try:
+            db.delete_device(dev)
+            print(f"Deleted {dev}")
+            removed += 1
+        except Exception as exc:
+            print(f"Failed to delete {dev}: {exc}")
+
+    print(f"Total removed: {removed}")
+
 
 if __name__ == "__main__":
-    magnet_name = sys.argv[1] if len(sys.argv) > 1 else "VS3M2T6R"
-    test_cm_set(magnet_name) 
+    main()

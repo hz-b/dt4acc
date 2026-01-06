@@ -1,59 +1,90 @@
 import asyncio
+from functools import partial
 
 import numpy as np
+from tango import DeviceProxy
 
+from .create_or_update_pv import update_or_create_pv
 from ...core.model.element_upate import ElementUpdate
 from ...core.model.orbit import Orbit
 from ...core.model.twiss import TwissWithAggregatedKValues
 from ...core.utils.logger import get_logger
-from .create_or_update_pv import update_or_create_pv
 
 logger = get_logger()
 
 
+def to_float_list(x) -> list[float]:
+    """
+    Convert anything array-like to a 1D Python list of Python floats.
+    Also sanitizes NaN/inf to 0.0.
+    """
+    arr = np.asarray(x, dtype=np.float64).ravel()
+    arr = np.nan_to_num(arr, nan=0.0, posinf=0.0, neginf=0.0)
+    # Ensure Python core floats (not numpy.float64) for maximum PyTango compatibility
+    return [float(v) for v in arr]
+
+
 async def update_orbit_pv(pv_name, orbit_result):
+    device = DeviceProxy(pv_name)
+
+    x_payload = to_float_list(orbit_result.x)
+    y_payload = to_float_list(orbit_result.y)
+
+    logger.info(f"orbit_x payload len={len(x_payload)} first3={x_payload[:3]}")
+    logger.info(f"orbit_y payload len={len(y_payload)} first3={y_payload[:3]}")
+
+    loop = asyncio.get_running_loop()
+
     try:
-        from .create_or_update_pv import update_orbit_pv as _update_orbit_pv
-        await _update_orbit_pv(pv_name, orbit_result)
+        await loop.run_in_executor(None, lambda: device.command_inout("push_orbit_x", x_payload))
+        logger.info("push_orbit_x SUCCESS")
     except Exception as e:
-        logger.error(f"Failed to update or create Orbit PV {pv_name}: {e}")
+        logger.error(f"push_orbit_x FAILED: {e}")
+        raise
+
+    try:
+        await loop.run_in_executor(None, lambda: device.command_inout("push_orbit_y", y_payload))
+        logger.info("push_orbit_y SUCCESS")
+    except Exception as e:
+        logger.error(f"push_orbit_y FAILED: {e}")
+        raise
 
 
 async def update_twiss_pv(pv_name, twiss_result):
-    tune_x = float(twiss_result.x.tune)
-    tune_y = float(twiss_result.y.tune)
+    device = DeviceProxy(pv_name)
 
-    try:
+    alpha_x_payload = to_float_list(twiss_result.x.alpha)
+    beta_x_payload  = to_float_list(twiss_result.x.beta)
+    nu_x_payload    = to_float_list(twiss_result.x.nu)
 
-        from .create_or_update_pv import update_twiss_pv as _update_twiss_pv
-        await _update_twiss_pv(pv_name, twiss_result)
-    except Exception as e:
-        logger.warning("FAILED Updated twiss values: %s", e)
+    alpha_y_payload = to_float_list(twiss_result.y.alpha)
+    beta_y_payload  = to_float_list(twiss_result.y.beta)
+    nu_y_payload    = to_float_list(twiss_result.y.nu)
+
+    loop = asyncio.get_running_loop()
+
+    await loop.run_in_executor(None, lambda: device.command_inout("push_alpha_x", alpha_x_payload))
+    await loop.run_in_executor(None, lambda: device.command_inout("push_beta_x",  beta_x_payload))
+    await loop.run_in_executor(None, lambda: device.command_inout("push_nu_x",    nu_x_payload))
+    await loop.run_in_executor(None, lambda: device.command_inout("push_alpha_y", alpha_y_payload))
+    await loop.run_in_executor(None, lambda: device.command_inout("push_beta_y",  beta_y_payload))
+    await loop.run_in_executor(None, lambda: device.command_inout("push_nu_y",    nu_y_payload))
+
 
 
 class CalculationResultView:
     def __init__(self, *, prefix):
         self.prefix = prefix
-        # self.bpm_pvs = BeamPositionPVs(prefix=f"{self.prefix}:{special_pvs['bpm_pv']}")
-        # tmp = np.empty([2048], np.int16)
-        # tmp.fill(-2 ** 15 + 1)
-        # self.default_bpm_legacy_data = tmp
-        # self.bpm_mimicry = None
-
-    # dependency injection (push bpm mimicry when it is available
-    def set_orbit_at_bpm(self, orbit_at_bpm):
-        self.orbit_at_bpm = orbit_at_bpm
 
     async def push_value(self, elm_update: ElementUpdate):
-        pass
-        # elm_update
-        # if elm_update.property_name == "K":
-        #     pass
-        # else:
-        #     property_name = 'x:set' if 'x' in elm_update.property_name else (
-        #         'y:set' if 'dy' in elm_update.property_name else elm_update.property_name)
-        #     label = f'{self.prefix}:{elm_update.element_id}:{property_name}'
-        #     await update_or_create_pv(elm_update, label, elm_update.value, 'float', 'd')
+        if elm_update.property_name == "K":
+
+            await asyncio.sleep(0.0)
+        else:
+            property_name = 'x:set' if 'x' in elm_update.property_name else (
+                'y:set' if 'dy' in elm_update.property_name else elm_update.property_name)
+            label = f'{self.prefix}:{elm_update.element_id}:{property_name}'
+            await update_or_create_pv(elm_update, label, elm_update.value, 'float', 'd')
 
     async def push_orbit(self, orbit_result: Orbit):
         # If prefix is PHYSICS/SOLEIL, use it directly, otherwise use the registered name
