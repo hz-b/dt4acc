@@ -1,10 +1,8 @@
 import asyncio
-from functools import partial
 
 import numpy as np
 from tango import DeviceProxy
 
-from .create_or_update_pv import update_or_create_pv
 from ...core.model.element_upate import ElementUpdate
 from ...core.model.orbit import Orbit
 from ...core.model.twiss import TwissWithAggregatedKValues
@@ -54,22 +52,27 @@ async def update_twiss_pv(pv_name, twiss_result):
     device = DeviceProxy(pv_name)
 
     alpha_x_payload = to_float_list(twiss_result.x.alpha)
-    beta_x_payload  = to_float_list(twiss_result.x.beta)
-    nu_x_payload    = to_float_list(twiss_result.x.nu)
+    beta_x_payload = to_float_list(twiss_result.x.beta)
+    nu_x_payload = to_float_list(twiss_result.x.nu)
 
     alpha_y_payload = to_float_list(twiss_result.y.alpha)
-    beta_y_payload  = to_float_list(twiss_result.y.beta)
-    nu_y_payload    = to_float_list(twiss_result.y.nu)
+    beta_y_payload = to_float_list(twiss_result.y.beta)
+    nu_y_payload = to_float_list(twiss_result.y.nu)
 
+    logger.info(f"alpha_x_payload payload len={len(alpha_x_payload)} first3={alpha_x_payload[:3]}")
+    logger.info(f"beta_x payload len={len(beta_x_payload)} first3={beta_x_payload[:3]}")
+    logger.info(f"nu_x_payload payload len={len(nu_x_payload)} first3={nu_x_payload[:3]}")
+    logger.info(f"alpha_y_payload payload len={len(alpha_y_payload)} first3={alpha_y_payload[:3]}")
+    logger.info(f"beta_y_payload payload len={len(beta_y_payload)} first3={beta_y_payload[:3]}")
+    logger.info(f"nu_y_payload payload len={len(nu_y_payload)} first3={nu_y_payload[:3]}")
     loop = asyncio.get_running_loop()
 
     await loop.run_in_executor(None, lambda: device.command_inout("push_alpha_x", alpha_x_payload))
-    await loop.run_in_executor(None, lambda: device.command_inout("push_beta_x",  beta_x_payload))
-    await loop.run_in_executor(None, lambda: device.command_inout("push_nu_x",    nu_x_payload))
+    await loop.run_in_executor(None, lambda: device.command_inout("push_beta_x", beta_x_payload))
+    await loop.run_in_executor(None, lambda: device.command_inout("push_nu_x", nu_x_payload))
     await loop.run_in_executor(None, lambda: device.command_inout("push_alpha_y", alpha_y_payload))
-    await loop.run_in_executor(None, lambda: device.command_inout("push_beta_y",  beta_y_payload))
-    await loop.run_in_executor(None, lambda: device.command_inout("push_nu_y",    nu_y_payload))
-
+    await loop.run_in_executor(None, lambda: device.command_inout("push_beta_y", beta_y_payload))
+    await loop.run_in_executor(None, lambda: device.command_inout("push_nu_y", nu_y_payload))
 
 
 class CalculationResultView:
@@ -77,14 +80,7 @@ class CalculationResultView:
         self.prefix = prefix
 
     async def push_value(self, elm_update: ElementUpdate):
-        if elm_update.property_name == "K":
-
-            await asyncio.sleep(0.0)
-        else:
-            property_name = 'x:set' if 'x' in elm_update.property_name else (
-                'y:set' if 'dy' in elm_update.property_name else elm_update.property_name)
-            label = f'{self.prefix}:{elm_update.element_id}:{property_name}'
-            await update_or_create_pv(elm_update, label, elm_update.value, 'float', 'd')
+        pass
 
     async def push_orbit(self, orbit_result: Orbit):
         # If prefix is PHYSICS/SOLEIL, use it directly, otherwise use the registered name
