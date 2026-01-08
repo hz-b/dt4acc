@@ -12,7 +12,7 @@ from ..views.shared_view import get_view_instance
 logger = get_logger()
 
 
-data_file = Path.home() / "Documents" / "soleil" / "SOLEIL_II_V3631_sym1_V001_database.m"
+data_file = Path.home() / "Documents" / "dt4acc_soleil_twin_data" / "SOLEIL_II_V3631_sym1_V001_database.m"
 
 class AcceleratorManager:
     """
