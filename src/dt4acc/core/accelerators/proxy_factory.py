@@ -47,7 +47,7 @@ class PyATProxyFactory(ProxyFactoryInterface):
             element_id (str): The ID of the element.
         """
 
-        data_file = Path.home() / "Documents" / "soleil" / "accelerator_setup.json"
+        data_file = Path.home() / "Documents" / "dt4acc_soleil_twin_data" / "accelerator_setup.json"
 
         with data_file.open() as fp:
             data: List[Dict[str, Any]] = json.load(fp)

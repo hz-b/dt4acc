@@ -20,7 +20,7 @@ from typing import Iterable, List, Dict, Any
 # locate and load the data file once; keep it cached in _DATA
 # -----------------------------------------------------------------
 
-data_file = Path.home() / "Documents" / "soleil" / "accelerator_setup.json"
+data_file = Path.home() / "Documents" / "dt4acc_soleil_twin_data" / "accelerator_setup.json"
 with data_file.open() as fp:
     _DATA: List[Dict[str, Any]] = json.load(fp)
 
