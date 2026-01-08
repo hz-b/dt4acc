@@ -28,14 +28,21 @@ python = ">=3.7"
 accelerator-toolbox="*"
 numpy="<2.0"
 pymongo="*"
-lat2db="*"
-# waveforms of chars/strings
-softioc=">4.1"
-
-p4p="*"
-bact_device_models="*"
 pandas="*"
+
+# HZB modules providing different functionallity
+# to be replaced by accml or similar
+lat2db="*"
+bact_device_models="*"
 bact-twin-architecture="*"
+
+# if using epics
+# waveforms of chars/strings
+softioc = {version = ">4.1", optional = true }
+p4p = {version = "*",  optional = true }
+# if ussing tango
+pytango = {version = "*", optional = true }
+
 # jsons="*"
 # fastapi="*"
 # pydantic="*"
@@ -46,9 +53,13 @@ bact-twin-architecture="*"
 # uvicorn="*"
 # httpx="*"
 # lark="*"
+
+# for documentation build
 Sphinx = { version = "4.2.0", optional = true }
 sphinx-rtd-theme = { version = "1.0.0", optional = true }
 sphinxcontrib-napoleon = { version = "0.7", optional = true }
 
 [tool.poetry.extras]
 docs = ["Sphinx", "sphinx-rtd-theme", "sphinxcontrib-napoleon"]
+epics = [ "softioc", "p4p" ]
+tango = [ "pytango" ]
