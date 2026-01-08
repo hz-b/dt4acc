@@ -207,10 +207,6 @@ class RepeatedResultView:
         if orbit_result is None:
             return
 
-        # In your original file, you were converting Orbit -> dataframe via BPMMimicry filter
-        # and then using OrbitView on that dataframe.
-        # This cleaned module does NOT do that conversion here (and does not push BPM legacy data).
-        # So orbit_result must already be in the OrbitView expected format (df with x/y).
         self.orbit_publisher.set_data(orbit_result)
         self._have_orbit = True
         await self.orbit_publisher.publish()
