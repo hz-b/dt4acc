@@ -2,29 +2,11 @@ from bact_twin_architecture.bl.command_rewriter import CommandRewriter
 # from dt4acc.custom_epics.ioc.liasion_translation_manager import build_managers
 
 from dt4acc.custom_epics.ioc.liasion_translation_manager import build_managers
-from dt4acc.custom_epics.utils.context_proxy import ContextProxy
 from dt4acc.core.accelerators.pyat_accelerator import setup_accelerator
 from dt4acc.core.command import UpdateManager
 from dt4acc.core.utils.logger import get_logger
 
 logger = get_logger()
-
-# ctx = ContextProxy("pva")  # Create a context for EPICS PVA (PV Access)
-
-#: todo replace soon by database service
-
-# lm, tm = build_managers()
-#
-# # todo: should this be part of the controller
-# update_manager = UpdateManager(
-#     command_rewritter=CommandRewriter(
-#         liasion_manager=lm,
-#         translation_service=tm
-#     ),
-#     liaison_manager=lm,
-#     translator_service=tm,
-#     acc_mgr=setup_accelerator()
-# )
 # 1. Initialize the global variable to None
 _update_manager_instance = None
 
