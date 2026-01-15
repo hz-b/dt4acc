@@ -149,7 +149,8 @@ def initialize_orbit_pvs(builder):
 
 def initialize_tune_pvs(builder):
     for axis in ["x", "y"]:
-        builder.aOut(f"TUNECC:{axis}", initial_value=0.0, PREC=9)
+        builder.aOut(f"TUNECC:flq:{axis}", initial_value=0.0, PREC=9)
+        builder.aOut(f"TUNECC:{axis}", initial_value=0.0, PREC=3, EGU="kHz")
     builder.longOut(f"TUNECC:count", initial_value=0)
 
 
@@ -174,6 +175,14 @@ def initialize_twiss_pvs(builder):
     builder.WaveformOut(
         f"beam:twiss:names", initial_value=[""], length=config.n_elements
     )
+
+
+def initialize_machine_info_pvs(builder):
+    """configuration of the machine: e.g. number of bunches
+    """
+
+    builder.longOut(f"beam:machine:info:n_rf_buckets", initial_value=400)
+    builder.aOut(f"beam:rev_freq", initial_value=0.0, EGU="kHz")
 
 
 def initialize_master_clock_pvs(builder):
@@ -201,6 +210,7 @@ def initialize_master_clock_pvs(builder):
             device_id="master_clock", property_id="reference_frequency", value=val
         ),
     )
+    #: todo ... comment these values
     builder.aIn("lattice_info:ref_freq", initial_value=start_val, EGU="kHz", PREC=1)
     builder.longIn(
         "lattice_info:ref_freq:khz:up", initial_value=int(start_val), EGU="kHz"

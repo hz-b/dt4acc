@@ -17,6 +17,26 @@ logger = get_logger()
 ctx = ContextProxy("pva")
 
 
+def tune_to_frequency(tune: float, rf_frequency: float, n_rf_buckets: int) -> float:
+    """
+    Todo: move to the correct place
+    """
+    assert tune > 0, "Expect tune to be positive"
+    fractional_tune = tune % 1
+    # Inverse of the time around the ring
+    rev_freq = rf_frequency / n_rf_buckets
+
+    # Some sytems only can measure half of it so ...
+    # The measurement system can only measure the half tune
+    # if tune is above 0.5 it is "mirrored in"
+    # if fractional_tune > 0.5:
+    #     assert fractional_tune <= 1.0
+    #     fractional_tune = 1.0 - fractional_tune
+
+    tune_freq = rev_freq * fractional_tune
+    return tune_freq
+
+
 class ExtractBPMFromOrbitFilter:
     def __init__(self):
         self.bpm_mimicry = None
@@ -80,30 +100,61 @@ class OrbitView(ViewInterface):
 
 
 class TuneView(ViewInterface):
-    def __init__(self, prefix):
+    def __init__(self, prefix: str, *, synchrotron_frequency_scale: float=1.0):
         self.prefix = prefix
         self.counter = itertools.count()
+        self.synchrotron_frequency_scale = synchrotron_frequency_scale
 
     async def push(self, data: TuneData):
         if data is None:
-            logger.warning("tune data is None")
+            logger.warning("Updating tune view: data is None")
             return
         tune_x = float(data.x)
         tune_y = float(data.y)
-
         # currently adding very small noise to get data republished
         # need to check softioc what its records can do
         tune_x += np.random.uniform(-1e-12, 1e-12)
         tune_y += np.random.uniform(-1e-12, 1e-12)
 
         try:
-            prefix = f"{self.prefix}:TUNECC"
+            prefix = f"{self.prefix}:TUNECC:flq"
             await ctx.put(f"{prefix}:x", tune_x)
             await ctx.put(f"{prefix}:y", tune_y)
-            #await ctx.put(f"{prefix}:count", int(next(self.counter)))
             # Todo: check that the dimensions are properly made
         except Exception as e:
-            logger.error(f"Error processing tune object data: {e}")
+            logger.error(f"Error publishing tune (Floquet) data: {e}")
+
+        try:
+            n_rf_buckets = await ctx.get(f"{self.prefix}:beam:machine:info:n_rf_buckets")
+        except Exception as e:
+            logger.error(f"Error getting  n_rf_buckets: {e}")
+            return
+
+        pv_name = f"{self.prefix}:{special_pvs['master_clock']}:freq"
+        try:
+            freq = await ctx.get(pv_name)
+        except Exception as e:
+            logger.error(f"Error getting master clock freq using '{pv_name}': {e}")
+            return
+
+        tune_freq_x = tune_to_frequency(tune=tune_x, rf_frequency=freq, n_rf_buckets=n_rf_buckets)
+        tune_freq_y = tune_to_frequency(tune=tune_y, rf_frequency=freq, n_rf_buckets=n_rf_buckets)
+        tune_freq_x *= self.synchrotron_frequency_scale
+        tune_freq_y *= self.synchrotron_frequency_scale
+
+        # currently adding very small noise to get data republished
+        # need to check softioc what its records can do
+        tune_freq_x += np.random.uniform(-1e-12, 1e-12)
+        tune_freq_y += np.random.uniform(-1e-12, 1e-12)
+
+        try:
+            prefix = f"{self.prefix}:TUNECC"
+            await ctx.put(f"{prefix}:x", tune_freq_x)
+            await ctx.put(f"{prefix}:y", tune_freq_y)
+            await ctx.put(f"{prefix}:count", int(next(self.counter)))
+            # Todo: check that the dimensions are properly made
+        except Exception as e:
+            logger.error(f"Error publishing tune as synchrotron frequency: {e}")
 
 
 class RepeatedResultView:
@@ -111,7 +162,6 @@ class RepeatedResultView:
         self.prefix = prefix
         tmp = np.empty([2048], np.int16)
         tmp.fill(-2 ** 15 + 1)
-
 
         self.legacy_bpm_publisher = PeriodicPublisher(view=LegacyBPMView(prefix=f"{prefix}:{special_pvs['bpm_pv']}"), name="legacy-bpm")
         self.legacy_bpm_publisher.set_data(tmp)

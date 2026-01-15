@@ -46,7 +46,7 @@ class AcceleratorManager:
         """
         try:
             from lat2db.model.accelerator import Accelerator
-            acc_model = Accelerator(file_name ="bessyii_lattice_json.json", from_json= True)
+            acc_model = Accelerator(file_name ="bessy2_storage_ring_reflat.json", from_json=True, energy=1.7185e9)
 
             # Initialize the accelerator with required components
             self.accelerator = AcceleratorImpl(
