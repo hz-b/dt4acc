@@ -148,10 +148,10 @@ def initialize_orbit_pvs(builder):
 
 
 def initialize_tune_pvs(builder):
-    for axis in ["x", "y"]:
-        builder.aOut(f"TUNECC:flq:{axis}", initial_value=0.0, PREC=9)
-        builder.aOut(f"TUNECC:{axis}", initial_value=0.0, PREC=3, EGU="kHz")
-    builder.longOut(f"TUNECC:count", initial_value=0)
+    for axis in ["rdH", "rdV"]:
+        builder.aOut(f"TUNEZR:flq:{axis}", initial_value=0.0, PREC=9)
+        builder.aOut(f"TUNEZR:{axis}", initial_value=0.0, PREC=3, EGU="kHz")
+    builder.longOut(f"TUNEZR:count", initial_value=0)
 
 
 def initialize_twiss_pvs(builder):

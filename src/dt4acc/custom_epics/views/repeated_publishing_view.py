@@ -117,9 +117,9 @@ class TuneView(ViewInterface):
         tune_y += np.random.uniform(-1e-12, 1e-12)
 
         try:
-            prefix = f"{self.prefix}:TUNECC:flq"
-            await ctx.put(f"{prefix}:x", tune_x)
-            await ctx.put(f"{prefix}:y", tune_y)
+            prefix = f"{self.prefix}:TUNEZR:flq"
+            await ctx.put(f"{prefix}:rdH", tune_x)
+            await ctx.put(f"{prefix}:rdV", tune_y)
             # Todo: check that the dimensions are properly made
         except Exception as e:
             logger.error(f"Error publishing tune (Floquet) data: {e}")
@@ -148,9 +148,9 @@ class TuneView(ViewInterface):
         tune_freq_y += np.random.uniform(-1e-12, 1e-12)
 
         try:
-            prefix = f"{self.prefix}:TUNECC"
-            await ctx.put(f"{prefix}:x", tune_freq_x)
-            await ctx.put(f"{prefix}:y", tune_freq_y)
+            prefix = f"{self.prefix}:TUNEZR"
+            await ctx.put(f"{prefix}:rdH", tune_freq_x)
+            await ctx.put(f"{prefix}:rdV", tune_freq_y)
             await ctx.put(f"{prefix}:count", int(next(self.counter)))
             # Todo: check that the dimensions are properly made
         except Exception as e:
