@@ -16,9 +16,13 @@ class TuneDevice(Device):
     Tune devices manage the betatron tune values for x and y planes and a counter.
     
     EPICS PVs:
-        - TUNECC:x (analog output, precision 9)
-        - TUNECC:y (analog output, precision 9)
-        - TUNECC:count (long output)
+        - TUNEZR:rdH (analog output, precision 9)
+        - TUNEZR:rdV (analog output, precision 9)
+        - TUNEZR:count (long output)
+
+    Todo:
+        need to correct the tune names. Will be done as soon
+        as tests are run using this twin
     """
 
     def init_device(self):
@@ -35,6 +39,7 @@ class TuneDevice(Device):
 
 
     @attribute(
+        # name="TUNEZR/rdH",
         name="TUNECC/x",
         dtype=float,
         access=AttrWriteType.READ_WRITE,
@@ -52,6 +57,7 @@ class TuneDevice(Device):
         logger.warning(f"Updated tune X to {value}")
 
     @attribute(
+        # name="TUNEZR/rdV",
         name="TUNECC/y",
         dtype=float,
         access=AttrWriteType.READ_WRITE,
@@ -69,13 +75,14 @@ class TuneDevice(Device):
         logger.warning(f"Updated tune Y to {value}")
 
     @attribute(
+        # name="TUNEZR/count",
         name="TUNECC/count",
         dtype=int,
         access=AttrWriteType.READ_WRITE,
-        label="Tune count",
+        label="Tune count: updates",
     )
     def count(self) -> int:
-        """Tune count - equivalent to EPICS TUNECC:count."""
+        """Tune count - equivalent to EPICS TUNEZR:count."""
         return self._count
 
     @count.write
