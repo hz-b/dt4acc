@@ -1301,7 +1301,7 @@
   "type": "Quadrupole",
   "name": "QIT6R",
   "magnetic_strength": -0.0928,
-  "pc": "PQIPT6R",
+  "pc": "PQIT6R",
   "k": -1.08082489
 },{
   "_id": {
