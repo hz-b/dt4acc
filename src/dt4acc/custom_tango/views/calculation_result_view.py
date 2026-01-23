@@ -58,8 +58,8 @@ class ResultView:
         # self.bpm_mimicry = None
 
     # dependency injection (push bpm mimicry when it is available
-    def set_bpm_mimicry(self, bpm_mimicry):
-        self.bpm_mimicry = bpm_mimicry
+    def set_orbit_at_bpm(self, orbit_at_bpm):
+        self.orbit_at_bpm = orbit_at_bpm
 
     async def push_value(self, elm_update: ElementUpdate):
         pass

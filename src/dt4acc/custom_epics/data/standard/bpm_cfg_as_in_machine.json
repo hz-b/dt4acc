@@ -1,0 +1,644 @@
+{
+    "col": [
+        {
+            "name": "BPMZ5D1R",
+            "used": false,
+            "longitudinal_position": 2.756
+        },
+        {
+            "name": "BPMZ6D1R",
+            "used": false,
+            "longitudinal_position": 3.995
+        },
+        {
+            "name": "BPMZ7D1R",
+            "used": false,
+            "longitudinal_position": 6.474
+        },
+        {
+            "name": "BPMZ1T1R",
+            "used": false,
+            "longitudinal_position": 7.675
+        },
+        {
+            "name": "BPMZ2T1R",
+            "used": false,
+            "longitudinal_position": 8.591
+        },
+        {
+            "name": "BPMZ3T1R",
+            "used": false,
+            "longitudinal_position": 11.005
+        },
+        {
+            "name": "BPMZ4T1R",
+            "used": false,
+            "longitudinal_position": 12.639
+        },
+        {
+            "name": "BPMZ41T1R",
+            "used": false,
+            "longitudinal_position": 15.93
+        },
+        {
+            "name": "BPMZ5T1R",
+            "used": false,
+            "longitudinal_position": 17.361
+        },
+        {
+            "name": "BPMZ6T1R",
+            "used": false,
+            "longitudinal_position": 18.995
+        },
+        {
+            "name": "BPMZ7T1R",
+            "used": false,
+            "longitudinal_position": 21.474
+        },
+        {
+            "name": "BPMZ1D2R",
+            "used": false,
+            "longitudinal_position": 22.675
+        },
+        {
+            "name": "BPMZ2D2R",
+            "used": false,
+            "longitudinal_position": 23.591
+        },
+        {
+            "name": "BPMZ3D2R",
+            "used": false,
+            "longitudinal_position": 26.005
+        },
+        {
+            "name": "BPMZ4D2R",
+            "used": false,
+            "longitudinal_position": 27.264
+        },
+        {
+            "name": "BPMZ5D2R",
+            "used": false,
+            "longitudinal_position": 32.736
+        },
+        {
+            "name": "BPMZ6D2R",
+            "used": false,
+            "longitudinal_position": 33.995
+        },
+        {
+            "name": "BPMZ7D2R",
+            "used": false,
+            "longitudinal_position": 36.474
+        },
+        {
+            "name": "BPMZ1T2R",
+            "used": false,
+            "longitudinal_position": 37.675
+        },
+        {
+            "name": "BPMZ2T2R",
+            "used": false,
+            "longitudinal_position": 38.591
+        },
+        {
+            "name": "BPMZ3T2R",
+            "used": false,
+            "longitudinal_position": 41.005
+        },
+        {
+            "name": "BPMZ4T2R",
+            "used": false,
+            "longitudinal_position": 42.639
+        },
+        {
+            "name": "BPMZ41T2R",
+            "used": false,
+            "longitudinal_position": 46.928
+        },
+        {
+            "name": "BPMZ42T2R",
+            "used": false,
+            "longitudinal_position": 47.078
+        },
+        {
+            "name": "BPMZ43T2R",
+            "used": false,
+            "longitudinal_position": 47.228
+        },
+        {
+            "name": "BPMZ5T2R",
+            "used": false,
+            "longitudinal_position": 47.361
+        },
+        {
+            "name": "BPMZ6T2R",
+            "used": false,
+            "longitudinal_position": 48.995
+        },
+        {
+            "name": "BPMZ7T2R",
+            "used": false,
+            "longitudinal_position": 51.474
+        },
+        {
+            "name": "BPMZ1D3R",
+            "used": false,
+            "longitudinal_position": 52.675
+        },
+        {
+            "name": "BPMZ2D3R",
+            "used": false,
+            "longitudinal_position": 53.591
+        },
+        {
+            "name": "BPMZ3D3R",
+            "used": false,
+            "longitudinal_position": 56.005
+        },
+        {
+            "name": "BPMZ4D3R",
+            "used": false,
+            "longitudinal_position": 57.264
+        },
+        {
+            "name": "BPMZ5D3R",
+            "used": false,
+            "longitudinal_position": 62.736
+        },
+        {
+            "name": "BPMZ6D3R",
+            "used": false,
+            "longitudinal_position": 63.995
+        },
+        {
+            "name": "BPMZ7D3R",
+            "used": false,
+            "longitudinal_position": 66.474
+        },
+        {
+            "name": "BPMZ1T3R",
+            "used": false,
+            "longitudinal_position": 67.675
+        },
+        {
+            "name": "BPMZ2T3R",
+            "used": false,
+            "longitudinal_position": 68.591
+        },
+        {
+            "name": "BPMZ3T3R",
+            "used": false,
+            "longitudinal_position": 71.005
+        },
+        {
+            "name": "BPMZ4T3R",
+            "used": false,
+            "longitudinal_position": 72.639
+        },
+        {
+            "name": "BPMZ5T3R",
+            "used": false,
+            "longitudinal_position": 77.361
+        },
+        {
+            "name": "BPMZ6T3R",
+            "used": false,
+            "longitudinal_position": 78.995
+        },
+        {
+            "name": "BPMZ7T3R",
+            "used": false,
+            "longitudinal_position": 81.474
+        },
+        {
+            "name": "BPMZ1D4R",
+            "used": false,
+            "longitudinal_position": 82.675
+        },
+        {
+            "name": "BPMZ2D4R",
+            "used": false,
+            "longitudinal_position": 83.591
+        },
+        {
+            "name": "BPMZ3D4R",
+            "used": false,
+            "longitudinal_position": 86.005
+        },
+        {
+            "name": "BPMZ4D4R",
+            "used": false,
+            "longitudinal_position": 87.264
+        },
+        {
+            "name": "BPMZ5D4R",
+            "used": false,
+            "longitudinal_position": 92.736
+        },
+        {
+            "name": "BPMZ6D4R",
+            "used": false,
+            "longitudinal_position": 93.995
+        },
+        {
+            "name": "BPMZ7D4R",
+            "used": false,
+            "longitudinal_position": 96.474
+        },
+        {
+            "name": "BPMZ1T4R",
+            "used": false,
+            "longitudinal_position": 97.675
+        },
+        {
+            "name": "BPMZ2T4R",
+            "used": false,
+            "longitudinal_position": 98.591
+        },
+        {
+            "name": "BPMZ3T4R",
+            "used": false,
+            "longitudinal_position": 101.005
+        },
+        {
+            "name": "BPMZ4T4R",
+            "used": false,
+            "longitudinal_position": 102.639
+        },
+        {
+            "name": "BPMZ5T4R",
+            "used": false,
+            "longitudinal_position": 107.361
+        },
+        {
+            "name": "BPMZ6T4R",
+            "used": false,
+            "longitudinal_position": 108.995
+        },
+        {
+            "name": "BPMZ7T4R",
+            "used": false,
+            "longitudinal_position": 111.474
+        },
+        {
+            "name": "BPMZ1D5R",
+            "used": false,
+            "longitudinal_position": 112.675
+        },
+        {
+            "name": "BPMZ2D5R",
+            "used": false,
+            "longitudinal_position": 113.591
+        },
+        {
+            "name": "BPMZ3D5R",
+            "used": false,
+            "longitudinal_position": 116.005
+        },
+        {
+            "name": "BPMZ4D5R",
+            "used": false,
+            "longitudinal_position": 117.264
+        },
+        {
+            "name": "BPMZ5D5R",
+            "used": false,
+            "longitudinal_position": 122.736
+        },
+        {
+            "name": "BPMZ6D5R",
+            "used": false,
+            "longitudinal_position": 123.995
+        },
+        {
+            "name": "BPMZ7D5R",
+            "used": false,
+            "longitudinal_position": 126.474
+        },
+        {
+            "name": "BPMZ1T5R",
+            "used": false,
+            "longitudinal_position": 127.675
+        },
+        {
+            "name": "BPMZ2T5R",
+            "used": false,
+            "longitudinal_position": 128.591
+        },
+        {
+            "name": "BPMZ3T5R",
+            "used": false,
+            "longitudinal_position": 131.005
+        },
+        {
+            "name": "BPMZ4T5R",
+            "used": false,
+            "longitudinal_position": 132.639
+        },
+        {
+            "name": "BPMZ5T5R",
+            "used": false,
+            "longitudinal_position": 137.361
+        },
+        {
+            "name": "BPMZ6T5R",
+            "used": false,
+            "longitudinal_position": 138.995
+        },
+        {
+            "name": "BPMZ7T5R",
+            "used": false,
+            "longitudinal_position": 141.474
+        },
+        {
+            "name": "BPMZ1D6R",
+            "used": false,
+            "longitudinal_position": 142.675
+        },
+        {
+            "name": "BPMZ2D6R",
+            "used": false,
+            "longitudinal_position": 143.591
+        },
+        {
+            "name": "BPMZ3D6R",
+            "used": false,
+            "longitudinal_position": 146.005
+        },
+        {
+            "name": "BPMZ4D6R",
+            "used": false,
+            "longitudinal_position": 147.264
+        },
+        {
+            "name": "BPMZ41D6R",
+            "used": false,
+            "longitudinal_position": 147.718
+        },
+        {
+            "name": "BPMZ42D6R",
+            "used": false,
+            "longitudinal_position": 149.569
+        },
+        {
+            "name": "BPMZ43D6R",
+            "used": false,
+            "longitudinal_position": 150.282
+        },
+        {
+            "name": "BPMZ44D6R",
+            "used": false,
+            "longitudinal_position": 152.309
+        },
+        {
+            "name": "BPMZ6D6R",
+            "used": false,
+            "longitudinal_position": 154.00339
+        },
+        {
+            "name": "BPMZ7D6R",
+            "used": false,
+            "longitudinal_position": 156.48239
+        },
+        {
+            "name": "BPMZ1T6R",
+            "used": false,
+            "longitudinal_position": 157.68339
+        },
+        {
+            "name": "BPMZ2T6R",
+            "used": false,
+            "longitudinal_position": 158.59939
+        },
+        {
+            "name": "BPMZ3T6R",
+            "used": false,
+            "longitudinal_position": 161.01339
+        },
+        {
+            "name": "BPMZ4T6R",
+            "used": false,
+            "longitudinal_position": 162.64739
+        },
+        {
+            "name": "BPMZ41T6R",
+            "used": false,
+            "longitudinal_position": 164.79449
+        },
+        {
+            "name": "BPMZ5T6R",
+            "used": false,
+            "longitudinal_position": 167.36939
+        },
+        {
+            "name": "BPMZ6T6R",
+            "used": false,
+            "longitudinal_position": 169.00339
+        },
+        {
+            "name": "BPMZ7T6R",
+            "used": false,
+            "longitudinal_position": 171.48239
+        },
+        {
+            "name": "BPMZ1D7R",
+            "used": false,
+            "longitudinal_position": 172.68339
+        },
+        {
+            "name": "BPMZ2D7R",
+            "used": false,
+            "longitudinal_position": 173.59939
+        },
+        {
+            "name": "BPMZ3D7R",
+            "used": false,
+            "longitudinal_position": 176.01339
+        },
+        {
+            "name": "BPMZ4D7R",
+            "used": false,
+            "longitudinal_position": 177.27239
+        },
+        {
+            "name": "BPMZ5D7R",
+            "used": false,
+            "longitudinal_position": 182.74439
+        },
+        {
+            "name": "BPMZ6D7R",
+            "used": false,
+            "longitudinal_position": 184.00339
+        },
+        {
+            "name": "BPMZ7D7R",
+            "used": false,
+            "longitudinal_position": 186.48239
+        },
+        {
+            "name": "BPMZ1T7R",
+            "used": false,
+            "longitudinal_position": 187.68339
+        },
+        {
+            "name": "BPMZ2T7R",
+            "used": false,
+            "longitudinal_position": 188.59939
+        },
+        {
+            "name": "BPMZ3T7R",
+            "used": false,
+            "longitudinal_position": 191.01339
+        },
+        {
+            "name": "BPMZ4T7R",
+            "used": false,
+            "longitudinal_position": 192.64739
+        },
+        {
+            "name": "BPMZ41T7R",
+            "used": false,
+            "longitudinal_position": 195.93839
+        },
+        {
+            "name": "BPMZ5T7R",
+            "used": false,
+            "longitudinal_position": 197.36939
+        },
+        {
+            "name": "BPMZ6T7R",
+            "used": false,
+            "longitudinal_position": 199.00339
+        },
+        {
+            "name": "BPMZ7T7R",
+            "used": false,
+            "longitudinal_position": 201.48239
+        },
+        {
+            "name": "BPMZ1D8R",
+            "used": false,
+            "longitudinal_position": 202.68339
+        },
+        {
+            "name": "BPMZ2D8R",
+            "used": false,
+            "longitudinal_position": 203.59939
+        },
+        {
+            "name": "BPMZ3D8R",
+            "used": false,
+            "longitudinal_position": 206.01339
+        },
+        {
+            "name": "BPMZ4D8R",
+            "used": false,
+            "longitudinal_position": 207.27239
+        },
+        {
+            "name": "BPMZ5D8R",
+            "used": false,
+            "longitudinal_position": 212.74439
+        },
+        {
+            "name": "BPMZ6D8R",
+            "used": false,
+            "longitudinal_position": 214.00339
+        },
+        {
+            "name": "BPMZ7D8R",
+            "used": false,
+            "longitudinal_position": 216.48239
+        },
+        {
+            "name": "BPMZ1T8R",
+            "used": false,
+            "longitudinal_position": 217.68339
+        },
+        {
+            "name": "BPMZ2T8R",
+            "used": false,
+            "longitudinal_position": 218.59939
+        },
+        {
+            "name": "BPMZ3T8R",
+            "used": false,
+            "longitudinal_position": 221.01339
+        },
+        {
+            "name": "BPMZ4T8R",
+            "used": false,
+            "longitudinal_position": 222.64739
+        },
+        {
+            "name": "BPMZ5T8R",
+            "used": false,
+            "longitudinal_position": 227.36939
+        },
+        {
+            "name": "BPMZ6T8R",
+            "used": false,
+            "longitudinal_position": 229.00339
+        },
+        {
+            "name": "BPMZ7T8R",
+            "used": false,
+            "longitudinal_position": 231.48239
+        },
+        {
+            "name": "BPMZ1D1R",
+            "used": false,
+            "longitudinal_position": 232.68339
+        },
+        {
+            "name": "BPMZ2D1R",
+            "used": false,
+            "longitudinal_position": 233.59939
+        },
+        {
+            "name": "BPMZ3D1R",
+            "used": false,
+            "longitudinal_position": 236.01339
+        },
+        {
+            "name": "BPMZ4D1R",
+            "used": false,
+            "longitudinal_position": 237.27239
+        },
+        {
+            "name": "BPMZ41D1R",
+            "used": false,
+            "longitudinal_position": 238.22339
+        },
+        {
+            "name": "BPMZ42D1R",
+            "used": false,
+            "longitudinal_position": 238.42639
+        },
+        {
+            "name": "SBPM00CC",
+            "used": false,
+            "longitudinal_position": NaN
+        },
+        {
+            "name": "SBPM01CC",
+            "used": false,
+            "longitudinal_position": NaN
+        },
+        {
+            "name": "SBPM02CC",
+            "used": false,
+            "longitudinal_position": NaN
+        },
+        {
+            "name": "SBPM03CC",
+            "used": false,
+            "longitudinal_position": NaN
+        },
+        {
+            "name": "SBPM04CC",
+            "used": false,
+            "longitudinal_position": NaN
+        }
+    ]
+}

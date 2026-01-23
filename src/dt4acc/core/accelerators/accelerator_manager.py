@@ -1,11 +1,14 @@
 from importlib import resources
+from typing import Sequence
 
 from .proxy_factory import PyATProxyFactory
 from ..accelerators.accelerator_impl import AcceleratorImpl
 from ..calculations.pyat_calculator import PyAtTwissCalculator, PyAtOrbitCalculator
 from ..utils.logger import get_logger
-from ...custom_epics.utils.bpm_mimicry import BPMMimicry
 from ..views.shared_view import get_view_instance
+
+# Todo: remove this dependency: rather inject it
+from ...custom_epics.utils.orbit_at_bpms import OrbitAtBPMS
 
 logger = get_logger()
 
@@ -23,7 +26,7 @@ class AcceleratorManager:
         bpm_mimicry (BPMMimicry): Object to manage BPM data mimicking.
     """
 
-    def __init__(self, prefix):
+    def __init__(self, prefix: str, bpm_names_as_in_machine: Sequence[str]):
         """
         Initializes the AcceleratorManager with a given prefix.
 
@@ -32,9 +35,10 @@ class AcceleratorManager:
             todo: What about tango? do we have/need usage of prefix? we will findout
         """
         self.prefix = prefix
+        self.bpm_names_as_in_machine = bpm_names_as_in_machine
         self.accelerator = None  # Will be initialized in the `initialize` method
         self.view = get_view_instance()  # Shared view instance for displaying results
-        self.bpm_mimicry = None  # Placeholder for BPM mimicry instance
+        self.orbit_at_bpms = None  # Placeholder for BPM mimicry instance
 
     def initialize(self):
         """
@@ -48,7 +52,10 @@ class AcceleratorManager:
         """
         try:
             from lat2db.model.accelerator import Accelerator
-            filename = resources.files("dt4acc").joinpath("custom_epics/data/standard/bessy2_storage_ring_reflat.json")
+
+            filename = resources.files("dt4acc").joinpath(
+                "custom_epics/data/standard/bessy2_storage_ring_reflat.json"
+            )
             acc_model = Accelerator(file_name=filename, from_json=True, energy=1.7185e9)
 
             # Initialize the accelerator with required components
@@ -56,14 +63,19 @@ class AcceleratorManager:
                 acc_model.ring,
                 PyATProxyFactory(lattice_model=None, at_lattice=acc_model.ring),
                 PyAtTwissCalculator(acc_model),
-                PyAtOrbitCalculator(acc_model.ring)
+                PyAtOrbitCalculator(acc_model.ring),
             )
 
             # Extract BPM elements from the accelerator and create BPM mimicry
-            bpm_names = [elem.FamName for elem in self.accelerator.acc if elem.FamName.startswith("BPM")]
-            self.bpm_mimicry = BPMMimicry(prefix=self.prefix, bpm_names=bpm_names)
+            bpm_names = [
+                elem.FamName
+                for elem in self.accelerator.acc
+                if elem.FamName.startswith("BPM")
+            ]
+            # Todo: load bpm names from file ... names as used in machine
+            self.orbit_at_bpms = OrbitAtBPMS(bpm_names=self.bpm_names_as_in_machine)
             # Inject the BPM mimicry into the view instance
-            self.view.set_bpm_mimicry(self.bpm_mimicry)
+            self.view.set_orbit_at_bpms(self.orbit_at_bpms)
             self.setup_event_subscriptions()
 
             logger.warning("AcceleratorManager initialized successfully.")
@@ -78,7 +90,9 @@ class AcceleratorManager:
         Ensures that the view receives updates whenever the accelerator produces new data.
         """
         if not self.accelerator:
-            logger.error("Accelerator must be initialized before subscribing to events.")
+            logger.error(
+                "Accelerator must be initialized before subscribing to events."
+            )
 
         # Subscriptions
         self.accelerator.on_new_twiss.subscribe(self.view.push_twiss)

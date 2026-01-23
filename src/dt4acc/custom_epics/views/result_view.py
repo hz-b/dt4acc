@@ -17,8 +17,8 @@ class ResultView:
         self.calculation_result_view = CalculationResultView(prefix=prefix)
         self.periodic_update_view = RepeatedResultView(prefix=prefix)
 
-    def set_bpm_mimicry(self, bpm_mimicry):
-        self.periodic_update_view.set_bpm_mimicry(bpm_mimicry)
+    def set_orbit_at_bpms(self, bpm_mimicry):
+        self.periodic_update_view.set_orbit_at_bpms(bpm_mimicry)
 
     async def push_twiss(self, twiss_result: TwissWithAggregatedKValues):
         await self.calculation_result_view.push_twiss(twiss_result)

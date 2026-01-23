@@ -39,26 +39,30 @@ def tune_to_frequency(tune: float, rf_frequency: float, n_rf_buckets: int) -> fl
 
 class ExtractBPMFromOrbitFilter:
     def __init__(self):
-        self.bpm_mimicry = None
+        self.orbit_at_bpm_filter = None
 
-    def set_bpm_mimicry(self, bpm_mimicry):
-        assert callable(bpm_mimicry.extract_bpm_legacy_data_to_df)
-        assert callable(bpm_mimicry.bpm_legacy_data_df_to_array)
-        self.bpm_mimicry = bpm_mimicry
+    def set_orbit_at_bpm(self, orbit_at_bpm_filter_delegator):
+        # assert callable(orbit_at_bpm_filter_delegator.extract_bpm_legacy_data_to_df)
+        # assert callable(orbit_at_bpm_filter_delegator.bpm_legacy_data_df_to_array)
+        assert callable(orbit_at_bpm_filter_delegator.extract_bpms_at_orbit)
+        self.orbit_at_bpm_filter = orbit_at_bpm_filter_delegator
 
     def is_ready(self) -> bool:
-        return self.bpm_mimicry is not None
+        return self.orbit_at_bpm_filter is not None
 
     def process(self, orbit_data: Orbit):
-        assert self.bpm_mimicry is not None, f"BPM Mimicry was not set to {self.__class__.__name__}"
+        assert (
+            self.orbit_at_bpm_filter is not None
+        ), f"Orbit bpm data filter was not set to {self.__class__.__name__}"
 
-        df_bpm = self.bpm_mimicry.extract_bpm_legacy_data_to_df(orbit_data)
-        bpm_legacy_data = self.bpm_mimicry.bpm_legacy_data_df_to_array(df_bpm)
-        orbit_object_data = df_bpm.copy()
-        mm2nm = 1e6
-        orbit_object_data.x = df_bpm.x * mm2nm
-        orbit_object_data.y = df_bpm.y * mm2nm
-        return bpm_legacy_data, orbit_object_data
+        orbit_at_bpm = self.orbit_at_bpm_filter.extract_bpms_at_orbit(orbit_data)
+        # df_bpm = self.orbit_at_bpm_filter.extract_bpm_legacy_data_to_df(orbit_data)
+        # bpm_legacy_data = self.orbit_at_bpm_filter.bpm_legacy_data_df_to_array(df_bpm)
+        orbit_object_data = orbit_at_bpm.copy()
+        m2nm = 1e9
+        orbit_object_data.x = orbit_at_bpm.x * m2nm
+        orbit_object_data.y = orbit_at_bpm.y * m2nm
+        return orbit_object_data
 
 
 class LegacyBPMView(ViewInterface):
@@ -100,7 +104,7 @@ class OrbitView(ViewInterface):
 
 
 class TuneView(ViewInterface):
-    def __init__(self, prefix: str, *, synchrotron_frequency_scale: float=1.0):
+    def __init__(self, prefix: str, *, synchrotron_frequency_scale: float = 1.0):
         self.prefix = prefix
         self.counter = itertools.count()
         self.synchrotron_frequency_scale = synchrotron_frequency_scale
@@ -125,7 +129,9 @@ class TuneView(ViewInterface):
             logger.error(f"Error publishing tune (Floquet) data: {e}")
 
         try:
-            n_rf_buckets = await ctx.get(f"{self.prefix}:beam:machine:info:n_rf_buckets")
+            n_rf_buckets = await ctx.get(
+                f"{self.prefix}:beam:machine:info:n_rf_buckets"
+            )
         except Exception as e:
             logger.error(f"Error getting  n_rf_buckets: {e}")
             return
@@ -137,8 +143,12 @@ class TuneView(ViewInterface):
             logger.error(f"Error getting master clock freq using '{pv_name}': {e}")
             return
 
-        tune_freq_x = tune_to_frequency(tune=tune_x, rf_frequency=freq, n_rf_buckets=n_rf_buckets)
-        tune_freq_y = tune_to_frequency(tune=tune_y, rf_frequency=freq, n_rf_buckets=n_rf_buckets)
+        tune_freq_x = tune_to_frequency(
+            tune=tune_x, rf_frequency=freq, n_rf_buckets=n_rf_buckets
+        )
+        tune_freq_y = tune_to_frequency(
+            tune=tune_y, rf_frequency=freq, n_rf_buckets=n_rf_buckets
+        )
         tune_freq_x *= self.synchrotron_frequency_scale
         tune_freq_y *= self.synchrotron_frequency_scale
 
@@ -161,31 +171,38 @@ class RepeatedResultView:
     def __init__(self, *, prefix):
         self.prefix = prefix
         tmp = np.empty([2048], np.int16)
-        tmp.fill(-2 ** 15 + 1)
+        tmp.fill(-(2 ** 15) + 1)
 
-        self.legacy_bpm_publisher = PeriodicPublisher(view=LegacyBPMView(prefix=f"{prefix}:{special_pvs['bpm_pv']}"), name="legacy-bpm")
-        self.legacy_bpm_publisher.set_data(tmp)
-        self.orbit_object_publisher = PeriodicPublisher(view=OrbitView(prefix=prefix), name="orbit")
-        self.tune_publisher = PeriodicPublisher(view=TuneView(prefix=prefix), name="tune")
+        self.orbit_object_publisher = PeriodicPublisher(
+            view=OrbitView(prefix=prefix), name="orbit"
+        )
+        self.tune_publisher = PeriodicPublisher(
+            view=TuneView(prefix=prefix), name="tune"
+        )
         # todo: fix this design flaw
         self.bpm_mimicry = None
         self.bpm_filter = ExtractBPMFromOrbitFilter()
 
-    def set_bpm_mimicry(self, bpm_mimicry):
-        self.bpm_filter.set_bpm_mimicry(bpm_mimicry)
+    def set_orbit_at_bpms(self, bpm_mimicry):
+        self.bpm_filter.set_orbit_at_bpm(bpm_mimicry)
 
     async def heart_beat(self):
         """
         Periodic heartbeat function to push default BPM data.
         """
-        logger.debug(f"{self.__class__.__name__} heartbeat {datetime.now()}, publishing bpm, orbit, twiss")
+        logger.debug(
+            f"{self.__class__.__name__} heartbeat {datetime.now()}, publishing bpm, orbit, twiss"
+        )
         await self.orbit_object_publisher.publish()
         await self.tune_publisher.publish()
-        await self.legacy_bpm_publisher.publish()
-        logger.info(f"{self.__class__.__name__} view heartbeat {datetime.now()}, published bpm, orbit, twiss")
+        logger.info(
+            f"{self.__class__.__name__} view heartbeat {datetime.now()}, published bpm, orbit, twiss"
+        )
 
     async def push_twiss(self, twiss_result: TwissWithAggregatedKValues):
-        self.tune_publisher.set_data(TuneData(x=twiss_result.x.tune, y=twiss_result.y.tune))
+        self.tune_publisher.set_data(
+            TuneData(x=twiss_result.x.tune, y=twiss_result.y.tune)
+        )
         await self.tune_publisher.publish()
 
     async def push_orbit(self, orbit_result: Orbit):
@@ -198,14 +215,9 @@ class RepeatedResultView:
             return
 
         try:
-            bpm_legacy_data, orbit_object_data = self.bpm_filter.process(orbit_data)
-            if bpm_legacy_data is None:
-                logger.error("BPM Legacy data is None, not setting it")
-            else:
-                self.legacy_bpm_publisher.set_data(bpm_legacy_data)
+            orbit_object_data = self.bpm_filter.process(orbit_data)
             self.orbit_object_publisher.set_data(orbit_object_data)
 
-            await self.legacy_bpm_publisher.publish()
             await self.orbit_object_publisher.publish()
             logger.warning("Pushed bpm / orbit data")
             await asyncio.sleep(0.0)

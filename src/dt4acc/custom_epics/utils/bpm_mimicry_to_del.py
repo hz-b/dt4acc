@@ -152,7 +152,7 @@ class BPMMimicry:
         raise NotImplementedError("why still needed?")
 
 def get_data_file(name: str = "bpm_config") -> Path:
-    _DATA_FILE= (
+    data_file= (
         Path(__file__).resolve()
         .parent          # …/utils
         .parent          # …/custom_epics
@@ -160,9 +160,11 @@ def get_data_file(name: str = "bpm_config") -> Path:
         / "standard"
         / f"{name}.json"
     )
-    with _DATA_FILE.open() as fp:
-        _DATA: List[Dict[str, Any]] = json.load(fp)
-    return _DATA
+    with data_file.open() as fp:
+        data: List[Dict[str, Any]] = json.load(fp)
+    return data
+
+
 @functools.lru_cache(maxsize=1)
 def create_bpm_config():
     '''Beam position monitor as an array of records
