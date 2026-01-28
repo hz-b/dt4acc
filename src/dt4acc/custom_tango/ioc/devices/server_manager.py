@@ -43,13 +43,13 @@ def _magnet_monitor_and_heartbeat(stop_evt: threading.Event,
             logger.warning(f"Magnet {device_name} reachable; base {attr_name}={base}")
             break
         except DevFailed as e:
-            logger.debug(f"Waiting for magnet {device_name} (DevFailed): {e}")
+            logger.warning(f"Waiting for magnet {device_name} (DevFailed): {e}")
         except Exception as e:
-            logger.debug(f"Waiting for magnet {device_name} (exc): {e}")
+            logger.error(f"Waiting for magnet {device_name} (exc): {e}")
         stop_evt.wait(wait_connect_s)
 
     if stop_evt.is_set():
-        logger.info("Magnet monitor exiting before starting heartbeat (stop event set).")
+        logger.warning("Magnet monitor exiting before starting heartbeat (stop event set).")
         return
 
     # Phase 2: heartbeat loop toggling value
@@ -81,7 +81,7 @@ def _magnet_monitor_and_heartbeat(stop_evt: threading.Event,
         # wait with ability to be interrupted
         stop_evt.wait(period_s)
 
-    logger.info("Magnet heartbeat thread exiting (stop event set).")
+    logger.warning("Magnet heartbeat thread exiting (stop event set).")
 
 
 def main():
@@ -89,7 +89,7 @@ def main():
 
     # 1) register all devices (DB only)
     servers = register_all_devices()
-    logger.info(f"DB registration done. Need to start {len(servers)} servers.")
+    logger.warning(f"DB registration done. Need to start {len(servers)} servers.")
 
     # 2) spawn one process per server
     procs = []
@@ -99,7 +99,7 @@ def main():
     for server_name, instance_name in servers:
         cmd = [sys.executable, "-u", single_server_path, server_name, instance_name]
 
-        logger.info(f"Starting process: {' '.join(cmd)}")
+        logger.warning(f"Starting process: {' '.join(cmd)}")
 
         p = subprocess.Popen(
             cmd,
@@ -125,7 +125,7 @@ def main():
         name="magnet-heartbeat-thread",
     )
     hb_thread.start()
-    logger.info("Magnet monitor/heartbeat thread started (daemon).")
+    logger.warning("Magnet monitor/heartbeat thread started (daemon).")
 
     # 3) wait + allow Ctrl+C clean shutdown
     def shutdown(*_):
@@ -150,7 +150,7 @@ def main():
     signal.signal(signal.SIGINT, shutdown)
     signal.signal(signal.SIGTERM, shutdown)
 
-    logger.info("All server processes launched. Waiting...")
+    logger.warning("All server processes launched. Waiting...")
     while True:
         time.sleep(5)
 

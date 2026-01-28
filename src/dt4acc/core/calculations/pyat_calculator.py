@@ -52,8 +52,8 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
     """
 
     def __init__(self, acc, closed=True):
-        self.acc = acc.ring
-        self.machine = acc.machine
+        self.acc = acc
+        # self.machine = acc.machine
         self.closed=closed
         self.executor = ThreadPoolExecutor(max_workers=2)  # Limit to prevent over-utilization
 

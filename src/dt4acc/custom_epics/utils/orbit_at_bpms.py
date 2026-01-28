@@ -16,6 +16,9 @@ class OrbitAtBPMS:
         # Why do I need a prefix here?
         # self.prefix = prefix
 
+    # def set_orbit_at_bpms(self, orbit):
+    #     raise NotImplementedError("need to implement set_orbit_at_bpms")
+
     def extract_bpms_at_orbit(self, orbit: Orbit) -> Orbit:
         df = pd.DataFrame(index=orbit.names, data=dict(x=orbit.x, y=orbit.y))
         # as in machine orbit object: all data which are not set are marked as nan

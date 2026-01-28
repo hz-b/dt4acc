@@ -16,6 +16,14 @@ class ResultView:
     def set_bpm_mimicry(self, bpm_mimicry):
         pass
 
+    def set_orbit_at_bpms(self, *args, **kwargs):
+        """
+        Todo:
+            implement transfer orbit data to BPM s'
+        """
+        logger.info("Need to implement set_orbit_at_bpms which transfers orbit data to bpm's")
+        # raise NotImplementedError("Need to implement set_orbit_at_bpms")
+
     async def push_twiss(self, twiss_result: TwissWithAggregatedKValues):
         await self.calculation_result_view.push_twiss(twiss_result)
         await self.periodic_update_view.push_twiss(twiss_result)

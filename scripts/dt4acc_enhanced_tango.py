@@ -19,6 +19,8 @@ logging.basicConfig(level=logging.WARNING)
 os.environ["server"] = "tango"
 
 from dt4acc.custom_tango.ioc.devices.server_manager import main
+# Todo: find out what that was ...
+# from dt4acc.custom_tango.enhanced_tango_server_complete import main
 
 if __name__ == "__main__":
     try:

@@ -242,7 +242,7 @@ class BPMManagerDevice(Device, AsyncMixin):
                 )
             )
         except Exception as e:
-            logger.error(f"BPMManagerDevice refresh failed: {e}")
+            logger.warning(f"BPMManagerDevice refresh failed: {e}")
 
     @attribute(dtype=str, max_dim_x=4096, format=AttrDataFormat.SPECTRUM)
     def bpm_names_attr(self):

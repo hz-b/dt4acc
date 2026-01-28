@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import sys
 import asyncio
 import threading
@@ -21,6 +22,7 @@ def main():
     server_name = sys.argv[1]
     instance_name = sys.argv[2]
 
+    os.nice(4)
   
     global global_event_loop
     try:
