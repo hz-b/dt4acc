@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""
-try to use
+"""Start servers and heart beat process
+
+Only start heartbeat when everything else is running
 """
 import itertools
 import multiprocessing.synchronize
@@ -8,9 +9,9 @@ import os
 import sys
 import time
 import signal
-import subprocess
 import threading
-from typing import Sequence, Dict
+from dataclasses import dataclass
+from typing import Dict, Tuple, Sequence
 
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.devices.tango_device_setup import register_all_devices
@@ -119,21 +120,47 @@ def _magnet_monitor_and_heartbeat(
     logger.warning("Magnet heartbeat thread exiting (stop event set).")
 
 
-def wait_all_events_cleared(events: Dict[str, mp.synchronize.Event]):
+@dataclass
+class ProcessMonitor:
+    event : mp.synchronize.Event
+    process : mp.process.BaseProcess
+    server_name : str
+    instance_name : str
+
+    def trl_prefix(self):
+        return f"{self.server_name}/{self.instance_name}"
+
+
+def wait_all_events_cleared(process_monitors: Sequence[ProcessMonitor]) -> bool:
+    """are processes still active that are accociated with the events ?
+    """
     start = time.time()
+
+    lut = {pm.trl_prefix() : pm  for pm in process_monitors}
     for cnt in itertools.count():
-        now_set = {name: event for name, event in events.items() if event.is_set()}
+        dt = time.time() - start
+        dt /= 60e0
+        now_set = {trl_prefix: pm for trl_prefix, pm in lut.items() if pm.event.is_set()}
         if now_set:
-            logger.warning(f"Round {cnt=} following events set this time  {list(now_set)}")
-        for k in now_set:
-            events.pop(k)
-        if not events:
-            return
+            logger.warning(
+                f"{dt=:.1f} min: following events set this time %s",
+                list(now_set)
+            )
+            for trl_prefix in now_set:
+                lut.pop(trl_prefix)
+            if not lut:
+                return True
+        # refrain to reduce to non set ... be exact on what
+        # is reported
+
+        for _, pm in lut.items():
+            if not pm.process.is_alive() or pm.process.exitcode:
+                logger.error("Process %s pid %s died: trying to stop", pm.trl_prefix(), pm.process.pid)
+                return False
+
         time.sleep(0.2)
-        if (cnt % (5 * 5)) == 0:
-            dt = time.time() - start
-            dt /= 60e0
-            logger.warning(f"{dt=:.1f} min still waiting for {list(events)}")
+        if (cnt % (5 * 30)) == 0:
+            logger.warning(f"{dt=:.1f} min still waiting for {list(lut)}")
 
 
 def main():
@@ -144,33 +171,36 @@ def main():
     logger.warning(f"DB registration done. Need to start {len(servers)} servers.")
 
     # 2) spawn one process per server
-    procs = []
     script_dir = os.path.dirname(os.path.abspath(__file__))
     single_server_path = os.path.join(script_dir, "single_server.py")
 
-    events = {}
+    procs_mon = []
     for server_name, instance_name in servers:
         logger.info(f"Starting mp process: {server_name}-{instance_name}")
-        if server_name.startswith("AN01"):
-            logger.warning(f'You need to start single server with: "{server_name}"-"{instance_name}" manually!')
-        else:
+        # if server_name.startswith("AN01"):
+        #     logger.warning(f'You need to start single server with: "{server_name}"-"{instance_name}" manually!')
+        # else:
+        if True:
             t_event = mp.Event()
-            events[f"{server_name}-{instance_name}"] = t_event
             p = mp.Process(
                 target=single_server.main_loop,
                 args=(server_name, instance_name, t_event),
                 name=f"process-{server_name}-{instance_name}"
             )
             p.start()
-            procs.append((server_name, instance_name, p))
+            procs_mon.append(ProcessMonitor(event=t_event, process=p, server_name=server_name, instance_name=instance_name))
             time.sleep(.3)  # small stagger
 
+    del server_name, instance_name
     # waiting for events to clear
 
     # Todo: clear this race condition here
     logger.warning(
-        "%s:\n\t All server processes launched apart from heartbeat,\n\t waiting for databases to be initialised for 10 s...",
+        "%s:"
+        "\n\t All server processes launched apart from heartbeat,"
+        "\n\t waiting for databases to be initialised for 10 s...",
         __name__)
+    logger.warning("Server processes are %s", [{pm.trl_prefix(): pm.process.pid for pm in procs_mon}])
     logger.warning("%s trying to start heart beat loop", __name__)
     # -- start magnet monitor + heartbeat thread AFTER launching servers --
     start_event = threading.Event()
@@ -191,12 +221,6 @@ def main():
     )
     hb_thread.start()
     logger.warning("Magnet monitor/heartbeat thread started (daemon).")
-    wait_all_events_cleared(events)
-    input("> hit any key when all other servers were started")
-    logger.warning("All tango processes signaled startup!")
-    logger.warning("Signaling heart beat to start")
-    start_event.set()
-    logger.warning("Signaled heart beat to start")
 
     # 3) wait + allow Ctrl+C clean shutdown
     def shutdown(*_):
@@ -204,16 +228,16 @@ def main():
         # first tell background thread to stop
         stop_event.set()
 
-        for s, i, p in procs:
+        for pm in procs_mon:
             try:
-                p.terminate()
+                pm.process.terminate()
             except Exception:
                 pass
         time.sleep(1.0)
-        for s, i, p in procs:
+        for pm in procs_mon:
             try:
-                if p.poll() is None:
-                    p.kill()
+                if pm.process.poll() is None:
+                    pm.process.kill()
             except Exception:
                 pass
         sys.exit(0)
@@ -221,10 +245,27 @@ def main():
     signal.signal(signal.SIGINT, shutdown)
     signal.signal(signal.SIGTERM, shutdown)
 
-    logger.warning("All server processes launched. Waiting...")
+    if wait_all_events_cleared(procs_mon):
+        # all events here go on
+        pass
+    else:
+        logger.error("Error occured while waiting for statup of all tango servers trying to shut down!")
+        shutdown()
+
+    # only needed if you want to start some process by hand
+    # input("> hit any key when all other servers were started")
+    logger.warning("All tango processes signaled startup!")
+    logger.warning("Signaling heart beat to start")
+    start_event.set()
+    logger.warning("Signaled heart beat to start")
+
+    logger.warning("All server processes launched. Monitoring the status of subprocessed!")
     while True:
         time.sleep(5)
-
+        for pm in procs_mon:
+            if not pm.process.is_alive() or pm.process.exitcode:
+                logger.error(f"server process {pm.trl_prefix()} with pid {pm.process.pid} died!, shutting down")
+                shutdown()
 
 if __name__ == "__main__":
     main()
