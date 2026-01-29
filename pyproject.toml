@@ -41,8 +41,8 @@ bact-twin-architecture="*"
 # waveforms of chars/strings
 softioc = {version = ">4.1", optional = true }
 p4p = {version = "*",  optional = true }
-# if ussing tango
-pytango = {version = "*", optional = true }
+# if using tango ... I have constantly problems with pytango 10.1 (micro version I don't know)
+pytango = {version = "<10.1", optional = true }
 
 # jsons="*"
 # fastapi="*"
