@@ -1,5 +1,19 @@
 #!/usr/bin/env python3
-"""Start servers and heart beat process
+"""Start servers and heart beat process: but supervise that subprocesses keep running
+
+Following procedure:
+    * managing process starts all subservers using multiprocessing
+      each of them is started as single_server.main_loop
+    * handles each of them an event and waits them to set it
+      this progress is monitored and handled to the user
+    * after all processes have reported startup,
+      a heart beat in a separate thread is started
+      this is currently used to wiggle a bit on the magnet
+      so that changes can be seen
+    * the main process monitors keeps all childs monitored
+      if one of thems exits, it will report it stop all
+      other processes and exit
+
 
 Only start heartbeat when everything else is running
 """
@@ -11,7 +25,7 @@ import time
 import signal
 import threading
 from dataclasses import dataclass
-from typing import Dict, Tuple, Sequence
+from typing import Sequence
 
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.devices.tango_device_setup import register_all_devices
@@ -37,7 +51,7 @@ def wait_for_start_of_heartbeat(
             return False
 
         time.sleep(0.2)
-        if (cnt % (5 * 5)) == 0:
+        if (cnt % (5 * 30)) == 0:
             dt = time.time() - start
             dt /=60e0
             logger.warning(f"{dt=:.1f} min, magnet monitor: waiting for starting calculations")
@@ -143,24 +157,22 @@ def wait_all_events_cleared(process_monitors: Sequence[ProcessMonitor]) -> bool:
         now_set = {trl_prefix: pm for trl_prefix, pm in lut.items() if pm.event.is_set()}
         if now_set:
             logger.warning(
-                f"{dt=:.1f} min: following events set this time %s",
+                f"{dt=:.2f} min: following processing signaled initalisation at this time %s",
                 list(now_set)
             )
             for trl_prefix in now_set:
                 lut.pop(trl_prefix)
             if not lut:
                 return True
-        # refrain to reduce to non set ... be exact on what
-        # is reported
 
-        for _, pm in lut.items():
+        for pm in process_monitors:
             if not pm.process.is_alive() or pm.process.exitcode:
                 logger.error("Process %s pid %s died: trying to stop", pm.trl_prefix(), pm.process.pid)
                 return False
 
         time.sleep(0.2)
         if (cnt % (5 * 30)) == 0:
-            logger.warning(f"{dt=:.1f} min still waiting for {list(lut)}")
+            logger.warning(f"{dt=:.2f} min still waiting for {list(lut)}")
 
 
 def main():
