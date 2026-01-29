@@ -13,36 +13,10 @@ logger = get_logger()
 # created global event loop for the tango server thread
 global_event_loop = None
 
-
-def _enable_debugger(port=5678):
-    import pydevd_pycharm
-    pydevd_pycharm.settrace(
-            "localhost",
-            port=port,
-            stdout_to_server=True,
-            stderr_to_server=True,
-            suspend=True,
-        )
-
-
-def enable_debugger():
-    port=5678
-    while True:
-        try:
-            _enable_debugger(port)
-        except ImportError as ie:
-            raise ie
-        except ConnectionRefusedError:
-            logger.warning(f"waiting for debug process for {os.getpid()=} {port=}")
-            time.sleep(10)
-
 def post_init_callback():
     logger.warning(f"Server {sys.argv} instaniated")
 
 def main_loop(server_name: str, instance_name: str, event=None):
-    if server_name.upper().startswith("A"):
-        logger.warning(f"preparing debug for process {server_name=} {os.getpid()}")
-        enable_debugger()
     os.nice(4)
 
     if event is None:
@@ -67,9 +41,13 @@ def main_loop(server_name: str, instance_name: str, event=None):
     
     try:
         device_classes = get_all_device_classes()
-        run(device_classes, args=[server_name, instance_name], post_init_callback=cb, raises=True)
-        sys.stderr(f"Tango server {server_name}/{instance_name} finished")
+        logger.warning("Starting server %s instance %s for %d device classes", server_name, instance_name, len(device_classes))
+        run(device_classes, args=[server_name, instance_name], post_init_callback=cb, raises=True, verbose=True)
+        sys.stderr.write(f"Tango server {server_name}/{instance_name} finished")
+        sys.stderr.flush()
+        logger.warning(f"Tango server {server_name}/{instance_name} finished")
     except Exception as e:
+        sys.stderr.write(f"Tango server {server_name}/{instance_name} failed {e}")
         sys.stderr(f"Tango server {server_name}/{instance_name} failed: {e}")
         logger.error(f"Tango server {server_name}/{instance_name} failed: {e}")
         raise
