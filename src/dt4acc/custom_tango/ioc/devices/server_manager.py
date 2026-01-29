@@ -1,24 +1,51 @@
 #!/usr/bin/env python3
+"""
+try to use
+"""
+import itertools
+import multiprocessing.synchronize
 import os
 import sys
 import time
 import signal
 import subprocess
 import threading
+from typing import Sequence, Dict
 
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.devices.tango_device_setup import register_all_devices
+from dt4acc.custom_tango.ioc.devices import single_server
 
 # minimal tango import for heartbeat
 from tango import DeviceProxy, DevFailed
 
+import multiprocessing as mp
+
 logger = get_logger()
 
+def wait_for_start_of_heartbeat(
+        start_evt: threading.Event,
+        stop_evt: threading.Event,
+):
+    start = time.time()
+    for cnt in itertools.count():
+        if start_evt.is_set():
+            return True
+        if stop_evt.is_set():
+            return False
 
-def _magnet_monitor_and_heartbeat(stop_evt: threading.Event,
-                                  device_name: str = "an01-ar/em/cqln.03",
-                                  attr_name: str = "magnetic_strength",
-                                  delta: float = 0.01,
+        time.sleep(0.2)
+        if (cnt % (5 * 5)) == 0:
+            dt = time.time() - start
+            logger.warning(f"{dt=:.1f} magnet monitor: waiting for starting calculations")
+
+
+def _magnet_monitor_and_heartbeat(
+        start_evt: threading.Event,
+        stop_evt: threading.Event,
+        device_name: str = "an01-ar/em/cqln.03",
+        attr_name: str = "magnetic_strength",
+    delta: float = 0.01,
                                   period_s: float = 1.0,
                                   wait_connect_s: float = 5.0):
     """
@@ -33,6 +60,12 @@ def _magnet_monitor_and_heartbeat(stop_evt: threading.Event,
     base = None
     sign = +1.0
 
+
+    if not wait_for_start_of_heartbeat(start_evt, stop_evt):
+        logger.warning("Magnet monitor exiting before starting heartbeat (start event not send, but stop event set).")
+        return
+
+    logger.warning("Magnet monitor: starting heart beat")
     # Phase 1: wait until device is reachable and attribute can be read
     while not stop_evt.is_set():
         try:
@@ -43,13 +76,14 @@ def _magnet_monitor_and_heartbeat(stop_evt: threading.Event,
             logger.warning(f"Magnet {device_name} reachable; base {attr_name}={base}")
             break
         except DevFailed as e:
-            logger.debug(f"Waiting for magnet {device_name} (DevFailed): {e}")
+            logger.warning(f"Heartbead: Devfailed for magnet {device_name} (DevFailed) perhaps calling too early?")
+            logger.info(f"Waiting for magnet {device_name} (DevFailed): {e}")
         except Exception as e:
-            logger.debug(f"Waiting for magnet {device_name} (exc): {e}")
+            logger.error(f"Waiting for magnet {device_name} (exc): {e}")
         stop_evt.wait(wait_connect_s)
 
     if stop_evt.is_set():
-        logger.info("Magnet monitor exiting before starting heartbeat (stop event set).")
+        logger.warning("Magnet monitor exiting before starting heartbeat (stop event set).")
         return
 
     # Phase 2: heartbeat loop toggling value
@@ -71,7 +105,7 @@ def _magnet_monitor_and_heartbeat(stop_evt: threading.Event,
                     logger.warning(f"Reconnected magnet {device_name}; new base {attr_name}={base}")
                     break
                 except Exception as e:
-                    logger.debug(f"Reconnect attempt failed: {e}")
+                    logger.warning(f"Reconnect attempt failed: {e}")
                 stop_evt.wait(wait_connect_s)
         except Exception as e:
             logger.error(f"Magnet heartbeat unexpected error: {e}")
@@ -81,7 +115,22 @@ def _magnet_monitor_and_heartbeat(stop_evt: threading.Event,
         # wait with ability to be interrupted
         stop_evt.wait(period_s)
 
-    logger.info("Magnet heartbeat thread exiting (stop event set).")
+    logger.warning("Magnet heartbeat thread exiting (stop event set).")
+
+def wait_all_events_cleared(events: Dict[str, mp.synchronize.Event]):
+    start = time.time()
+    for cnt in itertools.count():
+        now_set = {name: event for name, event in events.items() if event.is_set()}
+        if now_set:
+            logger.warning(f"Round {cnt=} following events set this time  {list(now_set)}")
+        for k in now_set:
+            events.pop(k)
+        if not events:
+            return
+        time.sleep(0.2)
+        if (cnt % (5 * 5)) == 0:
+            dt = time.time() - start
+            logger.warning(f"{dt=:.1f} still waiting for {list(events)}")
 
 
 def main():
@@ -89,30 +138,39 @@ def main():
 
     # 1) register all devices (DB only)
     servers = register_all_devices()
-    logger.info(f"DB registration done. Need to start {len(servers)} servers.")
+    logger.warning(f"DB registration done. Need to start {len(servers)} servers.")
 
     # 2) spawn one process per server
     procs = []
     script_dir = os.path.dirname(os.path.abspath(__file__))
     single_server_path = os.path.join(script_dir, "single_server.py")
 
+    events = {}
     for server_name, instance_name in servers:
-        cmd = [sys.executable, "-u", single_server_path, server_name, instance_name]
+        logger.info(f"Starting mp process: {server_name}-{instance_name}")
 
-        logger.info(f"Starting process: {' '.join(cmd)}")
-
-        p = subprocess.Popen(
-            cmd,
-            env=os.environ.copy(),
+        t_event = mp.Event()
+        events[f"{server_name}-{instance_name}"] = t_event
+        p = mp.Process(
+            target=single_server.main_loop,
+            args=(server_name, instance_name, t_event),
+            name=f"process-{server_name}-{instance_name}"
         )
+        p.start()
         procs.append((server_name, instance_name, p))
         time.sleep(0.3)  # small stagger
 
+    # waiting for events to clear
+
+    # Todo: clear this race condition here
+    logger.warning("%s:\n\t All server processes launched apart from heartbeat,\n\t waiting for databases to be initialised for 10 s...", __name__)
+    logger.warning("%s trying to start heart beat loop", __name__)
     # -- start magnet monitor + heartbeat thread AFTER launching servers --
+    start_event = threading.Event()
     stop_event = threading.Event()
     hb_thread = threading.Thread(
         target=_magnet_monitor_and_heartbeat,
-        args=(stop_event,),
+        args=(start_event, stop_event,),
         kwargs={
             # use default device_name and attr_name shown above; change here if needed
             "device_name": "an01-ar/em/cqln.03",
@@ -125,8 +183,12 @@ def main():
         name="magnet-heartbeat-thread",
     )
     hb_thread.start()
-    logger.info("Magnet monitor/heartbeat thread started (daemon).")
-
+    logger.warning("Magnet monitor/heartbeat thread started (daemon).")
+    wait_all_events_cleared(events)
+    logger.warning("All tango processes signaled startup!")
+    logger.warning("Signaling heart beat to start")
+    start_event.set()
+    logger.warning("Signaled heart beat to start")
     # 3) wait + allow Ctrl+C clean shutdown
     def shutdown(*_):
         logger.warning("Shutting down all servers...")
@@ -150,7 +212,7 @@ def main():
     signal.signal(signal.SIGINT, shutdown)
     signal.signal(signal.SIGTERM, shutdown)
 
-    logger.info("All server processes launched. Waiting...")
+    logger.warning("All server processes launched. Waiting...")
     while True:
         time.sleep(5)
 
