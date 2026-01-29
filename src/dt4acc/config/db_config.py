@@ -46,6 +46,6 @@ def mongodb_url(mod_name):
         return os.environ["MONGODB_URL"]
     except KeyError:
         txt = f'Environment variable MONGODB_URL is not defined, using default: {default_url}'
-        print(txt)
-        logger.warning(txt)
+        # print(txt)
+        logger.info(txt)
         return default_url
