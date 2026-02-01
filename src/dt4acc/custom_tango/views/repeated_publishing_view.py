@@ -120,8 +120,8 @@ class TwissView(ViewInterface):
 class TuneView(ViewInterface):
     """
     Pushes tune scalars to TuneDevice using attributes:
-      - tune_x_attr (READ_WRITE)
-      - tune_y_attr (READ_WRITE)
+      - hor (READ_WRITE)
+      - vert (READ_WRITE)
     """
 
     def __init__(self, prefix: str | None):
@@ -140,8 +140,8 @@ class TuneView(ViewInterface):
         dev = DeviceProxy(dev_name)
 
         loop = asyncio.get_running_loop()
-        await loop.run_in_executor(None, lambda: dev.write_attribute("tune_x_attr", tune_x))
-        await loop.run_in_executor(None, lambda: dev.write_attribute("tune_y_attr", tune_y))
+        await loop.run_in_executor(None, lambda: dev.write_attribute("hor", tune_x))
+        await loop.run_in_executor(None, lambda: dev.write_attribute("vert", tune_y))
 
 
 # ---------------------------------------------------------------------

@@ -287,19 +287,19 @@ class TuneDevice(Device):
         self.set_state(DevState.ON)
 
     @attribute(dtype=float, access=AttrWriteType.READ_WRITE)
-    def tune_x_attr(self):
+    def hor(self):
         return self.tune_x
 
-    @tune_x_attr.write
-    def tune_x_attr(self, value):
+    @hor.write
+    def hor(self, value):
         self.tune_x = float(value)
 
     @attribute(dtype=float, access=AttrWriteType.READ_WRITE)
-    def tune_y_attr(self):
+    def vert(self):
         return self.tune_y
 
-    @tune_y_attr.write
-    def tune_y_attr(self, value):
+    @vert.write
+    def vert(self, value):
         self.tune_y = float(value)
 
 

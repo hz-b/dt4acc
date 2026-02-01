@@ -51,8 +51,8 @@ class AcceleratorManager:
             Exception: If initialization fails.
         """
         try:
-            from lat2db.model.accelerator import Accelerator
-            acc_model = Accelerator(file_name ="bessyii_lattice_json.json", from_json= True)
+            # from lat2db.model.accelerator import Accelerator
+            # acc_model = Accelerator(file_name ="bessyii_lattice_json.json", from_json= True)
 
             bessyii_json_file = data_file
             # with open(bessyii_json_file, "rt") as fp:
