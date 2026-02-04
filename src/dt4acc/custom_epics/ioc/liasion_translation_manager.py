@@ -1,81 +1,24 @@
 from typing import Dict, Sequence, Mapping
 import logging
 
-from bact_twin_architecture.data_model.identifiers import (
+from accml_lib.core.bl.unit_conversion import EnergyDependentLinearUnitConversion, LinearUnitConversion
+from accml_lib.core.bl.liaison_manager import LiaisonManager
+from accml_lib.core.bl.translator_service import TranslatorService
+from accml_lib.core.interfaces.utils.liaison_manager import LiaisonManagerBase
+from accml_lib.core.interfaces.utils.translator_service import TranslatorServiceBase
+from accml_lib.core.interfaces.utils.yellow_pages import YellowPagesBase
+
+from accml_lib.core.model.utils.identifiers import (
     LatticeElementPropertyID,
     DevicePropertyID,
     ConversionID,
 )
-from bact_twin_architecture.interfaces.liaison_manager import LiaisonManagerBase
-from bact_twin_architecture.interfaces.state_conversion import StateConversion
-from bact_twin_architecture.interfaces.translator_service import TranslatorServiceBase
-from bact_twin_architecture.utils.unit_conversion import (
-    LinearUnitConversion,
-    EnergyIndependentLinearUnitConversion,
-)
-from bact_twin_architecture.bl.bessyii_yellow_pages import YellowPages, bessyii_yellow_pages
-
 from ..data.querries import get_magnets
 from ..data.constants import ring_parameters, cavity_names
 from ...core.model.elementmodel import MagnetElementSetup
 
 logger = logging.getLogger("dt4acc")
 
-
-class LiaisonManager(LiaisonManagerBase):
-    def __init__(
-        self,
-        forward_lut: Mapping[LatticeElementPropertyID, Sequence[DevicePropertyID]],
-        inverse_lut: Mapping[DevicePropertyID, Sequence[LatticeElementPropertyID]],
-    ):
-        self.forward_lut = forward_lut
-        self.inverse_lut = inverse_lut
-
-    def forward(self, id_: LatticeElementPropertyID) -> Sequence[DevicePropertyID]:
-        return self.forward_lut[id_]
-
-    def inverse(self, id_: DevicePropertyID) -> Sequence[LatticeElementPropertyID]:
-        try:
-            return self.inverse_lut[id_]
-        except KeyError as ke:
-            logger.error(
-                f"{self.__class__.__name__} I did not find id {id_} in lookup table: {ke}"
-            )
-
-
-class TranslatorService(TranslatorServiceBase):
-    def __init__(self, lut: Mapping[ConversionID, StateConversion]):
-        self.lut = lut
-
-    def get(self, id_: ConversionID) -> StateConversion:
-        try:
-            return self.lut[id_]
-        except KeyError as ke:
-            logger.error(
-                f"{self.__class__.__name__}: I did not find id {id_} in lookup table: {ke}"
-            )
-            od = self.objects_for_device(id_)
-            logger.warning(f"{self.__class__.__name__}: For the device I know {od}")
-            em = self.objects_for_lat_elem(id_)
-            logger.warning(
-                f"{self.__class__.__name__}: For the lattice element I know {em}"
-            )
-            raise ke
-
-    def objects_for_lat_elem(self, id_: ConversionID):
-        return {
-            key: to
-            for key, to in self.lut.items()
-            if id_.lattice_property_id.element_name
-            == key.lattice_property_id.element_name
-        }
-
-    def objects_for_device(self, id_: ConversionID):
-        return {
-            key: to
-            for key, to in self.lut.items()
-            if id_.device_property_id.device_name == key.device_property_id.device_name
-        }
 
 
 def remove_id(d: Dict) -> Dict:
@@ -89,37 +32,37 @@ def magnet_infos_from_db() -> Sequence[MagnetElementSetup]:
     return [MagnetElementSetup(**remove_id(info)) for info in get_magnets()]
 
 
-def element_method(element_name: str, yp: YellowPages):
-    if element_name in yp.horizontal_steerer_names():
+def element_method(element_name: str, yp: YellowPagesBase):
+    if element_name in yp.get("horizontal_steerers"):
         return "x_kick"
-    elif element_name in yp.vertical_steerer_names():
+    elif element_name in yp.get("vertical_steerers"):
         return "y_kick"
-    elif element_name in yp.quadrupole_names():
+    elif element_name in yp.get("quadrupoles"):
         return "K"
-    elif element_name in yp.sextupole_names():
+    elif element_name in yp.get("sextupoles"):
         return "H"
     else:
         raise AssertionError(f"Don't know how to handle {element_name}")
 
 
-def extract_host_element_name(element_name: str, yp: YellowPages) -> str:
-    if element_name in yp.vertical_steerer_names() or element_name in yp.horizontal_steerer_names():
+def extract_host_element_name(element_name: str, yp: YellowPagesBase) -> str:
+    if element_name in yp.get("vertical_steerers") or element_name in yp.get("horizontal_steerers"):
         return element_name[1:]
     return element_name
 
 
 def construct_energy_independent_linear_conversion(
     slope: float,
-) -> EnergyIndependentLinearUnitConversion:
+) -> EnergyDependentLinearUnitConversion:
     if slope is None:
         raise AssertionError("Refusing creating linear unit conversion without slope")
-    return EnergyIndependentLinearUnitConversion(
+    return EnergyDependentLinearUnitConversion(
         slope=1.0 / slope, intercept=0.0, brho=ring_parameters.brho
     )
 
 
 def build_managers(
-    yp: YellowPages = bessyii_yellow_pages(),
+    yp: YellowPagesBase = bessyii_yellow_pages(),
 ) -> (LiaisonManagerBase, TranslatorServiceBase):
     """A first poor mans implementation of liasion manager and Translation service for BessyII
 
@@ -152,7 +95,7 @@ def build_managers(
             LatticeElementPropertyID(element_name=info.name[1:], property="x_kick"),
         )
         for info in infos
-        if info.name in yp.horizontal_steerer_names()
+        if info.name in yp.get("horizontal_steerers")
     }
     inverse_lut.update(
         {
@@ -160,7 +103,7 @@ def build_managers(
                 LatticeElementPropertyID(element_name=info.name[1:], property="y_kick"),
             )
             for info in infos
-            if info.name in yp.vertical_steerer_names()
+            if info.name in yp.get("vertical_steerers")()
         }
     )
 
