@@ -13,7 +13,7 @@ from ...custom_epics.utils.orbit_at_bpms import OrbitAtBPMS
 logger = get_logger()
 
 
-class AcceleratorManager:
+class BackendRW:
     """
     Manages the initialization and event subscription of the accelerator.
     Orchestrates interactions, manages configurations,

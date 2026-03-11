@@ -1,9 +1,11 @@
-import numpy as np
-from bact_twin_architecture.data_model.identifiers import (
-    LatticeElementPropertyID,
-    DevicePropertyID,
-)
+from typing import Dict, Union
 
+import numpy as np
+
+from accml_lib.core.interfaces.backend.backend import BackendR, BackendRW
+from accml_lib.core.interfaces.utils.measurement_execution_engine import MeasurementExecutionEngine
+from accml_lib.core.model.utils.command import ReadCommand, Command
+from accml_lib.core.model.utils.identifiers import DevicePropertyID, LatticeElementPropertyID
 from .handlers import handle_device_update, update_manager
 from ..data.constants import config, special_pvs, cavity_names
 from ..data.querries import (
@@ -19,7 +21,7 @@ def flag_not_handling(pv_name: str, val: object):
     logger.warning("Not handling update of pv %s to %s", pv_name, val)
 
 
-def initialize_magnet_pvs(builder, magnet):
+async def initialize_magnet_pvs(builder, magnet):
     """
     Initializes the process variables (PVs) for a given magnet.
 
@@ -36,7 +38,10 @@ def initialize_magnet_pvs(builder, magnet):
     magnet_name = magnet["name"]
     # Create an element representing the magnet
     # Create PVs and link to update logic
-    val = update_manager.peek_engine(
+    # Todo: howto handle steerers here?
+    #       it should be not that
+    #       should use liasion manager here too
+    val = await update_manager.peek_engine(
         LatticeElementPropertyID(element_name=magnet_name, property="main_strength")
     )
     builder.aOut(
@@ -76,7 +81,7 @@ def initialize_magnet_pvs(builder, magnet):
     )
 
 
-def initialize_power_converter_pvs(builder, prefix):
+async def initialize_power_converter_pvs(builder, prefix):
     """
     Initializes power converter PVs and associated magnets.
 
@@ -85,10 +90,10 @@ def initialize_power_converter_pvs(builder, prefix):
         prefix (str): The prefix used for PV naming.
     """
     for pc_name in get_unique_power_converters():
-        add_pc_pvs(builder, pc_name, prefix)
+        await add_pc_pvs(builder, pc_name, prefix)
 
 
-def add_pc_pvs(builder, pc_name, prefix):
+async def add_pc_pvs(builder, pc_name, prefix):
     """
     Adds PVs for a specific power converter and its associated magnets.
 
@@ -104,14 +109,20 @@ def add_pc_pvs(builder, pc_name, prefix):
 
     # Initialize PVs for each magnet connected to this (pc_name) power converter
     for magnet_data in magnets:
-        initialize_magnet_pvs(builder, magnet_data)
+        await initialize_magnet_pvs(builder, magnet_data)
 
     # Create power converter setpoint and readback PVs
     # Todo: put it to power converters directly
-    vals = update_manager.device_value_from_peeking_engine(
-        DevicePropertyID(device_name=pc_name, property="set_current")
-    )
-    start_val = np.asarray(vals).mean()
+    # Todo: add input data to config so that exception does not need to be
+    #       handled
+    dev_prop = DevicePropertyID(device_name=pc_name, property="set_current")
+    try:
+        vals = await update_manager.device_value_from_peeking_engine(dev_prop)
+        start_val = np.asarray(vals).mean()
+    except KeyError as ke:
+        logger.warning(f"At startup peeking failed for {dev_prop}: {ke}")
+        start_val = np.nan
+
     rdbk = builder.aOut(f"{pc_name}:rdbk", initial_value=start_val, PREC=2)
 
     async def handle_pc_update(device_id: str, property_id: str, value: float):
@@ -185,8 +196,10 @@ def initialize_machine_info_pvs(builder):
     builder.aOut(f"beam:rev_freq", initial_value=0.0, EGU="kHz")
 
 
-def initialize_master_clock_pvs(builder):
-    """initalise master clock pv
+async def initialize_master_clock_pvs(
+        builder, mexec: MeasurementExecutionEngine
+) -> Dict[ReadCommand, Union[BackendR, BackendRW]]:
+    """initialise master clock pv
 
     Warning:
         note for running the twin as a shadow it will
@@ -196,28 +209,45 @@ def initialize_master_clock_pvs(builder):
         Foresee dedicated variables for allowing only a difference shift
         Provide the frequency the code starts with
     """
-    vals = update_manager.device_value_from_peeking_engine(
-        DevicePropertyID(device_name="master_clock", property="reference_frequency")
+
+    vals = await mexec.trigger_read(
+        [ReadCommand("master_clock", "reference_frequency")]
     )
-    start_val = np.asarray(vals).mean()
-    builder.aOut(
+    start_val = np.asarray([v.payload for v in vals.data]).mean()
+
+    d = dict()
+
+    d[ReadCommand(id="master_clock", property="freq")] = builder.aOut(
         f"{special_pvs['master_clock']}:freq",
         initial_value=start_val,
         always_update=True,
         EGU="kHz",
         PREC=3,
-        on_update=lambda val: handle_device_update(
-            device_id="master_clock", property_id="reference_frequency", value=val
-        ),
+        on_update=lambda val: mexec.set([
+            Command(
+                id="master_clock", property="reference_frequency", value=val, behaviour_on_error=None,
+            )
+        ])
     )
+
     #: todo ... comment these values
-    builder.aIn("lattice_info:ref_freq", initial_value=start_val, EGU="kHz", PREC=1)
-    builder.longIn(
-        "lattice_info:ref_freq:khz:up", initial_value=int(start_val), EGU="kHz"
+    d[ReadCommand(id="lattice_info", property="ref_freq")] = (
+        builder.aIn(
+            "lattice_info:ref_freq", initial_value=start_val, EGU="kHz", PREC=1
+        )
+    )
+    d[ReadCommand(id="lattice_info", property="ref_freq:khz:up")] = (
+        builder.longIn(
+            "lattice_info:ref_freq:khz:up", initial_value=int(start_val), EGU="kHz"
+        )
     )
     frac = (start_val % 1) * 1e6
-    builder.longIn("lattice_info:ref_freq:khz:frac", initial_value=int(frac), EGU="mHz")
-
+    d[ReadCommand(id="lattice_info", property="ref_freq:khz:frac")] = (
+        builder.longIn(
+            "lattice_info:ref_freq:khz:frac", initial_value=int(frac), EGU="mHz"
+        )
+    )
+    return d
 
 def initialize_other_pvs(builder, prefix):
     """Initializes miscellaneous PVs (dummy values).
@@ -253,7 +283,7 @@ def initialize_orbit_object_pvs(builder):
     builder.longOut("ORBITCC:count", initial_value=0)
 
 
-def initialize_cavity_pvs(builder):
+async def initialize_cavity_pvs(builder):
     """
     Initializes PVs for RF cavities.
 
@@ -265,8 +295,8 @@ def initialize_cavity_pvs(builder):
     """
 
     for cavity_name in cavity_names:
-        vals = update_manager.device_value_from_peeking_engine(
-            DevicePropertyID(device_name=cavity_name, property="frequency")
+        vals = await update_manager.device_value_from_peeking_engine(
+            DevicePropertyID(device_name="master_clock", property="reference_frequency")
         )
         start_val = np.asarray(vals).mean()
         builder.aOut(f"{cavity_name}:freq", initial_value=start_val, EGU="kHz", PREC=3)
