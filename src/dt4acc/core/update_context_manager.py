@@ -28,4 +28,10 @@ class UpdateContext:
         tb_buf = io.StringIO()
         traceback.print_tb(exc_tb, file=tb_buf)
         tb_buf.seek(0)
-        logger.error("%s\nTraceback:\n%s\n%s\n", marker, tb_buf.read(), marker)
+        logger.error(
+            "%s\nError %s %s\nTraceback:\n%s\n%s\n",
+            marker,
+            exc_type, exc_val,
+            tb_buf.read(),
+            marker
+        )
