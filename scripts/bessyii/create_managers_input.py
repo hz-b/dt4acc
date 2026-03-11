@@ -26,7 +26,7 @@ from accml_lib.core.interfaces.utils.yellow_pages import YellowPagesBase
 from accml_lib.core.model.config.power_converter import PowerConverter
 from accml_lib.core.model.utils.identifiers import DevicePropertyID, LatticeElementPropertyID, ConversionID
 from accml_lib.core.model.utils.liaison_manager_lookup_table import LiaisonManagerInverseLookupElement, \
-    LiaisonManagerInverseLookupTable
+    LiaisonManagerInverseLookupTable, LiaisonManagerForwardLookupElement, LiaisonManagerForwardLookupTable
 from accml_lib.core.model.utils.translator_manager_lookup_table import TranslatorLookupTable, \
     TranslatorLookupTableElement, PolynomCoefficients
 
@@ -77,7 +77,9 @@ def construct_energy_independent_linear_conversion(
     )
 
 
-def build_liaison_manager_inverse_lut(data_path: Tuple[str], *, yp: YellowPagesBase) -> Sequence[LiaisonManagerInverseLookupElement]:
+def build_liaison_manager_lut(
+        data_path: Tuple[str], *, yp: YellowPagesBase
+) -> (Sequence[LiaisonManagerForwardLookupElement], Sequence[LiaisonManagerInverseLookupElement]):
     """A first poor mans implementation of liaison manager BessyII
 
     Todo:
@@ -142,7 +144,8 @@ def build_liaison_manager_inverse_lut(data_path: Tuple[str], *, yp: YellowPagesB
                 )
 
 
-    lut = [LiaisonManagerInverseLookupElement(dev_id=k, lat_ids=v) for k,v in d.items()]
+    lut_fwd = []
+    lut_inv = [LiaisonManagerInverseLookupElement(dev_id=k, lat_ids=v) for k,v in d.items()]
     del d
 
     for family, same_property in [
@@ -154,7 +157,7 @@ def build_liaison_manager_inverse_lut(data_path: Tuple[str], *, yp: YellowPagesB
         # fmt:on
         ("cavities", "frequency")
     ]:
-        lut += [
+        lut_inv += [
             LiaisonManagerInverseLookupElement(
                 dev_id=DevicePropertyID(device_name=entry.dev_id, property=same_property),
                 lat_ids=[LatticeElementPropertyID(element_name=entry.elem_id, property=same_property)]
@@ -162,7 +165,7 @@ def build_liaison_manager_inverse_lut(data_path: Tuple[str], *, yp: YellowPagesB
             for entry in magnet_info if entry.elem_id in yp.get(family)
         ]
 
-    lut += [
+    lut_inv += [
         LiaisonManagerInverseLookupElement(
             dev_id=DevicePropertyID(device_name="master_clock", property="reference_frequency"),
             lat_ids=[
@@ -171,7 +174,15 @@ def build_liaison_manager_inverse_lut(data_path: Tuple[str], *, yp: YellowPagesB
             ]
         )
     ]
-    return lut
+    lut_fwd += [
+        LiaisonManagerForwardLookupElement(
+            lat_id=LatticeElementPropertyID(element_name=cavity_name, property="frequency"),
+            dev_ids=[DevicePropertyID(device_name="master_clock", property="reference_frequency")]
+        )
+        for cavity_name in yp.get("cavities")
+
+    ]
+    return lut_fwd, lut_inv
 
 
 def build_translator_manager_lut(
@@ -370,7 +381,8 @@ def main():
 #          please check when it is updated if you edit it by hand!
 """
     yp_fname = "bessyii_yellow_pages_lookup_table.yml"
-    lm_fname = "bessyii_liaison_manager_inverse_lookup_table.yml"
+    lm_inv_fname = "bessyii_liaison_manager_inverse_lookup_table.yml"
+    lm_fwd_fname = "bessyii_liaison_manager_forward_lookup_table.yml"
     ts_fname = "bessyii_translation_service_lookup_table.yml"
     data_path = ("custom", "config_data", "bessyii")
 
@@ -388,9 +400,9 @@ def main():
     del fp
     yp = YellowPages(yp_lut)
 
-    lut_inv = LiaisonManagerInverseLookupTable(
-        lut=build_liaison_manager_inverse_lut(data_path=data_path, yp=yp)
-    )
+    lut_fwd_, lut_inv_ = build_liaison_manager_lut(data_path=data_path, yp=yp)
+    lut_fwd = LiaisonManagerForwardLookupTable(lut_fwd_)
+    lut_inv = LiaisonManagerInverseLookupTable(lut_inv_)
     mismatched = lut_inv.non_unique_entries()
     if mismatched:
         print("Following items look up can be misleading!")
@@ -399,18 +411,38 @@ def main():
 
     del mismatched
 
-    with open(lm_fname, "wt") as fp:
-        fp.write(header_fmt.format(**dict(data_type="Liaison manager inverse table", date=now)))
+    mismatched = lut_fwd.non_unique_entries()
+    if mismatched:
+        print("Following items look up can be misleading!")
+        pprint.pprint(mismatched)
+        print(" ===========================================")
+
+    del mismatched
+
+    with open(lm_inv_fname, "wt") as fp:
+        fp.write(header_fmt.format(data_type="Liaison manager inverse table", date=now))
         yaml.dump(asdict(lut_inv), fp, Dumper=CompressedSequenceDumper)
         fp.write("# EOF\n")
-    del yp_lut
 
-    with open(lm_fname, "rt") as fp:
+    with open(lm_inv_fname, "rt") as fp:
         tmp = yaml.load(fp, Loader=yaml.SafeLoader)
 
     # verify that it gets reloaded
     lmt_inv = jsons.load(tmp, LiaisonManagerInverseLookupTable)
     lmt_inv.verify()
+
+    with open(lm_fwd_fname, "wt") as fp:
+        fp.write(header_fmt.format(data_type="Liaison manager forward table", date=now))
+        yaml.dump(asdict(lut_fwd), fp, Dumper=CompressedSequenceDumper)
+        fp.write("# EOF\n")
+    del yp_lut
+
+    with open(lm_fwd_fname, "rt") as fp:
+        tmp = yaml.load(fp, Loader=yaml.SafeLoader)
+
+    # verify that it gets reloaded
+    lmt_fwd = jsons.load(tmp, LiaisonManagerForwardLookupTable)
+    lmt_fwd.verify()
 
     tlut = TranslatorLookupTable(lut=build_translator_manager_lut(data_path=data_path, yp=yp, lm_inv=lmt_inv))
 
