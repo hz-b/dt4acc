@@ -3,7 +3,7 @@ import sys
 import time
 from tango import DeviceProxy, DevFailed
 from dt4acc.core.utils.logger import get_logger
-from dt4acc.custom_epics.ioc.liasion_translation_manager import element_method
+from dt4acc.scripts.bessyii.create_managers_input import element_method
 from bact_twin_architecture.bl.bessyii_yellow_pages import bessyii_yellow_pages
 
 logger = get_logger()

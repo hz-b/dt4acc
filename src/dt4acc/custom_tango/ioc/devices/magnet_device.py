@@ -6,7 +6,8 @@ import threading
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_epics.data.querries import get_unique_power_converters, get_magnets_per_power_converters
 from dt4acc.custom_epics.ioc.handlers import update_manager, handle_device_update
-from dt4acc.custom_epics.ioc.liasion_translation_manager import build_managers, element_method
+from dt4acc.custom_epics.ioc.liasion_translation_manager import build_managers
+from dt4acc.scripts.bessyii.create_managers_input import element_method
 from bact_twin_architecture.data_model.identifiers import LatticeElementPropertyID, DevicePropertyID
 from bact_twin_architecture.bl.bessyii_yellow_pages import bessyii_yellow_pages
 

@@ -299,11 +299,11 @@ class KickAngleCorrectorProxy(AddOnElementProxy):
 
         Todo: review if this code is still neede
         """
-        (element,) = self._obj
+        element = self._obj
         if kick_x is not None:
-            kick_x = kick_x * element_data.hw2phys
+            kick_x = kick_x
         if kick_y is not None:
-            kick_y = kick_y * element_data.hw2phys
+            kick_y = kick_y
         element.update(
             KickAngle=manipulate_kick(self._obj.KickAngle, kick_x=kick_x, kick_y=kick_y)
         )
@@ -320,12 +320,12 @@ class KickAngleCorrectorProxy(AddOnElementProxy):
         Raises:
             ValueError: If an unknown property is specified.
         """
-        if property_id != "im":
+        if property_id not in  ["y_kick", "x_kick"]:
             raise ValueError(f"Unexpected property {property_id} for kick corrector")
 
-        if self.correction_plane == "horizontal":
+        if property_id == "x_kick":
             await self.update_kick(kick_x=value, element_data=element_data)
-        elif self.correction_plane == "vertical":
+        elif property_id == "y_kick":
             await self.update_kick(kick_y=value, element_data=element_data)
 
         await self.on_update_finished.trigger(None)

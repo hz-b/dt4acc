@@ -1,18 +1,21 @@
+"""
+Todo:
+    reimplement update manager based on accml simulator
+"""
 from typing import Sequence
 
-from bact_twin_architecture.data_model.command import Command, BehaviourOnError
-from bact_twin_architecture.data_model.identifiers import (
+from accml_lib.core.interfaces.backend.backend import BackendRW
+from accml_lib.core.interfaces.utils.liaison_manager import LiaisonManagerBase
+from accml_lib.core.interfaces.utils.translator_service import TranslatorServiceBase
+from accml_lib.core.interfaces.utils.command_rewritter import CommandRewriterBase
+
+from accml_lib.core.model.utils.identifiers import (
     LatticeElementPropertyID,
     DevicePropertyID,
     ConversionID,
 )
-from bact_twin_architecture.interfaces.command_rewritter import CommandRewriterBase
-from bact_twin_architecture.interfaces.liaison_manager import LiaisonManagerBase
-from bact_twin_architecture.interfaces.translator_service import TranslatorServiceBase
-
-from .accelerators.accelerator_manager import AcceleratorManager
+from accml_lib.core.model.utils.command import Command, BehaviourOnError
 from .update_context_manager import UpdateContext
-from ..custom_epics.ioc.liasion_translation_manager import TranslatorService
 
 
 class UpdateManager:
@@ -22,6 +25,12 @@ class UpdateManager:
     machine
 
     Supports peeking into the engine
+
+    Todo:
+        check if cmd exec does the job
+
+        call conversion only if needed. Use natural interface name
+
     """
 
     def __init__(
@@ -30,14 +39,14 @@ class UpdateManager:
         command_rewritter: CommandRewriterBase,
         liaison_manager: LiaisonManagerBase,
         translator_service: TranslatorServiceBase,
-        acc_mgr: AcceleratorManager,
+        backend: BackendRW,
     ):
         self.command_rewritter = command_rewritter
         self.liaison_manager = liaison_manager
         self.translator_service = translator_service
-        self.acc_mgr = acc_mgr
+        self.backend = backend
 
-    def device_value_from_peeking_engine(
+    async def device_value_from_peeking_engine(
         self, dev_prop: DevicePropertyID
     ) -> Sequence[float]:
         """
@@ -51,28 +60,26 @@ class UpdateManager:
             pass
         lat_props = self.liaison_manager.inverse(dev_prop)
         if lat_props is None:
-            raise AssertionError(
-                f"{self.liaison_manager.__class__.__name__} does not know {dev_prop}"
-            )
+            raise  AssertionError(f"{self.liaison_manager.__class__.__name__} does not know {dev_prop}")
 
-        def convert(lat_prop):
+        async def convert(lat_prop):
             translator = self.translator_service.get(
                 ConversionID(lattice_property_id=lat_prop, device_property_id=dev_prop)
             )
-            val = self.peek_engine(lat_prop)
+            val = await self.peek_engine(lat_prop)
             return translator.forward(val)
 
-        values = [convert(lat_prop) for lat_prop in lat_props]
+        values = [await convert(lat_prop) for lat_prop in lat_props]
         return values
 
-    def peek_engine(self, lat_elem_prop: LatticeElementPropertyID) -> object:
+    async def peek_engine(self, lat_elem_prop: LatticeElementPropertyID) -> object:
         """peek into underlaying engine to get value
 
         Todo:
             resolve layring violation
         """
-        proxy = self.acc_mgr.accelerator.proxy_factory.get(lat_elem_prop.element_name)
-        val = proxy.peek(property_id=lat_elem_prop.property)
+        await self.backend.trigger(lat_elem_prop.element_name, lat_elem_prop.property)
+        val = await self.backend.read(lat_elem_prop.element_name, lat_elem_prop.property)
         return val
 
     async def update(self, *, device_id, property_name, value=None, element=None):
@@ -108,5 +115,4 @@ class UpdateManager:
                 #
                 # Todo: revisit if a transactional update should be applied here
 
-                elem_proxy = await self.acc_mgr.accelerator.get_element(cmd.id)
-                await elem_proxy.update(cmd.property, cmd.value, element)
+                await self.backend.set(cmd.id, cmd.property, cmd.value)

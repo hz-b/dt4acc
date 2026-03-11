@@ -1,7 +1,8 @@
-from bact_twin_architecture.bl.command_rewriter import CommandRewriter
 # from dt4acc.custom_epics.ioc.liasion_translation_manager import build_managers
 
-from .liasion_translation_manager import build_managers
+from accml_lib.core.bl.command_rewritter import CommandRewriter
+from accml_lib.custom.bessyii.liasion_translator_setup import load_managers
+
 from ..utils.context_proxy import ContextProxy
 from ...core.accelerators.pyat_accelerator import setup_accelerator
 from ...core.command import UpdateManager
@@ -13,17 +14,17 @@ ctx = ContextProxy("pva")  # Create a context for EPICS PVA (PV Access)
 
 #: todo replace soon by database service
 
-lm, tm = build_managers()
+_, lm, tm = load_managers()
 
 # todo: should this be part of the controller
 update_manager = UpdateManager(
     command_rewritter=CommandRewriter(
-        liasion_manager=lm,
+        liaison_manager=lm,
         translation_service=tm
     ),
     liaison_manager=lm,
     translator_service=tm,
-    acc_mgr=setup_accelerator()
+    backend=setup_accelerator()
 )
 
 
