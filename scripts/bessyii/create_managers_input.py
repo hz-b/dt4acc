@@ -107,24 +107,29 @@ def build_liaison_manager_lut(
 
     # These contain a one to one mapping (for quadrupoles and sextupoles)
     # therefore I need to group them as they belong together
-    d = defaultdict(list)
-    for family_name, lattice_property in (
+    inv_d = defaultdict(list)
+    fwd_d = defaultdict(list)
+    for family_name, lattice_property, at_property in (
         # fmt:off
-        # ( "quadrupoles"         , "main_strength" ),
-        ( "sextupoles"          , "main_strength" ),
-            # fmt:on
+        # ( "quadrupoles"         , "main_strength", "K" ),
+        ( "sextupoles"          , "main_strength", "H" ),
+        # fmt:on
     ):
         for entry in magnet_info:
             if entry.elem_id in yp.get(family_name):
-                d[
-                    DevicePropertyID(
-                        device_name=pc_magnet_is_connected_to[entry.elem_id], property="set_current"
-                    )
-                ].append(LatticeElementPropertyID(element_name=entry.elem_id, property=lattice_property))
-
+                dev_name = str(pc_magnet_is_connected_to[entry.elem_id])
+                lat_p  = LatticeElementPropertyID(element_name=str(entry.elem_id), property=lattice_property)
+                pc_dev_p = DevicePropertyID(device_name=dev_name, property="set_current")
+                mag_dev_p = DevicePropertyID(device_name=str(entry.dev_id), property="main_strength")
+                fwd_d[lat_p].append(pc_dev_p)
+                inv_d[pc_dev_p].append(lat_p)
+                inv_d[mag_dev_p].append(lat_p)
     # special treatment for horizontal and vertical steerers as these are cowound ..
     # so the magnet name is the sextupole but the
     # power converter
+    lut_fwd = []
+    lut_inv = []
+
     for family_name, lattice_property, co_wound_prefix in (
         # fmt:off
         ( "horizontal_steerers" , "x_kick", "H"),
@@ -134,19 +139,18 @@ def build_liaison_manager_lut(
         names_in_family = [f"{co_wound_prefix}{name}" for name in yp.get(family_name)]
         for entry in magnet_info:
             if entry.elem_id in names_in_family:
-                d[
-                    DevicePropertyID(
-                        device_name=pc_magnet_is_connected_to[entry.elem_id],
-                        property="set_current"
-                    )
-                ].append(
-                    LatticeElementPropertyID(element_name=entry.elem_id, property=lattice_property)
-                )
+                dev_name = str(pc_magnet_is_connected_to[entry.elem_id])
+                lat_p = LatticeElementPropertyID(element_name=str(entry.elem_id), property=lattice_property)
+                pc_dev_p = DevicePropertyID(device_name=dev_name, property="set_current")
+                mag_dev_p = DevicePropertyID(device_name=str(entry.dev_id), property="main_strength")
+                fwd_d[lat_p].append(pc_dev_p)
+                inv_d[pc_dev_p].append(lat_p)
+                inv_d[mag_dev_p].append(lat_p)
 
 
-    lut_fwd = []
-    lut_inv = [LiaisonManagerInverseLookupElement(dev_id=k, lat_ids=v) for k,v in d.items()]
-    del d
+    lut_fwd += [LiaisonManagerForwardLookupElement(lat_id=k, dev_ids=v) for k,v in fwd_d.items()]
+    lut_inv += [LiaisonManagerInverseLookupElement(dev_id=k, lat_ids=v) for k,v in inv_d.items()]
+    del fwd_d, inv_d
 
     for family, same_property in [
         # fmt:off
@@ -180,14 +184,13 @@ def build_liaison_manager_lut(
             dev_ids=[DevicePropertyID(device_name="master_clock", property="reference_frequency")]
         )
         for cavity_name in yp.get("cavities")
-
     ]
     return lut_fwd, lut_inv
 
 
 def build_translator_manager_lut(
-        data_path: Tuple[str], *, yp: YellowPagesBase, lm_inv: LiaisonManagerInverseLookupTable) \
--> Sequence[TranslatorLookupTableElement]:
+        data_path: Tuple[str], *, yp: YellowPagesBase, lm_inv: LiaisonManagerInverseLookupTable
+)-> Sequence[TranslatorLookupTableElement]:
     """A first poor mans implementation of liaison manager BessyII"""
     # start to build it for the magnets ... power converter feed
 
@@ -252,6 +255,34 @@ def build_translator_manager_lut(
                 PolynomCoefficients([0.0, 1.0], energy_dependent=False)
             )
         )
+
+    # handle corrector main strength
+    all_keys, unhandled = unhandled, []
+    for dev_p in all_keys:
+        if dev_p.device_name not in yp.get("steerers"):
+            unhandled.append(dev_p)
+            continue
+        # assuming that there is only one for the steerer main strength
+        lat_p, = lm_inv.get(dev_p)
+        # Todo: find out the coefficient for magnet to steerer
+        lut.append(
+            TranslatorLookupTableElement(
+                ConversionID(lat_p, dev_p),
+                PolynomCoefficients([0.0, 1.0], energy_dependent=False)
+            )
+        )
+
+    all_keys, unhandled = unhandled, []
+    dev_names = list(yp.get("quadrupoles")) + list(yp.get("sextupoles"))
+    for dev_p in all_keys:
+        if dev_p.property == "main_strength" and dev_p.device_name in dev_names:
+            lat_p, = lm_inv.get(dev_p)
+            lut.append(
+                TranslatorLookupTableElement(
+                    ConversionID(lat_p, dev_p),
+                    PolynomCoefficients([0.0, 1.0], energy_dependent=False)
+                )
+            )
 
     print("No translation objects for")
     pprint.pprint(unhandled)
