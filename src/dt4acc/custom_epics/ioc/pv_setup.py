@@ -3,11 +3,8 @@ from typing import Dict
 from softioc.pythonSoftIoc import RecordWrapper
 import numpy as np
 
-from accml_lib.core.interfaces.backend.backend import BackendR, BackendRW
-from accml_lib.core.interfaces.utils.measurement_execution_engine import MeasurementExecutionEngine
 from accml_lib.core.model.utils.command import ReadCommand, Command
-from accml_lib.core.model.utils.identifiers import DevicePropertyID, LatticeElementPropertyID
-from .handlers import handle_device_update, update_manager
+from .controller_interface import ControllerInterface
 from ..data.constants import config, special_pvs, cavity_names
 from ..data.querries import (
     get_unique_power_converters,
@@ -22,7 +19,7 @@ def flag_not_handling(pv_name: str, val: object):
     logger.warning("Not handling update of pv %s to %s", pv_name, val)
 
 
-async def initialize_magnet_pvs(builder, magnet, mexec: MeasurementExecutionEngine) -> Dict[ReadCommand, RecordWrapper]:
+async def initialize_magnet_pvs(builder, magnet,  controller: ControllerInterface) -> Dict[ReadCommand, RecordWrapper]:
     """
     Initializes the process variables (PVs) for a given magnet.
 
@@ -47,7 +44,7 @@ async def initialize_magnet_pvs(builder, magnet, mexec: MeasurementExecutionEngi
     # retrieve the reference value for start
     rcmd_for_ref = ReadCommand(id=magnet_name, property="main_strength")
     try:
-        vals = await mexec.trigger_read([rcmd_for_ref])
+        vals = await controller.trigger_read([rcmd_for_ref])
         single, = vals.data
         val = single.payload
     except KeyError as ke:
@@ -75,30 +72,36 @@ async def initialize_magnet_pvs(builder, magnet, mexec: MeasurementExecutionEngi
         ),
     )
     async def handle_magnet_update(device_id: str, property_id: str, value: float):
-        r = await mexec.set([Command(id=device_id, property=property_id, value=value, behaviour_on_error=None)])
-        logger.info("%s:%s setting setpoint val=%s", device_id, property_id, value)
-        rdbk.set(value)
-        logger.info("%s:%s set readback  val=%s", device_id, property_id, value)
+        logger.info("%s:%s updating setpoint val=%s", device_id, property_id, value)
+        r = await controller.update(
+            cmd=Command(id=device_id, property=property_id, value=value, behaviour_on_error=None),
+            reads=[rcmd_for_rdbk],
+            delayed_reads=[],
+        )
         return r
 
     d[ReadCommand(id=magnet_name, property="x")] = builder.aOut(
         f"{magnet_name}:x:set",
         initial_value=0.0,
-        on_update=lambda val: mexec.set(
-            [Command(id=magnet_name, property="x", value=val, behaviour_on_error=None)],
+        on_update=lambda val: controller.update(
+            cmd=Command(id=magnet_name, property="x", value=val, behaviour_on_error=None),
+            reads=[],
+            delayed_reads=[],
         )
     )
     d[ReadCommand(id=magnet_name, property="y")] = builder.aOut(
         f"{magnet_name}:y:set",
         initial_value=0.0,
-        on_update=lambda val: mexec.set(
-            [Command(id=magnet_name, property="y", value=val, behaviour_on_error=None)],
+        on_update=lambda val:  controller.update(
+            cmd=Command(id=magnet_name, property="y", value=val, behaviour_on_error=None),
+            reads=[],
+            delayed_reads=[],
         )
     )
     return d
 
 
-async def initialize_power_converter_pvs(builder, prefix: str, mexec: MeasurementExecutionEngine):
+async def initialize_power_converter_pvs(builder, prefix: str,  controller: ControllerInterface):
     """
     Initializes power converter PVs and associated magnets.
 
@@ -108,11 +111,11 @@ async def initialize_power_converter_pvs(builder, prefix: str, mexec: Measuremen
     """
     d = dict()
     for pc_name in get_unique_power_converters():
-        d.update(await add_pc_pvs(builder, pc_name, prefix, mexec))
+        d.update(await add_pc_pvs(builder, pc_name, prefix, controller))
     return d
 
 
-async def add_pc_pvs(builder, pc_name:str, prefix:str, mexec:MeasurementExecutionEngine) -> Dict[str, RecordWrapper]:
+async def add_pc_pvs(builder, pc_name:str, prefix:str,  controller: ControllerInterface) -> Dict[str, RecordWrapper]:
     """
     Adds PVs for a specific power converter and its associated magnets.
 
@@ -129,14 +132,14 @@ async def add_pc_pvs(builder, pc_name:str, prefix:str, mexec:MeasurementExecutio
     d = dict()
     # Initialize PVs for each magnet connected to this (pc_name) power converter
     for magnet_data in magnets:
-        d.update(await initialize_magnet_pvs(builder, magnet_data, mexec))
+        d.update(await initialize_magnet_pvs(builder, magnet_data, controller))
 
     # Create power converter setpoint and readback PVs
     # Todo: put it to power converters directly
     # Todo: add input data to config so that exception does not need to be
     #       handled
     try:
-        vals = await mexec.trigger_read([ReadCommand(pc_name, "set_current")])
+        vals = await controller.trigger_read([ReadCommand(pc_name, "set_current")])
         start_val = np.asarray([v.payload for v in vals.data]).mean()
     except KeyError as ke:
         logger.warning(f"At startup peeking failed for {pc_name} 'set_current': {ke}")
@@ -154,12 +157,17 @@ async def add_pc_pvs(builder, pc_name:str, prefix:str, mexec:MeasurementExecutio
 
     async def handle_pc_update(device_id: str, property_id: str, value: float):
         logger.warning("%s:%s updating setpoint val=%s", device_id, property_id, value)
-        r = await mexec.set([Command(id=device_id,property=property_id, value=value, behaviour_on_error=None)])
+        r = await controller.update(
+            cmd=Command(id=device_id,property=property_id, value=value, behaviour_on_error=None),
+            reads=[ReadCommand(id=pc_name, property="rdbk_current")],
+            delayed_reads=[],
+        )
         logger.debug("%s:%s updating rdbk val=%s", device_id, property_id, value)
         rdbk.set(value)
         return r
 
     return d
+
 
 def initialize_orbit_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
     """
@@ -175,17 +183,17 @@ def initialize_orbit_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
                                                                  length=config.n_elements),
         ReadCommand(id="beam", property="x0"): builder.WaveformIn(f"beam:orbit:x0", initial_value=[0.0],
                                                                   length=config.n_elements),
-    ReadCommand(id="beam", property="name"): builder.WaveformIn(f"beam:orbit:names", initial_value=[""],
+        ReadCommand(id="beam", property="name"): builder.WaveformIn(f"beam:orbit:names", initial_value=[""],
                                                                   length=config.n_elements),
-    ReadCommand(id="beam", property="name"): builder.boolIn(f"beam:orbit:found", initial_value=False),
+        ReadCommand(id="beam", property="name"): builder.boolIn(f"beam:orbit:found", initial_value=False),
     }
 
 
 def initialize_tune_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
     d = dict()
-    for axis in ["rdH", "rdV"]:
-        d[ReadCommand(id="tune", property="flq_x")] = builder.aOut(f"TUNEZR:flq:{axis}", initial_value=0.0, PREC=9)
-        d[ReadCommand(id="tune", property="x")] = builder.aOut(f"TUNEZR:{axis}", initial_value=0.0, PREC=3, EGU="kHz")
+    for axis, suffix in [("x", "rdH"), ("y", "rdV")]:
+        d[ReadCommand(id="tune", property=f"flq_{axis}")] = builder.aOut(f"TUNEZR:flq:{suffix}", initial_value=0.0, PREC=9)
+        d[ReadCommand(id="tune", property=f"{axis}")] = builder.aOut(f"TUNEZR:{suffix}", initial_value=0.0, PREC=3, EGU="kHz")
     d[ReadCommand(id="tune", property="count")] = builder.longOut(f"TUNEZR:count", initial_value=0)
     return d
 
@@ -198,16 +206,16 @@ def initialize_twiss_pvs(builder):
     """
     d = dict()
     for axis in ["x", "y"]:
-        d[ReadCommand("twiss", "{axis}:alpha")] = builder.WaveformIn(
+        d[ReadCommand("twiss", f"{axis}:alpha")] = builder.WaveformIn(
             f"beam:twiss:{axis}:alpha", initial_value=[0.0], length=config.n_elements
         )
-        d[ReadCommand("twiss", "{axis}:beta")] = builder.WaveformIn(
+        d[ReadCommand("twiss", f"{axis}:beta")] = builder.WaveformIn(
             f"beam:twiss:{axis}:beta", initial_value=[0.0], length=config.n_elements
         )
-        d[ReadCommand("twiss", "{axis}:nu")] = builder.WaveformIn(
+        d[ReadCommand("twiss", f"{axis}:nu")] = builder.WaveformIn(
             f"beam:twiss:{axis}:nu", initial_value=[0.0], length=config.n_elements
         )
-        d[ReadCommand("twiss", "{axis}:tune")] = builder.aIn(f"beam:twiss:{axis}:tune", initial_value=0.0, PREC=8)
+        d[ReadCommand("twiss", f"{axis}:tune")] = builder.aIn(f"beam:twiss:{axis}:tune", initial_value=0.0, PREC=8)
     d[ReadCommand("twiss", "names")] =builder.WaveformIn(
         f"beam:twiss:names", initial_value=[""], length=config.n_elements
     )
@@ -227,7 +235,7 @@ def initialize_machine_info_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
 
 
 async def initialize_master_clock_pvs(
-        builder, mexec: MeasurementExecutionEngine
+        builder, controller: ControllerInterface
 ) -> Dict[ReadCommand, RecordWrapper]:
     """initialise master clock pv
 
@@ -240,7 +248,7 @@ async def initialize_master_clock_pvs(
         Provide the frequency the code starts with
     """
 
-    vals = await mexec.trigger_read(
+    vals = await controller.trigger_read(
         [ReadCommand("master_clock", "reference_frequency")]
     )
     start_val = np.asarray([v.payload for v in vals.data]).mean()
@@ -253,11 +261,13 @@ async def initialize_master_clock_pvs(
         always_update=True,
         EGU="kHz",
         PREC=3,
-        on_update=lambda val: mexec.set([
-            Command(
+        on_update=lambda val: controller.update(
+            cmd=Command(
                 id="master_clock", property="reference_frequency", value=val, behaviour_on_error=None,
-            )
-        ])
+            ),
+            reads=[],
+            delayed_reads=[]
+        )
     )
 
     #: todo ... comment these values
@@ -319,7 +329,7 @@ def initialize_orbit_object_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
     return d
 
 
-async def initialize_cavity_pvs(builder,  mexec: MeasurementExecutionEngine):
+async def initialize_cavity_pvs(builder, controller: ControllerInterface):
     """
     Initializes PVs for RF cavities.
 
@@ -329,7 +339,7 @@ async def initialize_cavity_pvs(builder,  mexec: MeasurementExecutionEngine):
     Todo:
         check that these are updated if the master clock changes
     """
-    vals = await mexec.trigger_read(
+    vals = await controller.trigger_read(
         [ReadCommand("master_clock", "reference_frequency")]
     )
     start_val = np.asarray([v.payload for v in vals.data]).mean()
