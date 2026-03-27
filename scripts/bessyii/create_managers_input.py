@@ -28,7 +28,8 @@ from accml_lib.core.model.utils.identifiers import DevicePropertyID, LatticeElem
 from accml_lib.core.model.utils.liaison_manager_lookup_table import LiaisonManagerInverseLookupElement, \
     LiaisonManagerInverseLookupTable, LiaisonManagerForwardLookupElement, LiaisonManagerForwardLookupTable
 from accml_lib.core.model.utils.translator_manager_lookup_table import TranslatorLookupTable, \
-    TranslatorLookupTableElement, PolynomCoefficients
+    TranslatorLookupTableElement, PolynomCoefficients, TuneConversionCoefficients, IdentityMapper
+from accml_lib.custom.bessyii.tune_translator import TuneConversion
 
 from dt4acc.core.model.elementmodel import MagnetElementSetup
 from dt4acc.custom_epics.data.constants import ring_parameters, cavity_names
@@ -111,7 +112,7 @@ def build_liaison_manager_lut(
     fwd_d = defaultdict(list)
     for family_name, lattice_property, at_property in (
         # fmt:off
-        # ( "quadrupoles"         , "main_strength", "K" ),
+        ( "quadrupoles"         , "main_strength", "K" ),
         ( "sextupoles"          , "main_strength", "H" ),
         # fmt:on
     ):
@@ -124,6 +125,11 @@ def build_liaison_manager_lut(
                 fwd_d[lat_p].append(pc_dev_p)
                 inv_d[pc_dev_p].append(lat_p)
                 inv_d[mag_dev_p].append(lat_p)
+                # Readback current only needs to go one way
+                inv_d[DevicePropertyID(device_name=dev_name, property="rdbk_current")].append(lat_p)
+                # Todo: review naming of the properties
+                inv_d[DevicePropertyID(device_name=entry.dev_id, property="main_strength_rdbk")].append(lat_p)
+
     # special treatment for horizontal and vertical steerers as these are cowound ..
     # so the magnet name is the sextupole but the
     # power converter
@@ -147,6 +153,8 @@ def build_liaison_manager_lut(
                 inv_d[pc_dev_p].append(lat_p)
                 inv_d[mag_dev_p].append(lat_p)
 
+                # Readback current only needs to go one way
+                inv_d[DevicePropertyID(device_name=dev_name, property="rdbk_current")].append(lat_p)
 
     lut_fwd += [LiaisonManagerForwardLookupElement(lat_id=k, dev_ids=v) for k,v in fwd_d.items()]
     lut_inv += [LiaisonManagerInverseLookupElement(dev_id=k, lat_ids=v) for k,v in inv_d.items()]
@@ -185,6 +193,52 @@ def build_liaison_manager_lut(
         )
         for cavity_name in yp.get("cavities")
     ]
+
+    # Dedicate elements that represent calculation results
+    lut_fwd += [
+        LiaisonManagerForwardLookupElement(
+            lat_id=LatticeElementPropertyID(element_name="tune", property="transversal"),
+            dev_ids=[
+                DevicePropertyID(device_name="tune", property=prop)
+                for prop in ("x", "y", "flq_x", "flq_y", "transversal", "transversal_frequency")
+            ]
+        )
+    ]
+    lut_inv += [
+        LiaisonManagerInverseLookupElement(
+            dev_id=DevicePropertyID(device_name="tune", property=prop),
+            lat_ids=[LatticeElementPropertyID(element_name="tune", property="transversal")]
+        )
+        for prop in ("x", "y", "flq_x", "flq_y", "transversal", "transversal_frequency")
+    ]
+
+    lut_inv += [
+        LiaisonManagerInverseLookupElement(
+            dev_id=DevicePropertyID(device_name="orbit", property="pos"),
+            lat_ids=[LatticeElementPropertyID(element_name="orbit", property="pos")]
+        )
+    ]
+    lut_inv += [
+        LiaisonManagerInverseLookupElement(
+            dev_id=DevicePropertyID(device_name="twiss", property="parameters"),
+            lat_ids=[LatticeElementPropertyID(element_name="twiss", property="parameters")]
+        ),
+        LiaisonManagerInverseLookupElement(
+            dev_id=DevicePropertyID(device_name="track", property="pos"),
+            lat_ids=[LatticeElementPropertyID(element_name="track", property="pos")]
+        )
+    ]
+    lut_fwd += [
+        LiaisonManagerForwardLookupElement(
+            lat_id=LatticeElementPropertyID(element_name="twiss", property="parameters"),
+            dev_ids=[DevicePropertyID(device_name="twiss", property="parameters")]
+        ),
+        LiaisonManagerForwardLookupElement(
+            lat_id=LatticeElementPropertyID(element_name="track", property="pos"),
+            dev_ids=[DevicePropertyID(device_name="track", property="pos")]
+        )
+    ]
+
     return lut_fwd, lut_inv
 
 
@@ -283,6 +337,53 @@ def build_translator_manager_lut(
                     PolynomCoefficients([0.0, 1.0], energy_dependent=False)
                 )
             )
+        elif dev_p.property == "main_strength_rdbk" and dev_p.device_name in dev_names:
+            lat_p, = lm_inv.get(dev_p)
+            lut.append(
+                TranslatorLookupTableElement(
+                    ConversionID(lat_p, dev_p),
+                    PolynomCoefficients([0.0, 1.0], energy_dependent=False)
+                )
+            )
+        else:
+            unhandled.append(dev_p)
+
+    lat_p = LatticeElementPropertyID(element_name="tune", property="transversal")
+    lut.extend([
+        TranslatorLookupTableElement(
+            ConversionID(lat_p, DevicePropertyID(device_name="tune", property=prop)),
+            IdentityMapper()
+        )
+        for prop in ("flq_x", "flq_y", "transversal")
+    ])
+
+    # These are just a hack ... here we have interdependence of different
+    #                           values
+    #     to calculate it one would also need the reference frequency
+    # Warning: Frequency needs to be read from master clock or similar
+    floquet_to_frequency = 500e3 / 400.0
+    lut.extend([
+        TranslatorLookupTableElement(
+             ConversionID(lat_p, DevicePropertyID(device_name="tune", property=prop)),
+             TuneConversionCoefficients(PolynomCoefficients([0.0, floquet_to_frequency], energy_dependent=False))
+        )
+        for prop in ("x", "y", "transversal_frequency")
+    ])
+
+    lut.extend([
+        TranslatorLookupTableElement(
+            ConversionID(LatticeElementPropertyID(element_name="twiss", property="parameters"),
+                         DevicePropertyID(device_name="twiss", property="parameters"),
+                         ),
+            IdentityMapper()
+        ),
+        TranslatorLookupTableElement(
+            ConversionID(LatticeElementPropertyID(element_name="track", property="pos"),
+                         DevicePropertyID(device_name="track", property="pos"),
+                         ),
+            IdentityMapper()
+        ),
+    ])
 
     print("No translation objects for")
     pprint.pprint(unhandled)
@@ -487,6 +588,7 @@ def main():
     with open(ts_fname, "rt") as fp:
         tmp = yaml.load(fp, Loader=yaml.SafeLoader)
     tlut = jsons.load(tmp, TranslatorLookupTable)
+    tlut
     # pprint.pprint(tlut)
 
 
