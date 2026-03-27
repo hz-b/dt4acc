@@ -19,7 +19,9 @@ def flag_not_handling(pv_name: str, val: object):
     logger.warning("Not handling update of pv %s to %s", pv_name, val)
 
 
-async def initialize_magnet_pvs(builder, magnet,  controller: ControllerInterface) -> Dict[ReadCommand, RecordWrapper]:
+async def initialize_magnet_pvs(
+    builder, magnet, controller: ControllerInterface
+) -> Dict[ReadCommand, RecordWrapper]:
     """
     Initializes the process variables (PVs) for a given magnet.
 
@@ -45,7 +47,7 @@ async def initialize_magnet_pvs(builder, magnet,  controller: ControllerInterfac
     rcmd_for_ref = ReadCommand(id=magnet_name, property="main_strength")
     try:
         vals = await controller.trigger_read([rcmd_for_ref])
-        single, = vals.data
+        (single,) = vals.data
         val = single.payload
     except KeyError as ke:
         logger.error(f"No look up for {rcmd_for_ref}, {ke}")
@@ -57,9 +59,9 @@ async def initialize_magnet_pvs(builder, magnet,  controller: ControllerInterfac
     d[rcmd_for_ref] = builder.aOut(
         f"{magnet_name}:Cm:set",
         initial_value=val,
-        on_update=lambda val:handle_magnet_update(
-            device_id=magnet_name, property_id="main_strength", value = val
-        )
+        on_update=lambda val: handle_magnet_update(
+            device_id=magnet_name, property_id="main_strength", value=val
+        ),
     )
 
     d[ReadCommand(id=magnet_name, property="driving_current")] = builder.aOut(
@@ -71,10 +73,13 @@ async def initialize_magnet_pvs(builder, magnet,  controller: ControllerInterfac
             magnet_name, "powersupply_current", val
         ),
     )
+
     async def handle_magnet_update(device_id: str, property_id: str, value: float):
         logger.info("%s:%s updating setpoint val=%s", device_id, property_id, value)
         r = await controller.update(
-            cmd=Command(id=device_id, property=property_id, value=value, behaviour_on_error=None),
+            cmd=Command(
+                id=device_id, property=property_id, value=value, behaviour_on_error=None
+            ),
             reads=[rcmd_for_rdbk],
             delayed_reads=[],
         )
@@ -84,24 +89,30 @@ async def initialize_magnet_pvs(builder, magnet,  controller: ControllerInterfac
         f"{magnet_name}:x:set",
         initial_value=0.0,
         on_update=lambda val: controller.update(
-            cmd=Command(id=magnet_name, property="x", value=val, behaviour_on_error=None),
+            cmd=Command(
+                id=magnet_name, property="x", value=val, behaviour_on_error=None
+            ),
             reads=[],
             delayed_reads=[],
-        )
+        ),
     )
     d[ReadCommand(id=magnet_name, property="y")] = builder.aOut(
         f"{magnet_name}:y:set",
         initial_value=0.0,
-        on_update=lambda val:  controller.update(
-            cmd=Command(id=magnet_name, property="y", value=val, behaviour_on_error=None),
+        on_update=lambda val: controller.update(
+            cmd=Command(
+                id=magnet_name, property="y", value=val, behaviour_on_error=None
+            ),
             reads=[],
             delayed_reads=[],
-        )
+        ),
     )
     return d
 
 
-async def initialize_power_converter_pvs(builder, prefix: str,  controller: ControllerInterface):
+async def initialize_power_converter_pvs(
+    builder, prefix: str, controller: ControllerInterface
+):
     """
     Initializes power converter PVs and associated magnets.
 
@@ -115,7 +126,9 @@ async def initialize_power_converter_pvs(builder, prefix: str,  controller: Cont
     return d
 
 
-async def add_pc_pvs(builder, pc_name:str, prefix:str,  controller: ControllerInterface) -> Dict[str, RecordWrapper]:
+async def add_pc_pvs(
+    builder, pc_name: str, prefix: str, controller: ControllerInterface
+) -> Dict[str, RecordWrapper]:
     """
     Adds PVs for a specific power converter and its associated magnets.
 
@@ -145,20 +158,21 @@ async def add_pc_pvs(builder, pc_name:str, prefix:str,  controller: ControllerIn
         logger.warning(f"At startup peeking failed for {pc_name} 'set_current': {ke}")
         start_val = np.nan
 
-
     rdbk = builder.aOut(f"{pc_name}:rdbk", initial_value=start_val, PREC=2)
     d[ReadCommand(id=pc_name, property="rdbk_current")] = rdbk
-    d[ReadCommand(id=pc_name,property="set_current")] = builder.aOut(
+    d[ReadCommand(id=pc_name, property="set_current")] = builder.aOut(
         f"{pc_name}:set",
         initial_value=start_val,
         on_update=lambda val: handle_pc_update(pc_name, "set_current", val),
-        PREC = 2,
+        PREC=2,
     )
 
     async def handle_pc_update(device_id: str, property_id: str, value: float):
         logger.warning("%s:%s updating setpoint val=%s", device_id, property_id, value)
         r = await controller.update(
-            cmd=Command(id=device_id,property=property_id, value=value, behaviour_on_error=None),
+            cmd=Command(
+                id=device_id, property=property_id, value=value, behaviour_on_error=None
+            ),
             reads=[ReadCommand(id=pc_name, property="rdbk_current")],
             delayed_reads=[],
         )
@@ -177,25 +191,38 @@ def initialize_orbit_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
         builder: The SoftIOC PV builder instance.
     """
     return {
-        ReadCommand(id="beam", property="x"): builder.WaveformIn(f"beam:orbit:x", initial_value=[0.0],
-                                                                  length=config.n_elements),
-        ReadCommand(id="beam", property="y"): builder.WaveformIn(f"beam:orbit:y", initial_value=[0.0],
-                                                                 length=config.n_elements),
-        ReadCommand(id="beam", property="x0"): builder.WaveformIn(f"beam:orbit:x0", initial_value=[0.0],
-                                                                  length=config.n_elements),
-        ReadCommand(id="beam", property="name"): builder.WaveformIn(f"beam:orbit:names", initial_value=[""],
-                                                                  length=config.n_elements),
-        ReadCommand(id="beam", property="name"): builder.boolIn(f"beam:orbit:found", initial_value=False),
+        ReadCommand(id="beam", property="x"): builder.WaveformIn(
+            f"beam:orbit:x", initial_value=[0.0], length=config.n_elements
+        ),
+        ReadCommand(id="beam", property="y"): builder.WaveformIn(
+            f"beam:orbit:y", initial_value=[0.0], length=config.n_elements
+        ),
+        ReadCommand(id="beam", property="x0"): builder.WaveformIn(
+            f"beam:orbit:x0", initial_value=[0.0], length=config.n_elements
+        ),
+        ReadCommand(id="beam", property="name"): builder.WaveformIn(
+            f"beam:orbit:names", initial_value=[""], length=config.n_elements
+        ),
+        ReadCommand(id="beam", property="name"): builder.boolIn(
+            f"beam:orbit:found", initial_value=False
+        ),
     }
 
 
 def initialize_tune_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
     d = dict()
     for axis, suffix in [("x", "rdH"), ("y", "rdV")]:
-        d[ReadCommand(id="tune", property=f"flq_{axis}")] = builder.aOut(f"TUNEZR:flq:{suffix}", initial_value=0.0, PREC=9)
-        d[ReadCommand(id="tune", property=f"{axis}")] = builder.aOut(f"TUNEZR:{suffix}", initial_value=0.0, PREC=3, EGU="kHz")
-    d[ReadCommand(id="tune", property="count")] = builder.longOut(f"TUNEZR:count", initial_value=0)
+        d[ReadCommand(id="tune", property=f"flq_{axis}")] = builder.aOut(
+            f"TUNEZR:flq:{suffix}", initial_value=0.0, PREC=9
+        )
+        d[ReadCommand(id="tune", property=f"{axis}")] = builder.aOut(
+            f"TUNEZR:{suffix}", initial_value=0.0, PREC=3, EGU="kHz"
+        )
+    d[ReadCommand(id="tune", property="count")] = builder.longOut(
+        f"TUNEZR:count", initial_value=0
+    )
     return d
+
 
 def initialize_twiss_pvs(builder):
     """
@@ -215,27 +242,30 @@ def initialize_twiss_pvs(builder):
         d[ReadCommand("twiss", f"{axis}:nu")] = builder.WaveformIn(
             f"beam:twiss:{axis}:nu", initial_value=[0.0], length=config.n_elements
         )
-        d[ReadCommand("twiss", f"{axis}:tune")] = builder.aIn(f"beam:twiss:{axis}:tune", initial_value=0.0, PREC=8)
-    d[ReadCommand("twiss", "names")] =builder.WaveformIn(
+        d[ReadCommand("twiss", f"{axis}:tune")] = builder.aIn(
+            f"beam:twiss:{axis}:tune", initial_value=0.0, PREC=8
+        )
+    d[ReadCommand("twiss", "names")] = builder.WaveformIn(
         f"beam:twiss:names", initial_value=[""], length=config.n_elements
     )
     return d
 
 
 def initialize_machine_info_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
-    """configuration of the machine: e.g. number of bunches
-    """
+    """configuration of the machine: e.g. number of bunches"""
 
     return {
-        ReadCommand(id="ring", property="n_rf_buckets") : builder.longIn(f"beam:machine:info:n_rf_buckets", initial_value=400),
-        ReadCommand(id="ring", property="rev_freq") : builder.aIn(f"beam:rev_freq", initial_value=0.0, EGU="kHz")
+        ReadCommand(id="ring", property="n_rf_buckets"): builder.longIn(
+            f"beam:machine:info:n_rf_buckets", initial_value=400
+        ),
+        ReadCommand(id="ring", property="rev_freq"): builder.aIn(
+            f"beam:rev_freq", initial_value=0.0, EGU="kHz"
+        ),
     }
 
 
-
-
 async def initialize_master_clock_pvs(
-        builder, controller: ControllerInterface
+    builder, controller: ControllerInterface
 ) -> Dict[ReadCommand, RecordWrapper]:
     """initialise master clock pv
 
@@ -263,31 +293,29 @@ async def initialize_master_clock_pvs(
         PREC=3,
         on_update=lambda val: controller.update(
             cmd=Command(
-                id="master_clock", property="reference_frequency", value=val, behaviour_on_error=None,
+                id="master_clock",
+                property="reference_frequency",
+                value=val,
+                behaviour_on_error=None,
             ),
             reads=[],
-            delayed_reads=[]
-        )
+            delayed_reads=[],
+        ),
     )
 
     #: todo ... comment these values
-    d[ReadCommand(id="lattice_info", property="ref_freq")] = (
-        builder.aIn(
-            "lattice_info:ref_freq", initial_value=start_val, EGU="kHz", PREC=1
-        )
+    d[ReadCommand(id="lattice_info", property="ref_freq")] = builder.aIn(
+        "lattice_info:ref_freq", initial_value=start_val, EGU="kHz", PREC=1
     )
-    d[ReadCommand(id="lattice_info", property="ref_freq:khz:up")] = (
-        builder.longIn(
-            "lattice_info:ref_freq:khz:up", initial_value=int(start_val), EGU="kHz"
-        )
+    d[ReadCommand(id="lattice_info", property="ref_freq:khz:up")] = builder.longIn(
+        "lattice_info:ref_freq:khz:up", initial_value=int(start_val), EGU="kHz"
     )
     frac = (start_val % 1) * 1e6
-    d[ReadCommand(id="lattice_info", property="ref_freq:khz:frac")] = (
-        builder.longIn(
-            "lattice_info:ref_freq:khz:frac", initial_value=int(frac), EGU="mHz"
-        )
+    d[ReadCommand(id="lattice_info", property="ref_freq:khz:frac")] = builder.longIn(
+        "lattice_info:ref_freq:khz:frac", initial_value=int(frac), EGU="mHz"
     )
     return d
+
 
 def initialize_other_pvs(builder, prefix) -> Dict[ReadCommand, RecordWrapper]:
     """Initializes miscellaneous PVs (dummy values).
@@ -297,7 +325,9 @@ def initialize_other_pvs(builder, prefix) -> Dict[ReadCommand, RecordWrapper]:
         prefix (str): Prefix for PV naming.
     """
     return {
-        ReadCommand("ring", "current"): builder.aOut(f"{special_pvs['current']}:current", initial_value=0)
+        ReadCommand("ring", "current"): builder.aOut(
+            f"{special_pvs['current']}:current", initial_value=0
+        )
     }
 
 
@@ -320,11 +350,17 @@ def initialize_orbit_object_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
     n_bpms = 128
     tmp = np.ravel(np.empty([n_bpms, 2], float))
     tmp.fill(np.nan)
-    d[ReadCommand("orbit", "pos")] = builder.WaveformIn("ORBITCC:rdPos", initial_value=tmp, length=len(tmp))
+    d[ReadCommand("orbit", "pos")] = builder.WaveformIn(
+        "ORBITCC:rdPos", initial_value=tmp, length=len(tmp)
+    )
     tmp = np.ravel(np.empty([n_bpms, 4], float))
     tmp.fill(np.nan)
-    d[ReadCommand("orbit", "buttons")] = builder.WaveformIn("ORBITCC:rdButtons", initial_value=tmp, length=len(tmp))
-    d[ReadCommand("orbit", "bpm_names")] = builder.WaveformIn("ORBITCC:rdBpmNames", initial_value=[""], length=n_bpms)
+    d[ReadCommand("orbit", "buttons")] = builder.WaveformIn(
+        "ORBITCC:rdButtons", initial_value=tmp, length=len(tmp)
+    )
+    d[ReadCommand("orbit", "bpm_names")] = builder.WaveformIn(
+        "ORBITCC:rdBpmNames", initial_value=[""], length=n_bpms
+    )
     d[ReadCommand("orbit", "count")] = builder.longIn("ORBITCC:count", initial_value=0)
     return d
 
@@ -345,10 +381,9 @@ async def initialize_cavity_pvs(builder, controller: ControllerInterface):
     start_val = np.asarray([v.payload for v in vals.data]).mean()
 
     return {
-        ReadCommand(id="lattice_info", property="ref_freq:khz:up") :
+        ReadCommand(id="lattice_info", property="ref_freq:khz:up"):
         # cavity frequency is determined by master clock ... perhaps some
         # little shift for eigen frequency
         builder.aIn(f"{cavity_name}:freq", initial_value=start_val, EGU="kHz", PREC=3)
         for cavity_name in cavity_names
     }
-

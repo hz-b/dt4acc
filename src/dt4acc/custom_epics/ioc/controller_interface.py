@@ -8,10 +8,10 @@ from accml_lib.core.model.utils.command import Command, ReadCommand
 class ControllerInterface(metaclass=ABCMeta):
     @abstractmethod
     async def update(
-            self,
-            cmd: Command,
-            reads: Sequence[ReadCommand],
-            delayed_reads: Sequence[ReadCommand]
+        self,
+        cmd: Command,
+        reads: Sequence[ReadCommand],
+        delayed_reads: Sequence[ReadCommand],
     ):
         """update a value (in the back engine) and update views accordingly
 
@@ -26,5 +26,4 @@ class ControllerInterface(metaclass=ABCMeta):
 
     @abstractmethod
     async def trigger_read(self, reads: Sequence[ReadCommand]) -> ReadTogether:
-        """just a simple wrapper of mexec.trigger_read
-        """
+        """just a simple wrapper of mexec.trigger_read"""

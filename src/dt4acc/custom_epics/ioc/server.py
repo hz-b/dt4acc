@@ -7,11 +7,15 @@ from typing import Dict, Sequence
 
 from softioc import softioc, builder, asyncio_dispatcher, pythonSoftIoc
 
-from accml_lib.core.interfaces.utils.measurement_execution_engine import MeasurementExecutionEngine
+from accml_lib.core.interfaces.utils.measurement_execution_engine import (
+    MeasurementExecutionEngine,
+)
 from accml_lib.core.model.output.result import ReadTogether
 from accml_lib.core.model.utils.command import ReadCommand, Command
 from accml_lib.core.model.utils.identifiers import ConversionID, DevicePropertyID
-from accml_lib.custom.pyat_simulator.accelerator_simulator import PyATAcceleratorSimulator
+from accml_lib.custom.pyat_simulator.accelerator_simulator import (
+    PyATAcceleratorSimulator,
+)
 from dt4acc.custom_epics.ioc.controller_interface import ControllerInterface
 from ...core.model.twiss import TwissForPlane
 from ...core.utils.logger import get_logger
@@ -44,10 +48,13 @@ class View:
     Please note:
        * additional context is required for
     """
+
     def __init__(self):
         self.process_variables: Dict[ReadCommand, pythonSoftIoc.RecordWrapper] = dict()
 
-    def update_process_variables(self, variables: Dict[ReadCommand, pythonSoftIoc.RecordWrapper]):
+    def update_process_variables(
+        self, variables: Dict[ReadCommand, pythonSoftIoc.RecordWrapper]
+    ):
         """Update process variables with their key
 
         Todo:
@@ -84,16 +91,18 @@ class View:
         return False
 
     def update_track(self, var: ReadCommand, value):
-        """
-
-        """
+        """ """
         assert var.id == "track", f"Only prepared to process 'track' but got {var}"
         if var.property == "pos":
-            record_wrapper = self.process_variables.get(ReadCommand(id="beam", property="x"))
+            record_wrapper = self.process_variables.get(
+                ReadCommand(id="beam", property="x")
+            )
             assert record_wrapper is not None
             record_wrapper.set([pos.x for pos in value.track])
 
-            record_wrapper = self.process_variables.get(ReadCommand(id="beam", property="y"))
+            record_wrapper = self.process_variables.get(
+                ReadCommand(id="beam", property="y")
+            )
             assert record_wrapper is not None
             record_wrapper.set([pos.y for pos in value.track])
 
@@ -137,15 +146,21 @@ class View:
     def update_twiss(self, var: ReadCommand, value):
         assert var.id == "twiss", f"Only prepared to process 'twiss' but got {var}"
         for plane in ("x", "y"):
-            record_wrapper = self.process_variables.get(ReadCommand("twiss", f"{plane}:beta"))
+            record_wrapper = self.process_variables.get(
+                ReadCommand("twiss", f"{plane}:beta")
+            )
             assert record_wrapper is not None
             record_wrapper.set([getattr(pos, plane).beta for pos in value.twiss])
 
-            record_wrapper = self.process_variables.get(ReadCommand("twiss", f"{plane}:alpha"))
+            record_wrapper = self.process_variables.get(
+                ReadCommand("twiss", f"{plane}:alpha")
+            )
             assert record_wrapper is not None
             record_wrapper.set([getattr(pos, plane).alpha for pos in value.twiss])
 
-            record_wrapper = self.process_variables.get(ReadCommand("twiss", f"{plane}:nu"))
+            record_wrapper = self.process_variables.get(
+                ReadCommand("twiss", f"{plane}:nu")
+            )
             assert record_wrapper is not None
             record_wrapper.set([getattr(pos, plane).nu for pos in value.twiss])
 
@@ -160,6 +175,7 @@ class Controller(ControllerInterface):
         * add heart beat / periodic update variables
         * review integration with asyncio
     """
+
     def __init__(
         self,
         *,
@@ -167,7 +183,7 @@ class Controller(ControllerInterface):
         mexec: MeasurementExecutionEngine,
         prefix: str = os.environ.get("DT4ACC_PREFIX", getpass.getuser()),
         builder: builder,
-        default_delayed_reads : Sequence[ReadCommand]
+        default_delayed_reads: Sequence[ReadCommand],
     ):
         self.view = view
         self.mexec = mexec
@@ -188,24 +204,30 @@ class Controller(ControllerInterface):
 
         self.builder.SetDeviceName(self.prefix)
 
-        self.view.update_process_variables({
-            # Initialize additional PVs such as master clock, dummy data
-            **await initialize_master_clock_pvs(self.builder, controller=self),
-            **await initialize_cavity_pvs(self.builder, controller=self),
-              # Initialize power converters and linked magnets
-            **await initialize_power_converter_pvs(self.builder, self.prefix, controller=self),
-            **initialize_machine_info_pvs(self.builder),
-            # Initialize PV's of the new orbit object ... collection of bpms
-            #   (ca access possible)
-            **initialize_orbit_object_pvs(self.builder),
-            # orbit all around the machine (at each element)
-            **initialize_orbit_pvs(self.builder),
-            # as calculated from the model
-            **initialize_twiss_pvs(self.builder),
-            # as calculated from the model
-            **initialize_tune_pvs(self.builder),
-            **initialize_other_pvs(self.builder, prefix)  # Initialize additional PVs such as master clock, dummy data
-        })
+        self.view.update_process_variables(
+            {
+                # Initialize additional PVs such as master clock, dummy data
+                **await initialize_master_clock_pvs(self.builder, controller=self),
+                **await initialize_cavity_pvs(self.builder, controller=self),
+                # Initialize power converters and linked magnets
+                **await initialize_power_converter_pvs(
+                    self.builder, self.prefix, controller=self
+                ),
+                **initialize_machine_info_pvs(self.builder),
+                # Initialize PV's of the new orbit object ... collection of bpms
+                #   (ca access possible)
+                **initialize_orbit_object_pvs(self.builder),
+                # orbit all around the machine (at each element)
+                **initialize_orbit_pvs(self.builder),
+                # as calculated from the model
+                **initialize_twiss_pvs(self.builder),
+                # as calculated from the model
+                **initialize_tune_pvs(self.builder),
+                **initialize_other_pvs(
+                    self.builder, prefix
+                ),  # Initialize additional PVs such as master clock, dummy data
+            }
+        )
         logger.warning("All pvs set up")
 
         # Initialize PVs for various accelerator components
@@ -223,11 +245,11 @@ class Controller(ControllerInterface):
         # asyncio.create_task(monitor_heartbeat(), name="server-heartbeat-loop")
 
     async def update(
-            self,
-            *,
-            cmd: Command,
-            reads: Sequence[ReadCommand],
-            delayed_reads: Sequence[ReadCommand]
+        self,
+        *,
+        cmd: Command,
+        reads: Sequence[ReadCommand],
+        delayed_reads: Sequence[ReadCommand],
     ):
         """update a value (in the back engine) and update views accordingly
 
@@ -262,7 +284,7 @@ class Controller(ControllerInterface):
                 returns as soon as commands are on queue
         """
         await asyncio.wait_for(
-            asyncio.gather(*[self.cmd_queue.put(r) for r in reads]) , timeout=0.1
+            asyncio.gather(*[self.cmd_queue.put(r) for r in reads]), timeout=0.1
         )
 
     def start_delayed_execution_task(self):
@@ -270,7 +292,7 @@ class Controller(ControllerInterface):
         task_count = next(self.task_counter)
         self.pending_task = asyncio.create_task(
             self._operate_on_queue_loop(),
-            name=f"controller-delayed-execution-task-{task_count}"
+            name=f"controller-delayed-execution-task-{task_count}",
         )
 
     async def _operate_on_queue_loop(self):
@@ -293,7 +315,11 @@ class Controller(ControllerInterface):
             try:
                 read_data = await self.trigger_read(t_rcmds)
             except Exception as exc:
-                logger.error("Failed to retrieve data from backend using %s: reason %s", t_rcmds, exc)
+                logger.error(
+                    "Failed to retrieve data from backend using %s: reason %s",
+                    t_rcmds,
+                    exc,
+                )
                 traceback.print_exc()
                 raise exc
             finally:
@@ -304,7 +330,9 @@ class Controller(ControllerInterface):
                     self.view.update_value(rc, rd.payload)
                 except Exception as exc:
                     # Todo: should this be handled by the view?
-                    logger.error("Failed to push view %s using data %s: reason %s", rc, rd, exc)
+                    logger.error(
+                        "Failed to push view %s using data %s: reason %s", rc, rd, exc
+                    )
                     traceback.print_exc()
                     raise exc
 
