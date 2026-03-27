@@ -17,7 +17,6 @@ from accml_lib.custom.pyat_simulator.accelerator_simulator import (
     PyATAcceleratorSimulator,
 )
 from dt4acc.custom_epics.ioc.controller_interface import ControllerInterface
-from ...core.model.twiss import TwissForPlane
 from ...core.utils.logger import get_logger
 from .pv_setup import (
     initialize_power_converter_pvs,

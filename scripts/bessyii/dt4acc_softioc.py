@@ -1,4 +1,6 @@
 import logging
+from importlib import resources
+
 logging.basicConfig(level=logging.WARNING)
 
 from softioc import builder, softioc
@@ -6,9 +8,9 @@ from softioc import builder, softioc
 from accml.core.utils.basic_measurement_execution_engine import BasicMeasurementExecutionEngine
 from accml_lib.core.bl.command_rewritter import CommandRewriter
 from accml_lib.core.model.utils.command import ReadCommand
-from accml_lib.core.model.utils.identifiers import DevicePropertyID, ConversionID
 from accml_lib.custom.bessyii.liasion_translator_setup import load_managers
-from dt4acc.core.accelerators.pyat_accelerator import setup_accelerator
+from accml_lib.custom.bessyii.pyat_simulator_backend import simulator_backend
+
 from dt4acc.custom_epics.ioc.server import View, Controller, dispatcher
 
 
@@ -28,17 +30,23 @@ def main():
         * handle delayed execution
 
     """
+    filename = resources.files("dt4acc").joinpath(
+        "custom_epics/data/standard/bessy2_storage_ring_reflat.json"
+    )
+
+    backend = simulator_backend(filename)
     _, lm, ts = load_managers()
 
     command_rewriter=CommandRewriter(
         liaison_manager=lm,
         translation_service=ts
     )
+
     # Todo: review if a dedicated execution engine
     #       View gets an engine to execute
     #       each trigger calls to the engine. When something happens
     mexec = BasicMeasurementExecutionEngine(
-        backend=setup_accelerator(),
+        backend=backend,
         cmd_rewriter=command_rewriter,
         storage=None,
         expected_view_for_output="device",
