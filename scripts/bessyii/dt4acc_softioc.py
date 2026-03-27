@@ -13,19 +13,22 @@ from dt4acc.custom_epics.ioc.server import View, Controller, dispatcher
 
 
 def main():
-    # Start the IOC server by dispatching the main function
+    """Handle all startups
+
+    * load liasion manager and translation service
+      and build command rewriter from them
+    * use a basic measurement execution engine should be
+      (should be rather called "command execution engine).
+      This currently uses an pyat based backend.
+
+    * view is a key-value storage to access the proces variables
+    * controller takes care to
+        * build up all variables of the view (needed due to EPICS builder)
+        * pass them to the view
+        * handle delayed execution
+
+    """
     _, lm, ts = load_managers()
-
-    print(lm)
-    print(ts)
-    # print(repr(ts))
-
-    # Just for test
-    dev_p = DevicePropertyID(device_name="tune", property="transversal_frequency")
-    dev_p = DevicePropertyID(device_name="tune", property="transversal")
-    lat_p, = lm.inverse(dev_p)
-    test = ts.get(ConversionID(lat_p, dev_p))
-    test
 
     command_rewriter=CommandRewriter(
         liaison_manager=lm,

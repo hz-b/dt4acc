@@ -36,13 +36,31 @@ dispatcher = asyncio_dispatcher.AsyncioDispatcher()
 
 
 class View:
+    """Basically a key/value interface to process variables
+
+    * Each key is a :class:`ReadCommand`
+    * it contains the appropriate process variable
+
+    Please note:
+       * additional context is required for
+    """
     def __init__(self):
         self.process_variables: Dict[ReadCommand, pythonSoftIoc.RecordWrapper] = dict()
 
     def update_process_variables(self, variables: Dict[ReadCommand, pythonSoftIoc.RecordWrapper]):
+        """Update process variables with their key
+
+        Todo:
+            better register process variables ?
+        """
         self.process_variables.update(variables)
 
     def update_value(self, var: ReadCommand, value):
+        """Update the value of a process variable
+
+        **NB** some variables need post processings, these are handled by
+        :meth:`update_special_values`
+        """
         if self.update_special_values(var, value):
             # processed
             return
@@ -137,6 +155,11 @@ class View:
 
 
 class Controller(ControllerInterface):
+    """
+    Todo:
+        * add heart beat / periodic update variables
+        * review integration with asyncio
+    """
     def __init__(
         self,
         *,
@@ -233,7 +256,11 @@ class Controller(ControllerInterface):
         return await self.mexec.trigger_read(reads)
 
     async def request_delayed_reads(self, reads: Sequence[ReadCommand]):
-        # todo:
+        """Put delayed commands on queue
+
+        Warning:
+                returns as soon as commands are on queue
+        """
         await asyncio.wait_for(
             asyncio.gather(*[self.cmd_queue.put(r) for r in reads]) , timeout=0.1
         )
