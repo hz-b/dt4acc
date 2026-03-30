@@ -82,6 +82,20 @@ class OrbitView(ViewInterface):
         await loop.run_in_executor(None, lambda: dev.command_inout("push_orbit_x", x_payload))
         await loop.run_in_executor(None, lambda: dev.command_inout("push_orbit_y", y_payload))
 
+        bpm_df = data
+        bpm_names = [str(name) for name in bpm_df.index]
+        bpm_x = _to_py_float_list(bpm_df.loc[:, "x"].values)
+        bpm_y = _to_py_float_list(bpm_df.loc[:, "y"].values)
+
+        bpm_dev_name = _virtual_device_name(self.prefix, "BPM_MANAGER")
+        dev = DeviceProxy(bpm_dev_name)
+
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, lambda: dev.write_attribute("bpm_names_attr", bpm_names))
+        await loop.run_in_executor(None, lambda: dev.write_attribute("bpm_x_attr", bpm_x))
+        await loop.run_in_executor(None, lambda: dev.write_attribute("bpm_y_attr", bpm_y))
+
+
 
 class TwissView(ViewInterface):
     """
@@ -157,6 +171,7 @@ class RepeatedResultView:
         self.prefix = prefix
 
         self.orbit_publisher = PeriodicPublisher(view=OrbitView(prefix=prefix), name="orbit")
+        # self.bpm_publisher = PeriodicPublisher(view=BPMView(prefix=prefix), name="bpm") inside orbit
         self.twiss_publisher = PeriodicPublisher(view=TwissView(prefix=prefix), name="twiss")
         self.tune_publisher = PeriodicPublisher(view=TuneView(prefix=prefix), name="tune")
 

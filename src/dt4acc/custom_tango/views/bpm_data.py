@@ -6,7 +6,7 @@ import numpy as np
 from tango import DeviceProxy
 
 from ...core.utils.logger import get_logger
-from ...custom_epics.data.constants import special_pvs
+from ...custom_epics.data.constants import special_dev
 from ..config import SERVER_NAME, SERVER_INSTANCE, DEVICE_NAME_FORMAT
 
 logger = get_logger()

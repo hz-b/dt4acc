@@ -18,6 +18,7 @@ def post_init_callback():
 
 def main_loop(server_name: str, instance_name: str, event=None):
     os.nice(4)
+    logger.warning(f"subserver {server_name} instance {instance_name}  running pid {os.getpid()}.")
 
     if event is None:
         cb = post_init_callback

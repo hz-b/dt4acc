@@ -7,7 +7,7 @@ This file contains ALL virtual Tango devices used by dt4acc:
     ✔ TwissOrbitDevice
     ✔ BPMManagerDevice
     ✔ TuneDevice
-    ✔ OtherPVsDevice
+    ✔ OtherdevDevice
     ✔ MasterClockDevice
     ✔ CavityDevice
 
@@ -199,63 +199,101 @@ class TwissOrbitDevice(Device, AsyncMixin):
 # 2. BPM MANAGER DEVICE
 # ===============================================================
 
+# class BPMManagerDevice(Device, AsyncMixin):
+#     """
+#     Virtual BPM aggregator:
+#
+#         Tango device: SOLEIL/BPM/MANAGER
+#         Server:       PHYSICS/SOLEIL
+#
+#     Provides:
+#         bpm_names[]
+#         bpm_x[]
+#         bpm_y[]
+#     """
+#
+#     def init_device(self):
+#         super().init_device()
+#         self._start_async()
+#
+#         logger.info("Initializing BPMManagerDevice")
+#
+#         self.bpm_names = []
+#         self.bpm_x = np.zeros(1)
+#         self.bpm_y = np.zeros(1)
+#
+#         self._refresh()
+#         self.set_state(DevState.ON)
+#
+#
+#     @attribute(dtype=str, max_dim_x=4096, format=AttrDataFormat.SPECTRUM)
+#     def bpm_names_attr(self):
+#         return self.bpm_names
+#
+#     @attribute(dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM)
+#     def bpm_x_attr(self):
+#         return self.bpm_x
+#
+#     @attribute(dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM)
+#     def bpm_y_attr(self):
+#         return self.bpm_y
+#
+
 class BPMManagerDevice(Device, AsyncMixin):
     """
-    Virtual BPM aggregator:
+    Virtual BPM aggregator.
 
-        Tango device: SOLEIL/BPM/MANAGER
-        Server:       PHYSICS/SOLEIL
-
-    Provides:
-        bpm_names[]
-        bpm_x[]
-        bpm_y[]
+    Tango device: PHYSICS/SOLEIL/BPM_MANAGER
     """
+
+    MAX_BPMS = 4096
 
     def init_device(self):
         super().init_device()
-        self._start_async()
-
         logger.info("Initializing BPMManagerDevice")
 
-        self.bpm_names = []
-        self.bpm_x = np.zeros(1)
-        self.bpm_y = np.zeros(1)
+        self._bpm_names = []
+        self._bpm_x = np.array([], dtype=np.float64)
+        self._bpm_y = np.array([], dtype=np.float64)
 
-        self._refresh()
+        for attr_name in ("bpm_names_attr", "bpm_x_attr", "bpm_y_attr"):
+            self.set_change_event(attr_name, True, False)
+
         self.set_state(DevState.ON)
 
-    def _refresh(self):
-        try:
-            update_manager = get_update_manager()
-            self.bpm_names = update_manager.peek_engine(
-                LatticeElementPropertyID("BPM", "names")
-            )
-            self.bpm_x = np.asarray(
-                update_manager.peek_engine(
-                    LatticeElementPropertyID("BPM", "x")
-                )
-            )
-            self.bpm_y = np.asarray(
-                update_manager.peek_engine(
-                    LatticeElementPropertyID("BPM", "y")
-                )
-            )
-        except Exception as e:
-            logger.error(f"BPMManagerDevice refresh failed: {e}")
-
-    @attribute(dtype=str, max_dim_x=4096, format=AttrDataFormat.SPECTRUM)
+    @attribute(dtype=str, access=AttrWriteType.READ_WRITE, dformat=AttrDataFormat.SPECTRUM, max_dim_x=MAX_BPMS)
     def bpm_names_attr(self):
-        return self.bpm_names
+        return self._bpm_names
 
-    @attribute(dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM)
+    @bpm_names_attr.write
+    def bpm_names_attr(self, values):
+        self._bpm_names = [] if values is None else [str(v) for v in values]
+        if self._bpm_names:
+            self.push_change_event("bpm_names_attr", self._bpm_names)
+
+    @attribute(dtype=DevDouble, access=AttrWriteType.READ_WRITE, dformat=AttrDataFormat.SPECTRUM, max_dim_x=MAX_BPMS)
     def bpm_x_attr(self):
-        return self.bpm_x
+        return self._bpm_x
 
-    @attribute(dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM)
+    @bpm_x_attr.write
+    def bpm_x_attr(self, values):
+        arr = np.asarray([] if values is None else values, dtype=np.float64).ravel()
+        arr = np.nan_to_num(arr, nan=0.0, posinf=0.0, neginf=0.0)
+        self._bpm_x = arr
+        if arr.size:
+            self.push_change_event("bpm_x_attr", arr.tolist())
+
+    @attribute(dtype=DevDouble, access=AttrWriteType.READ_WRITE, dformat=AttrDataFormat.SPECTRUM, max_dim_x=MAX_BPMS)
     def bpm_y_attr(self):
-        return self.bpm_y
+        return self._bpm_y
 
+    @bpm_y_attr.write
+    def bpm_y_attr(self, values):
+        arr = np.asarray([] if values is None else values, dtype=np.float64).ravel()
+        arr = np.nan_to_num(arr, nan=0.0, posinf=0.0, neginf=0.0)
+        self._bpm_y = arr
+        if arr.size:
+            self.push_change_event("bpm_y_attr", arr.tolist())
 
 # ===============================================================
 # 3. TUNE DEVICE
@@ -304,19 +342,19 @@ class TuneDevice(Device):
 
 
 # ===============================================================
-# 4. OTHER PVs DEVICE
+# 4. OTHER dev DEVICE
 # ===============================================================
 
 class OtherPVsDevice(Device):
     """
-    Virtual provider for miscellaneous global PVs:
+    Virtual provider for miscellaneous global dev:
 
-        SOLEIL/PHYSICS/OTHER_PVS
+        SOLEIL/PHYSICS/OTHER_dev
     """
 
     def init_device(self):
         super().init_device()
-        logger.info("Initializing OtherPVsDevice")
+        logger.info("Initializing OtherdevDevice")
 
         self.values = {}
         self.values["temperature"] = 0.0

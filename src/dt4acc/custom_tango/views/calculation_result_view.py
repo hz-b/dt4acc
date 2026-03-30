@@ -22,8 +22,8 @@ def to_float_list(x) -> list[float]:
     return [float(v) for v in arr]
 
 
-async def update_orbit_pv(pv_name, orbit_result):
-    device = DeviceProxy(pv_name)
+async def update_orbit_dev(dev_name, orbit_result):
+    device = DeviceProxy(dev_name)
 
     x_payload = to_float_list(orbit_result.x)
     y_payload = to_float_list(orbit_result.y)
@@ -48,8 +48,8 @@ async def update_orbit_pv(pv_name, orbit_result):
         raise
 
 
-async def update_twiss_pv(pv_name, twiss_result):
-    device = DeviceProxy(pv_name)
+async def update_twiss_dev(dev_name, twiss_result):
+    device = DeviceProxy(dev_name)
 
     alpha_x_payload = to_float_list(twiss_result.x.alpha)
     beta_x_payload = to_float_list(twiss_result.x.beta)
@@ -92,7 +92,7 @@ class CalculationResultView:
             device_name = "PHYSICS/SOLEIL/TWISS_ORBIT"
 
         try:
-            await update_orbit_pv(device_name, orbit_result)
+            await update_orbit_dev(device_name, orbit_result)
         except Exception as exc:
             logger.warning('Orbit view pushing failed: %s', exc)
             raise exc
@@ -108,4 +108,4 @@ class CalculationResultView:
         if twiss_result is None:
             return
 
-        await update_twiss_pv(device_name, twiss_result)
+        await update_twiss_dev(device_name, twiss_result)

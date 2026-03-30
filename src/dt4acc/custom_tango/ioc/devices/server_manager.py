@@ -176,32 +176,38 @@ def wait_all_events_cleared(process_monitors: Sequence[ProcessMonitor]) -> bool:
 
 
 def main():
+    logger.warning(f"Tango main server running pid {os.getpid()}.")
     os.environ.setdefault("TANGO_HOST", "localhost:10000")
+
+    # Force fork so child processes inherit parent memory —
+    # specifically the already-initialized _instance in pyat_accelerator.py.
+    # This means the lattice loads ONCE here, and all 24 children get it free.
+    mp.set_start_method("fork", force=True)
+
+    # Load the accelerator ONCE in the parent before any process is spawned.
+    # After fork, each child already has _instance set — setup_accelerator()
+    # returns immediately without reloading the lattice.
+    logger.warning("Loading accelerator in parent process (once)...")
+    from dt4acc.core.bl.handlers import get_update_manager
+    get_update_manager()
+    logger.warning("Accelerator loaded. Spawning server processes...")
 
     # 1) register all devices (DB only)
     servers = register_all_devices()
     logger.warning(f"DB registration done. Need to start {len(servers)} servers.")
 
-    # 2) spawn one process per server
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    single_server_path = os.path.join(script_dir, "single_server.py")
-
     procs_mon = []
     for server_name, instance_name in servers:
         logger.info(f"Starting mp process: {server_name}-{instance_name}")
-        # if server_name.startswith("AN01"):
-        #     logger.warning(f'You need to start single server with: "{server_name}"-"{instance_name}" manually!')
-        # else:
-        if True:
-            t_event = mp.Event()
-            p = mp.Process(
-                target=single_server.main_loop,
-                args=(server_name, instance_name, t_event),
-                name=f"process-{server_name}-{instance_name}"
-            )
-            p.start()
-            procs_mon.append(ProcessMonitor(event=t_event, process=p, server_name=server_name, instance_name=instance_name))
-            time.sleep(.3)  # small stagger
+        t_event = mp.Event()
+        p = mp.Process(
+            target=single_server.main_loop,
+            args=(server_name, instance_name, t_event),
+            name=f"process-{server_name}-{instance_name}"
+        )
+        p.start()
+        procs_mon.append(ProcessMonitor(event=t_event, process=p, server_name=server_name, instance_name=instance_name))
+        time.sleep(.3)
 
     del server_name, instance_name
     # waiting for events to clear

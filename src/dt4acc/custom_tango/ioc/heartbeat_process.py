@@ -8,7 +8,7 @@ from tango import DeviceProxy, DevFailed
 from dt4acc.custom_tango.views.calculation_result_view import ResultView
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.config import SERVER_NAME, SERVER_INSTANCE, DEVICE_NAME_FORMAT
-from dt4acc.custom_epics.data.constants import special_pvs
+from dt4acc.custom_epics.data.constants import special_dev
 
 logger = get_logger()
 
@@ -37,7 +37,7 @@ def try_device_proxy(device_name, timeout=5):
 def cleanup():
     """Cleanup function to properly close Tango devices."""
     try:
-        view.bpm_pvs.device = None
+        view.bpm_dev.device = None
     except Exception:
         pass
 
@@ -60,15 +60,15 @@ async def initialize_view():
     """Safely initialize the BPM device."""
     try:
 
-        device_name = f"{SERVER_NAME}/{SERVER_INSTANCE}/{DEVICE_NAME_FORMAT.format(device_type='BPMDevice', name=special_pvs['bpm_pv'])}"
+        device_name = f"{SERVER_NAME}/{SERVER_INSTANCE}/{DEVICE_NAME_FORMAT.format(device_type='BPMDevice', name=special_dev['bpm_pv'])}"
         print(f"Attempting to connect to device: {device_name}")
         device = try_device_proxy(device_name)
         if not device:
             print(f"[INIT ERROR] BPM device {device_name} unavailable.")
             return False
 
-        view.bpm_pvs.device = device
-        view.bpm_pvs.device.write_attribute("bdata", view.default_bpm_legacy_data)
+        view.bpm_dev.device = device
+        view.bpm_dev.device.write_attribute("bdata", view.default_bpm_legacy_data)
         print(f"[INIT] BPM device initialized: {device_name}")
         return True
     except Exception as e:
@@ -80,7 +80,7 @@ async def heartbeat_loop():
     """Ping the BPM device periodically."""
     logger.info("Heartbeat loop started")
     while not stop_event.is_set():
-        if not view.bpm_pvs.device:
+        if not view.bpm_dev.device:
             success = await initialize_view()
             if not success:
                 logger.warning("[HEARTBEAT] Waiting 5s before retry...")
@@ -88,11 +88,11 @@ async def heartbeat_loop():
                 continue
 
         try:
-            view.bpm_pvs.device.ping()
+            view.bpm_dev.device.ping()
             print("[HEARTBEAT] Ping successful")
         except Exception as exc:
             print(f"[HEARTBEAT FAIL] {exc}. Resetting device and waiting...")
-            view.bpm_pvs.device = None
+            view.bpm_dev.device = None
         await asyncio.sleep(2)  
 
     logger.info("Heartbeat loop stopped")
