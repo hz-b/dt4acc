@@ -199,51 +199,11 @@ class TwissOrbitDevice(Device, AsyncMixin):
 # 2. BPM MANAGER DEVICE
 # ===============================================================
 
-# class BPMManagerDevice(Device, AsyncMixin):
-#     """
-#     Virtual BPM aggregator:
-#
-#         Tango device: SOLEIL/BPM/MANAGER
-#         Server:       PHYSICS/SOLEIL
-#
-#     Provides:
-#         bpm_names[]
-#         bpm_x[]
-#         bpm_y[]
-#     """
-#
-#     def init_device(self):
-#         super().init_device()
-#         self._start_async()
-#
-#         logger.info("Initializing BPMManagerDevice")
-#
-#         self.bpm_names = []
-#         self.bpm_x = np.zeros(1)
-#         self.bpm_y = np.zeros(1)
-#
-#         self._refresh()
-#         self.set_state(DevState.ON)
-#
-#
-#     @attribute(dtype=str, max_dim_x=4096, format=AttrDataFormat.SPECTRUM)
-#     def bpm_names_attr(self):
-#         return self.bpm_names
-#
-#     @attribute(dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM)
-#     def bpm_x_attr(self):
-#         return self.bpm_x
-#
-#     @attribute(dtype=float, max_dim_x=4096, format=AttrDataFormat.SPECTRUM)
-#     def bpm_y_attr(self):
-#         return self.bpm_y
-#
-
 class BPMManagerDevice(Device, AsyncMixin):
     """
     Virtual BPM aggregator.
 
-    Tango device: PHYSICS/SOLEIL/BPM_MANAGER
+    Tango device: PHYSICS/SOLEIL/BPM
     """
 
     MAX_BPMS = 4096

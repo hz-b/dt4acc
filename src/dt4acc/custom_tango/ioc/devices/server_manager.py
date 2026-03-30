@@ -1,23 +1,6 @@
 #!/usr/bin/env python3
-"""Start servers and heart beat process: but supervise that subprocesses keep running
-
-Following procedure:
-    * managing process starts all subservers using multiprocessing
-      each of them is started as single_server.main_loop
-    * handles each of them an event and waits them to set it
-      this progress is monitored and handled to the user
-    * after all processes have reported startup,
-      a heart beat in a separate thread is started
-      this is currently used to wiggle a bit on the magnet
-      so that changes can be seen
-    * the main process monitors keeps all childs monitored
-      if one of thems exits, it will report it stop all
-      other processes and exit
-
-
-Only start heartbeat when everything else is running
-"""
 import itertools
+import multiprocessing.managers
 import multiprocessing.synchronize
 import os
 import sys
@@ -29,173 +12,233 @@ from typing import Sequence
 
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.devices.tango_device_setup import register_all_devices
-from dt4acc.custom_tango.ioc.devices import single_server
-
-# minimal tango import for heartbeat
+import single_server
 from tango import DeviceProxy, DevFailed
-
 import multiprocessing as mp
 
 logger = get_logger()
 
+_MANAGER_HOST = "127.0.0.1"
+_MANAGER_PORT = 50200
+_MANAGER_AUTHKEY = b"dt4acc-tango-secret"
 
-def wait_for_start_of_heartbeat(
-        start_evt: threading.Event,
-        stop_evt: threading.Event,
-):
+
+# ── UpdateManager service ─────────────────────────────────────────────────────
+
+class UpdateManagerService(multiprocessing.managers.BaseManager):
+    pass
+
+def _run_update_manager_service():
+    import asyncio
+    import concurrent.futures
+    from dt4acc.core.bl.handlers import get_update_manager
+
+    # Start a persistent event loop in a background thread.
+    # This loop runs forever so DelayExecution's scheduled tasks
+    # (call_later, ensure_future) actually fire between update calls.
+    service_loop = asyncio.new_event_loop()
+
+    def run_loop():
+        asyncio.set_event_loop(service_loop)
+        service_loop.run_forever()
+
+    loop_thread = threading.Thread(
+        target=run_loop,
+        daemon=True,
+        name="service-event-loop"
+    )
+    loop_thread.start()
+
+    # Load the accelerator on the service loop so all its internal
+    # async machinery (DelayExecution etc.) is bound to that loop.
+    future = asyncio.run_coroutine_threadsafe(
+        _async_get_update_manager(), service_loop
+    )
+    instance = future.result(timeout=120)
+    logger.warning("UpdateManagerService: lattice ready, serving.")
+
+    class SyncUpdateManagerProxy:
+        def peek_engine(self, lat_elem_prop):
+            return instance.peek_engine(lat_elem_prop)
+
+        def device_value_from_peeking_engine(self, dev_prop):
+            return instance.device_value_from_peeking_engine(dev_prop)
+
+        def sync_update(self, device_id: str, property_name: str, value: float):
+            # Submit to the running loop and block until done.
+            # The loop keeps running between calls so delayed tasks fire.
+            fut = asyncio.run_coroutine_threadsafe(
+                instance.update(
+                    device_id=device_id,
+                    property_name=property_name,
+                    value=value,
+                ),
+                service_loop
+            )
+            return fut.result(timeout=30)
+
+    sync_instance = SyncUpdateManagerProxy()
+    UpdateManagerService.register("get_update_manager", callable=lambda: sync_instance)
+
+    mgr = UpdateManagerService(
+        address=(_MANAGER_HOST, _MANAGER_PORT),
+        authkey=_MANAGER_AUTHKEY
+    )
+    mgr.get_server().serve_forever()
+
+
+async def _async_get_update_manager():
+    """Load the UpdateManager on the service loop."""
+    from dt4acc.core.bl.handlers import get_update_manager
+    return get_update_manager()
+def _connect_to_update_manager_service():
+    UpdateManagerService.register("get_update_manager")
+    client = UpdateManagerService(
+        address=(_MANAGER_HOST, _MANAGER_PORT),
+        authkey=_MANAGER_AUTHKEY
+    )
+    client.connect()
+    return client.get_update_manager()
+
+
+# ── Heartbeat ─────────────────────────────────────────────────────────────────
+
+def wait_for_start_of_heartbeat(start_evt, stop_evt):
     start = time.time()
     for cnt in itertools.count():
         if start_evt.is_set():
             return True
         if stop_evt.is_set():
             return False
-
         time.sleep(0.2)
         if (cnt % (5 * 30)) == 0:
-            dt = time.time() - start
-            dt /=60e0
+            dt = (time.time() - start) / 60
             logger.warning(f"{dt=:.1f} min, magnet monitor: waiting for starting calculations")
 
 
 def _magnet_monitor_and_heartbeat(
-        start_evt: threading.Event,
-        stop_evt: threading.Event,
-        device_name: str = "an01-ar/em/cqln.03",
-        attr_name: str = "magnetic_strength",
-        delta: float = 0.01,
-        period_s: float = 1.0,
-        wait_connect_s: float = 5.0):
-    """
-    Wait for the real magnet device to be reachable, then toggle
-    `attr_name` = base +/- delta every `period_s` seconds until stop_evt is set.
+        start_evt, stop_evt,
+        device_name="an01-ar/em/cqln.03",
+        attr_name="magnetic_strength",
+        delta=0.001, period_s=1.0, wait_connect_s=5.0):
 
-    - Does not raise on failures; logs and retries.
-    - Non-blocking when launched as a daemon thread.
-    """
     logger.info(f"Magnet monitor thread starting; waiting for device {device_name}...")
-    dev = None
-    base = None
-    sign = +1.0
+    dev, base, sign = None, None, +1.0
 
     if not wait_for_start_of_heartbeat(start_evt, stop_evt):
-        logger.warning("Magnet monitor exiting before starting heartbeat (start event not send, but stop event set).")
+        logger.warning("Magnet monitor exiting before heartbeat.")
         return
 
     logger.warning("Magnet monitor: starting heart beat")
-    # Phase 1: wait until device is reachable and attribute can be read
     while not stop_evt.is_set():
         try:
             dev = DeviceProxy(device_name)
-            # attempt to read the attribute to ensure device is up
-            val = dev.read_attribute(attr_name).value
-            base = float(val)
-            logger.warning(f"Magnet {device_name} reachable; base {attr_name}={base}")
+            base = float(dev.read_attribute(attr_name).value)
+            logger.warning(f"Magnet {device_name} reachable; base={base}")
             break
         except DevFailed as e:
-            logger.warning(f"Heartbead: Devfailed for magnet {device_name} (DevFailed) perhaps calling too early?")
-            logger.info(f"Waiting for magnet {device_name} (DevFailed): {e}")
+            logger.warning(f"Heartbeat DevFailed for {device_name}: {e}")
         except Exception as e:
-            logger.error(f"Waiting for magnet {device_name} (exc): {e}")
+            logger.error(f"Waiting for {device_name}: {e}")
         stop_evt.wait(wait_connect_s)
 
     if stop_evt.is_set():
-        logger.warning("Magnet monitor exiting before starting heartbeat (stop event set).")
         return
 
-    # Phase 2: heartbeat loop toggling value
-    logger.warning(f"Starting magnet heartbeat for {device_name}/{attr_name} delta={delta}, period={period_s}s")
+    logger.warning(f"Starting heartbeat for {device_name}/{attr_name}")
     while not stop_evt.is_set():
         try:
-            val = base + sign * delta
-            dev.write_attribute(attr_name, float(val))
+            dev.write_attribute(attr_name, float(base + sign * delta))
             sign *= -1.0
         except DevFailed as e:
-            # device may have restarted; re-enter wait loop to re-acquire base
-            logger.warning(f"Magnet write failed (DevFailed). Will wait and retry: {e}")
+            logger.warning(f"Heartbeat write failed: {e}")
             base = None
-            # try to re-establish base
             while not stop_evt.is_set():
                 try:
-                    val = dev.read_attribute(attr_name).value
-                    base = float(val)
-                    logger.warning(f"Reconnected magnet {device_name}; new base {attr_name}={base}")
+                    base = float(dev.read_attribute(attr_name).value)
                     break
                 except Exception as e:
-                    logger.warning(f"Reconnect attempt failed: {e}")
+                    logger.warning(f"Reconnect failed: {e}")
                 stop_evt.wait(wait_connect_s)
         except Exception as e:
-            logger.error(f"Magnet heartbeat unexpected error: {e}")
-            # a small pause before retrying to avoid busy loop in error storms
+            logger.error(f"Heartbeat error: {e}")
             stop_evt.wait(1.0)
-
-        # wait with ability to be interrupted
         stop_evt.wait(period_s)
 
-    logger.warning("Magnet heartbeat thread exiting (stop event set).")
+    logger.warning("Heartbeat thread exiting.")
 
+
+# ── Process monitor ───────────────────────────────────────────────────────────
 
 @dataclass
 class ProcessMonitor:
-    event : mp.synchronize.Event
-    process : mp.process.BaseProcess
-    server_name : str
-    instance_name : str
+    event: mp.synchronize.Event
+    process: mp.process.BaseProcess
+    server_name: str
+    instance_name: str
 
     def trl_prefix(self):
         return f"{self.server_name}/{self.instance_name}"
 
 
 def wait_all_events_cleared(process_monitors: Sequence[ProcessMonitor]) -> bool:
-    """are processes still active that are accociated with the events ?
-    """
     start = time.time()
-
-    lut = {pm.trl_prefix() : pm  for pm in process_monitors}
+    lut = {pm.trl_prefix(): pm for pm in process_monitors}
     for cnt in itertools.count():
-        dt = time.time() - start
-        dt /= 60e0
-        now_set = {trl_prefix: pm for trl_prefix, pm in lut.items() if pm.event.is_set()}
+        dt = (time.time() - start) / 60
+        now_set = {k: pm for k, pm in lut.items() if pm.event.is_set()}
         if now_set:
             logger.warning(
-                f"{dt=:.2f} min: following processing signaled initalisation at this time %s",
-                list(now_set)
+                f"{dt=:.2f} min: following processing signaled initialisation: {list(now_set)}"
             )
-            for trl_prefix in now_set:
-                lut.pop(trl_prefix)
+            for k in now_set:
+                lut.pop(k)
             if not lut:
                 return True
-
         for pm in process_monitors:
             if not pm.process.is_alive() or pm.process.exitcode:
-                logger.error("Process %s pid %s died: trying to stop", pm.trl_prefix(), pm.process.pid)
+                logger.error("Process %s pid %s died", pm.trl_prefix(), pm.process.pid)
                 return False
-
         time.sleep(0.2)
         if (cnt % (5 * 30)) == 0:
             logger.warning(f"{dt=:.2f} min still waiting for {list(lut)}")
 
 
+# ── Main ──────────────────────────────────────────────────────────────────────
+
 def main():
-    logger.warning(f"Tango main server running pid {os.getpid()}.")
     os.environ.setdefault("TANGO_HOST", "localhost:10000")
 
-    # Force fork so child processes inherit parent memory —
-    # specifically the already-initialized _instance in pyat_accelerator.py.
-    # This means the lattice loads ONCE here, and all 24 children get it free.
-    mp.set_start_method("fork", force=True)
+    # 1. Start the UpdateManager service process — loads lattice ONCE
+    svc_proc = mp.Process(
+        target=_run_update_manager_service,
+        name="update-manager-service",
+        daemon=True,
+    )
+    svc_proc.start()
+    logger.warning("UpdateManagerService started (pid=%s) — waiting for lattice...", svc_proc.pid)
 
-    # Load the accelerator ONCE in the parent before any process is spawned.
-    # After fork, each child already has _instance set — setup_accelerator()
-    # returns immediately without reloading the lattice.
-    logger.warning("Loading accelerator in parent process (once)...")
-    from dt4acc.core.bl.handlers import get_update_manager
-    get_update_manager()
-    logger.warning("Accelerator loaded. Spawning server processes...")
+    # Wait until the service is reachable before spawning Tango processes
+    for attempt in range(60):
+        time.sleep(2.0)
+        if not svc_proc.is_alive():
+            logger.error("UpdateManagerService died during startup!")
+            sys.exit(1)
+        try:
+            _connect_to_update_manager_service()
+            logger.warning("UpdateManagerService reachable after %.0fs.", attempt * 2.0)
+            break
+        except Exception:
+            logger.info("Waiting for UpdateManagerService... attempt %d", attempt + 1)
+    else:
+        logger.error("UpdateManagerService never became reachable.")
+        sys.exit(1)
 
-    # 1) register all devices (DB only)
+    # 2. Register devices in Tango DB
     servers = register_all_devices()
     logger.warning(f"DB registration done. Need to start {len(servers)} servers.")
 
+    # 3. Spawn one Tango server process per server/instance
     procs_mon = []
     for server_name, instance_name in servers:
         logger.info(f"Starting mp process: {server_name}-{instance_name}")
@@ -203,31 +246,25 @@ def main():
         p = mp.Process(
             target=single_server.main_loop,
             args=(server_name, instance_name, t_event),
-            name=f"process-{server_name}-{instance_name}"
+            name=f"process-{server_name}-{instance_name}",
         )
         p.start()
-        procs_mon.append(ProcessMonitor(event=t_event, process=p, server_name=server_name, instance_name=instance_name))
-        time.sleep(.3)
+        procs_mon.append(ProcessMonitor(
+            event=t_event, process=p,
+            server_name=server_name, instance_name=instance_name,
+        ))
+        time.sleep(0.3)
 
     del server_name, instance_name
-    # waiting for events to clear
 
-    # Todo: clear this race condition here
-    logger.warning(
-        "%s:"
-        "\n\t All server processes launched apart from heartbeat,"
-        "\n\t waiting for databases to be initialised for 10 s...",
-        __name__)
-    logger.warning("Server processes are %s", [{pm.trl_prefix(): pm.process.pid for pm in procs_mon}])
-    logger.warning("%s trying to start heart beat loop", __name__)
-    # -- start magnet monitor + heartbeat thread AFTER launching servers --
+    logger.warning("All server processes launched. Waiting for startup...")
+
     start_event = threading.Event()
     stop_event = threading.Event()
     hb_thread = threading.Thread(
         target=_magnet_monitor_and_heartbeat,
-        args=(start_event, stop_event,),
+        args=(start_event, stop_event),
         kwargs={
-            # use default device_name and attr_name shown above; change here if needed
             "device_name": "an01-ar/em/cqln.03",
             "attr_name": "magnetic_strength",
             "delta": 0.001,
@@ -238,52 +275,42 @@ def main():
         name="magnet-heartbeat-thread",
     )
     hb_thread.start()
-    logger.warning("Magnet monitor/heartbeat thread started (daemon).")
+    logger.warning("Magnet monitor/heartbeat thread started.")
 
-    # 3) wait + allow Ctrl+C clean shutdown
     def shutdown(*_):
         logger.warning("Shutting down all servers...")
-        # first tell background thread to stop
         stop_event.set()
-
         for pm in procs_mon:
             try:
                 pm.process.terminate()
             except Exception:
                 pass
+        svc_proc.terminate()
         time.sleep(1.0)
-        for pm in procs_mon:
-            try:
-                if pm.process.poll() is None:
-                    pm.process.kill()
-            except Exception:
-                pass
         sys.exit(0)
 
     signal.signal(signal.SIGINT, shutdown)
     signal.signal(signal.SIGTERM, shutdown)
 
     if wait_all_events_cleared(procs_mon):
-        # all events here go on
         pass
     else:
-        logger.error("Error occured while waiting for statup of all tango servers trying to shut down!")
+        logger.error("Error during startup — shutting down.")
         shutdown()
 
-    # only needed if you want to start some process by hand
-    # input("> hit any key when all other servers were started")
     logger.warning("All tango processes signaled startup!")
-    logger.warning("Signaling heart beat to start")
     start_event.set()
-    logger.warning("Signaled heart beat to start")
 
-    logger.warning("All server processes launched. Monitoring the status of subprocessed!")
     while True:
         time.sleep(5)
+        if not svc_proc.is_alive():
+            logger.error("UpdateManagerService died — shutting down.")
+            shutdown()
         for pm in procs_mon:
             if not pm.process.is_alive() or pm.process.exitcode:
-                logger.error(f"server process {pm.trl_prefix()} with pid {pm.process.pid} died!, shutting down")
+                logger.error(f"Server process {pm.trl_prefix()} died — shutting down.")
                 shutdown()
+
 
 if __name__ == "__main__":
     main()

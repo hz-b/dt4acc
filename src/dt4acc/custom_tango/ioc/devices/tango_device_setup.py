@@ -196,7 +196,7 @@ def register_all_devices():
         logger.error(f"❌ Failed to register TuneDevice: {e}")
 
     # BPM Manager device
-    bpm_manager_name = "PHYSICS/SOLEIL/BPM_MANAGER"
+    bpm_manager_name = "PHYSICS/SOLEIL/BPM"
     try:
         domain, family, _ = _split_domain_family_member(bpm_manager_name)
         server_name = domain

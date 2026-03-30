@@ -19,7 +19,7 @@ class ResultView:
     async def push_twiss(self, twiss_result: TwissWithAggregatedKValues):
         await self.calculation_result_view.push_twiss(twiss_result)
         await self.periodic_update_view.push_twiss(twiss_result)
-        logger.info(f"{self.__class__.__name__}.push_twiss: Completed Twiss push to both views")
+        # logger.info(f"{self.__class__.__name__}.push_twiss: Completed Twiss push to both views")
 
     async def push_orbit(self, orbit_result: Orbit):
         await self.calculation_result_view.push_orbit(orbit_result)

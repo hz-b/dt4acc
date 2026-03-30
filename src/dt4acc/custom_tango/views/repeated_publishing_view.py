@@ -3,6 +3,7 @@ import numpy as np
 
 from tango import DeviceProxy
 
+from .calculation_result_view import update_bpms_dev
 from ...core.interfaces.view_interface import ViewInterface
 from ...core.model.orbit import Orbit
 from ...core.model.twiss import TwissWithAggregatedKValues, TuneData
@@ -17,6 +18,7 @@ logger = get_logger()
 _ALLOWED_VIRTUAL_DEVICES = {
     "PHYSICS/SOLEIL/TWISS_ORBIT",
     "PHYSICS/SOLEIL/TUNE",
+    "PHYSICS/SOLEIL/BPM"
 }
 
 
@@ -68,33 +70,24 @@ class OrbitView(ViewInterface):
         self.prefix = prefix
 
     async def push(self, data):
-        # data is expected to be a dataframe-like with columns 'x' and 'y'
-        if data is None or len(getattr(data, "index", [])) == 0:
+        if data is None:
             return
 
-        x_payload = _to_py_float_list(data.loc[:, "x"].values)
-        y_payload = _to_py_float_list(data.loc[:, "y"].values)
+        x_payload = _to_py_float_list(data.x)
+        y_payload = _to_py_float_list(data.y)
 
         dev_name = _virtual_device_name(self.prefix, "TWISS_ORBIT")
         dev = DeviceProxy(dev_name)
-
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(None, lambda: dev.command_inout("push_orbit_x", x_payload))
         await loop.run_in_executor(None, lambda: dev.command_inout("push_orbit_y", y_payload))
 
-        bpm_df = data
-        bpm_names = [str(name) for name in bpm_df.index]
-        bpm_x = _to_py_float_list(bpm_df.loc[:, "x"].values)
-        bpm_y = _to_py_float_list(bpm_df.loc[:, "y"].values)
-
+        # BPM update — reuses the same orbit result, filters internally
         bpm_dev_name = _virtual_device_name(self.prefix, "BPM_MANAGER")
-        dev = DeviceProxy(bpm_dev_name)
-
-        loop = asyncio.get_running_loop()
-        await loop.run_in_executor(None, lambda: dev.write_attribute("bpm_names_attr", bpm_names))
-        await loop.run_in_executor(None, lambda: dev.write_attribute("bpm_x_attr", bpm_x))
-        await loop.run_in_executor(None, lambda: dev.write_attribute("bpm_y_attr", bpm_y))
-
+        try:
+            await update_bpms_dev(bpm_dev_name, data)
+        except Exception as e:
+            logger.warning("BPM push failed: %s", e)
 
 
 class TwissView(ViewInterface):

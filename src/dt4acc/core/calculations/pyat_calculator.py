@@ -63,7 +63,7 @@ class PyAtTwissCalculator(TwissCalculator, metaclass=ABCMeta):
             RuntimeError: If the calculation fails due to invalid input.
         """
 
-        logger.info("Starting Twiss calculation (get_optics)")
+        # logger.info("Starting Twiss calculation (get_optics)")
 
         twiss_in = {
             'beta': np.array([8.860461, 4.03432]),
@@ -144,7 +144,7 @@ class PyAtOrbitCalculator(OrbitCalculator, metaclass=ABCMeta):
         Raises:
             RuntimeError: If the calculation fails.
         """
-        logger.info("Starting orbit calculation (find_orbit)")
+        # logger.info("Starting orbit calculation (find_orbit)")
 
         try:
             x0, orbit = self.acc.find_orbit(at.All)
