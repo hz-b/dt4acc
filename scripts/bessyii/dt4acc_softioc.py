@@ -1,18 +1,19 @@
 import logging
 from importlib import resources
 
+from dt4acc.core.bl.translating_command_execution_engine import TranslatingCommandExecutionEngine
+
 logging.basicConfig(level=logging.WARNING)
 
 from softioc import builder, softioc
 
-from accml.core.utils.basic_measurement_execution_engine import BasicMeasurementExecutionEngine
 from accml_lib.core.bl.command_rewritter import CommandRewriter
 from accml_lib.core.model.utils.command import ReadCommand
 from accml_lib.custom.bessyii.liasion_translator_setup import load_managers
 from accml_lib.custom.bessyii.pyat_simulator_backend import simulator_backend
 
-from dt4acc.custom_epics.ioc.server import View, Controller, dispatcher
 
+from dt4acc.custom_epics.ioc.server import View, Controller, dispatcher
 
 def main():
     """Handle all startups
@@ -45,14 +46,13 @@ def main():
     # Todo: review if a dedicated execution engine
     #       View gets an engine to execute
     #       each trigger calls to the engine. When something happens
-    mexec = BasicMeasurementExecutionEngine(
+    mexec = TranslatingCommandExecutionEngine(
         backend=backend,
         cmd_rewriter=command_rewriter,
         storage=None,
         expected_view_for_output="device",
         num_readings=1,
     )
-    # Todo: should be rather a controller
     view = View()
     controller = Controller(
         view=view,
