@@ -4,7 +4,7 @@ from softioc.pythonSoftIoc import RecordWrapper
 import numpy as np
 
 from accml_lib.core.model.utils.command import ReadCommand, Command
-from .controller_interface import ControllerInterface
+from dt4acc.core.interfaces.controller_interface import ControllerInterface
 from ..data.constants import config, special_pvs, cavity_names
 from ..data.querries import (
     get_unique_power_converters,
@@ -47,7 +47,7 @@ async def initialize_magnet_pvs(
     rcmd_for_ref = ReadCommand(id=magnet_name, property="main_strength")
     try:
         vals = await controller.trigger_read([rcmd_for_ref])
-        (single,) = vals.data
+        (single,) = vals.all_readings()
         val = single.payload
     except KeyError as ke:
         logger.error(f"No look up for {rcmd_for_ref}, {ke}")
@@ -153,7 +153,7 @@ async def add_pc_pvs(
     #       handled
     try:
         vals = await controller.trigger_read([ReadCommand(pc_name, "set_current")])
-        start_val = np.asarray([v.payload for v in vals.data]).mean()
+        start_val = np.mean([v.payload for v in vals.all_readings()]).mean()
     except KeyError as ke:
         logger.warning(f"At startup peeking failed for {pc_name} 'set_current': {ke}")
         start_val = np.nan
@@ -281,7 +281,7 @@ async def initialize_master_clock_pvs(
     vals = await controller.trigger_read(
         [ReadCommand("master_clock", "reference_frequency")]
     )
-    start_val = np.asarray([v.payload for v in vals.data]).mean()
+    start_val = np.mean([v.payload for v in vals.all_readings()])
 
     d = dict()
 
@@ -378,7 +378,7 @@ async def initialize_cavity_pvs(builder, controller: ControllerInterface):
     vals = await controller.trigger_read(
         [ReadCommand("master_clock", "reference_frequency")]
     )
-    start_val = np.asarray([v.payload for v in vals.data]).mean()
+    start_val = np.mean([v.payload for v in vals.all_readings()]).mean()
 
     return {
         ReadCommand(id="lattice_info", property="ref_freq:khz:up"):

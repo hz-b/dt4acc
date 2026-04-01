@@ -12,11 +12,7 @@ from accml_lib.core.interfaces.utils.measurement_execution_engine import (
 )
 from accml_lib.core.model.output.result import ReadTogether
 from accml_lib.core.model.utils.command import ReadCommand, Command
-from accml_lib.core.model.utils.identifiers import ConversionID, DevicePropertyID
-from accml_lib.custom.pyat_simulator.accelerator_simulator import (
-    PyATAcceleratorSimulator,
-)
-from dt4acc.custom_epics.ioc.controller_interface import ControllerInterface
+from dt4acc.core.interfaces.controller_interface import ControllerInterface
 from ...core.utils.logger import get_logger
 from .pv_setup import (
     initialize_power_converter_pvs,
@@ -61,19 +57,21 @@ class View:
         """
         self.process_variables.update(variables)
 
-    def update_value(self, var: ReadCommand, value):
+    def update_value(self, var: ReadCommand, pkg):
         """Update the value of a process variable
 
         **NB** some variables need post processings, these are handled by
         :meth:`update_special_values`
         """
-        if self.update_special_values(var, value):
+        if self.update_special_values(var, pkg):
             # processed
             return
 
-        # not processed .. go on standard path
+        # not processed ... go on standard path
         record_wrapper = self.process_variables.get(var)
         # todo: a better error reporting
+        (single_reading,) = pkg.readings
+        value = single_reading.payload
         assert record_wrapper is not None
         record_wrapper.set(value)
 
@@ -89,9 +87,12 @@ class View:
             return True
         return False
 
-    def update_track(self, var: ReadCommand, value):
+    def update_track(self, var: ReadCommand, pkg):
         """ """
         assert var.id == "track", f"Only prepared to process 'track' but got {var}"
+        (single_reading,) = pkg.readings
+        value = single_reading.payload
+
         if var.property == "pos":
             record_wrapper = self.process_variables.get(
                 ReadCommand(id="beam", property="x")
@@ -109,7 +110,7 @@ class View:
             # Todo: fix exception type
             raise AssertionError(f"Don't know track property {var.property}")
 
-    def update_tune(self, var: ReadCommand, value):
+    def update_tune(self, var: ReadCommand, pkg):
         """
         Todo:
             need to avoid this hack
@@ -121,6 +122,12 @@ class View:
             This is currently missing
         """
         assert var.id == "tune", f"Only prepared to process 'tune' but got {var}"
+
+        logger.warning("Tune view needs to be implemented")
+        return
+        # Expecting only a single reading
+        single_reading, = pkg.readings
+        value = single_reading.payload
 
         if var.property == "x":
             rcmd = ReadCommand("tune", "x")
@@ -142,8 +149,13 @@ class View:
 
         raise AssertionError("Should not end up here")
 
-    def update_twiss(self, var: ReadCommand, value):
+    def update_twiss(self, var: ReadCommand, pkg):
         assert var.id == "twiss", f"Only prepared to process 'twiss' but got {var}"
+
+
+        # Expecting only a sngle reading
+        single_reading, = pkg.readings
+        value = single_reading.payload
         for plane in ("x", "y"):
             record_wrapper = self.process_variables.get(
                 ReadCommand("twiss", f"{plane}:beta")
@@ -267,7 +279,7 @@ class Controller(ControllerInterface):
         # now push these into the view
         read_data = await self.trigger_read(reads)
         for rcmd, rdata in zip(reads, read_data.data):
-            self.view.update_value(rcmd, rdata.payload)
+            self.view.update_value(rcmd, rdata)
         # push delayed data where they belong to
         await self.request_delayed_reads(
             list(self.default_delayed_reads) + list(delayed_reads)
@@ -324,9 +336,13 @@ class Controller(ControllerInterface):
             finally:
                 logger.debug("Retrieved data from backend using %s", t_rcmds)
 
+            l_cmds = len(t_rcmds)
+            l_data = len(read_data.data)
+            if l_cmds != l_data:
+                raise AssertionError(f"Used {l_cmds} read commands but received {l_data}")
             for rc, rd in zip(t_rcmds, read_data.data):
                 try:
-                    self.view.update_value(rc, rd.payload)
+                    self.view.update_value(rc, rd)
                 except Exception as exc:
                     # Todo: should this be handled by the view?
                     logger.error(
@@ -348,7 +364,7 @@ async def consume(queue: asyncio.Queue, delay: float) -> Sequence[ReadCommand]:
     rcmds = []
     while True:
         try:
-            # Wait for next item but only up to `delay`
+            # Wait for next item but only up to delay`
             rcmd = await asyncio.wait_for(queue.get(), timeout=delay)
         except asyncio.TimeoutError:
             logger.debug("No new command arrived within %s", delay)
@@ -359,6 +375,7 @@ async def consume(queue: asyncio.Queue, delay: float) -> Sequence[ReadCommand]:
         queue.task_done()
 
         # Wait fixed delay after each item
+        # todo: remove me ... delay is in asyncio.wait_for
         await asyncio.sleep(delay)
 
     logger.debug(f"controller cmd queue: accumulated commands: %s", rcmds)
