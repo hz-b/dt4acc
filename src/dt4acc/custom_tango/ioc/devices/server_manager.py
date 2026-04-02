@@ -12,7 +12,7 @@ from typing import Sequence
 
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.devices.tango_device_setup import register_all_devices
-import single_server
+from . import single_server
 from tango import DeviceProxy, DevFailed
 import multiprocessing as mp
 
