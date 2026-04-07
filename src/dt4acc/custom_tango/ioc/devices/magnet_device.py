@@ -4,7 +4,7 @@ from tango.server import Device, attribute, command, device_property, AttrWriteT
 import asyncio
 
 from ....core.utils.logger import get_logger
-from ....core.bl.handlers import get_update_manager, handle_device_update
+from ....core.bl import handlers
 from bact_twin_architecture.data_model.identifiers import LatticeElementPropertyID
 from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
 
@@ -58,7 +58,7 @@ class MagnetDevice(Device):
 
         # Attempt to read main_strength; if missing fallback to 0.0
         try:
-            update_manager = get_update_manager()
+            update_manager = handlers.get_update_manager()
             val = update_manager.peek_engine(
                 LatticeElementPropertyID(self.magnet_name, "main_strength")
             )
@@ -95,7 +95,7 @@ class MagnetDevice(Device):
         value = float(value)
         self._magnetic_strength = value
         pc = self.pc_name or f"{self.magnet_name}-pc"     # default Soleil rule
-        self._async(handle_device_update(pc, "set_current", value))
+        self._async(handlers.handle_device_update(pc, "set_current", value))
         self._magnetic_strength_readback = value
 
     @attribute(dtype=float)
@@ -111,7 +111,7 @@ class MagnetDevice(Device):
         value = float(value)
         self._current = value
         pc = self.pc_name or f"{self.magnet_name}-pc"
-        self._async(handle_device_update(pc, "set_current", value))
+        self._async(handlers.handle_device_update(pc, "set_current", value))
 
     # Horizontal steerer kick
     @attribute(dtype=float, access=AttrWriteType.READ_WRITE)
@@ -121,7 +121,7 @@ class MagnetDevice(Device):
     @x_kick.write
     def x_kick(self, value):
         self._x = float(value)
-        self._async(handle_device_update(self.magnet_name, "x_kick", value))
+        self._async(handlers.handle_device_update(self.magnet_name, "x_kick", value))
 
     # Vertical steerer kick
     @attribute(dtype=float, access=AttrWriteType.READ_WRITE)
@@ -131,7 +131,7 @@ class MagnetDevice(Device):
     @y_kick.write
     def y_kick(self, value):
         self._y = float(value)
-        self._async(handle_device_update(self.magnet_name, "y_kick", value))
+        self._async(handlers.handle_device_update(self.magnet_name, "y_kick", value))
 
     # Reset the device state
     @command

@@ -85,8 +85,8 @@ def remove_id(d: Dict) -> Dict:
     return nd
 
 
-def magnet_infos_from_db() -> Sequence[MagnetElementSetup]:
-    return [MagnetElementSetup(**remove_id(info)) for info in get_magnets()]
+def magnet_infos_from_db(elements=None) -> Sequence[MagnetElementSetup]:
+    return [MagnetElementSetup(**remove_id(info)) for info in get_magnets(elements=elements)]
 
 
 def element_method(element_name: str, yp: YellowPages):
@@ -138,14 +138,17 @@ def construct_energy_independent_linear_conversion(
 
 
 def build_managers(
-    yp: YellowPages = bessyii_yellow_pages(),
+    yp: YellowPages | None = None,
+    elements=None,
 ) -> (LiaisonManagerBase, TranslatorServiceBase):
     """A first poor mans implementation of liasion manager and Translation service for BessyII
 
     Todo:
         Which info is already in database and better obtained from database?
     """
-    infos = magnet_infos_from_db()
+    if yp is None:
+        yp = bessyii_yellow_pages(elements=elements)
+    infos = magnet_infos_from_db(elements=elements)
 
     magnet_types = set([info.type for info in infos])
     # Make sure that names are unique ... everything down the list depends on it

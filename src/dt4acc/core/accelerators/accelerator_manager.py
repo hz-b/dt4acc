@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import at
+from ...config.accelerator_config import accelerator_config
 
 from .proxy_factory import PyATProxyFactory
 from ..accelerators.accelerator_impl import AcceleratorImpl
@@ -11,8 +12,6 @@ from ..views.shared_view import get_view_instance
 
 logger = get_logger()
 
-
-data_file = Path.home() / "Documents" / "dt4acc_soleil_twin_data" / "SOLEIL_II_V3631_sym1_V001_database.m"
 
 class AcceleratorManager:
     """
@@ -27,7 +26,7 @@ class AcceleratorManager:
         bpm_mimicry (BPMMimicry): Object to manage BPM data mimicking.
     """
 
-    def __init__(self, prefix):
+    def __init__(self, prefix, lattice_file: str | None = None, elements=None):
         """
         Initializes the AcceleratorManager with a given prefix.
 
@@ -36,6 +35,8 @@ class AcceleratorManager:
             todo: What about tango? do we have/need usage of prefix? we will findout
         """
         self.prefix = prefix
+        self.lattice_file = lattice_file
+        self.elements = elements
         self.accelerator = None  # Will be initialized in the `initialize` method
         self.view = get_view_instance()  # Shared view instance for displaying results
         self.bpm_mimicry = None  # Placeholder for BPM mimicry instance
@@ -53,8 +54,13 @@ class AcceleratorManager:
         try:
             # from lat2db.model.accelerator import Accelerator
             # acc_model = Accelerator(file_name ="bessyii_lattice_json.json", from_json= True)
-
-            bessyii_json_file = data_file
+            lattice_file_path:str = self.lattice_file or accelerator_config.get_lattice_file()
+            if lattice_file_path is None:
+                raise RuntimeError(
+                    "Lattice file is not configured. "
+                    "Provide it explicitly or initialize accelerator_config first."
+                )
+            lattice_file = Path(lattice_file_path)
             # with open(bessyii_json_file, "rt") as fp:
             #     ring_lattice = json.load(fp)
             #
@@ -64,13 +70,13 @@ class AcceleratorManager:
             #     if new_elem is not None:
             #         converted_ring.append(new_elem)
 
-            acc_model = at.load_m(bessyii_json_file)
+            acc_model = at.load_m(lattice_file)
             print("Loaded ring with", len(acc_model), "elements.")
             # acc_model = at.load_json(ring_lattice)
             # Initialize the accelerator with required components
             self.accelerator = AcceleratorImpl(
                 acc_model,
-                PyATProxyFactory(lattice_model=None, at_lattice=acc_model),
+                PyATProxyFactory(lattice_model=None, at_lattice=acc_model, elements=self.elements),
                 PyAtTwissCalculator(acc_model),
                 PyAtOrbitCalculator(acc_model)
             )

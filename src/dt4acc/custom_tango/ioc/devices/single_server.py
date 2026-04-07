@@ -46,8 +46,11 @@ def _inject_shared_update_manager():
 
 
 def main_loop(server_name: str, instance_name: str, event=None):
-    os.nice(4)
-
+    try:
+        if sys.platform != "win32":
+            os.nice(4)
+    except Exception:
+        pass  # optional: log warning
     # Inject BEFORE Tango initialises any device
     _inject_shared_update_manager()
 

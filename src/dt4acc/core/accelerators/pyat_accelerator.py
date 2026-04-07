@@ -12,7 +12,7 @@ _instance = None
 _lock = threading.Lock()
 
 
-def setup_accelerator():
+def setup_accelerator(lattice_file: str | None = None, elements = None):
     """
     Set up and initialize the accelerator.
 
@@ -31,7 +31,7 @@ def setup_accelerator():
     with _lock:
         if _instance is None:
             prefix = os.getenv("DT4ACC_PREFIX", getpass.getuser())
-            manager = AcceleratorManager(prefix=prefix)
+            manager = AcceleratorManager(prefix=prefix, lattice_file=lattice_file, elements=elements)
             manager.initialize()
             _instance = manager
 

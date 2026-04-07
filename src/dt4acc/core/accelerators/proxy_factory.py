@@ -1,6 +1,6 @@
-import json
-from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any
+
+from ...config.accelerator_config import accelerator_config
 
 from .element_proxies import ElementProxy, KickAngleCorrectorProxy
 from ..interfaces.proxy_factory_interface import ProxyFactoryInterface
@@ -23,7 +23,7 @@ class PyATProxyFactory(ProxyFactoryInterface):
         Leave addon element proxy e.g. for handling combined function magnets
     """
 
-    def __init__(self, *, lattice_model, at_lattice):
+    def __init__(self, *, lattice_model, at_lattice, elements: list[dict[str, Any]] | None = None):
         """
         Initialize the proxy factory.
 
@@ -32,6 +32,29 @@ class PyATProxyFactory(ProxyFactoryInterface):
             at_lattice: The actual AT lattice used to retrieve elements.
         """
         self.acc = at_lattice
+        self.elements = elements
+        self._uuid_by_name = None
+
+    def _get_elements(self) -> list[dict[str, Any]]:
+        if self.elements is not None:
+            return self.elements
+
+        elements = accelerator_config.get_accelerator_setup()
+        if elements is None:
+            raise RuntimeError(
+                "Accelerator setup is not loaded. "
+                "Provide `elements` explicitly or initialize accelerator_config first."
+            )
+        return elements
+
+    def _get_uuid_by_name(self) -> dict[str, str]:
+        if self._uuid_by_name is None:
+            self._uuid_by_name = {
+                entry["name"]: entry["uuid"]
+                for entry in self._get_elements()
+                if "name" in entry and "uuid" in entry
+            }
+        return self._uuid_by_name
 
     def get_element_by_uuid(self, uuid):
         for elem in self.acc:
@@ -40,27 +63,7 @@ class PyATProxyFactory(ProxyFactoryInterface):
         return None
 
     def get_uuid(self, element_id):
-        """
-        Extracts the UUID from the element ID if present.
-
-        Args:
-            element_id (str): The ID of the element.
-        """
-
-        data_file = Path.home() / "Documents" / "dt4acc_soleil_twin_data" / "accelerator_setup.json"
-
-        with data_file.open() as fp:
-            data: List[Dict[str, Any]] = json.load(fp)
-            # ---- SEARCH FOR MATCHING NAME ----
-            for entry in data:
-                if entry.get("name") == element_id:
-                    return entry.get("uuid")
-
-            # If we reach here → not found
-            return None
-
-
-
+        return self._get_uuid_by_name().get(element_id)
 
     def get(self, element_id,uuid=None):
         """

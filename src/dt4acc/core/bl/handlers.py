@@ -1,7 +1,7 @@
 from bact_twin_architecture.bl.command_rewriter import CommandRewriter
 # from dt4acc.custom_epics.ioc.liasion_translation_manager import build_managers
 
-from dt4acc.custom_epics.ioc.liasion_translation_manager import build_managers
+from dt4acc.custom_epics.ioc import liasion_translation_manager
 from dt4acc.core.accelerators.pyat_accelerator import setup_accelerator
 from dt4acc.core.command import UpdateManager
 from dt4acc.core.utils.logger import get_logger
@@ -11,7 +11,7 @@ logger = get_logger()
 _update_manager_instance = None
 
 
-def get_update_manager():
+def get_update_manager(elements=None, lattice_file: str | None = None):
     """
     Lazy loader for the UpdateManager.
     Ensures the heavy initialization logic runs only ONCE per process,
@@ -24,7 +24,7 @@ def get_update_manager():
         logger.info("Initializing UpdateManager backend (Lazy Load)...")
 
         # --- Heavy Initialization Logic Moved Here ---
-        lm, tm = build_managers()
+        lm, tm = liasion_translation_manager.build_managers(elements=elements)
 
         _update_manager_instance = UpdateManager(
             command_rewritter=CommandRewriter(
@@ -33,7 +33,7 @@ def get_update_manager():
             ),
             liaison_manager=lm,
             translator_service=tm,
-            acc_mgr=setup_accelerator()
+            acc_mgr=setup_accelerator(lattice_file=lattice_file, elements=elements)
         )
         # ---------------------------------------------
 
