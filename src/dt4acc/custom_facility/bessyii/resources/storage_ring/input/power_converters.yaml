@@ -1,0 +1,1246 @@
+- id: HS1PD1R
+  interface:
+    setpoint: HS1PD1R:set
+    readback: HS1PD1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS1PD2R
+  interface:
+    setpoint: HS1PD2R:set
+    readback: HS1PD2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS1PD3R
+  interface:
+    setpoint: HS1PD3R:set
+    readback: HS1PD3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS1PD4R
+  interface:
+    setpoint: HS1PD4R:set
+    readback: HS1PD4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS1PD5R
+  interface:
+    setpoint: HS1PD5R:set
+    readback: HS1PD5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS1PD6R
+  interface:
+    setpoint: HS1PD6R:set
+    readback: HS1PD6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS1PD7R
+  interface:
+    setpoint: HS1PD7R:set
+    readback: HS1PD7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS1PD8R
+  interface:
+    setpoint: HS1PD8R:set
+    readback: HS1PD8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS1PT1R
+  interface:
+    setpoint: HS1PT1R:set
+    readback: HS1PT1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS1PT2R
+  interface:
+    setpoint: HS1PT2R:set
+    readback: HS1PT2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS1PT3R
+  interface:
+    setpoint: HS1PT3R:set
+    readback: HS1PT3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS1PT4R
+  interface:
+    setpoint: HS1PT4R:set
+    readback: HS1PT4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS1PT5R
+  interface:
+    setpoint: HS1PT5R:set
+    readback: HS1PT5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS1PT6R
+  interface:
+    setpoint: HS1PT6R:set
+    readback: HS1PT6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS1PT7R
+  interface:
+    setpoint: HS1PT7R:set
+    readback: HS1PT7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS1PT8R
+  interface:
+    setpoint: HS1PT8R:set
+    readback: HS1PT8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P1D1R
+  interface:
+    setpoint: HS4P1D1R:set
+    readback: HS4P1D1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P1D2R
+  interface:
+    setpoint: HS4P1D2R:set
+    readback: HS4P1D2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P1D3R
+  interface:
+    setpoint: HS4P1D3R:set
+    readback: HS4P1D3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P1D4R
+  interface:
+    setpoint: HS4P1D4R:set
+    readback: HS4P1D4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P1D5R
+  interface:
+    setpoint: HS4P1D5R:set
+    readback: HS4P1D5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P1D6R
+  interface:
+    setpoint: HS4P1D6R:set
+    readback: HS4P1D6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P1D7R
+  interface:
+    setpoint: HS4P1D7R:set
+    readback: HS4P1D7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P1D8R
+  interface:
+    setpoint: HS4P1D8R:set
+    readback: HS4P1D8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P1T1R
+  interface:
+    setpoint: HS4P1T1R:set
+    readback: HS4P1T1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P1T2R
+  interface:
+    setpoint: HS4P1T2R:set
+    readback: HS4P1T2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P1T3R
+  interface:
+    setpoint: HS4P1T3R:set
+    readback: HS4P1T3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P1T4R
+  interface:
+    setpoint: HS4P1T4R:set
+    readback: HS4P1T4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P1T5R
+  interface:
+    setpoint: HS4P1T5R:set
+    readback: HS4P1T5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P1T6R
+  interface:
+    setpoint: HS4P1T6R:set
+    readback: HS4P1T6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P1T7R
+  interface:
+    setpoint: HS4P1T7R:set
+    readback: HS4P1T7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P1T8R
+  interface:
+    setpoint: HS4P1T8R:set
+    readback: HS4P1T8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P2D1R
+  interface:
+    setpoint: HS4P2D1R:set
+    readback: HS4P2D1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P2D2R
+  interface:
+    setpoint: HS4P2D2R:set
+    readback: HS4P2D2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P2D3R
+  interface:
+    setpoint: HS4P2D3R:set
+    readback: HS4P2D3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P2D4R
+  interface:
+    setpoint: HS4P2D4R:set
+    readback: HS4P2D4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P2D5R
+  interface:
+    setpoint: HS4P2D5R:set
+    readback: HS4P2D5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P2D6R
+  interface:
+    setpoint: HS4P2D6R:set
+    readback: HS4P2D6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P2D7R
+  interface:
+    setpoint: HS4P2D7R:set
+    readback: HS4P2D7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P2D8R
+  interface:
+    setpoint: HS4P2D8R:set
+    readback: HS4P2D8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P2T1R
+  interface:
+    setpoint: HS4P2T1R:set
+    readback: HS4P2T1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P2T2R
+  interface:
+    setpoint: HS4P2T2R:set
+    readback: HS4P2T2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P2T3R
+  interface:
+    setpoint: HS4P2T3R:set
+    readback: HS4P2T3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P2T4R
+  interface:
+    setpoint: HS4P2T4R:set
+    readback: HS4P2T4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P2T5R
+  interface:
+    setpoint: HS4P2T5R:set
+    readback: HS4P2T5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P2T6R
+  interface:
+    setpoint: HS4P2T6R:set
+    readback: HS4P2T6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P2T7R
+  interface:
+    setpoint: HS4P2T7R:set
+    readback: HS4P2T7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: HS4P2T8R
+  interface:
+    setpoint: HS4P2T8R:set
+    readback: HS4P2T8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: PQIPT6R
+  interface:
+    setpoint: PQIT6R:set
+    readback: PQIT6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q1PDR
+  interface:
+    setpoint: Q1PDR:set
+    readback: Q1PDR:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q1PTR
+  interface:
+    setpoint: Q1PTR:set
+    readback: Q1PTR:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q2PDR
+  interface:
+    setpoint: Q2PDR:set
+    readback: Q2PDR:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q2PTR
+  interface:
+    setpoint: Q2PTR:set
+    readback: Q2PTR:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3P1T1R
+  interface:
+    setpoint: Q3P1T1R:set
+    readback: Q3P1T1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3P1T6R
+  interface:
+    setpoint: Q3P1T6R:set
+    readback: Q3P1T6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3P1T8R
+  interface:
+    setpoint: Q3P1T8R:set
+    readback: Q3P1T8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3P2T1R
+  interface:
+    setpoint: Q3P2T1R:set
+    readback: Q3P2T1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3P2T6R
+  interface:
+    setpoint: Q3P2T6R:set
+    readback: Q3P2T6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3P2T8R
+  interface:
+    setpoint: Q3P2T8R:set
+    readback: Q3P2T8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3PD1R
+  interface:
+    setpoint: Q3PD1R:set
+    readback: Q3PD1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3PD2R
+  interface:
+    setpoint: Q3PD2R:set
+    readback: Q3PD2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3PD3R
+  interface:
+    setpoint: Q3PD3R:set
+    readback: Q3PD3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3PD4R
+  interface:
+    setpoint: Q3PD4R:set
+    readback: Q3PD4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3PD5R
+  interface:
+    setpoint: Q3PD5R:set
+    readback: Q3PD5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3PD6R
+  interface:
+    setpoint: Q3PD6R:set
+    readback: Q3PD6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3PD7R
+  interface:
+    setpoint: Q3PD7R:set
+    readback: Q3PD7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3PD8R
+  interface:
+    setpoint: Q3PD8R:set
+    readback: Q3PD8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3PT2R
+  interface:
+    setpoint: Q3PT2R:set
+    readback: Q3PT2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3PT3R
+  interface:
+    setpoint: Q3PT3R:set
+    readback: Q3PT3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3PT4R
+  interface:
+    setpoint: Q3PT4R:set
+    readback: Q3PT4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3PT5R
+  interface:
+    setpoint: Q3PT5R:set
+    readback: Q3PT5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q3PT7R
+  interface:
+    setpoint: Q3PT7R:set
+    readback: Q3PT7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4P1T1R
+  interface:
+    setpoint: Q4P1T1R:set
+    readback: Q4P1T1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4P1T6R
+  interface:
+    setpoint: Q4P1T6R:set
+    readback: Q4P1T6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4P1T8R
+  interface:
+    setpoint: Q4P1T8R:set
+    readback: Q4P1T8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4P2T1R
+  interface:
+    setpoint: Q4P2T1R:set
+    readback: Q4P2T1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4P2T6R
+  interface:
+    setpoint: Q4P2T6R:set
+    readback: Q4P2T6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4P2T8R
+  interface:
+    setpoint: Q4P2T8R:set
+    readback: Q4P2T8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4PD1R
+  interface:
+    setpoint: Q4PD1R:set
+    readback: Q4PD1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4PD2R
+  interface:
+    setpoint: Q4PD2R:set
+    readback: Q4PD2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4PD3R
+  interface:
+    setpoint: Q4PD3R:set
+    readback: Q4PD3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4PD4R
+  interface:
+    setpoint: Q4PD4R:set
+    readback: Q4PD4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4PD5R
+  interface:
+    setpoint: Q4PD5R:set
+    readback: Q4PD5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4PD6R
+  interface:
+    setpoint: Q4PD6R:set
+    readback: Q4PD6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4PD7R
+  interface:
+    setpoint: Q4PD7R:set
+    readback: Q4PD7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4PD8R
+  interface:
+    setpoint: Q4PD8R:set
+    readback: Q4PD8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4PT2R
+  interface:
+    setpoint: Q4PT2R:set
+    readback: Q4PT2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4PT3R
+  interface:
+    setpoint: Q4PT3R:set
+    readback: Q4PT3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4PT4R
+  interface:
+    setpoint: Q4PT4R:set
+    readback: Q4PT4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4PT5R
+  interface:
+    setpoint: Q4PT5R:set
+    readback: Q4PT5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q4PT7R
+  interface:
+    setpoint: Q4PT7R:set
+    readback: Q4PT7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q5P1T1R
+  interface:
+    setpoint: Q5P1T1R:set
+    readback: Q5P1T1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q5P1T6R
+  interface:
+    setpoint: Q5P1T6R:set
+    readback: Q5P1T6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q5P1T8R
+  interface:
+    setpoint: Q5P1T8R:set
+    readback: Q5P1T8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q5P2T1R
+  interface:
+    setpoint: Q5P2T1R:set
+    readback: Q5P2T1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q5P2T6R
+  interface:
+    setpoint: Q5P2T6R:set
+    readback: Q5P2T6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q5P2T8R
+  interface:
+    setpoint: Q5P2T8R:set
+    readback: Q5P2T8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q5PT2R
+  interface:
+    setpoint: Q5PT2R:set
+    readback: Q5PT2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q5PT3R
+  interface:
+    setpoint: Q5PT3R:set
+    readback: Q5PT3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q5PT4R
+  interface:
+    setpoint: Q5PT4R:set
+    readback: Q5PT4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q5PT5R
+  interface:
+    setpoint: Q5PT5R:set
+    readback: Q5PT5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: Q5PT7R
+  interface:
+    setpoint: Q5PT7R:set
+    readback: Q5PT7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: S2PDR
+  interface:
+    setpoint: S2PDR:set
+    readback: S2PDR:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: S2PTR
+  interface:
+    setpoint: S2PTR:set
+    readback: S2PTR:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: S3P1T6R
+  interface:
+    setpoint: S3P1T6R:set
+    readback: S3P1T6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: S3P2T6R
+  interface:
+    setpoint: S3P2T6R:set
+    readback: S3P2T6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: S3PD1R
+  interface:
+    setpoint: S3PD1R:set
+    readback: S3PD1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: S3PDR
+  interface:
+    setpoint: S3PDR:set
+    readback: S3PDR:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: S3PTR
+  interface:
+    setpoint: S3PTR:set
+    readback: S3PTR:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: S4P1T6R
+  interface:
+    setpoint: S4P1T6R:set
+    readback: S4P1T6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: S4P2T6R
+  interface:
+    setpoint: S4P2T6R:set
+    readback: S4P2T6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: S4PD1R
+  interface:
+    setpoint: S4PD1R:set
+    readback: S4PD1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: S4PDR
+  interface:
+    setpoint: S4PDR:set
+    readback: S4PDR:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: S4PTR
+  interface:
+    setpoint: S4PTR:set
+    readback: S4PTR:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P1D1R
+  interface:
+    setpoint: VS2P1D1R:set
+    readback: VS2P1D1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P1D2R
+  interface:
+    setpoint: VS2P1D2R:set
+    readback: VS2P1D2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P1D3R
+  interface:
+    setpoint: VS2P1D3R:set
+    readback: VS2P1D3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P1D4R
+  interface:
+    setpoint: VS2P1D4R:set
+    readback: VS2P1D4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P1D5R
+  interface:
+    setpoint: VS2P1D5R:set
+    readback: VS2P1D5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P1D6R
+  interface:
+    setpoint: VS2P1D6R:set
+    readback: VS2P1D6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P1D7R
+  interface:
+    setpoint: VS2P1D7R:set
+    readback: VS2P1D7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P1D8R
+  interface:
+    setpoint: VS2P1D8R:set
+    readback: VS2P1D8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P1T1R
+  interface:
+    setpoint: VS2P1T1R:set
+    readback: VS2P1T1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P1T2R
+  interface:
+    setpoint: VS2P1T2R:set
+    readback: VS2P1T2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P1T3R
+  interface:
+    setpoint: VS2P1T3R:set
+    readback: VS2P1T3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P1T4R
+  interface:
+    setpoint: VS2P1T4R:set
+    readback: VS2P1T4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P1T5R
+  interface:
+    setpoint: VS2P1T5R:set
+    readback: VS2P1T5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P1T6R
+  interface:
+    setpoint: VS2P1T6R:set
+    readback: VS2P1T6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P1T7R
+  interface:
+    setpoint: VS2P1T7R:set
+    readback: VS2P1T7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P1T8R
+  interface:
+    setpoint: VS2P1T8R:set
+    readback: VS2P1T8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P2D1R
+  interface:
+    setpoint: VS2P2D1R:set
+    readback: VS2P2D1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P2D2R
+  interface:
+    setpoint: VS2P2D2R:set
+    readback: VS2P2D2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P2D3R
+  interface:
+    setpoint: VS2P2D3R:set
+    readback: VS2P2D3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P2D4R
+  interface:
+    setpoint: VS2P2D4R:set
+    readback: VS2P2D4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P2D5R
+  interface:
+    setpoint: VS2P2D5R:set
+    readback: VS2P2D5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P2D6R
+  interface:
+    setpoint: VS2P2D6R:set
+    readback: VS2P2D6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P2D7R
+  interface:
+    setpoint: VS2P2D7R:set
+    readback: VS2P2D7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P2D8R
+  interface:
+    setpoint: VS2P2D8R:set
+    readback: VS2P2D8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P2T1R
+  interface:
+    setpoint: VS2P2T1R:set
+    readback: VS2P2T1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P2T2R
+  interface:
+    setpoint: VS2P2T2R:set
+    readback: VS2P2T2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P2T3R
+  interface:
+    setpoint: VS2P2T3R:set
+    readback: VS2P2T3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P2T4R
+  interface:
+    setpoint: VS2P2T4R:set
+    readback: VS2P2T4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P2T5R
+  interface:
+    setpoint: VS2P2T5R:set
+    readback: VS2P2T5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P2T6R
+  interface:
+    setpoint: VS2P2T6R:set
+    readback: VS2P2T6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P2T7R
+  interface:
+    setpoint: VS2P2T7R:set
+    readback: VS2P2T7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS2P2T8R
+  interface:
+    setpoint: VS2P2T8R:set
+    readback: VS2P2T8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P1D1R
+  interface:
+    setpoint: VS3P1D1R:set
+    readback: VS3P1D1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P1D2R
+  interface:
+    setpoint: VS3P1D2R:set
+    readback: VS3P1D2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P1D3R
+  interface:
+    setpoint: VS3P1D3R:set
+    readback: VS3P1D3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P1D4R
+  interface:
+    setpoint: VS3P1D4R:set
+    readback: VS3P1D4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P1D5R
+  interface:
+    setpoint: VS3P1D5R:set
+    readback: VS3P1D5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P1D6R
+  interface:
+    setpoint: VS3P1D6R:set
+    readback: VS3P1D6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P1D7R
+  interface:
+    setpoint: VS3P1D7R:set
+    readback: VS3P1D7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P1D8R
+  interface:
+    setpoint: VS3P1D8R:set
+    readback: VS3P1D8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P1T1R
+  interface:
+    setpoint: VS3P1T1R:set
+    readback: VS3P1T1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P1T2R
+  interface:
+    setpoint: VS3P1T2R:set
+    readback: VS3P1T2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P1T3R
+  interface:
+    setpoint: VS3P1T3R:set
+    readback: VS3P1T3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P1T4R
+  interface:
+    setpoint: VS3P1T4R:set
+    readback: VS3P1T4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P1T5R
+  interface:
+    setpoint: VS3P1T5R:set
+    readback: VS3P1T5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P1T6R
+  interface:
+    setpoint: VS3P1T6R:set
+    readback: VS3P1T6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P1T7R
+  interface:
+    setpoint: VS3P1T7R:set
+    readback: VS3P1T7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P1T8R
+  interface:
+    setpoint: VS3P1T8R:set
+    readback: VS3P1T8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P2D1R
+  interface:
+    setpoint: VS3P2D1R:set
+    readback: VS3P2D1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P2D2R
+  interface:
+    setpoint: VS3P2D2R:set
+    readback: VS3P2D2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P2D3R
+  interface:
+    setpoint: VS3P2D3R:set
+    readback: VS3P2D3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P2D4R
+  interface:
+    setpoint: VS3P2D4R:set
+    readback: VS3P2D4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P2D5R
+  interface:
+    setpoint: VS3P2D5R:set
+    readback: VS3P2D5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P2D6R
+  interface:
+    setpoint: VS3P2D6R:set
+    readback: VS3P2D6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P2D7R
+  interface:
+    setpoint: VS3P2D7R:set
+    readback: VS3P2D7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P2D8R
+  interface:
+    setpoint: VS3P2D8R:set
+    readback: VS3P2D8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P2T1R
+  interface:
+    setpoint: VS3P2T1R:set
+    readback: VS3P2T1R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P2T2R
+  interface:
+    setpoint: VS3P2T2R:set
+    readback: VS3P2T2R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P2T3R
+  interface:
+    setpoint: VS3P2T3R:set
+    readback: VS3P2T3R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P2T4R
+  interface:
+    setpoint: VS3P2T4R:set
+    readback: VS3P2T4R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P2T5R
+  interface:
+    setpoint: VS3P2T5R:set
+    readback: VS3P2T5R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P2T6R
+  interface:
+    setpoint: VS3P2T6R:set
+    readback: VS3P2T6R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P2T7R
+  interface:
+    setpoint: VS3P2T7R:set
+    readback: VS3P2T7R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0
+- id: VS3P2T8R
+  interface:
+    setpoint: VS3P2T8R:set
+    readback: VS3P2T8R:rdbk
+  response:
+    settle_time: 0.5
+    timeout: 2.0

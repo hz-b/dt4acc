@@ -1,0 +1,1448 @@
+# 
+# BESSY II Liaison manager forward table: 2026-04-09 14:21:58.167065
+# WARNING: automatically generated data
+#          please check when it is updated if you edit it by hand!
+lut:
+- dev_ids: [{device_name: Q1PDR, property: set_current}]
+  lat_id:
+    element_name: Q1M2D1R
+    property: main_strength
+- dev_ids: [{device_name: Q1PTR, property: set_current}]
+  lat_id:
+    element_name: Q1M1T1R
+    property: main_strength
+- dev_ids: [{device_name: Q1PTR, property: set_current}]
+  lat_id:
+    element_name: Q1M2T1R
+    property: main_strength
+- dev_ids: [{device_name: Q1PDR, property: set_current}]
+  lat_id:
+    element_name: Q1M1D2R
+    property: main_strength
+- dev_ids: [{device_name: Q1PDR, property: set_current}]
+  lat_id:
+    element_name: Q1M2D2R
+    property: main_strength
+- dev_ids: [{device_name: Q1PTR, property: set_current}]
+  lat_id:
+    element_name: Q1M1T2R
+    property: main_strength
+- dev_ids: [{device_name: Q1PTR, property: set_current}]
+  lat_id:
+    element_name: Q1M2T2R
+    property: main_strength
+- dev_ids: [{device_name: Q1PDR, property: set_current}]
+  lat_id:
+    element_name: Q1M1D3R
+    property: main_strength
+- dev_ids: [{device_name: Q1PDR, property: set_current}]
+  lat_id:
+    element_name: Q1M2D3R
+    property: main_strength
+- dev_ids: [{device_name: Q1PTR, property: set_current}]
+  lat_id:
+    element_name: Q1M1T3R
+    property: main_strength
+- dev_ids: [{device_name: Q1PTR, property: set_current}]
+  lat_id:
+    element_name: Q1M2T3R
+    property: main_strength
+- dev_ids: [{device_name: Q1PDR, property: set_current}]
+  lat_id:
+    element_name: Q1M1D4R
+    property: main_strength
+- dev_ids: [{device_name: Q1PDR, property: set_current}]
+  lat_id:
+    element_name: Q1M2D4R
+    property: main_strength
+- dev_ids: [{device_name: Q1PTR, property: set_current}]
+  lat_id:
+    element_name: Q1M1T4R
+    property: main_strength
+- dev_ids: [{device_name: Q1PTR, property: set_current}]
+  lat_id:
+    element_name: Q1M2T4R
+    property: main_strength
+- dev_ids: [{device_name: Q1PDR, property: set_current}]
+  lat_id:
+    element_name: Q1M1D5R
+    property: main_strength
+- dev_ids: [{device_name: Q1PDR, property: set_current}]
+  lat_id:
+    element_name: Q1M2D5R
+    property: main_strength
+- dev_ids: [{device_name: Q1PTR, property: set_current}]
+  lat_id:
+    element_name: Q1M1T5R
+    property: main_strength
+- dev_ids: [{device_name: Q1PTR, property: set_current}]
+  lat_id:
+    element_name: Q1M2T5R
+    property: main_strength
+- dev_ids: [{device_name: Q1PDR, property: set_current}]
+  lat_id:
+    element_name: Q1M1D6R
+    property: main_strength
+- dev_ids: [{device_name: Q1PDR, property: set_current}]
+  lat_id:
+    element_name: Q1M2D6R
+    property: main_strength
+- dev_ids: [{device_name: Q1PTR, property: set_current}]
+  lat_id:
+    element_name: Q1M1T6R
+    property: main_strength
+- dev_ids: [{device_name: Q1PTR, property: set_current}]
+  lat_id:
+    element_name: Q1M2T6R
+    property: main_strength
+- dev_ids: [{device_name: Q1PDR, property: set_current}]
+  lat_id:
+    element_name: Q1M1D7R
+    property: main_strength
+- dev_ids: [{device_name: Q1PDR, property: set_current}]
+  lat_id:
+    element_name: Q1M2D7R
+    property: main_strength
+- dev_ids: [{device_name: Q1PTR, property: set_current}]
+  lat_id:
+    element_name: Q1M1T7R
+    property: main_strength
+- dev_ids: [{device_name: Q1PTR, property: set_current}]
+  lat_id:
+    element_name: Q1M2T7R
+    property: main_strength
+- dev_ids: [{device_name: Q1PDR, property: set_current}]
+  lat_id:
+    element_name: Q1M1D8R
+    property: main_strength
+- dev_ids: [{device_name: Q1PDR, property: set_current}]
+  lat_id:
+    element_name: Q1M2D8R
+    property: main_strength
+- dev_ids: [{device_name: Q1PTR, property: set_current}]
+  lat_id:
+    element_name: Q1M1T8R
+    property: main_strength
+- dev_ids: [{device_name: Q1PTR, property: set_current}]
+  lat_id:
+    element_name: Q1M2T8R
+    property: main_strength
+- dev_ids: [{device_name: Q1PDR, property: set_current}]
+  lat_id:
+    element_name: Q1M1D1R
+    property: main_strength
+- dev_ids: [{device_name: Q2PDR, property: set_current}]
+  lat_id:
+    element_name: Q2M2D1R
+    property: main_strength
+- dev_ids: [{device_name: Q2PTR, property: set_current}]
+  lat_id:
+    element_name: Q2M1T1R
+    property: main_strength
+- dev_ids: [{device_name: Q2PTR, property: set_current}]
+  lat_id:
+    element_name: Q2M2T1R
+    property: main_strength
+- dev_ids: [{device_name: Q2PDR, property: set_current}]
+  lat_id:
+    element_name: Q2M1D2R
+    property: main_strength
+- dev_ids: [{device_name: Q2PDR, property: set_current}]
+  lat_id:
+    element_name: Q2M2D2R
+    property: main_strength
+- dev_ids: [{device_name: Q2PTR, property: set_current}]
+  lat_id:
+    element_name: Q2M1T2R
+    property: main_strength
+- dev_ids: [{device_name: Q2PTR, property: set_current}]
+  lat_id:
+    element_name: Q2M2T2R
+    property: main_strength
+- dev_ids: [{device_name: Q2PDR, property: set_current}]
+  lat_id:
+    element_name: Q2M1D3R
+    property: main_strength
+- dev_ids: [{device_name: Q2PDR, property: set_current}]
+  lat_id:
+    element_name: Q2M2D3R
+    property: main_strength
+- dev_ids: [{device_name: Q2PTR, property: set_current}]
+  lat_id:
+    element_name: Q2M1T3R
+    property: main_strength
+- dev_ids: [{device_name: Q2PTR, property: set_current}]
+  lat_id:
+    element_name: Q2M2T3R
+    property: main_strength
+- dev_ids: [{device_name: Q2PDR, property: set_current}]
+  lat_id:
+    element_name: Q2M1D4R
+    property: main_strength
+- dev_ids: [{device_name: Q2PDR, property: set_current}]
+  lat_id:
+    element_name: Q2M2D4R
+    property: main_strength
+- dev_ids: [{device_name: Q2PTR, property: set_current}]
+  lat_id:
+    element_name: Q2M1T4R
+    property: main_strength
+- dev_ids: [{device_name: Q2PTR, property: set_current}]
+  lat_id:
+    element_name: Q2M2T4R
+    property: main_strength
+- dev_ids: [{device_name: Q2PDR, property: set_current}]
+  lat_id:
+    element_name: Q2M1D5R
+    property: main_strength
+- dev_ids: [{device_name: Q2PDR, property: set_current}]
+  lat_id:
+    element_name: Q2M2D5R
+    property: main_strength
+- dev_ids: [{device_name: Q2PTR, property: set_current}]
+  lat_id:
+    element_name: Q2M1T5R
+    property: main_strength
+- dev_ids: [{device_name: Q2PTR, property: set_current}]
+  lat_id:
+    element_name: Q2M2T5R
+    property: main_strength
+- dev_ids: [{device_name: Q2PDR, property: set_current}]
+  lat_id:
+    element_name: Q2M1D6R
+    property: main_strength
+- dev_ids: [{device_name: Q2PDR, property: set_current}]
+  lat_id:
+    element_name: Q2M2D6R
+    property: main_strength
+- dev_ids: [{device_name: Q2PTR, property: set_current}]
+  lat_id:
+    element_name: Q2M1T6R
+    property: main_strength
+- dev_ids: [{device_name: Q2PTR, property: set_current}]
+  lat_id:
+    element_name: Q2M2T6R
+    property: main_strength
+- dev_ids: [{device_name: Q2PDR, property: set_current}]
+  lat_id:
+    element_name: Q2M1D7R
+    property: main_strength
+- dev_ids: [{device_name: Q2PDR, property: set_current}]
+  lat_id:
+    element_name: Q2M2D7R
+    property: main_strength
+- dev_ids: [{device_name: Q2PTR, property: set_current}]
+  lat_id:
+    element_name: Q2M1T7R
+    property: main_strength
+- dev_ids: [{device_name: Q2PTR, property: set_current}]
+  lat_id:
+    element_name: Q2M2T7R
+    property: main_strength
+- dev_ids: [{device_name: Q2PDR, property: set_current}]
+  lat_id:
+    element_name: Q2M1D8R
+    property: main_strength
+- dev_ids: [{device_name: Q2PDR, property: set_current}]
+  lat_id:
+    element_name: Q2M2D8R
+    property: main_strength
+- dev_ids: [{device_name: Q2PTR, property: set_current}]
+  lat_id:
+    element_name: Q2M1T8R
+    property: main_strength
+- dev_ids: [{device_name: Q2PTR, property: set_current}]
+  lat_id:
+    element_name: Q2M2T8R
+    property: main_strength
+- dev_ids: [{device_name: Q2PDR, property: set_current}]
+  lat_id:
+    element_name: Q2M1D1R
+    property: main_strength
+- dev_ids: [{device_name: Q3PD1R, property: set_current}]
+  lat_id:
+    element_name: Q3M2D1R
+    property: main_strength
+- dev_ids: [{device_name: Q3P1T1R, property: set_current}]
+  lat_id:
+    element_name: Q3M1T1R
+    property: main_strength
+- dev_ids: [{device_name: Q3P2T1R, property: set_current}]
+  lat_id:
+    element_name: Q3M2T1R
+    property: main_strength
+- dev_ids: [{device_name: Q3PD2R, property: set_current}]
+  lat_id:
+    element_name: Q3M1D2R
+    property: main_strength
+- dev_ids: [{device_name: Q3PD2R, property: set_current}]
+  lat_id:
+    element_name: Q3M2D2R
+    property: main_strength
+- dev_ids: [{device_name: Q3PT2R, property: set_current}]
+  lat_id:
+    element_name: Q3M1T2R
+    property: main_strength
+- dev_ids: [{device_name: Q3PT2R, property: set_current}]
+  lat_id:
+    element_name: Q3M2T2R
+    property: main_strength
+- dev_ids: [{device_name: Q3PD3R, property: set_current}]
+  lat_id:
+    element_name: Q3M1D3R
+    property: main_strength
+- dev_ids: [{device_name: Q3PD3R, property: set_current}]
+  lat_id:
+    element_name: Q3M2D3R
+    property: main_strength
+- dev_ids: [{device_name: Q3PT3R, property: set_current}]
+  lat_id:
+    element_name: Q3M1T3R
+    property: main_strength
+- dev_ids: [{device_name: Q3PT3R, property: set_current}]
+  lat_id:
+    element_name: Q3M2T3R
+    property: main_strength
+- dev_ids: [{device_name: Q3PD4R, property: set_current}]
+  lat_id:
+    element_name: Q3M1D4R
+    property: main_strength
+- dev_ids: [{device_name: Q3PD4R, property: set_current}]
+  lat_id:
+    element_name: Q3M2D4R
+    property: main_strength
+- dev_ids: [{device_name: Q3PT4R, property: set_current}]
+  lat_id:
+    element_name: Q3M1T4R
+    property: main_strength
+- dev_ids: [{device_name: Q3PT4R, property: set_current}]
+  lat_id:
+    element_name: Q3M2T4R
+    property: main_strength
+- dev_ids: [{device_name: Q3PD5R, property: set_current}]
+  lat_id:
+    element_name: Q3M1D5R
+    property: main_strength
+- dev_ids: [{device_name: Q3PD5R, property: set_current}]
+  lat_id:
+    element_name: Q3M2D5R
+    property: main_strength
+- dev_ids: [{device_name: Q3PT5R, property: set_current}]
+  lat_id:
+    element_name: Q3M1T5R
+    property: main_strength
+- dev_ids: [{device_name: Q3PT5R, property: set_current}]
+  lat_id:
+    element_name: Q3M2T5R
+    property: main_strength
+- dev_ids: [{device_name: Q3PD6R, property: set_current}]
+  lat_id:
+    element_name: Q3M1D6R
+    property: main_strength
+- dev_ids: [{device_name: Q3PD6R, property: set_current}]
+  lat_id:
+    element_name: Q3M2D6R
+    property: main_strength
+- dev_ids: [{device_name: Q3P1T6R, property: set_current}]
+  lat_id:
+    element_name: Q3M1T6R
+    property: main_strength
+- dev_ids: [{device_name: Q3P2T6R, property: set_current}]
+  lat_id:
+    element_name: Q3M2T6R
+    property: main_strength
+- dev_ids: [{device_name: Q3PD7R, property: set_current}]
+  lat_id:
+    element_name: Q3M1D7R
+    property: main_strength
+- dev_ids: [{device_name: Q3PD7R, property: set_current}]
+  lat_id:
+    element_name: Q3M2D7R
+    property: main_strength
+- dev_ids: [{device_name: Q3PT7R, property: set_current}]
+  lat_id:
+    element_name: Q3M1T7R
+    property: main_strength
+- dev_ids: [{device_name: Q3PT7R, property: set_current}]
+  lat_id:
+    element_name: Q3M2T7R
+    property: main_strength
+- dev_ids: [{device_name: Q3PD8R, property: set_current}]
+  lat_id:
+    element_name: Q3M1D8R
+    property: main_strength
+- dev_ids: [{device_name: Q3PD8R, property: set_current}]
+  lat_id:
+    element_name: Q3M2D8R
+    property: main_strength
+- dev_ids: [{device_name: Q3P1T8R, property: set_current}]
+  lat_id:
+    element_name: Q3M1T8R
+    property: main_strength
+- dev_ids: [{device_name: Q3P2T8R, property: set_current}]
+  lat_id:
+    element_name: Q3M2T8R
+    property: main_strength
+- dev_ids: [{device_name: Q3PD1R, property: set_current}]
+  lat_id:
+    element_name: Q3M1D1R
+    property: main_strength
+- dev_ids: [{device_name: Q4PD1R, property: set_current}]
+  lat_id:
+    element_name: Q4M2D1R
+    property: main_strength
+- dev_ids: [{device_name: Q4P1T1R, property: set_current}]
+  lat_id:
+    element_name: Q4M1T1R
+    property: main_strength
+- dev_ids: [{device_name: Q4P2T1R, property: set_current}]
+  lat_id:
+    element_name: Q4M2T1R
+    property: main_strength
+- dev_ids: [{device_name: Q4PD2R, property: set_current}]
+  lat_id:
+    element_name: Q4M1D2R
+    property: main_strength
+- dev_ids: [{device_name: Q4PD2R, property: set_current}]
+  lat_id:
+    element_name: Q4M2D2R
+    property: main_strength
+- dev_ids: [{device_name: Q4PT2R, property: set_current}]
+  lat_id:
+    element_name: Q4M1T2R
+    property: main_strength
+- dev_ids: [{device_name: Q4PT2R, property: set_current}]
+  lat_id:
+    element_name: Q4M2T2R
+    property: main_strength
+- dev_ids: [{device_name: Q4PD3R, property: set_current}]
+  lat_id:
+    element_name: Q4M1D3R
+    property: main_strength
+- dev_ids: [{device_name: Q4PD3R, property: set_current}]
+  lat_id:
+    element_name: Q4M2D3R
+    property: main_strength
+- dev_ids: [{device_name: Q4PT3R, property: set_current}]
+  lat_id:
+    element_name: Q4M1T3R
+    property: main_strength
+- dev_ids: [{device_name: Q4PT3R, property: set_current}]
+  lat_id:
+    element_name: Q4M2T3R
+    property: main_strength
+- dev_ids: [{device_name: Q4PD4R, property: set_current}]
+  lat_id:
+    element_name: Q4M1D4R
+    property: main_strength
+- dev_ids: [{device_name: Q4PD4R, property: set_current}]
+  lat_id:
+    element_name: Q4M2D4R
+    property: main_strength
+- dev_ids: [{device_name: Q4PT4R, property: set_current}]
+  lat_id:
+    element_name: Q4M1T4R
+    property: main_strength
+- dev_ids: [{device_name: Q4PT4R, property: set_current}]
+  lat_id:
+    element_name: Q4M2T4R
+    property: main_strength
+- dev_ids: [{device_name: Q4PD5R, property: set_current}]
+  lat_id:
+    element_name: Q4M1D5R
+    property: main_strength
+- dev_ids: [{device_name: Q4PD5R, property: set_current}]
+  lat_id:
+    element_name: Q4M2D5R
+    property: main_strength
+- dev_ids: [{device_name: Q4PT5R, property: set_current}]
+  lat_id:
+    element_name: Q4M1T5R
+    property: main_strength
+- dev_ids: [{device_name: Q4PT5R, property: set_current}]
+  lat_id:
+    element_name: Q4M2T5R
+    property: main_strength
+- dev_ids: [{device_name: Q4PD6R, property: set_current}]
+  lat_id:
+    element_name: Q4M1D6R
+    property: main_strength
+- dev_ids: [{device_name: Q4PD6R, property: set_current}]
+  lat_id:
+    element_name: Q4M2D6R
+    property: main_strength
+- dev_ids: [{device_name: Q4P1T6R, property: set_current}]
+  lat_id:
+    element_name: Q4M1T6R
+    property: main_strength
+- dev_ids: [{device_name: Q4P2T6R, property: set_current}]
+  lat_id:
+    element_name: Q4M2T6R
+    property: main_strength
+- dev_ids: [{device_name: Q4PD7R, property: set_current}]
+  lat_id:
+    element_name: Q4M1D7R
+    property: main_strength
+- dev_ids: [{device_name: Q4PD7R, property: set_current}]
+  lat_id:
+    element_name: Q4M2D7R
+    property: main_strength
+- dev_ids: [{device_name: Q4PT7R, property: set_current}]
+  lat_id:
+    element_name: Q4M1T7R
+    property: main_strength
+- dev_ids: [{device_name: Q4PT7R, property: set_current}]
+  lat_id:
+    element_name: Q4M2T7R
+    property: main_strength
+- dev_ids: [{device_name: Q4PD8R, property: set_current}]
+  lat_id:
+    element_name: Q4M1D8R
+    property: main_strength
+- dev_ids: [{device_name: Q4PD8R, property: set_current}]
+  lat_id:
+    element_name: Q4M2D8R
+    property: main_strength
+- dev_ids: [{device_name: Q4P1T8R, property: set_current}]
+  lat_id:
+    element_name: Q4M1T8R
+    property: main_strength
+- dev_ids: [{device_name: Q4P2T8R, property: set_current}]
+  lat_id:
+    element_name: Q4M2T8R
+    property: main_strength
+- dev_ids: [{device_name: Q4PD1R, property: set_current}]
+  lat_id:
+    element_name: Q4M1D1R
+    property: main_strength
+- dev_ids: [{device_name: Q5P1T1R, property: set_current}]
+  lat_id:
+    element_name: Q5M1T1R
+    property: main_strength
+- dev_ids: [{device_name: Q5P2T1R, property: set_current}]
+  lat_id:
+    element_name: Q5M2T1R
+    property: main_strength
+- dev_ids: [{device_name: Q5PT2R, property: set_current}]
+  lat_id:
+    element_name: Q5M1T2R
+    property: main_strength
+- dev_ids: [{device_name: Q5PT2R, property: set_current}]
+  lat_id:
+    element_name: Q5M2T2R
+    property: main_strength
+- dev_ids: [{device_name: Q5PT3R, property: set_current}]
+  lat_id:
+    element_name: Q5M1T3R
+    property: main_strength
+- dev_ids: [{device_name: Q5PT3R, property: set_current}]
+  lat_id:
+    element_name: Q5M2T3R
+    property: main_strength
+- dev_ids: [{device_name: Q5PT4R, property: set_current}]
+  lat_id:
+    element_name: Q5M1T4R
+    property: main_strength
+- dev_ids: [{device_name: Q5PT4R, property: set_current}]
+  lat_id:
+    element_name: Q5M2T4R
+    property: main_strength
+- dev_ids: [{device_name: Q5PT5R, property: set_current}]
+  lat_id:
+    element_name: Q5M1T5R
+    property: main_strength
+- dev_ids: [{device_name: Q5PT5R, property: set_current}]
+  lat_id:
+    element_name: Q5M2T5R
+    property: main_strength
+- dev_ids: [{device_name: Q5P1T6R, property: set_current}]
+  lat_id:
+    element_name: Q5M1T6R
+    property: main_strength
+- dev_ids: [{device_name: Q5P2T6R, property: set_current}]
+  lat_id:
+    element_name: Q5M2T6R
+    property: main_strength
+- dev_ids: [{device_name: Q5PT7R, property: set_current}]
+  lat_id:
+    element_name: Q5M1T7R
+    property: main_strength
+- dev_ids: [{device_name: Q5PT7R, property: set_current}]
+  lat_id:
+    element_name: Q5M2T7R
+    property: main_strength
+- dev_ids: [{device_name: Q5P1T8R, property: set_current}]
+  lat_id:
+    element_name: Q5M1T8R
+    property: main_strength
+- dev_ids: [{device_name: Q5P2T8R, property: set_current}]
+  lat_id:
+    element_name: Q5M2T8R
+    property: main_strength
+- dev_ids: [{device_name: PQIT6R, property: set_current}]
+  lat_id:
+    element_name: QIT6R
+    property: main_strength
+- dev_ids: [{device_name: S2PDR, property: set_current}]
+  lat_id:
+    element_name: S2M2D1R
+    property: main_strength
+- dev_ids: [{device_name: S2PTR, property: set_current}]
+  lat_id:
+    element_name: S2M1T1R
+    property: main_strength
+- dev_ids: [{device_name: S2PTR, property: set_current}]
+  lat_id:
+    element_name: S2M2T1R
+    property: main_strength
+- dev_ids: [{device_name: S2PDR, property: set_current}]
+  lat_id:
+    element_name: S2M1D2R
+    property: main_strength
+- dev_ids: [{device_name: S2PDR, property: set_current}]
+  lat_id:
+    element_name: S2M2D2R
+    property: main_strength
+- dev_ids: [{device_name: S2PTR, property: set_current}]
+  lat_id:
+    element_name: S2M1T2R
+    property: main_strength
+- dev_ids: [{device_name: S2PTR, property: set_current}]
+  lat_id:
+    element_name: S2M2T2R
+    property: main_strength
+- dev_ids: [{device_name: S2PDR, property: set_current}]
+  lat_id:
+    element_name: S2M1D3R
+    property: main_strength
+- dev_ids: [{device_name: S2PDR, property: set_current}]
+  lat_id:
+    element_name: S2M2D3R
+    property: main_strength
+- dev_ids: [{device_name: S2PTR, property: set_current}]
+  lat_id:
+    element_name: S2M1T3R
+    property: main_strength
+- dev_ids: [{device_name: S2PTR, property: set_current}]
+  lat_id:
+    element_name: S2M2T3R
+    property: main_strength
+- dev_ids: [{device_name: S2PDR, property: set_current}]
+  lat_id:
+    element_name: S2M1D4R
+    property: main_strength
+- dev_ids: [{device_name: S2PDR, property: set_current}]
+  lat_id:
+    element_name: S2M2D4R
+    property: main_strength
+- dev_ids: [{device_name: S2PTR, property: set_current}]
+  lat_id:
+    element_name: S2M1T4R
+    property: main_strength
+- dev_ids: [{device_name: S2PTR, property: set_current}]
+  lat_id:
+    element_name: S2M2T4R
+    property: main_strength
+- dev_ids: [{device_name: S2PDR, property: set_current}]
+  lat_id:
+    element_name: S2M1D5R
+    property: main_strength
+- dev_ids: [{device_name: S2PDR, property: set_current}]
+  lat_id:
+    element_name: S2M2D5R
+    property: main_strength
+- dev_ids: [{device_name: S2PTR, property: set_current}]
+  lat_id:
+    element_name: S2M1T5R
+    property: main_strength
+- dev_ids: [{device_name: S2PTR, property: set_current}]
+  lat_id:
+    element_name: S2M2T5R
+    property: main_strength
+- dev_ids: [{device_name: S2PDR, property: set_current}]
+  lat_id:
+    element_name: S2M1D6R
+    property: main_strength
+- dev_ids: [{device_name: S2PDR, property: set_current}]
+  lat_id:
+    element_name: S2M2D6R
+    property: main_strength
+- dev_ids: [{device_name: S2PTR, property: set_current}]
+  lat_id:
+    element_name: S2M1T6R
+    property: main_strength
+- dev_ids: [{device_name: S2PTR, property: set_current}]
+  lat_id:
+    element_name: S2M2T6R
+    property: main_strength
+- dev_ids: [{device_name: S2PDR, property: set_current}]
+  lat_id:
+    element_name: S2M1D7R
+    property: main_strength
+- dev_ids: [{device_name: S2PDR, property: set_current}]
+  lat_id:
+    element_name: S2M2D7R
+    property: main_strength
+- dev_ids: [{device_name: S2PTR, property: set_current}]
+  lat_id:
+    element_name: S2M1T7R
+    property: main_strength
+- dev_ids: [{device_name: S2PTR, property: set_current}]
+  lat_id:
+    element_name: S2M2T7R
+    property: main_strength
+- dev_ids: [{device_name: S2PDR, property: set_current}]
+  lat_id:
+    element_name: S2M1D8R
+    property: main_strength
+- dev_ids: [{device_name: S2PDR, property: set_current}]
+  lat_id:
+    element_name: S2M2D8R
+    property: main_strength
+- dev_ids: [{device_name: S2PTR, property: set_current}]
+  lat_id:
+    element_name: S2M1T8R
+    property: main_strength
+- dev_ids: [{device_name: S2PTR, property: set_current}]
+  lat_id:
+    element_name: S2M2T8R
+    property: main_strength
+- dev_ids: [{device_name: S2PDR, property: set_current}]
+  lat_id:
+    element_name: S2M1D1R
+    property: main_strength
+- dev_ids: [{device_name: S3PD1R, property: set_current}]
+  lat_id:
+    element_name: S3M2D1R
+    property: main_strength
+- dev_ids: [{device_name: S3PTR, property: set_current}]
+  lat_id:
+    element_name: S3M1T1R
+    property: main_strength
+- dev_ids: [{device_name: S3PTR, property: set_current}]
+  lat_id:
+    element_name: S3M2T1R
+    property: main_strength
+- dev_ids: [{device_name: S3PDR, property: set_current}]
+  lat_id:
+    element_name: S3M1D2R
+    property: main_strength
+- dev_ids: [{device_name: S3PDR, property: set_current}]
+  lat_id:
+    element_name: S3M2D2R
+    property: main_strength
+- dev_ids: [{device_name: S3PTR, property: set_current}]
+  lat_id:
+    element_name: S3M1T2R
+    property: main_strength
+- dev_ids: [{device_name: S3PTR, property: set_current}]
+  lat_id:
+    element_name: S3M2T2R
+    property: main_strength
+- dev_ids: [{device_name: S3PDR, property: set_current}]
+  lat_id:
+    element_name: S3M1D3R
+    property: main_strength
+- dev_ids: [{device_name: S3PDR, property: set_current}]
+  lat_id:
+    element_name: S3M2D3R
+    property: main_strength
+- dev_ids: [{device_name: S3PTR, property: set_current}]
+  lat_id:
+    element_name: S3M1T3R
+    property: main_strength
+- dev_ids: [{device_name: S3PTR, property: set_current}]
+  lat_id:
+    element_name: S3M2T3R
+    property: main_strength
+- dev_ids: [{device_name: S3PDR, property: set_current}]
+  lat_id:
+    element_name: S3M1D4R
+    property: main_strength
+- dev_ids: [{device_name: S3PDR, property: set_current}]
+  lat_id:
+    element_name: S3M2D4R
+    property: main_strength
+- dev_ids: [{device_name: S3PTR, property: set_current}]
+  lat_id:
+    element_name: S3M1T4R
+    property: main_strength
+- dev_ids: [{device_name: S3PTR, property: set_current}]
+  lat_id:
+    element_name: S3M2T4R
+    property: main_strength
+- dev_ids: [{device_name: S3PDR, property: set_current}]
+  lat_id:
+    element_name: S3M1D5R
+    property: main_strength
+- dev_ids: [{device_name: S3PDR, property: set_current}]
+  lat_id:
+    element_name: S3M2D5R
+    property: main_strength
+- dev_ids: [{device_name: S3PTR, property: set_current}]
+  lat_id:
+    element_name: S3M1T5R
+    property: main_strength
+- dev_ids: [{device_name: S3PTR, property: set_current}]
+  lat_id:
+    element_name: S3M2T5R
+    property: main_strength
+- dev_ids: [{device_name: S3PDR, property: set_current}]
+  lat_id:
+    element_name: S3M1D6R
+    property: main_strength
+- dev_ids: [{device_name: S3PDR, property: set_current}]
+  lat_id:
+    element_name: S3M2D6R
+    property: main_strength
+- dev_ids: [{device_name: S3P1T6R, property: set_current}]
+  lat_id:
+    element_name: S3M1T6R
+    property: main_strength
+- dev_ids: [{device_name: S3P2T6R, property: set_current}]
+  lat_id:
+    element_name: S3M2T6R
+    property: main_strength
+- dev_ids: [{device_name: S3PDR, property: set_current}]
+  lat_id:
+    element_name: S3M1D7R
+    property: main_strength
+- dev_ids: [{device_name: S3PDR, property: set_current}]
+  lat_id:
+    element_name: S3M2D7R
+    property: main_strength
+- dev_ids: [{device_name: S3PTR, property: set_current}]
+  lat_id:
+    element_name: S3M1T7R
+    property: main_strength
+- dev_ids: [{device_name: S3PTR, property: set_current}]
+  lat_id:
+    element_name: S3M2T7R
+    property: main_strength
+- dev_ids: [{device_name: S3PDR, property: set_current}]
+  lat_id:
+    element_name: S3M1D8R
+    property: main_strength
+- dev_ids: [{device_name: S3PDR, property: set_current}]
+  lat_id:
+    element_name: S3M2D8R
+    property: main_strength
+- dev_ids: [{device_name: S3PTR, property: set_current}]
+  lat_id:
+    element_name: S3M1T8R
+    property: main_strength
+- dev_ids: [{device_name: S3PTR, property: set_current}]
+  lat_id:
+    element_name: S3M2T8R
+    property: main_strength
+- dev_ids: [{device_name: S3PD1R, property: set_current}]
+  lat_id:
+    element_name: S3M1D1R
+    property: main_strength
+- dev_ids: [{device_name: S4PD1R, property: set_current}]
+  lat_id:
+    element_name: S4M2D1R
+    property: main_strength
+- dev_ids: [{device_name: S4PTR, property: set_current}]
+  lat_id:
+    element_name: S4M1T1R
+    property: main_strength
+- dev_ids: [{device_name: S4PTR, property: set_current}]
+  lat_id:
+    element_name: S4M2T1R
+    property: main_strength
+- dev_ids: [{device_name: S4PDR, property: set_current}]
+  lat_id:
+    element_name: S4M1D2R
+    property: main_strength
+- dev_ids: [{device_name: S4PDR, property: set_current}]
+  lat_id:
+    element_name: S4M2D2R
+    property: main_strength
+- dev_ids: [{device_name: S4PTR, property: set_current}]
+  lat_id:
+    element_name: S4M1T2R
+    property: main_strength
+- dev_ids: [{device_name: S4PTR, property: set_current}]
+  lat_id:
+    element_name: S4M2T2R
+    property: main_strength
+- dev_ids: [{device_name: S4PDR, property: set_current}]
+  lat_id:
+    element_name: S4M1D3R
+    property: main_strength
+- dev_ids: [{device_name: S4PDR, property: set_current}]
+  lat_id:
+    element_name: S4M2D3R
+    property: main_strength
+- dev_ids: [{device_name: S4PTR, property: set_current}]
+  lat_id:
+    element_name: S4M1T3R
+    property: main_strength
+- dev_ids: [{device_name: S4PTR, property: set_current}]
+  lat_id:
+    element_name: S4M2T3R
+    property: main_strength
+- dev_ids: [{device_name: S4PDR, property: set_current}]
+  lat_id:
+    element_name: S4M1D4R
+    property: main_strength
+- dev_ids: [{device_name: S4PDR, property: set_current}]
+  lat_id:
+    element_name: S4M2D4R
+    property: main_strength
+- dev_ids: [{device_name: S4PTR, property: set_current}]
+  lat_id:
+    element_name: S4M1T4R
+    property: main_strength
+- dev_ids: [{device_name: S4PTR, property: set_current}]
+  lat_id:
+    element_name: S4M2T4R
+    property: main_strength
+- dev_ids: [{device_name: S4PDR, property: set_current}]
+  lat_id:
+    element_name: S4M1D5R
+    property: main_strength
+- dev_ids: [{device_name: S4PDR, property: set_current}]
+  lat_id:
+    element_name: S4M2D5R
+    property: main_strength
+- dev_ids: [{device_name: S4PTR, property: set_current}]
+  lat_id:
+    element_name: S4M1T5R
+    property: main_strength
+- dev_ids: [{device_name: S4PTR, property: set_current}]
+  lat_id:
+    element_name: S4M2T5R
+    property: main_strength
+- dev_ids: [{device_name: S4PDR, property: set_current}]
+  lat_id:
+    element_name: S4M1D6R
+    property: main_strength
+- dev_ids: [{device_name: S4PDR, property: set_current}]
+  lat_id:
+    element_name: S4M2D6R
+    property: main_strength
+- dev_ids: [{device_name: S4P1T6R, property: set_current}]
+  lat_id:
+    element_name: S4M1T6R
+    property: main_strength
+- dev_ids: [{device_name: S4P2T6R, property: set_current}]
+  lat_id:
+    element_name: S4M2T6R
+    property: main_strength
+- dev_ids: [{device_name: S4PDR, property: set_current}]
+  lat_id:
+    element_name: S4M1D7R
+    property: main_strength
+- dev_ids: [{device_name: S4PDR, property: set_current}]
+  lat_id:
+    element_name: S4M2D7R
+    property: main_strength
+- dev_ids: [{device_name: S4PTR, property: set_current}]
+  lat_id:
+    element_name: S4M1T7R
+    property: main_strength
+- dev_ids: [{device_name: S4PTR, property: set_current}]
+  lat_id:
+    element_name: S4M2T7R
+    property: main_strength
+- dev_ids: [{device_name: S4PDR, property: set_current}]
+  lat_id:
+    element_name: S4M1D8R
+    property: main_strength
+- dev_ids: [{device_name: S4PDR, property: set_current}]
+  lat_id:
+    element_name: S4M2D8R
+    property: main_strength
+- dev_ids: [{device_name: S4PTR, property: set_current}]
+  lat_id:
+    element_name: S4M1T8R
+    property: main_strength
+- dev_ids: [{device_name: S4PTR, property: set_current}]
+  lat_id:
+    element_name: S4M2T8R
+    property: main_strength
+- dev_ids: [{device_name: S4PD1R, property: set_current}]
+  lat_id:
+    element_name: S4M1D1R
+    property: main_strength
+- dev_ids: [{device_name: HS4P2D1R, property: set_current}]
+  lat_id:
+    element_name: HS4M2D1R
+    property: x_kick
+- dev_ids: [{device_name: HS1PT1R, property: set_current}]
+  lat_id:
+    element_name: HS1MT1R
+    property: x_kick
+- dev_ids: [{device_name: HS4P1T1R, property: set_current}]
+  lat_id:
+    element_name: HS4M1T1R
+    property: x_kick
+- dev_ids: [{device_name: HS4P2T1R, property: set_current}]
+  lat_id:
+    element_name: HS4M2T1R
+    property: x_kick
+- dev_ids: [{device_name: HS1PD2R, property: set_current}]
+  lat_id:
+    element_name: HS1MD2R
+    property: x_kick
+- dev_ids: [{device_name: HS4P1D2R, property: set_current}]
+  lat_id:
+    element_name: HS4M1D2R
+    property: x_kick
+- dev_ids: [{device_name: HS4P2D2R, property: set_current}]
+  lat_id:
+    element_name: HS4M2D2R
+    property: x_kick
+- dev_ids: [{device_name: HS1PT2R, property: set_current}]
+  lat_id:
+    element_name: HS1MT2R
+    property: x_kick
+- dev_ids: [{device_name: HS4P1T2R, property: set_current}]
+  lat_id:
+    element_name: HS4M1T2R
+    property: x_kick
+- dev_ids: [{device_name: HS4P2T2R, property: set_current}]
+  lat_id:
+    element_name: HS4M2T2R
+    property: x_kick
+- dev_ids: [{device_name: HS1PD3R, property: set_current}]
+  lat_id:
+    element_name: HS1MD3R
+    property: x_kick
+- dev_ids: [{device_name: HS4P1D3R, property: set_current}]
+  lat_id:
+    element_name: HS4M1D3R
+    property: x_kick
+- dev_ids: [{device_name: HS4P2D3R, property: set_current}]
+  lat_id:
+    element_name: HS4M2D3R
+    property: x_kick
+- dev_ids: [{device_name: HS1PT3R, property: set_current}]
+  lat_id:
+    element_name: HS1MT3R
+    property: x_kick
+- dev_ids: [{device_name: HS4P1T3R, property: set_current}]
+  lat_id:
+    element_name: HS4M1T3R
+    property: x_kick
+- dev_ids: [{device_name: HS4P2T3R, property: set_current}]
+  lat_id:
+    element_name: HS4M2T3R
+    property: x_kick
+- dev_ids: [{device_name: HS1PD4R, property: set_current}]
+  lat_id:
+    element_name: HS1MD4R
+    property: x_kick
+- dev_ids: [{device_name: HS4P1D4R, property: set_current}]
+  lat_id:
+    element_name: HS4M1D4R
+    property: x_kick
+- dev_ids: [{device_name: HS4P2D4R, property: set_current}]
+  lat_id:
+    element_name: HS4M2D4R
+    property: x_kick
+- dev_ids: [{device_name: HS1PT4R, property: set_current}]
+  lat_id:
+    element_name: HS1MT4R
+    property: x_kick
+- dev_ids: [{device_name: HS4P1T4R, property: set_current}]
+  lat_id:
+    element_name: HS4M1T4R
+    property: x_kick
+- dev_ids: [{device_name: HS4P2T4R, property: set_current}]
+  lat_id:
+    element_name: HS4M2T4R
+    property: x_kick
+- dev_ids: [{device_name: HS1PD5R, property: set_current}]
+  lat_id:
+    element_name: HS1MD5R
+    property: x_kick
+- dev_ids: [{device_name: HS4P1D5R, property: set_current}]
+  lat_id:
+    element_name: HS4M1D5R
+    property: x_kick
+- dev_ids: [{device_name: HS4P2D5R, property: set_current}]
+  lat_id:
+    element_name: HS4M2D5R
+    property: x_kick
+- dev_ids: [{device_name: HS1PT5R, property: set_current}]
+  lat_id:
+    element_name: HS1MT5R
+    property: x_kick
+- dev_ids: [{device_name: HS4P1T5R, property: set_current}]
+  lat_id:
+    element_name: HS4M1T5R
+    property: x_kick
+- dev_ids: [{device_name: HS4P2T5R, property: set_current}]
+  lat_id:
+    element_name: HS4M2T5R
+    property: x_kick
+- dev_ids: [{device_name: HS1PD6R, property: set_current}]
+  lat_id:
+    element_name: HS1MD6R
+    property: x_kick
+- dev_ids: [{device_name: HS4P1D6R, property: set_current}]
+  lat_id:
+    element_name: HS4M1D6R
+    property: x_kick
+- dev_ids: [{device_name: HS4P2D6R, property: set_current}]
+  lat_id:
+    element_name: HS4M2D6R
+    property: x_kick
+- dev_ids: [{device_name: HS1PT6R, property: set_current}]
+  lat_id:
+    element_name: HS1MT6R
+    property: x_kick
+- dev_ids: [{device_name: HS4P1T6R, property: set_current}]
+  lat_id:
+    element_name: HS4M1T6R
+    property: x_kick
+- dev_ids: [{device_name: HS4P2T6R, property: set_current}]
+  lat_id:
+    element_name: HS4M2T6R
+    property: x_kick
+- dev_ids: [{device_name: HS1PD7R, property: set_current}]
+  lat_id:
+    element_name: HS1MD7R
+    property: x_kick
+- dev_ids: [{device_name: HS4P1D7R, property: set_current}]
+  lat_id:
+    element_name: HS4M1D7R
+    property: x_kick
+- dev_ids: [{device_name: HS4P2D7R, property: set_current}]
+  lat_id:
+    element_name: HS4M2D7R
+    property: x_kick
+- dev_ids: [{device_name: HS1PT7R, property: set_current}]
+  lat_id:
+    element_name: HS1MT7R
+    property: x_kick
+- dev_ids: [{device_name: HS4P1T7R, property: set_current}]
+  lat_id:
+    element_name: HS4M1T7R
+    property: x_kick
+- dev_ids: [{device_name: HS4P2T7R, property: set_current}]
+  lat_id:
+    element_name: HS4M2T7R
+    property: x_kick
+- dev_ids: [{device_name: HS1PD8R, property: set_current}]
+  lat_id:
+    element_name: HS1MD8R
+    property: x_kick
+- dev_ids: [{device_name: HS4P1D8R, property: set_current}]
+  lat_id:
+    element_name: HS4M1D8R
+    property: x_kick
+- dev_ids: [{device_name: HS4P2D8R, property: set_current}]
+  lat_id:
+    element_name: HS4M2D8R
+    property: x_kick
+- dev_ids: [{device_name: HS1PT8R, property: set_current}]
+  lat_id:
+    element_name: HS1MT8R
+    property: x_kick
+- dev_ids: [{device_name: HS4P1T8R, property: set_current}]
+  lat_id:
+    element_name: HS4M1T8R
+    property: x_kick
+- dev_ids: [{device_name: HS4P2T8R, property: set_current}]
+  lat_id:
+    element_name: HS4M2T8R
+    property: x_kick
+- dev_ids: [{device_name: HS1PD1R, property: set_current}]
+  lat_id:
+    element_name: HS1MD1R
+    property: x_kick
+- dev_ids: [{device_name: HS4P1D1R, property: set_current}]
+  lat_id:
+    element_name: HS4M1D1R
+    property: x_kick
+- dev_ids: [{device_name: VS3P2D1R, property: set_current}]
+  lat_id:
+    element_name: VS3M2D1R
+    property: y_kick
+- dev_ids: [{device_name: VS2P2D1R, property: set_current}]
+  lat_id:
+    element_name: VS2M2D1R
+    property: y_kick
+- dev_ids: [{device_name: VS2P1T1R, property: set_current}]
+  lat_id:
+    element_name: VS2M1T1R
+    property: y_kick
+- dev_ids: [{device_name: VS3P1T1R, property: set_current}]
+  lat_id:
+    element_name: VS3M1T1R
+    property: y_kick
+- dev_ids: [{device_name: VS3P2T1R, property: set_current}]
+  lat_id:
+    element_name: VS3M2T1R
+    property: y_kick
+- dev_ids: [{device_name: VS2P2T1R, property: set_current}]
+  lat_id:
+    element_name: VS2M2T1R
+    property: y_kick
+- dev_ids: [{device_name: VS2P1D2R, property: set_current}]
+  lat_id:
+    element_name: VS2M1D2R
+    property: y_kick
+- dev_ids: [{device_name: VS3P1D2R, property: set_current}]
+  lat_id:
+    element_name: VS3M1D2R
+    property: y_kick
+- dev_ids: [{device_name: VS3P2D2R, property: set_current}]
+  lat_id:
+    element_name: VS3M2D2R
+    property: y_kick
+- dev_ids: [{device_name: VS2P2D2R, property: set_current}]
+  lat_id:
+    element_name: VS2M2D2R
+    property: y_kick
+- dev_ids: [{device_name: VS2P1T2R, property: set_current}]
+  lat_id:
+    element_name: VS2M1T2R
+    property: y_kick
+- dev_ids: [{device_name: VS3P1T2R, property: set_current}]
+  lat_id:
+    element_name: VS3M1T2R
+    property: y_kick
+- dev_ids: [{device_name: VS3P2T2R, property: set_current}]
+  lat_id:
+    element_name: VS3M2T2R
+    property: y_kick
+- dev_ids: [{device_name: VS2P2T2R, property: set_current}]
+  lat_id:
+    element_name: VS2M2T2R
+    property: y_kick
+- dev_ids: [{device_name: VS2P1D3R, property: set_current}]
+  lat_id:
+    element_name: VS2M1D3R
+    property: y_kick
+- dev_ids: [{device_name: VS3P1D3R, property: set_current}]
+  lat_id:
+    element_name: VS3M1D3R
+    property: y_kick
+- dev_ids: [{device_name: VS3P2D3R, property: set_current}]
+  lat_id:
+    element_name: VS3M2D3R
+    property: y_kick
+- dev_ids: [{device_name: VS2P2D3R, property: set_current}]
+  lat_id:
+    element_name: VS2M2D3R
+    property: y_kick
+- dev_ids: [{device_name: VS2P1T3R, property: set_current}]
+  lat_id:
+    element_name: VS2M1T3R
+    property: y_kick
+- dev_ids: [{device_name: VS3P1T3R, property: set_current}]
+  lat_id:
+    element_name: VS3M1T3R
+    property: y_kick
+- dev_ids: [{device_name: VS3P2T3R, property: set_current}]
+  lat_id:
+    element_name: VS3M2T3R
+    property: y_kick
+- dev_ids: [{device_name: VS2P2T3R, property: set_current}]
+  lat_id:
+    element_name: VS2M2T3R
+    property: y_kick
+- dev_ids: [{device_name: VS2P1D4R, property: set_current}]
+  lat_id:
+    element_name: VS2M1D4R
+    property: y_kick
+- dev_ids: [{device_name: VS3P1D4R, property: set_current}]
+  lat_id:
+    element_name: VS3M1D4R
+    property: y_kick
+- dev_ids: [{device_name: VS3P2D4R, property: set_current}]
+  lat_id:
+    element_name: VS3M2D4R
+    property: y_kick
+- dev_ids: [{device_name: VS2P2D4R, property: set_current}]
+  lat_id:
+    element_name: VS2M2D4R
+    property: y_kick
+- dev_ids: [{device_name: VS2P1T4R, property: set_current}]
+  lat_id:
+    element_name: VS2M1T4R
+    property: y_kick
+- dev_ids: [{device_name: VS3P1T4R, property: set_current}]
+  lat_id:
+    element_name: VS3M1T4R
+    property: y_kick
+- dev_ids: [{device_name: VS3P2T4R, property: set_current}]
+  lat_id:
+    element_name: VS3M2T4R
+    property: y_kick
+- dev_ids: [{device_name: VS2P2T4R, property: set_current}]
+  lat_id:
+    element_name: VS2M2T4R
+    property: y_kick
+- dev_ids: [{device_name: VS2P1D5R, property: set_current}]
+  lat_id:
+    element_name: VS2M1D5R
+    property: y_kick
+- dev_ids: [{device_name: VS3P1D5R, property: set_current}]
+  lat_id:
+    element_name: VS3M1D5R
+    property: y_kick
+- dev_ids: [{device_name: VS3P2D5R, property: set_current}]
+  lat_id:
+    element_name: VS3M2D5R
+    property: y_kick
+- dev_ids: [{device_name: VS2P2D5R, property: set_current}]
+  lat_id:
+    element_name: VS2M2D5R
+    property: y_kick
+- dev_ids: [{device_name: VS2P1T5R, property: set_current}]
+  lat_id:
+    element_name: VS2M1T5R
+    property: y_kick
+- dev_ids: [{device_name: VS3P1T5R, property: set_current}]
+  lat_id:
+    element_name: VS3M1T5R
+    property: y_kick
+- dev_ids: [{device_name: VS3P2T5R, property: set_current}]
+  lat_id:
+    element_name: VS3M2T5R
+    property: y_kick
+- dev_ids: [{device_name: VS2P2T5R, property: set_current}]
+  lat_id:
+    element_name: VS2M2T5R
+    property: y_kick
+- dev_ids: [{device_name: VS2P1D6R, property: set_current}]
+  lat_id:
+    element_name: VS2M1D6R
+    property: y_kick
+- dev_ids: [{device_name: VS3P1D6R, property: set_current}]
+  lat_id:
+    element_name: VS3M1D6R
+    property: y_kick
+- dev_ids: [{device_name: VS3P2D6R, property: set_current}]
+  lat_id:
+    element_name: VS3M2D6R
+    property: y_kick
+- dev_ids: [{device_name: VS2P2D6R, property: set_current}]
+  lat_id:
+    element_name: VS2M2D6R
+    property: y_kick
+- dev_ids: [{device_name: VS2P1T6R, property: set_current}]
+  lat_id:
+    element_name: VS2M1T6R
+    property: y_kick
+- dev_ids: [{device_name: VS3P1T6R, property: set_current}]
+  lat_id:
+    element_name: VS3M1T6R
+    property: y_kick
+- dev_ids: [{device_name: VS3P2T6R, property: set_current}]
+  lat_id:
+    element_name: VS3M2T6R
+    property: y_kick
+- dev_ids: [{device_name: VS2P2T6R, property: set_current}]
+  lat_id:
+    element_name: VS2M2T6R
+    property: y_kick
+- dev_ids: [{device_name: VS2P1D7R, property: set_current}]
+  lat_id:
+    element_name: VS2M1D7R
+    property: y_kick
+- dev_ids: [{device_name: VS3P1D7R, property: set_current}]
+  lat_id:
+    element_name: VS3M1D7R
+    property: y_kick
+- dev_ids: [{device_name: VS3P2D7R, property: set_current}]
+  lat_id:
+    element_name: VS3M2D7R
+    property: y_kick
+- dev_ids: [{device_name: VS2P2D7R, property: set_current}]
+  lat_id:
+    element_name: VS2M2D7R
+    property: y_kick
+- dev_ids: [{device_name: VS2P1T7R, property: set_current}]
+  lat_id:
+    element_name: VS2M1T7R
+    property: y_kick
+- dev_ids: [{device_name: VS3P1T7R, property: set_current}]
+  lat_id:
+    element_name: VS3M1T7R
+    property: y_kick
+- dev_ids: [{device_name: VS3P2T7R, property: set_current}]
+  lat_id:
+    element_name: VS3M2T7R
+    property: y_kick
+- dev_ids: [{device_name: VS2P2T7R, property: set_current}]
+  lat_id:
+    element_name: VS2M2T7R
+    property: y_kick
+- dev_ids: [{device_name: VS2P1D8R, property: set_current}]
+  lat_id:
+    element_name: VS2M1D8R
+    property: y_kick
+- dev_ids: [{device_name: VS3P1D8R, property: set_current}]
+  lat_id:
+    element_name: VS3M1D8R
+    property: y_kick
+- dev_ids: [{device_name: VS3P2D8R, property: set_current}]
+  lat_id:
+    element_name: VS3M2D8R
+    property: y_kick
+- dev_ids: [{device_name: VS2P2D8R, property: set_current}]
+  lat_id:
+    element_name: VS2M2D8R
+    property: y_kick
+- dev_ids: [{device_name: VS2P1T8R, property: set_current}]
+  lat_id:
+    element_name: VS2M1T8R
+    property: y_kick
+- dev_ids: [{device_name: VS3P1T8R, property: set_current}]
+  lat_id:
+    element_name: VS3M1T8R
+    property: y_kick
+- dev_ids: [{device_name: VS3P2T8R, property: set_current}]
+  lat_id:
+    element_name: VS3M2T8R
+    property: y_kick
+- dev_ids: [{device_name: VS2P2T8R, property: set_current}]
+  lat_id:
+    element_name: VS2M2T8R
+    property: y_kick
+- dev_ids: [{device_name: VS2P1D1R, property: set_current}]
+  lat_id:
+    element_name: VS2M1D1R
+    property: y_kick
+- dev_ids: [{device_name: VS3P1D1R, property: set_current}]
+  lat_id:
+    element_name: VS3M1D1R
+    property: y_kick
+- dev_ids: [{device_name: master_clock, property: reference_frequency}]
+  lat_id:
+    element_name: CAVH1T8R
+    property: frequency
+- dev_ids: [{device_name: master_clock, property: reference_frequency}]
+  lat_id:
+    element_name: CAVH2T8R
+    property: frequency
+- dev_ids: [{device_name: master_clock, property: reference_frequency}]
+  lat_id:
+    element_name: CAVH3T8R
+    property: frequency
+- dev_ids: [{device_name: master_clock, property: reference_frequency}]
+  lat_id:
+    element_name: CAVH4T8R
+    property: frequency
+- dev_ids: [{device_name: tune, property: x}, {device_name: tune, property: y}, {
+      device_name: tune, property: flq_x}, {device_name: tune, property: flq_y}, {
+      device_name: tune, property: transversal}, {device_name: tune, property: transversal_frequency}]
+  lat_id:
+    element_name: tune
+    property: transversal
+- dev_ids: [{device_name: twiss, property: parameters}]
+  lat_id:
+    element_name: twiss
+    property: parameters
+- dev_ids: [{device_name: track, property: pos}]
+  lat_id:
+    element_name: track
+    property: pos
+# EOF

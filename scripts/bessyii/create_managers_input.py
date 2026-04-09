@@ -7,32 +7,26 @@ import logging
 import datetime
 import pprint
 from collections import defaultdict
-from dataclasses import asdict, dataclass
-from importlib.resources import open_text, files
+from dataclasses import asdict
+from importlib.resources import files
 from typing import Dict, Sequence, Tuple, List
 
 import jsons
 import yaml
 
-from accml_lib.core.bl.yellow_pages import YellowPages
-from accml_lib.core.model.config.magnet import MagneticObject, EnergyDependentConversionModel
-from accml_lib.core.bl.liaison_manager import LiaisonManager
-from accml_lib.core.bl.translator_service import TranslatorService
-
-from accml_lib.core.interfaces.utils.liaison_manager import LiaisonManagerBase
-from accml_lib.core.bl.unit_conversion import EnergyDependentLinearUnitConversion, LinearUnitConversion
-from accml_lib.core.interfaces.utils.translator_service import TranslatorServiceBase
-from accml_lib.core.interfaces.utils.yellow_pages import YellowPagesBase
-from accml_lib.core.model.config.power_converter import PowerConverter
-from accml_lib.core.model.utils.identifiers import DevicePropertyID, LatticeElementPropertyID, ConversionID
-from accml_lib.core.model.utils.liaison_manager_lookup_table import LiaisonManagerInverseLookupElement, \
+from dt4acc.custom_facility.bessyii.model.config.elementmodel import MagnetElementSetup
+from dt4acc.custom_facility.bessyii.model.config.magnet import MagneticObject
+from dt4acc.custom_facility.bessyii.model.config.power_converter import PowerConverter
+from dt4acc_lib.core.bl.yellow_pages import YellowPages
+from dt4acc_lib.core.bl.unit_conversion import EnergyDependentLinearUnitConversion, LinearUnitConversion
+from dt4acc_lib.core.interfaces.utils.yellow_pages import YellowPagesBase
+from dt4acc_lib.core.model.utils.identifiers import DevicePropertyID, LatticeElementPropertyID, ConversionID
+from dt4acc_lib.core.model.utils.liaison_manager_lookup_table import LiaisonManagerInverseLookupElement, \
     LiaisonManagerInverseLookupTable, LiaisonManagerForwardLookupElement, LiaisonManagerForwardLookupTable
-from accml_lib.core.model.utils.translator_manager_lookup_table import TranslatorLookupTable, \
+from dt4acc_lib.core.model.utils.translator_manager_lookup_table import TranslatorLookupTable, \
     TranslatorLookupTableElement, PolynomCoefficients, TuneConversionCoefficients, IdentityMapper
-from accml_lib.custom.bessyii.tune_translator import TuneConversion
 
-from dt4acc.core.model.elementmodel import MagnetElementSetup
-from dt4acc.custom_epics.data.constants import ring_parameters, cavity_names
+from dt4acc.custom_epics.data.constants import ring_parameters
 from dt4acc.custom_epics.data.querries import get_magnets
 
 logger = logging.getLogger("dt4acc")
@@ -441,21 +435,21 @@ class CompressedSequenceDumper(yaml.SafeDumper):
 
 
 @functools.lru_cache(maxsize=None)
-def load_yaml_data_config(data_path: Tuple[str], module="accml_lib"):
-    t_file = files("accml_lib").joinpath(*(data_path))
+def load_yaml_data_config(data_path: Tuple[str], module="dt4acc_lib"):
+    t_file = files("dt4acc").joinpath(*(data_path))
     with open(t_file, "rt") as fp:
         obj = yaml.load(fp, yaml.SafeLoader)
     return obj
 
 
 @functools.lru_cache(maxsize=None)
-def get_magnet_info(data_path: Tuple[str], module="accml_lib") -> Sequence[MagneticObject]:
+def get_magnet_info(data_path: Tuple[str], module="dt4acc_lib") -> Sequence[MagneticObject]:
     t_path = data_path + ("magnets.yaml",)
     return [MagneticObject(**d) for d in load_yaml_data_config(t_path)]
 
 
 @functools.lru_cache(maxsize=None)
-def get_pc_info(data_path: Tuple[str], module="accml_lib") -> Sequence[PowerConverter]:
+def get_pc_info(data_path: Tuple[str], module="dt4acc_lib") -> Sequence[PowerConverter]:
     t_path = data_path + ("power_converters.yaml",)
     return [PowerConverter(**d) for d in load_yaml_data_config(t_path)]
 
@@ -516,7 +510,7 @@ def main():
     lm_inv_fname = "bessyii_liaison_manager_inverse_lookup_table.yml"
     lm_fwd_fname = "bessyii_liaison_manager_forward_lookup_table.yml"
     ts_fname = "bessyii_translation_service_lookup_table.yml"
-    data_path = ("custom", "config_data", "bessyii")
+    data_path = ("custom_facility", "bessyii", "resources", "storage_ring", "input")
 
     yp_lut = create_yellow_pages_lut_from_config(data_path=data_path)
     now = datetime.datetime.now()
