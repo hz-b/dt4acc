@@ -1,5 +1,0 @@
-# Requirements for converting Markdown to PDF and PowerPoint
-markdown>=3.4.0
-pdfkit>=1.0.0
-python-pptx>=0.6.21
-Pygments>=2.15.0

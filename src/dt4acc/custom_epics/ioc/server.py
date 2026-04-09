@@ -2,8 +2,9 @@ import asyncio
 import itertools
 import os
 import getpass
+import time
 import traceback
-from typing import Dict, Sequence
+from typing import Dict, Optional, Sequence
 
 from softioc import softioc, builder, asyncio_dispatcher, pythonSoftIoc
 
@@ -14,13 +15,12 @@ from accml_lib.core.model.output.result import ReadTogether
 from accml_lib.core.model.utils.command import ReadCommand, Command
 from dt4acc.core.interfaces.controller_interface import ControllerInterface
 from ...core.utils.logger import get_logger
+from .orbit_pva import OrbitTwinServer
 from .pv_setup import (
     initialize_power_converter_pvs,
     initialize_cavity_pvs,
     initialize_master_clock_pvs,
     initialize_orbit_pvs,
-    # obsolete ... such data do not exist any more for BESSY II
-    # initialize_bpm_pvs,
     initialize_orbit_object_pvs,
     initialize_twiss_pvs,
     initialize_tune_pvs,
@@ -35,44 +35,38 @@ dispatcher = asyncio_dispatcher.AsyncioDispatcher()
 
 
 class View:
-    """Basically a key/value interface to process variables
+    """Key/value interface to process variables.
 
-    * Each key is a :class:`ReadCommand`
-    * it contains the appropriate process variable
+    Each key is a :class:`ReadCommand`; each value is the corresponding
+    ``RecordWrapper`` from pythonSoftIoc.
 
-    Please note:
-       * additional context is required for
+    Special cases (twiss, track/orbit, tune) are dispatched explicitly.
+    The orbit path additionally pushes to the PVA NTTable via
+    :class:`OrbitTwinServer` when one is registered.
     """
 
-    def __init__(self):
+    def __init__(self, *, orbit_server: Optional[OrbitTwinServer] = None):
         self.process_variables: Dict[ReadCommand, pythonSoftIoc.RecordWrapper] = dict()
+        self.orbit_server = orbit_server
 
     def update_process_variables(
         self, variables: Dict[ReadCommand, pythonSoftIoc.RecordWrapper]
     ):
-        """Update process variables with their key
-
-        Todo:
-            better register process variables ?
-        """
         self.process_variables.update(variables)
 
     def update_value(self, var: ReadCommand, pkg):
-        """Update the value of a process variable
+        """Update the value of a process variable.
 
-        **NB** some variables need post processings, these are handled by
-        :meth:`update_special_values`
+        Special-cased variables (tune, twiss, track) are dispatched to their
+        own handlers; everything else takes the generic path.
         """
         if self.update_special_values(var, pkg):
-            # processed
             return
 
-        # not processed ... go on standard path
         record_wrapper = self.process_variables.get(var)
-        # todo: a better error reporting
         (single_reading,) = pkg.readings
         value = single_reading.payload
-        assert record_wrapper is not None
+        assert record_wrapper is not None, f"No process variable registered for {var}"
         record_wrapper.set(value)
 
     def update_special_values(self, var: ReadCommand, value) -> bool:
@@ -88,103 +82,70 @@ class View:
         return False
 
     def update_track(self, var: ReadCommand, pkg):
-        """ """
         assert var.id == "track", f"Only prepared to process 'track' but got {var}"
         (single_reading,) = pkg.readings
         value = single_reading.payload
 
         if var.property == "pos":
-            record_wrapper = self.process_variables.get(
-                ReadCommand(id="beam", property="x")
-            )
-            assert record_wrapper is not None
-            record_wrapper.set([pos.x for pos in value.track])
+            x_vals = [pos.x for pos in value.track]
+            y_vals = [pos.y for pos in value.track]
+            names = [pos.name for pos in value.track]
 
-            record_wrapper = self.process_variables.get(
-                ReadCommand(id="beam", property="y")
-            )
-            assert record_wrapper is not None
-            record_wrapper.set([pos.y for pos in value.track])
+            rw_x = self.process_variables.get(ReadCommand(id="beam", property="x"))
+            rw_y = self.process_variables.get(ReadCommand(id="beam", property="y"))
+            assert rw_x is not None
+            assert rw_y is not None
+            rw_x.set(x_vals)
+            rw_y.set(y_vals)
 
+            rw_names = self.process_variables.get(ReadCommand(id="beam", property="name"))
+            if rw_names is not None:
+                rw_names.set(names)
+
+            rw_found = self.process_variables.get(ReadCommand(id="beam", property="found"))
+            if rw_found is not None:
+                rw_found.set(True)
+
+            # PVA NTTable
+            if self.orbit_server is not None:
+                try:
+                    self.orbit_server.push(x=x_vals, y=y_vals, names=names)
+                except Exception as exc:
+                    logger.error("OrbitTwinServer.push failed: %s", exc)
         else:
-            # Todo: fix exception type
             raise AssertionError(f"Don't know track property {var.property}")
 
     def update_tune(self, var: ReadCommand, pkg):
-        """
-        Todo:
-            need to avoid this hack
-
-        Warning:
-            NB: the frequency tune can only be calculated using
-            the frequency of master clock or cavities
-
-            This is currently missing
-        """
         assert var.id == "tune", f"Only prepared to process 'tune' but got {var}"
-
         logger.warning("Tune view needs to be implemented")
         return
-        # Expecting only a single reading
-        single_reading, = pkg.readings
-        value = single_reading.payload
-
-        if var.property == "x":
-            rcmd = ReadCommand("tune", "x")
-            record_wrapper = self.process_variables.get(rcmd)
-            assert record_wrapper is not None, f"No process variable for {rcmd}"
-            record_wrapper.set(value.x)
-            return
-
-        elif var.property == "y":
-            rcmd = ReadCommand("tune", "y")
-            record_wrapper = self.process_variables.get(rcmd)
-            assert record_wrapper is not None, f"No process variable for {rcmd}"
-            record_wrapper.set(value.y)
-            return
-
-        else:
-            # Todo: better exception
-            raise AssertionError(f"For tune: don't know how to handle {var}")
-
-        raise AssertionError("Should not end up here")
 
     def update_twiss(self, var: ReadCommand, pkg):
         assert var.id == "twiss", f"Only prepared to process 'twiss' but got {var}"
 
-
-        # Expecting only a sngle reading
-        single_reading, = pkg.readings
+        (single_reading,) = pkg.readings
         value = single_reading.payload
         for plane in ("x", "y"):
-            record_wrapper = self.process_variables.get(
-                ReadCommand("twiss", f"{plane}:beta")
-            )
-            assert record_wrapper is not None
-            record_wrapper.set([getattr(pos, plane).beta for pos in value.twiss])
+            for param in ("beta", "alpha", "nu"):
+                rw = self.process_variables.get(
+                    ReadCommand("twiss", f"{plane}:{param}")
+                )
+                assert rw is not None
+                rw.set([getattr(getattr(pos, plane), param) for pos in value.twiss])
 
-            record_wrapper = self.process_variables.get(
-                ReadCommand("twiss", f"{plane}:alpha")
-            )
-            assert record_wrapper is not None
-            record_wrapper.set([getattr(pos, plane).alpha for pos in value.twiss])
-
-            record_wrapper = self.process_variables.get(
-                ReadCommand("twiss", f"{plane}:nu")
-            )
-            assert record_wrapper is not None
-            record_wrapper.set([getattr(pos, plane).nu for pos in value.twiss])
-
-        record_wrapper = self.process_variables.get(ReadCommand("twiss", "names"))
-        assert record_wrapper is not None
-        record_wrapper.set([pos.name for pos in value.twiss])
+        rw_names = self.process_variables.get(ReadCommand("twiss", "names"))
+        assert rw_names is not None
+        rw_names.set([pos.name for pos in value.twiss])
 
 
 class Controller(ControllerInterface):
-    """
-    Todo:
-        * add heart beat / periodic update variables
-        * review integration with asyncio
+    """Async orchestrator between the backend engine and the EPICS/PVA views.
+
+    Responsibilities:
+    - Build all PVs at startup and hand them to the View
+    - Route immediate reads back to the View after each set()
+    - Batch and debounce expensive delayed reads (twiss, orbit, tune)
+      via an asyncio.Queue
     """
 
     def __init__(
@@ -207,53 +168,31 @@ class Controller(ControllerInterface):
         self.default_delayed_reads = default_delayed_reads
 
     async def startup(self):
-        """
-        Main function to initialize all the process variables (PVs) and start the IOC server.
-        """
-        # Retrieve the device name prefix from the environment, defaulting to getpass.getuser() if not set
-        prefix = self.prefix
-
+        """Initialise all PVs, load the IOC database, and start the delayed
+        execution loop."""
         self.builder.SetDeviceName(self.prefix)
 
         self.view.update_process_variables(
             {
-                # Initialize additional PVs such as master clock, dummy data
                 **await initialize_master_clock_pvs(self.builder, controller=self),
                 **await initialize_cavity_pvs(self.builder, controller=self),
-                # Initialize power converters and linked magnets
                 **await initialize_power_converter_pvs(
                     self.builder, self.prefix, controller=self
                 ),
                 **initialize_machine_info_pvs(self.builder),
-                # Initialize PV's of the new orbit object ... collection of bpms
-                #   (ca access possible)
                 **initialize_orbit_object_pvs(self.builder),
-                # orbit all around the machine (at each element)
                 **initialize_orbit_pvs(self.builder),
-                # as calculated from the model
                 **initialize_twiss_pvs(self.builder),
-                # as calculated from the model
                 **initialize_tune_pvs(self.builder),
-                **initialize_other_pvs(
-                    self.builder, prefix
-                ),  # Initialize additional PVs such as master clock, dummy data
+                **initialize_other_pvs(self.builder, self.prefix),
             }
         )
-        logger.warning("All pvs set up")
+        logger.warning("All PVs set up")
 
-        # Initialize PVs for various accelerator components
-        # Initialize Beam Position Monitor PVs
-        # which are not used like that any more at BESSY II
-        # initialize_bpm_pvs(self.builder)
-
-        # Load the database of PVs defined above into the SoftIOC server
         builder.LoadDatabase()
-        # Start the SoftIOC server to handle PV interactions
         softioc.iocInit(dispatcher)
 
         self.start_delayed_execution_task()
-        # Start monitoring the heartbeat to ensure the server is running correctly
-        # asyncio.create_task(monitor_heartbeat(), name="server-heartbeat-loop")
 
     async def update(
         self,
@@ -262,25 +201,11 @@ class Controller(ControllerInterface):
         reads: Sequence[ReadCommand],
         delayed_reads: Sequence[ReadCommand],
     ):
-        """update a value (in the back engine) and update views accordingly
-
-        Args:
-            cmd: command that changes value in the back engine
-            reads: read commands to peek into the back engine and update
-                   immediately
-            delayed_reads: read commands that typically require calculations
-                           these are only updated with a delay
-                           e.g. calculation of twiss or orbit
-
-        Todo:
-            push delayed records ...
-        """
-        r = await self.mexec.set([cmd])
-        # now push these into the view
+        """Apply a command to the backend, push immediate reads, queue delayed ones."""
+        await self.mexec.set([cmd])
         read_data = await self.trigger_read(reads)
         for rcmd, rdata in zip(reads, read_data.data):
             self.view.update_value(rcmd, rdata)
-        # push delayed data where they belong to
         await self.request_delayed_reads(
             list(self.default_delayed_reads) + list(delayed_reads)
         )
@@ -289,11 +214,7 @@ class Controller(ControllerInterface):
         return await self.mexec.trigger_read(reads)
 
     async def request_delayed_reads(self, reads: Sequence[ReadCommand]):
-        """Put delayed commands on queue
-
-        Warning:
-                returns as soon as commands are on queue
-        """
+        """Enqueue delayed reads. Returns as soon as items are on the queue."""
         await asyncio.wait_for(
             asyncio.gather(*[self.cmd_queue.put(r) for r in reads]), timeout=0.1
         )
@@ -312,71 +233,58 @@ class Controller(ControllerInterface):
             await self._operate_on_queue_step()
 
     async def _operate_on_queue_step(self):
-        """
-        Todo:
-            Review where/what to report when delayed execution or
-            view updates go wrong
-        """
-        logger.debug("Waiting for cmd queue for new data")
         rcmds = await consume(queue=self.cmd_queue, delay=0.05)
-        # Assuming that I can drop all rcmds which are doubled
-        if rcmds:
-            t_rcmds = tuple(set(rcmds))
-            logger.info("Executing delayed commands %s", t_rcmds)
+        if not rcmds:
+            return
+
+        t_rcmds = tuple(set(rcmds))
+        logger.info("Executing delayed commands %s", t_rcmds)
+        try:
+            read_data = await self.trigger_read(t_rcmds)
+        except Exception as exc:
+            logger.error(
+                "Failed to retrieve data from backend using %s: %s", t_rcmds, exc
+            )
+            traceback.print_exc()
+            # Log and continue — don't kill the queue loop on transient errors
+            return
+
+        l_cmds = len(t_rcmds)
+        l_data = len(read_data.data)
+        if l_cmds != l_data:
+            logger.error(
+                "Used %d read commands but received %d results — skipping", l_cmds, l_data
+            )
+            return
+
+        for rc, rd in zip(t_rcmds, read_data.data):
             try:
-                read_data = await self.trigger_read(t_rcmds)
+                self.view.update_value(rc, rd)
             except Exception as exc:
                 logger.error(
-                    "Failed to retrieve data from backend using %s: reason %s",
-                    t_rcmds,
-                    exc,
+                    "Failed to push view for %s using data %s: %s", rc, rd, exc
                 )
                 traceback.print_exc()
-                raise exc
-            finally:
-                logger.debug("Retrieved data from backend using %s", t_rcmds)
-
-            l_cmds = len(t_rcmds)
-            l_data = len(read_data.data)
-            if l_cmds != l_data:
-                raise AssertionError(f"Used {l_cmds} read commands but received {l_data}")
-            for rc, rd in zip(t_rcmds, read_data.data):
-                try:
-                    self.view.update_value(rc, rd)
-                except Exception as exc:
-                    # Todo: should this be handled by the view?
-                    logger.error(
-                        "Failed to push view %s using data %s: reason %s", rc, rd, exc
-                    )
-                    traceback.print_exc()
-                    raise exc
+                # Continue processing remaining commands
 
 
 async def consume(queue: asyncio.Queue, delay: float) -> Sequence[ReadCommand]:
-    """
-    Todo:
-        consider if a total delay should be respected
-        If data are arriving constantly, perhaps some processing should happen
-        then to
+    """Drain the queue, waiting up to ``delay`` seconds for the first item.
 
-
+    Subsequent items are collected without additional delay so the loop
+    drains as fast as possible before the next sleep cycle.
     """
     rcmds = []
     while True:
         try:
-            # Wait for next item but only up to delay`
             rcmd = await asyncio.wait_for(queue.get(), timeout=delay)
         except asyncio.TimeoutError:
-            logger.debug("No new command arrived within %s", delay)
+            logger.debug("No new command arrived within %s s", delay)
             break
 
-        logger.debug(f"controller cmd queue, got item: %s", rcmd)
+        logger.debug("Controller cmd queue, got item: %s", rcmd)
         rcmds.append(rcmd)
         queue.task_done()
 
-        # Wait fixed delay after each item
-        # todo: remove me ... delay is in asyncio.wait_for
-        await asyncio.sleep(delay)
-
-    logger.debug(f"controller cmd queue: accumulated commands: %s", rcmds)
+    logger.debug("Controller cmd queue: accumulated commands: %s", rcmds)
     return rcmds

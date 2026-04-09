@@ -203,7 +203,7 @@ def initialize_orbit_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
         ReadCommand(id="beam", property="name"): builder.WaveformIn(
             f"beam:orbit:names", initial_value=[""], length=config.n_elements
         ),
-        ReadCommand(id="beam", property="name"): builder.boolIn(
+        ReadCommand(id="beam", property="found"): builder.boolIn(
             f"beam:orbit:found", initial_value=False
         ),
     }

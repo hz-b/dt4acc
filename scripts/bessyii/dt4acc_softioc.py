@@ -1,7 +1,10 @@
+import getpass
 import logging
+import os
 from importlib import resources
 
 from dt4acc.core.bl.translating_command_execution_engine import TranslatingCommandExecutionEngine
+from dt4acc.custom_epics.ioc.orbit_pva import OrbitTwinServer
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -53,7 +56,10 @@ def main():
         expected_view_for_output="device",
         num_readings=1,
     )
-    view = View()
+    prefix = os.environ.get("DT4ACC_PREFIX", getpass.getuser())
+    orbit_server = OrbitTwinServer(prefix + ":ORBITCC:rdBpm")
+    orbit_server.start()
+    view = View(orbit_server=orbit_server)
     controller = Controller(
         view=view,
         mexec=mexec,
@@ -66,7 +72,6 @@ def main():
         ]
     )
     dispatcher(controller.startup)
-    # Start the interactive IOC shell, allowing interaction with the server
     softioc.interactive_ioc(globals())
 
 
