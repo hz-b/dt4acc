@@ -19,13 +19,15 @@ from typing import Iterable, List, Dict, Any
 # -----------------------------------------------------------------
 # locate and load the data file once; keep it cached in _DATA
 # -----------------------------------------------------------------
-_DATA_FILE = (
-        Path(__file__)
-        .resolve()  # .../src/dt4acc/custom_epics/queries_json.py
-        .parent  # .../src/dt4acc/custom_epics/data
-        / "standard"
-        / "accelerator_setup.json"
-)
+
+_DATA_FILE = Path.home() / "Documents" / "dt4acc_soleil_twin_data" / "accelerator_setup.json"
+# _DATA_FILE = (
+#         Path(__file__)
+#         .resolve()  # .../src/dt4acc/custom_epics/queries_json.py
+#         .parent  # .../src/dt4acc/custom_epics/data
+#         / "standard"
+#         / "accelerator_setup.json"
+# )
 
 with _DATA_FILE.open() as fp:
     _DATA: List[Dict[str, Any]] = json.load(fp)

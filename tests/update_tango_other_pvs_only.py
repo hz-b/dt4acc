@@ -14,7 +14,6 @@ import os
 # Add the src directory to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from dt4acc.custom_epics.data.constants import special_pvs
 from tango import DeviceProxy, DevFailed
 
 def update_other_pvs_properties_only():
