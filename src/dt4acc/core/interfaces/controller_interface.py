@@ -1,8 +1,8 @@
 from abc import ABCMeta, abstractmethod
 from typing import Sequence
 
-from accml_lib.core.model.output.result import ReadTogether
-from accml_lib.core.model.utils.command import Command, ReadCommand
+from dt4acc_lib.model.output.result import ReadTogether
+from dt4acc_lib.model.utils.command import Command, ReadCommand
 
 
 class ControllerInterface(metaclass=ABCMeta):

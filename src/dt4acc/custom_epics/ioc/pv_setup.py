@@ -3,7 +3,7 @@ from typing import Dict
 from softioc.pythonSoftIoc import RecordWrapper
 import numpy as np
 
-from accml_lib.core.model.utils.command import ReadCommand, Command
+from dt4acc_lib.model.utils.command import ReadCommand, Command
 from dt4acc.core.interfaces.controller_interface import ControllerInterface
 from ..data.constants import config, special_pvs, cavity_names
 from ..data.querries import (

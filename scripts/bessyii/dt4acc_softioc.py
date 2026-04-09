@@ -1,22 +1,23 @@
 import getpass
+import json
 import logging
 import os
+import at
 from importlib import resources
-
-from dt4acc.core.bl.translating_command_execution_engine import TranslatingCommandExecutionEngine
-from dt4acc.custom_epics.ioc.orbit_pva import OrbitTwinServer
-
-logging.basicConfig(level=logging.WARNING)
 
 from softioc import builder, softioc
 
-from accml_lib.core.bl.command_rewritter import CommandRewriter
-from accml_lib.core.model.utils.command import ReadCommand
-from accml_lib.custom.bessyii.liasion_translator_setup import load_managers
-from accml_lib.custom.bessyii.pyat_simulator_backend import simulator_backend
-
-
+from dt4acc_lib.pyat_simulator.simulator_backend import SimulatorBackend
+from dt4acc_lib.bl.command_rewritter import CommandRewriter
+from dt4acc_lib.model.utils.command import ReadCommand
+from dt4acc.core.bl.translating_command_execution_engine import TranslatingCommandExecutionEngine
+from dt4acc.custom_epics.ioc.orbit_pva import OrbitTwinServer
 from dt4acc.custom_epics.ioc.server import View, Controller, dispatcher
+from dt4acc.custom_facility.bessyii.liasion_translator_setup import load_managers
+from dt4acc_lib.pyat_simulator.accelerator_simulator import PyATAcceleratorSimulator
+
+
+logging.basicConfig(level=logging.WARNING)
 
 def main():
     """Handle all startups
@@ -35,10 +36,14 @@ def main():
 
     """
     filename = resources.files("dt4acc").joinpath(
-        "custom_epics/data/standard/bessy2_storage_ring_reflat.json"
+        "custom_facility/bessyii/resources/storage_ring/input/bessy2_storage_ring_reflat.json"
+    )
+    acc = bessyii_pyat_lattice(filename=filename)
+    backend=SimulatorBackend(
+        name="BESSYII_on_PyAT",
+        acc=PyATAcceleratorSimulator(at_lattice=acc),
     )
 
-    backend = simulator_backend(filename)
     _, lm, ts = load_managers()
 
     command_rewriter=CommandRewriter(
@@ -52,7 +57,6 @@ def main():
     mexec = TranslatingCommandExecutionEngine(
         backend=backend,
         cmd_rewriter=command_rewriter,
-        storage=None,
         expected_view_for_output="device",
         num_readings=1,
     )
@@ -73,6 +77,24 @@ def main():
     )
     dispatcher(controller.startup)
     softioc.interactive_ioc(globals())
+
+
+
+def bessyii_pyat_lattice_from_dics(seq, energy: float = 1.7185e9):
+    r = at.Lattice(seq, name="BESSY II storage ring", energy=energy)
+    r.enable_6d()
+    r.cavpts = "CAV*"
+    r.set_cavity_phase(cavpts=r.cavpts)
+    return r
+
+
+def bessyii_pyat_lattice(filename: str, energy: float = 1.7185e9) -> at.Lattice:
+    from lat2db.tools.factories.pyat import factory
+
+    with open(filename, "rt") as fp:
+        d = json.load(fp)
+    seq = factory(d, energy=energy)
+    return bessyii_pyat_lattice_from_dics(seq, energy=energy)
 
 
 if __name__ == "__main__":

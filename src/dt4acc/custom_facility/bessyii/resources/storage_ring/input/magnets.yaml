@@ -1,0 +1,3529 @@
+- elem_id: Q1M2D1R
+  dev_id: Q1M2D1R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PDR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M1T1R
+  dev_id: Q1M1T1R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PTR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M2T1R
+  dev_id: Q1M2T1R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PTR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M1D2R
+  dev_id: Q1M1D2R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PDR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M2D2R
+  dev_id: Q1M2D2R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PDR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M1T2R
+  dev_id: Q1M1T2R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PTR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M2T2R
+  dev_id: Q1M2T2R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PTR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M1D3R
+  dev_id: Q1M1D3R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PDR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M2D3R
+  dev_id: Q1M2D3R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PDR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M1T3R
+  dev_id: Q1M1T3R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PTR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M2T3R
+  dev_id: Q1M2T3R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PTR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M1D4R
+  dev_id: Q1M1D4R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PDR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M2D4R
+  dev_id: Q1M2D4R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PDR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M1T4R
+  dev_id: Q1M1T4R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PTR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M2T4R
+  dev_id: Q1M2T4R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PTR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M1D5R
+  dev_id: Q1M1D5R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PDR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M2D5R
+  dev_id: Q1M2D5R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PDR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M1T5R
+  dev_id: Q1M1T5R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PTR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M2T5R
+  dev_id: Q1M2T5R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PTR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M1D6R
+  dev_id: Q1M1D6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PDR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M2D6R
+  dev_id: Q1M2D6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PDR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M1T6R
+  dev_id: Q1M1T6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PTR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M2T6R
+  dev_id: Q1M2T6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PTR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M1D7R
+  dev_id: Q1M1D7R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PDR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M2D7R
+  dev_id: Q1M2D7R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PDR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M1T7R
+  dev_id: Q1M1T7R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PTR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M2T7R
+  dev_id: Q1M2T7R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PTR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M1D8R
+  dev_id: Q1M1D8R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PDR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M2D8R
+  dev_id: Q1M2D8R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PDR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M1T8R
+  dev_id: Q1M1T8R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PTR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M2T8R
+  dev_id: Q1M2T8R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PTR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q1M1D1R
+  dev_id: Q1M1D1R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q1PDR
+  conversion:
+    intercept: 0.0
+    slope: 0.06393
+    conversion_type: linear  
+
+- elem_id: Q2M2D1R
+  dev_id: Q2M2D1R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PDR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M1T1R
+  dev_id: Q2M1T1R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PTR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M2T1R
+  dev_id: Q2M2T1R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PTR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M1D2R
+  dev_id: Q2M1D2R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PDR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M2D2R
+  dev_id: Q2M2D2R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PDR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M1T2R
+  dev_id: Q2M1T2R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PTR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M2T2R
+  dev_id: Q2M2T2R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PTR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M1D3R
+  dev_id: Q2M1D3R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PDR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M2D3R
+  dev_id: Q2M2D3R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PDR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M1T3R
+  dev_id: Q2M1T3R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PTR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M2T3R
+  dev_id: Q2M2T3R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PTR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M1D4R
+  dev_id: Q2M1D4R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PDR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M2D4R
+  dev_id: Q2M2D4R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PDR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M1T4R
+  dev_id: Q2M1T4R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PTR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M2T4R
+  dev_id: Q2M2T4R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PTR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M1D5R
+  dev_id: Q2M1D5R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PDR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M2D5R
+  dev_id: Q2M2D5R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PDR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M1T5R
+  dev_id: Q2M1T5R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PTR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M2T5R
+  dev_id: Q2M2T5R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PTR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M1D6R
+  dev_id: Q2M1D6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PDR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M2D6R
+  dev_id: Q2M2D6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PDR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M1T6R
+  dev_id: Q2M1T6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PTR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M2T6R
+  dev_id: Q2M2T6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PTR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M1D7R
+  dev_id: Q2M1D7R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PDR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M2D7R
+  dev_id: Q2M2D7R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PDR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M1T7R
+  dev_id: Q2M1T7R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PTR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M2T7R
+  dev_id: Q2M2T7R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PTR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M1D8R
+  dev_id: Q2M1D8R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PDR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M2D8R
+  dev_id: Q2M2D8R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PDR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M1T8R
+  dev_id: Q2M1T8R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PTR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M2T8R
+  dev_id: Q2M2T8R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PTR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q2M1D1R
+  dev_id: Q2M1D1R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q2PDR
+  conversion:
+    intercept: 0.0
+    slope: -0.065656
+    conversion_type: linear  
+
+- elem_id: Q3M2D1R
+  dev_id: Q3M2D1R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PD1R
+  conversion:
+    intercept: 0.0
+    slope: -0.06343
+    conversion_type: linear  
+
+- elem_id: Q3M1T1R
+  dev_id: Q3M1T1R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3P1T1R
+  conversion:
+    intercept: 0.0
+    slope: -0.06294
+    conversion_type: linear  
+
+- elem_id: Q3M2T1R
+  dev_id: Q3M2T1R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3P2T1R
+  conversion:
+    intercept: 0.0
+    slope: -0.06294
+    conversion_type: linear  
+
+- elem_id: Q3M1D2R
+  dev_id: Q3M1D2R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PD2R
+  conversion:
+    intercept: 0.0
+    slope: -0.06343
+    conversion_type: linear  
+
+- elem_id: Q3M2D2R
+  dev_id: Q3M2D2R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PD2R
+  conversion:
+    intercept: 0.0
+    slope: -0.06343
+    conversion_type: linear  
+
+- elem_id: Q3M1T2R
+  dev_id: Q3M1T2R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PT2R
+  conversion:
+    intercept: 0.0
+    slope: -0.06294
+    conversion_type: linear  
+
+- elem_id: Q3M2T2R
+  dev_id: Q3M2T2R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PT2R
+  conversion:
+    intercept: 0.0
+    slope: -0.06294
+    conversion_type: linear  
+
+- elem_id: Q3M1D3R
+  dev_id: Q3M1D3R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PD3R
+  conversion:
+    intercept: 0.0
+    slope: -0.06343
+    conversion_type: linear  
+
+- elem_id: Q3M2D3R
+  dev_id: Q3M2D3R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PD3R
+  conversion:
+    intercept: 0.0
+    slope: -0.06343
+    conversion_type: linear  
+
+- elem_id: Q3M1T3R
+  dev_id: Q3M1T3R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PT3R
+  conversion:
+    intercept: 0.0
+    slope: -0.06294
+    conversion_type: linear  
+
+- elem_id: Q3M2T3R
+  dev_id: Q3M2T3R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PT3R
+  conversion:
+    intercept: 0.0
+    slope: -0.06294
+    conversion_type: linear  
+
+- elem_id: Q3M1D4R
+  dev_id: Q3M1D4R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PD4R
+  conversion:
+    intercept: 0.0
+    slope: -0.06343
+    conversion_type: linear  
+
+- elem_id: Q3M2D4R
+  dev_id: Q3M2D4R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PD4R
+  conversion:
+    intercept: 0.0
+    slope: -0.06343
+    conversion_type: linear  
+
+- elem_id: Q3M1T4R
+  dev_id: Q3M1T4R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PT4R
+  conversion:
+    intercept: 0.0
+    slope: -0.06294
+    conversion_type: linear  
+
+- elem_id: Q3M2T4R
+  dev_id: Q3M2T4R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PT4R
+  conversion:
+    intercept: 0.0
+    slope: -0.06294
+    conversion_type: linear  
+
+- elem_id: Q3M1D5R
+  dev_id: Q3M1D5R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PD5R
+  conversion:
+    intercept: 0.0
+    slope: -0.06343
+    conversion_type: linear  
+
+- elem_id: Q3M2D5R
+  dev_id: Q3M2D5R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PD5R
+  conversion:
+    intercept: 0.0
+    slope: -0.06343
+    conversion_type: linear  
+
+- elem_id: Q3M1T5R
+  dev_id: Q3M1T5R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PT5R
+  conversion:
+    intercept: 0.0
+    slope: -0.06294
+    conversion_type: linear  
+
+- elem_id: Q3M2T5R
+  dev_id: Q3M2T5R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PT5R
+  conversion:
+    intercept: 0.0
+    slope: -0.06294
+    conversion_type: linear  
+
+- elem_id: Q3M1D6R
+  dev_id: Q3M1D6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PD6R
+  conversion:
+    intercept: 0.0
+    slope: -0.06343
+    conversion_type: linear  
+
+- elem_id: Q3M2D6R
+  dev_id: Q3M2D6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PD6R
+  conversion:
+    intercept: 0.0
+    slope: -0.06343
+    conversion_type: linear  
+
+- elem_id: Q3M1T6R
+  dev_id: Q3M1T6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3P1T6R
+  conversion:
+    intercept: 0.0
+    slope: -0.06294
+    conversion_type: linear  
+
+- elem_id: Q3M2T6R
+  dev_id: Q3M2T6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3P2T6R
+  conversion:
+    intercept: 0.0
+    slope: -0.06294
+    conversion_type: linear  
+
+- elem_id: Q3M1D7R
+  dev_id: Q3M1D7R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PD7R
+  conversion:
+    intercept: 0.0
+    slope: -0.06343
+    conversion_type: linear  
+
+- elem_id: Q3M2D7R
+  dev_id: Q3M2D7R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PD7R
+  conversion:
+    intercept: 0.0
+    slope: -0.06343
+    conversion_type: linear  
+
+- elem_id: Q3M1T7R
+  dev_id: Q3M1T7R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PT7R
+  conversion:
+    intercept: 0.0
+    slope: -0.06294
+    conversion_type: linear  
+
+- elem_id: Q3M2T7R
+  dev_id: Q3M2T7R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PT7R
+  conversion:
+    intercept: 0.0
+    slope: -0.06294
+    conversion_type: linear  
+
+- elem_id: Q3M1D8R
+  dev_id: Q3M1D8R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PD8R
+  conversion:
+    intercept: 0.0
+    slope: -0.06343
+    conversion_type: linear  
+
+- elem_id: Q3M2D8R
+  dev_id: Q3M2D8R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PD8R
+  conversion:
+    intercept: 0.0
+    slope: -0.06343
+    conversion_type: linear  
+
+- elem_id: Q3M1T8R
+  dev_id: Q3M1T8R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3P1T8R
+  conversion:
+    intercept: 0.0
+    slope: -0.06294
+    conversion_type: linear  
+
+- elem_id: Q3M2T8R
+  dev_id: Q3M2T8R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3P2T8R
+  conversion:
+    intercept: 0.0
+    slope: -0.06294
+    conversion_type: linear  
+
+- elem_id: Q3M1D1R
+  dev_id: Q3M1D1R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q3PD1R
+  conversion:
+    intercept: 0.0
+    slope: -0.06343
+    conversion_type: linear  
+
+- elem_id: Q4M2D1R
+  dev_id: Q4M2D1R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PD1R
+  conversion:
+    intercept: 0.0
+    slope: 0.060633
+    conversion_type: linear  
+
+- elem_id: Q4M1T1R
+  dev_id: Q4M1T1R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4P1T1R
+  conversion:
+    intercept: 0.0
+    slope: 0.059339
+    conversion_type: linear  
+
+- elem_id: Q4M2T1R
+  dev_id: Q4M2T1R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4P2T1R
+  conversion:
+    intercept: 0.0
+    slope: 0.059339
+    conversion_type: linear  
+
+- elem_id: Q4M1D2R
+  dev_id: Q4M1D2R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PD2R
+  conversion:
+    intercept: 0.0
+    slope: 0.060633
+    conversion_type: linear  
+
+- elem_id: Q4M2D2R
+  dev_id: Q4M2D2R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PD2R
+  conversion:
+    intercept: 0.0
+    slope: 0.060633
+    conversion_type: linear  
+
+- elem_id: Q4M1T2R
+  dev_id: Q4M1T2R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PT2R
+  conversion:
+    intercept: 0.0
+    slope: 0.059339
+    conversion_type: linear  
+
+- elem_id: Q4M2T2R
+  dev_id: Q4M2T2R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PT2R
+  conversion:
+    intercept: 0.0
+    slope: 0.059339
+    conversion_type: linear  
+
+- elem_id: Q4M1D3R
+  dev_id: Q4M1D3R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PD3R
+  conversion:
+    intercept: 0.0
+    slope: 0.060633
+    conversion_type: linear  
+
+- elem_id: Q4M2D3R
+  dev_id: Q4M2D3R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PD3R
+  conversion:
+    intercept: 0.0
+    slope: 0.060633
+    conversion_type: linear  
+
+- elem_id: Q4M1T3R
+  dev_id: Q4M1T3R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PT3R
+  conversion:
+    intercept: 0.0
+    slope: 0.059339
+    conversion_type: linear  
+
+- elem_id: Q4M2T3R
+  dev_id: Q4M2T3R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PT3R
+  conversion:
+    intercept: 0.0
+    slope: 0.059339
+    conversion_type: linear  
+
+- elem_id: Q4M1D4R
+  dev_id: Q4M1D4R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PD4R
+  conversion:
+    intercept: 0.0
+    slope: 0.060633
+    conversion_type: linear  
+
+- elem_id: Q4M2D4R
+  dev_id: Q4M2D4R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PD4R
+  conversion:
+    intercept: 0.0
+    slope: 0.060633
+    conversion_type: linear  
+
+- elem_id: Q4M1T4R
+  dev_id: Q4M1T4R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PT4R
+  conversion:
+    intercept: 0.0
+    slope: 0.059339
+    conversion_type: linear  
+
+- elem_id: Q4M2T4R
+  dev_id: Q4M2T4R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PT4R
+  conversion:
+    intercept: 0.0
+    slope: 0.059339
+    conversion_type: linear  
+
+- elem_id: Q4M1D5R
+  dev_id: Q4M1D5R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PD5R
+  conversion:
+    intercept: 0.0
+    slope: 0.060633
+    conversion_type: linear  
+
+- elem_id: Q4M2D5R
+  dev_id: Q4M2D5R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PD5R
+  conversion:
+    intercept: 0.0
+    slope: 0.060633
+    conversion_type: linear  
+
+- elem_id: Q4M1T5R
+  dev_id: Q4M1T5R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PT5R
+  conversion:
+    intercept: 0.0
+    slope: 0.059339
+    conversion_type: linear  
+
+- elem_id: Q4M2T5R
+  dev_id: Q4M2T5R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PT5R
+  conversion:
+    intercept: 0.0
+    slope: 0.059339
+    conversion_type: linear  
+
+- elem_id: Q4M1D6R
+  dev_id: Q4M1D6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PD6R
+  conversion:
+    intercept: 0.0
+    slope: 0.060633
+    conversion_type: linear  
+
+- elem_id: Q4M2D6R
+  dev_id: Q4M2D6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PD6R
+  conversion:
+    intercept: 0.0
+    slope: 0.060633
+    conversion_type: linear  
+
+- elem_id: Q4M1T6R
+  dev_id: Q4M1T6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4P1T6R
+  conversion:
+    intercept: 0.0
+    slope: 0.059339
+    conversion_type: linear  
+
+- elem_id: Q4M2T6R
+  dev_id: Q4M2T6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4P2T6R
+  conversion:
+    intercept: 0.0
+    slope: 0.059339
+    conversion_type: linear  
+
+- elem_id: Q4M1D7R
+  dev_id: Q4M1D7R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PD7R
+  conversion:
+    intercept: 0.0
+    slope: 0.060633
+    conversion_type: linear  
+
+- elem_id: Q4M2D7R
+  dev_id: Q4M2D7R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PD7R
+  conversion:
+    intercept: 0.0
+    slope: 0.060633
+    conversion_type: linear  
+
+- elem_id: Q4M1T7R
+  dev_id: Q4M1T7R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PT7R
+  conversion:
+    intercept: 0.0
+    slope: 0.059339
+    conversion_type: linear  
+
+- elem_id: Q4M2T7R
+  dev_id: Q4M2T7R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PT7R
+  conversion:
+    intercept: 0.0
+    slope: 0.059339
+    conversion_type: linear  
+
+- elem_id: Q4M1D8R
+  dev_id: Q4M1D8R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PD8R
+  conversion:
+    intercept: 0.0
+    slope: 0.060633
+    conversion_type: linear  
+
+- elem_id: Q4M2D8R
+  dev_id: Q4M2D8R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PD8R
+  conversion:
+    intercept: 0.0
+    slope: 0.060633
+    conversion_type: linear  
+
+- elem_id: Q4M1T8R
+  dev_id: Q4M1T8R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4P1T8R
+  conversion:
+    intercept: 0.0
+    slope: 0.059339
+    conversion_type: linear  
+
+- elem_id: Q4M2T8R
+  dev_id: Q4M2T8R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4P2T8R
+  conversion:
+    intercept: 0.0
+    slope: 0.059339
+    conversion_type: linear  
+
+- elem_id: Q4M1D1R
+  dev_id: Q4M1D1R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q4PD1R
+  conversion:
+    intercept: 0.0
+    slope: 0.060633
+    conversion_type: linear  
+
+- elem_id: Q5M1T1R
+  dev_id: Q5M1T1R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q5P1T1R
+  conversion:
+    intercept: 0.0
+    slope: -0.064795
+    conversion_type: linear  
+
+- elem_id: Q5M2T1R
+  dev_id: Q5M2T1R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q5P2T1R
+  conversion:
+    intercept: 0.0
+    slope: -0.064795
+    conversion_type: linear  
+
+- elem_id: Q5M1T2R
+  dev_id: Q5M1T2R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q5PT2R
+  conversion:
+    intercept: 0.0
+    slope: -0.064795
+    conversion_type: linear  
+
+- elem_id: Q5M2T2R
+  dev_id: Q5M2T2R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q5PT2R
+  conversion:
+    intercept: 0.0
+    slope: -0.064795
+    conversion_type: linear  
+
+- elem_id: Q5M1T3R
+  dev_id: Q5M1T3R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q5PT3R
+  conversion:
+    intercept: 0.0
+    slope: -0.064795
+    conversion_type: linear  
+
+- elem_id: Q5M2T3R
+  dev_id: Q5M2T3R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q5PT3R
+  conversion:
+    intercept: 0.0
+    slope: -0.064795
+    conversion_type: linear  
+
+- elem_id: Q5M1T4R
+  dev_id: Q5M1T4R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q5PT4R
+  conversion:
+    intercept: 0.0
+    slope: -0.064795
+    conversion_type: linear  
+
+- elem_id: Q5M2T4R
+  dev_id: Q5M2T4R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q5PT4R
+  conversion:
+    intercept: 0.0
+    slope: -0.064795
+    conversion_type: linear  
+
+- elem_id: Q5M1T5R
+  dev_id: Q5M1T5R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q5PT5R
+  conversion:
+    intercept: 0.0
+    slope: -0.064795
+    conversion_type: linear  
+
+- elem_id: Q5M2T5R
+  dev_id: Q5M2T5R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q5PT5R
+  conversion:
+    intercept: 0.0
+    slope: -0.064795
+    conversion_type: linear  
+
+- elem_id: Q5M1T6R
+  dev_id: Q5M1T6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q5P1T6R
+  conversion:
+    intercept: 0.0
+    slope: -0.064795
+    conversion_type: linear  
+
+- elem_id: Q5M2T6R
+  dev_id: Q5M2T6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q5P2T6R
+  conversion:
+    intercept: 0.0
+    slope: -0.064795
+    conversion_type: linear  
+
+- elem_id: Q5M1T7R
+  dev_id: Q5M1T7R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q5PT7R
+  conversion:
+    intercept: 0.0
+    slope: -0.064795
+    conversion_type: linear  
+
+- elem_id: Q5M2T7R
+  dev_id: Q5M2T7R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q5PT7R
+  conversion:
+    intercept: 0.0
+    slope: -0.064795
+    conversion_type: linear  
+
+- elem_id: Q5M1T8R
+  dev_id: Q5M1T8R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q5P1T8R
+  conversion:
+    intercept: 0.0
+    slope: -0.064795
+    conversion_type: linear  
+
+- elem_id: Q5M2T8R
+  dev_id: Q5M2T8R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: Q5P2T8R
+  conversion:
+    intercept: 0.0
+    slope: -0.064795
+    conversion_type: linear  
+
+- elem_id: QIT6R
+  dev_id: QIT6R
+  type: quadrupole
+  family_member: [ tune_correction ]
+  power_converter_id: PQIT6R
+  conversion:
+    intercept: 0.0
+    slope: -0.0928
+    conversion_type: linear  
+
+- elem_id: S2M2D1R
+  dev_id: S2M2D1R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M1T1R
+  dev_id: S2M1T1R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M2T1R
+  dev_id: S2M2T1R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M1D2R
+  dev_id: S2M1D2R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M2D2R
+  dev_id: S2M2D2R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M1T2R
+  dev_id: S2M1T2R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M2T2R
+  dev_id: S2M2T2R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M1D3R
+  dev_id: S2M1D3R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M2D3R
+  dev_id: S2M2D3R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M1T3R
+  dev_id: S2M1T3R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M2T3R
+  dev_id: S2M2T3R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M1D4R
+  dev_id: S2M1D4R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M2D4R
+  dev_id: S2M2D4R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M1T4R
+  dev_id: S2M1T4R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M2T4R
+  dev_id: S2M2T4R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M1D5R
+  dev_id: S2M1D5R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M2D5R
+  dev_id: S2M2D5R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M1T5R
+  dev_id: S2M1T5R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M2T5R
+  dev_id: S2M2T5R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M1D6R
+  dev_id: S2M1D6R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M2D6R
+  dev_id: S2M2D6R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M1T6R
+  dev_id: S2M1T6R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M2T6R
+  dev_id: S2M2T6R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M1D7R
+  dev_id: S2M1D7R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M2D7R
+  dev_id: S2M2D7R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M1T7R
+  dev_id: S2M1T7R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M2T7R
+  dev_id: S2M2T7R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M1D8R
+  dev_id: S2M1D8R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M2D8R
+  dev_id: S2M2D8R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M1T8R
+  dev_id: S2M1T8R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M2T8R
+  dev_id: S2M2T8R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S2M1D1R
+  dev_id: S2M1D1R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S2PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.56905625
+    conversion_type: linear  
+
+- elem_id: S3M2D1R
+  dev_id: S3M2D1R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PD1R
+  conversion:
+    intercept: 0.0
+    slope: -1.572825
+    conversion_type: linear  
+
+- elem_id: S3M1T1R
+  dev_id: S3M1T1R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56403125
+    conversion_type: linear  
+
+- elem_id: S3M2T1R
+  dev_id: S3M2T1R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56403125
+    conversion_type: linear  
+
+- elem_id: S3M1D2R
+  dev_id: S3M1D2R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.572825
+    conversion_type: linear  
+
+- elem_id: S3M2D2R
+  dev_id: S3M2D2R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.572825
+    conversion_type: linear  
+
+- elem_id: S3M1T2R
+  dev_id: S3M1T2R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56403125
+    conversion_type: linear  
+
+- elem_id: S3M2T2R
+  dev_id: S3M2T2R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56403125
+    conversion_type: linear  
+
+- elem_id: S3M1D3R
+  dev_id: S3M1D3R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.572825
+    conversion_type: linear  
+
+- elem_id: S3M2D3R
+  dev_id: S3M2D3R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.572825
+    conversion_type: linear  
+
+- elem_id: S3M1T3R
+  dev_id: S3M1T3R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56403125
+    conversion_type: linear  
+
+- elem_id: S3M2T3R
+  dev_id: S3M2T3R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56403125
+    conversion_type: linear  
+
+- elem_id: S3M1D4R
+  dev_id: S3M1D4R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.572825
+    conversion_type: linear  
+
+- elem_id: S3M2D4R
+  dev_id: S3M2D4R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.572825
+    conversion_type: linear  
+
+- elem_id: S3M1T4R
+  dev_id: S3M1T4R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56403125
+    conversion_type: linear  
+
+- elem_id: S3M2T4R
+  dev_id: S3M2T4R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56403125
+    conversion_type: linear  
+
+- elem_id: S3M1D5R
+  dev_id: S3M1D5R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.572825
+    conversion_type: linear  
+
+- elem_id: S3M2D5R
+  dev_id: S3M2D5R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.572825
+    conversion_type: linear  
+
+- elem_id: S3M1T5R
+  dev_id: S3M1T5R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56403125
+    conversion_type: linear  
+
+- elem_id: S3M2T5R
+  dev_id: S3M2T5R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56403125
+    conversion_type: linear  
+
+- elem_id: S3M1D6R
+  dev_id: S3M1D6R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.572825
+    conversion_type: linear  
+
+- elem_id: S3M2D6R
+  dev_id: S3M2D6R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.572825
+    conversion_type: linear  
+
+- elem_id: S3M1T6R
+  dev_id: S3M1T6R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3P1T6R
+  conversion:
+    intercept: 0.0
+    slope: -1.56403125
+    conversion_type: linear  
+
+- elem_id: S3M2T6R
+  dev_id: S3M2T6R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3P2T6R
+  conversion:
+    intercept: 0.0
+    slope: -1.56403125
+    conversion_type: linear  
+
+- elem_id: S3M1D7R
+  dev_id: S3M1D7R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.572825
+    conversion_type: linear  
+
+- elem_id: S3M2D7R
+  dev_id: S3M2D7R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.572825
+    conversion_type: linear  
+
+- elem_id: S3M1T7R
+  dev_id: S3M1T7R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56403125
+    conversion_type: linear  
+
+- elem_id: S3M2T7R
+  dev_id: S3M2T7R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56403125
+    conversion_type: linear  
+
+- elem_id: S3M1D8R
+  dev_id: S3M1D8R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.572825
+    conversion_type: linear  
+
+- elem_id: S3M2D8R
+  dev_id: S3M2D8R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PDR
+  conversion:
+    intercept: 0.0
+    slope: -1.572825
+    conversion_type: linear  
+
+- elem_id: S3M1T8R
+  dev_id: S3M1T8R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56403125
+    conversion_type: linear  
+
+- elem_id: S3M2T8R
+  dev_id: S3M2T8R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PTR
+  conversion:
+    intercept: 0.0
+    slope: -1.56403125
+    conversion_type: linear  
+
+- elem_id: S3M1D1R
+  dev_id: S3M1D1R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S3PD1R
+  conversion:
+    intercept: 0.0
+    slope: -1.572825
+    conversion_type: linear  
+
+- elem_id: S4M2D1R
+  dev_id: S4M2D1R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PD1R
+  conversion:
+    intercept: 0.0
+    slope: 1.58346875
+    conversion_type: linear  
+
+- elem_id: S4M1T1R
+  dev_id: S4M1T1R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PTR
+  conversion:
+    intercept: 0.0
+    slope: 1.56116875
+    conversion_type: linear  
+
+- elem_id: S4M2T1R
+  dev_id: S4M2T1R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PTR
+  conversion:
+    intercept: 0.0
+    slope: 1.56116875
+    conversion_type: linear  
+
+- elem_id: S4M1D2R
+  dev_id: S4M1D2R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PDR
+  conversion:
+    intercept: 0.0
+    slope: 1.58346875
+    conversion_type: linear  
+
+- elem_id: S4M2D2R
+  dev_id: S4M2D2R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PDR
+  conversion:
+    intercept: 0.0
+    slope: 1.58346875
+    conversion_type: linear  
+
+- elem_id: S4M1T2R
+  dev_id: S4M1T2R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PTR
+  conversion:
+    intercept: 0.0
+    slope: 1.56116875
+    conversion_type: linear  
+
+- elem_id: S4M2T2R
+  dev_id: S4M2T2R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PTR
+  conversion:
+    intercept: 0.0
+    slope: 1.56116875
+    conversion_type: linear  
+
+- elem_id: S4M1D3R
+  dev_id: S4M1D3R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PDR
+  conversion:
+    intercept: 0.0
+    slope: 1.58346875
+    conversion_type: linear  
+
+- elem_id: S4M2D3R
+  dev_id: S4M2D3R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PDR
+  conversion:
+    intercept: 0.0
+    slope: 1.58346875
+    conversion_type: linear  
+
+- elem_id: S4M1T3R
+  dev_id: S4M1T3R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PTR
+  conversion:
+    intercept: 0.0
+    slope: 1.56116875
+    conversion_type: linear  
+
+- elem_id: S4M2T3R
+  dev_id: S4M2T3R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PTR
+  conversion:
+    intercept: 0.0
+    slope: 1.56116875
+    conversion_type: linear  
+
+- elem_id: S4M1D4R
+  dev_id: S4M1D4R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PDR
+  conversion:
+    intercept: 0.0
+    slope: 1.58346875
+    conversion_type: linear  
+
+- elem_id: S4M2D4R
+  dev_id: S4M2D4R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PDR
+  conversion:
+    intercept: 0.0
+    slope: 1.58346875
+    conversion_type: linear  
+
+- elem_id: S4M1T4R
+  dev_id: S4M1T4R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PTR
+  conversion:
+    intercept: 0.0
+    slope: 1.56116875
+    conversion_type: linear  
+
+- elem_id: S4M2T4R
+  dev_id: S4M2T4R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PTR
+  conversion:
+    intercept: 0.0
+    slope: 1.56116875
+    conversion_type: linear  
+
+- elem_id: S4M1D5R
+  dev_id: S4M1D5R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PDR
+  conversion:
+    intercept: 0.0
+    slope: 1.58346875
+    conversion_type: linear  
+
+- elem_id: S4M2D5R
+  dev_id: S4M2D5R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PDR
+  conversion:
+    intercept: 0.0
+    slope: 1.58346875
+    conversion_type: linear  
+
+- elem_id: S4M1T5R
+  dev_id: S4M1T5R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PTR
+  conversion:
+    intercept: 0.0
+    slope: 1.56116875
+    conversion_type: linear  
+
+- elem_id: S4M2T5R
+  dev_id: S4M2T5R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PTR
+  conversion:
+    intercept: 0.0
+    slope: 1.56116875
+    conversion_type: linear  
+
+- elem_id: S4M1D6R
+  dev_id: S4M1D6R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PDR
+  conversion:
+    intercept: 0.0
+    slope: 1.58346875
+    conversion_type: linear  
+
+- elem_id: S4M2D6R
+  dev_id: S4M2D6R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PDR
+  conversion:
+    intercept: 0.0
+    slope: 1.58346875
+    conversion_type: linear  
+
+- elem_id: S4M1T6R
+  dev_id: S4M1T6R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4P1T6R
+  conversion:
+    intercept: 0.0
+    slope: 1.56116875
+    conversion_type: linear  
+
+- elem_id: S4M2T6R
+  dev_id: S4M2T6R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4P2T6R
+  conversion:
+    intercept: 0.0
+    slope: 1.56116875
+    conversion_type: linear  
+
+- elem_id: S4M1D7R
+  dev_id: S4M1D7R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PDR
+  conversion:
+    intercept: 0.0
+    slope: 1.58346875
+    conversion_type: linear  
+
+- elem_id: S4M2D7R
+  dev_id: S4M2D7R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PDR
+  conversion:
+    intercept: 0.0
+    slope: 1.58346875
+    conversion_type: linear  
+
+- elem_id: S4M1T7R
+  dev_id: S4M1T7R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PTR
+  conversion:
+    intercept: 0.0
+    slope: 1.56116875
+    conversion_type: linear  
+
+- elem_id: S4M2T7R
+  dev_id: S4M2T7R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PTR
+  conversion:
+    intercept: 0.0
+    slope: 1.56116875
+    conversion_type: linear  
+
+- elem_id: S4M1D8R
+  dev_id: S4M1D8R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PDR
+  conversion:
+    intercept: 0.0
+    slope: 1.58346875
+    conversion_type: linear  
+
+- elem_id: S4M2D8R
+  dev_id: S4M2D8R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PDR
+  conversion:
+    intercept: 0.0
+    slope: 1.58346875
+    conversion_type: linear  
+
+- elem_id: S4M1T8R
+  dev_id: S4M1T8R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PTR
+  conversion:
+    intercept: 0.0
+    slope: 1.56116875
+    conversion_type: linear  
+
+- elem_id: S4M2T8R
+  dev_id: S4M2T8R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PTR
+  conversion:
+    intercept: 0.0
+    slope: 1.56116875
+    conversion_type: linear  
+
+- elem_id: S4M1D1R
+  dev_id: S4M1D1R
+  type: sextupole
+  family_member: [ tune_correction ]
+  power_converter_id: S4PD1R
+  conversion:
+    intercept: 0.0
+    slope: 1.58346875
+    conversion_type: linear  
+
+- elem_id: HS4M2D1R
+  dev_id: HS4M2D1R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P2D1R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS1MT1R
+  dev_id: HS1MT1R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS1PT1R
+  conversion:
+    intercept: 0.0
+    slope: -0.00553438
+    conversion_type: linear  
+
+- elem_id: HS4M1T1R
+  dev_id: HS4M1T1R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P1T1R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS4M2T1R
+  dev_id: HS4M2T1R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P2T1R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS1MD2R
+  dev_id: HS1MD2R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS1PD2R
+  conversion:
+    intercept: 0.0
+    slope: -0.00553438
+    conversion_type: linear  
+
+- elem_id: HS4M1D2R
+  dev_id: HS4M1D2R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P1D2R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS4M2D2R
+  dev_id: HS4M2D2R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P2D2R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS1MT2R
+  dev_id: HS1MT2R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS1PT2R
+  conversion:
+    intercept: 0.0
+    slope: -0.00553438
+    conversion_type: linear  
+
+- elem_id: HS4M1T2R
+  dev_id: HS4M1T2R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P1T2R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS4M2T2R
+  dev_id: HS4M2T2R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P2T2R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS1MD3R
+  dev_id: HS1MD3R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS1PD3R
+  conversion:
+    intercept: 0.0
+    slope: -0.00553438
+    conversion_type: linear  
+
+- elem_id: HS4M1D3R
+  dev_id: HS4M1D3R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P1D3R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS4M2D3R
+  dev_id: HS4M2D3R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P2D3R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS1MT3R
+  dev_id: HS1MT3R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS1PT3R
+  conversion:
+    intercept: 0.0
+    slope: -0.00553438
+    conversion_type: linear  
+
+- elem_id: HS4M1T3R
+  dev_id: HS4M1T3R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P1T3R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS4M2T3R
+  dev_id: HS4M2T3R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P2T3R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS1MD4R
+  dev_id: HS1MD4R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS1PD4R
+  conversion:
+    intercept: 0.0
+    slope: -0.00553438
+    conversion_type: linear  
+
+- elem_id: HS4M1D4R
+  dev_id: HS4M1D4R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P1D4R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS4M2D4R
+  dev_id: HS4M2D4R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P2D4R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS1MT4R
+  dev_id: HS1MT4R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS1PT4R
+  conversion:
+    intercept: 0.0
+    slope: -0.00553438
+    conversion_type: linear  
+
+- elem_id: HS4M1T4R
+  dev_id: HS4M1T4R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P1T4R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS4M2T4R
+  dev_id: HS4M2T4R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P2T4R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS1MD5R
+  dev_id: HS1MD5R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS1PD5R
+  conversion:
+    intercept: 0.0
+    slope: -0.00553438
+    conversion_type: linear  
+
+- elem_id: HS4M1D5R
+  dev_id: HS4M1D5R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P1D5R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS4M2D5R
+  dev_id: HS4M2D5R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P2D5R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS1MT5R
+  dev_id: HS1MT5R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS1PT5R
+  conversion:
+    intercept: 0.0
+    slope: -0.00553438
+    conversion_type: linear  
+
+- elem_id: HS4M1T5R
+  dev_id: HS4M1T5R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P1T5R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS4M2T5R
+  dev_id: HS4M2T5R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P2T5R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS1MD6R
+  dev_id: HS1MD6R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS1PD6R
+  conversion:
+    intercept: 0.0
+    slope: -0.00553438
+    conversion_type: linear  
+
+- elem_id: HS4M1D6R
+  dev_id: HS4M1D6R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P1D6R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS4M2D6R
+  dev_id: HS4M2D6R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P2D6R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS1MT6R
+  dev_id: HS1MT6R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS1PT6R
+  conversion:
+    intercept: 0.0
+    slope: -0.00553438
+    conversion_type: linear  
+
+- elem_id: HS4M1T6R
+  dev_id: HS4M1T6R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P1T6R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS4M2T6R
+  dev_id: HS4M2T6R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P2T6R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS1MD7R
+  dev_id: HS1MD7R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS1PD7R
+  conversion:
+    intercept: 0.0
+    slope: -0.00553438
+    conversion_type: linear  
+
+- elem_id: HS4M1D7R
+  dev_id: HS4M1D7R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P1D7R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS4M2D7R
+  dev_id: HS4M2D7R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P2D7R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS1MT7R
+  dev_id: HS1MT7R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS1PT7R
+  conversion:
+    intercept: 0.0
+    slope: -0.00553438
+    conversion_type: linear  
+
+- elem_id: HS4M1T7R
+  dev_id: HS4M1T7R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P1T7R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS4M2T7R
+  dev_id: HS4M2T7R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P2T7R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS1MD8R
+  dev_id: HS1MD8R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS1PD8R
+  conversion:
+    intercept: 0.0
+    slope: -0.00553438
+    conversion_type: linear  
+
+- elem_id: HS4M1D8R
+  dev_id: HS4M1D8R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P1D8R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS4M2D8R
+  dev_id: HS4M2D8R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P2D8R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS1MT8R
+  dev_id: HS1MT8R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS1PT8R
+  conversion:
+    intercept: 0.0
+    slope: -0.00553438
+    conversion_type: linear  
+
+- elem_id: HS4M1T8R
+  dev_id: HS4M1T8R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P1T8R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS4M2T8R
+  dev_id: HS4M2T8R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P2T8R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: HS1MD1R
+  dev_id: HS1MD1R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS1PD1R
+  conversion:
+    intercept: 0.0
+    slope: -0.00553438
+    conversion_type: linear  
+
+- elem_id: HS4M1D1R
+  dev_id: HS4M1D1R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: HS4P1D1R
+  conversion:
+    intercept: 0.0
+    slope: -0.0044502
+    conversion_type: linear  
+
+- elem_id: VS3M2D1R
+  dev_id: VS3M2D1R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P2D1R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M2D1R
+  dev_id: VS2M2D1R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P2D1R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M1T1R
+  dev_id: VS2M1T1R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P1T1R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M1T1R
+  dev_id: VS3M1T1R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P1T1R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M2T1R
+  dev_id: VS3M2T1R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P2T1R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M2T1R
+  dev_id: VS2M2T1R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P2T1R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M1D2R
+  dev_id: VS2M1D2R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P1D2R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M1D2R
+  dev_id: VS3M1D2R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P1D2R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M2D2R
+  dev_id: VS3M2D2R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P2D2R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M2D2R
+  dev_id: VS2M2D2R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P2D2R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M1T2R
+  dev_id: VS2M1T2R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P1T2R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M1T2R
+  dev_id: VS3M1T2R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P1T2R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M2T2R
+  dev_id: VS3M2T2R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P2T2R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M2T2R
+  dev_id: VS2M2T2R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P2T2R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M1D3R
+  dev_id: VS2M1D3R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P1D3R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M1D3R
+  dev_id: VS3M1D3R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P1D3R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M2D3R
+  dev_id: VS3M2D3R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P2D3R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M2D3R
+  dev_id: VS2M2D3R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P2D3R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M1T3R
+  dev_id: VS2M1T3R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P1T3R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M1T3R
+  dev_id: VS3M1T3R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P1T3R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M2T3R
+  dev_id: VS3M2T3R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P2T3R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M2T3R
+  dev_id: VS2M2T3R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P2T3R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M1D4R
+  dev_id: VS2M1D4R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P1D4R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M1D4R
+  dev_id: VS3M1D4R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P1D4R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M2D4R
+  dev_id: VS3M2D4R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P2D4R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M2D4R
+  dev_id: VS2M2D4R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P2D4R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M1T4R
+  dev_id: VS2M1T4R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P1T4R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M1T4R
+  dev_id: VS3M1T4R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P1T4R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M2T4R
+  dev_id: VS3M2T4R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P2T4R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M2T4R
+  dev_id: VS2M2T4R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P2T4R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M1D5R
+  dev_id: VS2M1D5R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P1D5R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M1D5R
+  dev_id: VS3M1D5R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P1D5R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M2D5R
+  dev_id: VS3M2D5R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P2D5R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M2D5R
+  dev_id: VS2M2D5R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P2D5R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M1T5R
+  dev_id: VS2M1T5R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P1T5R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M1T5R
+  dev_id: VS3M1T5R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P1T5R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M2T5R
+  dev_id: VS3M2T5R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P2T5R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M2T5R
+  dev_id: VS2M2T5R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P2T5R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M1D6R
+  dev_id: VS2M1D6R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P1D6R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M1D6R
+  dev_id: VS3M1D6R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P1D6R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M2D6R
+  dev_id: VS3M2D6R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P2D6R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M2D6R
+  dev_id: VS2M2D6R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P2D6R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M1T6R
+  dev_id: VS2M1T6R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P1T6R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M1T6R
+  dev_id: VS3M1T6R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P1T6R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M2T6R
+  dev_id: VS3M2T6R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P2T6R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M2T6R
+  dev_id: VS2M2T6R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P2T6R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M1D7R
+  dev_id: VS2M1D7R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P1D7R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M1D7R
+  dev_id: VS3M1D7R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P1D7R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M2D7R
+  dev_id: VS3M2D7R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P2D7R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M2D7R
+  dev_id: VS2M2D7R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P2D7R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M1T7R
+  dev_id: VS2M1T7R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P1T7R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M1T7R
+  dev_id: VS3M1T7R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P1T7R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M2T7R
+  dev_id: VS3M2T7R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P2T7R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M2T7R
+  dev_id: VS2M2T7R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P2T7R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M1D8R
+  dev_id: VS2M1D8R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P1D8R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M1D8R
+  dev_id: VS3M1D8R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P1D8R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M2D8R
+  dev_id: VS3M2D8R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P2D8R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M2D8R
+  dev_id: VS2M2D8R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P2D8R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M1T8R
+  dev_id: VS2M1T8R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P1T8R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M1T8R
+  dev_id: VS3M1T8R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P1T8R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M2T8R
+  dev_id: VS3M2T8R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P2T8R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M2T8R
+  dev_id: VS2M2T8R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P2T8R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS2M1D1R
+  dev_id: VS2M1D1R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS2P1D1R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
+
+- elem_id: VS3M1D1R
+  dev_id: VS3M1D1R
+  type: steerer
+  family_member: [ tune_correction ]
+  power_converter_id: VS3P1D1R
+  conversion:
+    intercept: 0.0
+    slope: 0.00297607
+    conversion_type: linear  
