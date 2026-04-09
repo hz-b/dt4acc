@@ -4,7 +4,7 @@ from typing import Tuple
 import numpy as np
 from at import shift_elem
 
-from ...core.interfaces.simulator.element import ElementInterface
+from dt4acc_lib.core.interfaces.simulator.element import ElementInterface
 
 logger = logging.getLogger("accml")
 

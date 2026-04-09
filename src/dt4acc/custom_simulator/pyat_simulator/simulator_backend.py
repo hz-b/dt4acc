@@ -12,12 +12,12 @@ import threading
 
 from transitions import Machine
 
+from dt4acc_lib.core.interfaces.backend.backend import BackendRW
+from dt4acc_lib.core.interfaces.simulator.result_element import ResultElement
 from dt4acc_lib.core.model.output.tune import Tune
-from ...core.interfaces.backend.backend import BackendRW
-from ...core.interfaces.simulator.accelerator_simulator import AcceleratorSimulatorInterface
+from dt4acc_lib.core.interfaces.simulator.accelerator_simulator import AcceleratorSimulatorInterface
 
 from .model.calculation_states import CalculationStates as States
-from ...core.interfaces.simulator.result_element import ResultElement
 from ...core.model.output.calculated_track import CalculatedTrack, CalculatedPosition
 from ...core.model.output.twiss import Twiss, TwissParameters, TwissAtPosition
 
