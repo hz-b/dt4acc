@@ -42,8 +42,7 @@ logger = get_logger()
 DEFAULT_DELAYED_READS: Sequence[ReadCommand] = (
     ReadCommand("track", "pos"),
     ReadCommand("twiss", "parameters"),
-    ReadCommand("tune", "x"),
-    ReadCommand("tune", "y"),
+    ReadCommand("tune", "transversal"),  # TuneElement.get() only accepts "transversal"
 )
 
 
@@ -213,30 +212,21 @@ class TangoController:
         self._task_counter = itertools.count()
 
     def start(self) -> None:
-        """Start the delayed execution loop. Call once from the asyncio loop."""
+        """Start the delayed execution loop on the shared event loop."""
         assert self._pending_task is None, "TangoController.start() called twice"
-        task_id = next(self._task_counter)
-        try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                self.cmd_queue = asyncio.Queue()
-                self._pending_task = loop.create_task(
-                    self._queue_loop(),
-                    name=f"tango-controller-delayed-{task_id}",
-                )
-            else:
-                from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
-                shared_loop = get_shared_event_loop()
-                self.cmd_queue = asyncio.Queue()
-                fut = asyncio.run_coroutine_threadsafe(self._queue_loop(), shared_loop)
-                self._pending_task = fut
-        except RuntimeError:
-            from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
-            shared_loop = get_shared_event_loop()
+        from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
+        shared_loop = get_shared_event_loop()
+
+        # Always use the shared loop — it's the one we control and is
+        # guaranteed to be running. Tango's own loop is not reliable here.
+        async def _create_queue_and_start():
             self.cmd_queue = asyncio.Queue()
-            fut = asyncio.run_coroutine_threadsafe(self._queue_loop(), shared_loop)
-            self._pending_task = fut
-        logger.info("TangoController delayed execution task started")
+
+        asyncio.run_coroutine_threadsafe(_create_queue_and_start(), shared_loop).result(timeout=5)
+
+        fut = asyncio.run_coroutine_threadsafe(self._queue_loop(), shared_loop)
+        self._pending_task = fut
+        logger.info("TangoController delayed execution task started on shared loop")
 
     async def update(
         self,
