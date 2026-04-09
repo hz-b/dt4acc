@@ -12,7 +12,7 @@ import os
 # Add the src directory to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from dt4acc.custom_epics.data.constants import cavity_names
+from dt4acc.custom_epics.data import cavity_names
 from tango import DeviceProxy, DevFailed
 
 def update_cavity_properties_only():
