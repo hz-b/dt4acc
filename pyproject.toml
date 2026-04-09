@@ -1,54 +1,48 @@
 [build-system]
-requires = [ "poetry-core>=1.0.0",]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[project]
 name = "dt4acc"
-version = "0.1.1"
+version = "0.2.0"
 description = "digital twin for accelerators"
-authors = [  "Waheedullah Sulaiman Khail", "Pierre Schnizer"]
-license = "GPL-3.0"
-homepage = "https://github.com/hz-b/dt4acc"
-documentation = "https://github.com/hz-b/dt4acc"
-repository = "https://github.com/hz-b/dt4acc.git"
+authors = [
+  { name = "Waheedullah Sulaiman Khail" },
+  { name = "Pierre Schnizer" },
+]
+license = { text = "GPL-3.0" }
+requires-python = ">=3.7"
 keywords = []
 classifiers = [
-     "Development Status :: 4 - Beta",
-     "Intended Audience :: Science/Research",
-     "License :: OSI Approved :: GNU General Public License (GPL)",
-     "Programming Language :: Python :: 3",
-     "Topic :: Scientific/Engineering :: Physics"
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: GNU General Public License (GPL)",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
 ]
 
-[tool.poetry.scripts]
-dt4acc_softioc = { reference = "scripts/bessyii/dt4acc_softioc.py", type = "file"}
+[project.urls]
+Homepage = "https://github.com/dt4acc/dt4acc"
+Documentation = "https://github.com/dt4acc/dt4acc"
+Repository = "https://github.com/dt4acc/dt4acc.git"
 
-[tool.poetry.dependencies]
-python = ">=3.7"
-accelerator-toolbox="*"
-numpy="<2.0"
-pymongo="*"
-lat2db="*"
-# waveforms of chars/strings
-softioc=">4.1"
+[project.optional-dependencies]
+docs = [
+  "Sphinx==4.2.0",
+  "sphinx-rtd-theme==1.0.0",
+  "sphinxcontrib-napoleon==0.7",
+]
 
-p4p="*"
-bact_device_models="*"
-pandas="*"
-bact-twin-architecture="*"
-# jsons="*"
-# fastapi="*"
-# pydantic="*"
-#
-# uuid="*"pymongo
-# pytest="*"
-# attrs="*"
-# uvicorn="*"
-# httpx="*"
-# lark="*"
-Sphinx = { version = "4.2.0", optional = true }
-sphinx-rtd-theme = { version = "1.0.0", optional = true }
-sphinxcontrib-napoleon = { version = "0.7", optional = true }
+epics = [
+     "softioc>4.1",
+     "p4p"
+]
 
-[tool.poetry.extras]
-docs = ["Sphinx", "sphinx-rtd-theme", "sphinxcontrib-napoleon"]
+tango = [
+     "pytango"
+]
+
+[project.scripts]
+dt4acc_softioc = "dt4acc_softioc:main"
