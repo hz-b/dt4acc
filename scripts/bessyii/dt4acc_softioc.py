@@ -7,14 +7,14 @@ from importlib import resources
 
 from softioc import builder, softioc
 
-from dt4acc.custom_simulator.pyat_simulator.simulator_backend import SimulatorBackend
-from dt4acc_lib.core.bl.command_rewritter import CommandRewriter
-from dt4acc_lib.core.model.utils.command import ReadCommand
+from dt4acc_lib.pyat_simulator.simulator_backend import SimulatorBackend
+from dt4acc_lib.bl.command_rewritter import CommandRewriter
+from dt4acc_lib.model.utils.command import ReadCommand
 from dt4acc.core.bl.translating_command_execution_engine import TranslatingCommandExecutionEngine
 from dt4acc.custom_epics.ioc.orbit_pva import OrbitTwinServer
 from dt4acc.custom_epics.ioc.server import View, Controller, dispatcher
 from dt4acc.custom_facility.bessyii.liasion_translator_setup import load_managers
-from dt4acc.custom_simulator.pyat_simulator.accelerator_simulator import PyATAcceleratorSimulator
+from dt4acc_lib.pyat_simulator.accelerator_simulator import PyATAcceleratorSimulator
 
 
 logging.basicConfig(level=logging.WARNING)

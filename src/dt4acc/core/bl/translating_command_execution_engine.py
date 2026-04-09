@@ -15,11 +15,11 @@ import datetime
 import itertools
 from typing import Any, Mapping, Sequence
 
-from dt4acc_lib.core.interfaces.backend.backend import BackendRW
-from dt4acc_lib.core.interfaces.utils.command_execution_engine import CommandExecutionEngine
-from dt4acc_lib.core.interfaces.utils.command_rewritter import CommandRewriterBase
-from dt4acc_lib.core.model.utils.command import ReadCommand, Command
-from dt4acc_lib.core.model.output.result import SingleReading, ReadTogether,  \
+from dt4acc_lib.interfaces.backend.backend import BackendRW
+from dt4acc_lib.interfaces.utils.command_execution_engine import CommandExecutionEngine
+from dt4acc_lib.interfaces.utils.command_rewritter import CommandRewriterBase
+from dt4acc_lib.model.utils.command import ReadCommand, Command
+from dt4acc_lib.model.output.result import SingleReading, ReadTogether,  \
     TranslatedReading, ReadTogetherAndTranslated
 
 

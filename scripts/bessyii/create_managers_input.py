@@ -17,13 +17,13 @@ import yaml
 from dt4acc.custom_facility.bessyii.model.config.elementmodel import MagnetElementSetup
 from dt4acc.custom_facility.bessyii.model.config.magnet import MagneticObject
 from dt4acc.custom_facility.bessyii.model.config.power_converter import PowerConverter
-from dt4acc_lib.core.bl.yellow_pages import YellowPages
-from dt4acc_lib.core.bl.unit_conversion import EnergyDependentLinearUnitConversion, LinearUnitConversion
-from dt4acc_lib.core.interfaces.utils.yellow_pages import YellowPagesBase
-from dt4acc_lib.core.model.utils.identifiers import DevicePropertyID, LatticeElementPropertyID, ConversionID
-from dt4acc_lib.core.model.utils.liaison_manager_lookup_table import LiaisonManagerInverseLookupElement, \
+from dt4acc_lib.bl.yellow_pages import YellowPages
+from dt4acc_lib.bl.unit_conversion import EnergyDependentLinearUnitConversion
+from dt4acc_lib.interfaces.utils.yellow_pages import YellowPagesBase
+from dt4acc_lib.model.utils.identifiers import DevicePropertyID, LatticeElementPropertyID, ConversionID
+from dt4acc_lib.model.utils.liaison_manager_lookup_table import LiaisonManagerInverseLookupElement, \
     LiaisonManagerInverseLookupTable, LiaisonManagerForwardLookupElement, LiaisonManagerForwardLookupTable
-from dt4acc_lib.core.model.utils.translator_manager_lookup_table import TranslatorLookupTable, \
+from dt4acc_lib.model.utils.translator_manager_lookup_table import TranslatorLookupTable, \
     TranslatorLookupTableElement, PolynomCoefficients, TuneConversionCoefficients, IdentityMapper
 
 from dt4acc.custom_epics.data.constants import ring_parameters

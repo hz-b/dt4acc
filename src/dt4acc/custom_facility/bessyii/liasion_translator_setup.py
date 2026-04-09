@@ -8,16 +8,16 @@ from typing import Tuple
 import jsons
 import yaml
 
-from dt4acc_lib.core.bl.liaison_manager import LiaisonManager
-from dt4acc_lib.core.bl.translator_service import TranslatorService
-from dt4acc_lib.core.bl.unit_conversion import LinearUnitConversion, EnergyDependentLinearUnitConversion
-from dt4acc_lib.core.bl.yellow_pages import YellowPages
-from dt4acc_lib.core.interfaces.utils.liaison_manager import LiaisonManagerBase
-from dt4acc_lib.core.interfaces.utils.translator_service import TranslatorServiceBase
-from dt4acc_lib.core.interfaces.utils.yellow_pages import YellowPagesBase
-from dt4acc_lib.core.model.utils.identifiers import LatticeElementPropertyID, DevicePropertyID, ConversionID
-from dt4acc_lib.core.model.utils.liaison_manager_lookup_table import LiaisonManagerInverseLookupTable, LiaisonManagerForwardLookupTable
-from dt4acc_lib.core.model.utils.translator_manager_lookup_table import TranslatorLookupTable
+from dt4acc_lib.bl.liaison_manager import LiaisonManager
+from dt4acc_lib.bl.translator_service import TranslatorService
+from dt4acc_lib.bl.unit_conversion import LinearUnitConversion, EnergyDependentLinearUnitConversion
+from dt4acc_lib.bl.yellow_pages import YellowPages
+from dt4acc_lib.interfaces.utils.liaison_manager import LiaisonManagerBase
+from dt4acc_lib.interfaces.utils.translator_service import TranslatorServiceBase
+from dt4acc_lib.interfaces.utils.yellow_pages import YellowPagesBase
+from dt4acc_lib.model.utils.identifiers import LatticeElementPropertyID, DevicePropertyID, ConversionID
+from dt4acc_lib.model.utils.liaison_manager_lookup_table import LiaisonManagerInverseLookupTable, LiaisonManagerForwardLookupTable
+from dt4acc_lib.model.utils.translator_manager_lookup_table import TranslatorLookupTable
 
 logger = logging.getLogger("accml")
 
