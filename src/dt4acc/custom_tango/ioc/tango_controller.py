@@ -26,12 +26,10 @@ import itertools
 import traceback
 from typing import Sequence
 
-from accml_lib.core.interfaces.utils.measurement_execution_engine import (
-    MeasurementExecutionEngine,
-)
-from accml_lib.core.model.output.result import ReadTogetherAndTranslated, TranslatedReading
-from accml_lib.core.model.utils.command import ReadCommand, Command
+from dt4acc_lib.model.output.result import TranslatedReading, ReadTogetherAndTranslated
+from dt4acc_lib.model.utils.command import ReadCommand, Command
 
+from dt4acc.core.bl.translating_command_execution_engine import TranslatingCommandExecutionEngine
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.views.calculation_result_view import CalculationResultView
 
@@ -202,7 +200,7 @@ class TangoController:
     def __init__(
         self,
         *,
-        mexec: MeasurementExecutionEngine,
+        mexec: TranslatingCommandExecutionEngine,
         prefix: str,
         default_delayed_reads: Sequence[ReadCommand] = DEFAULT_DELAYED_READS,
     ):
@@ -210,18 +208,34 @@ class TangoController:
         self.view = TangoView(prefix=prefix)
         self.default_delayed_reads = tuple(default_delayed_reads)
 
-        self.cmd_queue: asyncio.Queue = asyncio.Queue()
-        self._pending_task: Optional[asyncio.Task] = None
+        self.cmd_queue: asyncio.Queue = None  # created in start() on running loop
+        self._pending_task = None
         self._task_counter = itertools.count()
 
     def start(self) -> None:
         """Start the delayed execution loop. Call once from the asyncio loop."""
         assert self._pending_task is None, "TangoController.start() called twice"
         task_id = next(self._task_counter)
-        self._pending_task = asyncio.create_task(
-            self._queue_loop(),
-            name=f"tango-controller-delayed-{task_id}",
-        )
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                self.cmd_queue = asyncio.Queue()
+                self._pending_task = loop.create_task(
+                    self._queue_loop(),
+                    name=f"tango-controller-delayed-{task_id}",
+                )
+            else:
+                from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
+                shared_loop = get_shared_event_loop()
+                self.cmd_queue = asyncio.Queue()
+                fut = asyncio.run_coroutine_threadsafe(self._queue_loop(), shared_loop)
+                self._pending_task = fut
+        except RuntimeError:
+            from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
+            shared_loop = get_shared_event_loop()
+            self.cmd_queue = asyncio.Queue()
+            fut = asyncio.run_coroutine_threadsafe(self._queue_loop(), shared_loop)
+            self._pending_task = fut
         logger.info("TangoController delayed execution task started")
 
     async def update(
@@ -255,6 +269,9 @@ class TangoController:
         return await self.mexec.trigger_read(reads)
 
     async def _enqueue(self, reads: Sequence[ReadCommand]) -> None:
+        if self.cmd_queue is None:
+            logger.debug("TangoController: queue not yet started — delayed reads dropped")
+            return
         try:
             await asyncio.wait_for(
                 asyncio.gather(*[self.cmd_queue.put(r) for r in reads]),

@@ -20,13 +20,13 @@ import os
 import sys
 from typing import Sequence
 
+from dt4acc_lib.model.output.result import TranslatedReading, ReadTogetherAndTranslated, SingleReading
+from dt4acc_lib.model.utils.command import ReadCommand, Command
 from tango.server import run
 
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.controller_registry import set_controller
 from dt4acc.custom_tango.ioc.tango_controller import TangoController, DEFAULT_DELAYED_READS
-from accml_lib.core.model.utils.command import ReadCommand, Command, BehaviourOnError
-from accml_lib.core.model.output.result import ReadTogetherAndTranslated, TranslatedReading, SingleReading
 
 logger = get_logger()
 
@@ -52,21 +52,22 @@ class AsyncMexecAdapter:
     async def set(self, cmds: Sequence[Command]) -> None:
         loop = asyncio.get_running_loop()
         for cmd in cmds:
+            # Use lambda to capture args explicitly — multiprocessing.managers
+            # proxy methods don't accept positional args via run_in_executor
+            _id, _prop, _val = cmd.id, cmd.property, cmd.value
             await loop.run_in_executor(
                 None,
-                self._proxy.sync_set,
-                cmd.id, cmd.property, cmd.value,
+                lambda: self._proxy.sync_set(_id, _prop, _val),
             )
 
     async def trigger_read(self, rcmds: Sequence[ReadCommand]) -> ReadTogetherAndTranslated:
         loop = asyncio.get_running_loop()
-        ids  = [r.id for r in rcmds]
+        ids   = [r.id for r in rcmds]
         props = [r.property for r in rcmds]
 
         raw = await loop.run_in_executor(
             None,
-            self._proxy.sync_trigger_read,
-            ids, props,
+            lambda: self._proxy.sync_trigger_read(ids, props),
         )
         # raw is list of (rcmd_id, rcmd_property, payload) tuples
         # Reconstruct ReadTogetherAndTranslated for TangoController.view.dispatch()
@@ -95,9 +96,39 @@ class AsyncMexecAdapter:
         return ReadTogetherAndTranslated(data=data, start=now, end=now)
 
 
-# ---------------------------------------------------------------------------
-# Injection — runs before any Tango device's init_device()
-# ---------------------------------------------------------------------------
+# Process-global cache: uuid → initial main_strength value
+# Populated by _preload_initial_values() before init_device() runs.
+_initial_strength_cache: dict = {}
+
+
+def get_initial_strength(uuid: str) -> float:
+    """Called by MagnetDevice.init_device() to get cached initial value."""
+    return _initial_strength_cache.get(uuid, 0.0)
+
+
+def _preload_initial_values(sync_proxy, magnet_uuids: list) -> None:
+    """
+    Bulk-read main_strength for all magnets in one batch before Tango starts.
+    Populates _initial_strength_cache so init_device() needs no RPC calls.
+    """
+    global _initial_strength_cache
+    if not magnet_uuids:
+        return
+
+    logger.warning("Pre-loading initial values for %d magnets...", len(magnet_uuids))
+    try:
+        ids   = [uuid for uuid in magnet_uuids]
+        props = ["main_strength"] * len(magnet_uuids)
+        raw = sync_proxy.sync_trigger_read(ids, props)
+        for rcmd_id, rcmd_prop, payload in raw:
+            if payload is not None:
+                try:
+                    _initial_strength_cache[rcmd_id] = float(payload)
+                except (TypeError, ValueError):
+                    pass
+        logger.warning("Pre-loaded %d initial values.", len(_initial_strength_cache))
+    except Exception as exc:
+        logger.warning("Bulk pre-load failed: %s — devices will start at 0.0", exc)
 
 def _inject_controller(prefix: str) -> None:
     """
@@ -122,12 +153,37 @@ def _inject_controller(prefix: str) -> None:
 # ---------------------------------------------------------------------------
 
 def main_loop(server_name: str, instance_name: str, event=None):
+    import logging
+    logging.getLogger("transitions").setLevel(logging.WARNING)
+    logging.getLogger("transitions.core").setLevel(logging.WARNING)
     os.nice(4)
 
     prefix = os.environ.get("DT4ACC_PREFIX", os.getlogin())
 
-    # Inject BEFORE Tango initialises any device
+    # Inject controller BEFORE Tango initialises any device
     _inject_controller(prefix)
+
+    # Bulk pre-load initial values for all magnets in this server/instance.
+    # One RPC call for all magnets instead of one per magnet in init_device().
+    try:
+        from dt4acc.custom_epics.data.querries import get_magnets_per_power_converters, get_unique_power_converters
+        from dt4acc.custom_tango.ioc.server_manager import _connect_to_mexec_service
+        sync_proxy = _connect_to_mexec_service()
+
+        # Collect UUIDs for magnets belonging to this server/instance
+        my_uuids = []
+        for pc_name in get_unique_power_converters():
+            for m in get_magnets_per_power_converters(pc_name):
+                magnet_name = m["name"]  # e.g. AN01-AR/EM/CQLN.03
+                parts = magnet_name.split("/")
+                if len(parts) == 3 and parts[0] == server_name and parts[1] == instance_name:
+                    uuid = m.get("uuid", "")
+                    if uuid:
+                        my_uuids.append(uuid)
+
+        _preload_initial_values(sync_proxy, my_uuids)
+    except Exception as exc:
+        logger.warning("Pre-load setup failed: %s — devices will start at 0.0", exc)
 
     def _post_init_cb():
         # Start the controller's delayed queue loop inside the Tango event loop

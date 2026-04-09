@@ -1,9 +1,9 @@
+from dt4acc_lib.model.utils.command import ReadCommand, BehaviourOnError, Command
 from tango import DevState, DevFailed
 from tango.server import Device, attribute, command, device_property, AttrWriteType
 
 import asyncio
 
-from accml_lib.core.model.utils.command import Command, BehaviourOnError, ReadCommand
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
 from dt4acc.custom_tango.ioc.controller_registry import get_controller
@@ -41,9 +41,9 @@ class MagnetDevice(Device):
     """
 
     # Optional — set in DB if power converter name differs from the default rule.
-    # Default rule: pc_name = "{magnet_name}-pc"
-    pc_name = device_property(dtype=str, default_value="")
-    type    = device_property(dtype=str, default_value="")
+    pc_name      = device_property(dtype=str, default_value="")
+    type         = device_property(dtype=str, default_value="")
+    element_uuid = device_property(dtype=str, default_value="")
 
     # ------------------------------------------------------------------
     # Lifecycle
@@ -53,45 +53,33 @@ class MagnetDevice(Device):
         super().init_device()
         self.set_state(DevState.INIT)
 
-        full_name = self.get_name()   # e.g. AN10-AR/EM/SCF.11
+        full_name = self.get_name()   # e.g. AN10-AR/EM/CQLN.03
         domain, family, member = split_name(full_name)
 
         self.magnet_name = full_name
-        self.domain = domain
-        self.family = family
-        self.member = member
+        self.domain      = domain
+        self.family      = family
+        self.member      = member
 
-        logger.info("Initializing MagnetDevice: %s", self.magnet_name)
+        # element_uuid is the unique key into the pyAT lattice.
+        # Falls back to member name if not set (shouldn't happen after registration).
+        self.lattice_id = self.element_uuid if self.element_uuid else self.member
+
+        logger.info("Initializing MagnetDevice: %s lattice_id=%s",
+                    self.magnet_name, self.lattice_id)
 
         self._loop = get_shared_event_loop()
 
-        # Fetch initial main_strength from the backend via the controller.
-        # Falls back to 0.0 if the backend does not yet know this element.
-        self._magnetic_strength = self._peek_initial_strength()
+        # Get initial value from pre-loaded cache (populated in single_server
+        # before tango.server.run() — one bulk RPC for all magnets, not one per device).
+        from dt4acc.custom_tango.ioc.single_server import get_initial_strength
+        self._magnetic_strength = get_initial_strength(self.lattice_id)
         self._magnetic_strength_readback = self._magnetic_strength
         self._current = 0.0
         self._x = 0.0
         self._y = 0.0
 
         self.set_state(DevState.ON)
-
-    def _peek_initial_strength(self) -> float:
-        """Read main_strength from the backend at startup."""
-        try:
-            result = self._async(
-                get_controller().trigger_read(
-                    [ReadCommand(id=self.magnet_name, property="main_strength")]
-                )
-            )
-            readings = result.all_readings()
-            if readings:
-                return float(readings[0].payload)
-        except Exception as exc:
-            logger.warning(
-                "%s: could not read initial main_strength: %s — defaulting to 0.0",
-                self.magnet_name, exc,
-            )
-        return 0.0
 
     # ------------------------------------------------------------------
     # Async helper — submits a coroutine to the shared event loop and
@@ -105,14 +93,6 @@ class MagnetDevice(Device):
             return fut.result(timeout=10)
         except Exception as exc:
             raise DevFailed(str(exc))
-
-    # ------------------------------------------------------------------
-    # Helper: resolve the power converter name for this magnet
-    # ------------------------------------------------------------------
-
-    def _pc(self) -> str:
-        """Return the power converter name for this magnet."""
-        return self.pc_name if self.pc_name else f"{self.magnet_name}-pc"
 
     # ------------------------------------------------------------------
     # Tango attributes
@@ -130,13 +110,12 @@ class MagnetDevice(Device):
         self._async(
             get_controller().update(
                 cmd=Command(
-                    id=self._pc(),
-                    property="set_current",
+                    id=self.lattice_id,
+                    property="main_strength",
                     value=value,
                     behaviour_on_error=BehaviourOnError.stop,
                 ),
                 reads=[],
-                # default_delayed_reads in controller handles twiss/orbit/tune
                 delayed_reads=[],
             )
         )
@@ -158,8 +137,8 @@ class MagnetDevice(Device):
         self._async(
             get_controller().update(
                 cmd=Command(
-                    id=self._pc(),
-                    property="set_current",
+                    id=self.lattice_id,
+                    property="main_strength",
                     value=value,
                     behaviour_on_error=BehaviourOnError.stop,
                 ),
@@ -180,7 +159,7 @@ class MagnetDevice(Device):
         self._async(
             get_controller().update(
                 cmd=Command(
-                    id=self.magnet_name,
+                    id=self.lattice_id,
                     property="x_kick",
                     value=value,
                     behaviour_on_error=BehaviourOnError.stop,
@@ -202,7 +181,7 @@ class MagnetDevice(Device):
         self._async(
             get_controller().update(
                 cmd=Command(
-                    id=self.magnet_name,
+                    id=self.lattice_id,
                     property="y_kick",
                     value=value,
                     behaviour_on_error=BehaviourOnError.stop,

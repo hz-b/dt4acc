@@ -73,51 +73,42 @@ def register_all_devices():
     logger.info("📝 Registering ALL Soleil devices into Tango DB...")
 
     # ------------------------------------------------------------
-    # 1) Magnets & power converters
+    # 1) Magnets — registered by Tango name, UUID stored as DB property
+    #    so init_device can look up the unique AT element.
+    #    Power converters are NOT registered as Tango devices.
     # ------------------------------------------------------------
     for pc_name in get_unique_power_converters():
         magnets = get_magnets_per_power_converters(pc_name)
-
-        # Power converter name should already be Soleil-like, e.g. AN10-AR/EM/SCF.11-pc
-        pc_device_name = pc_name
-
-        # register PC first
-        try:
-            domain, family, _ = _split_domain_family_member(pc_device_name)
-            server_name = domain
-            instance_name = family
-            server_str = f"{server_name}/{instance_name}"
-            unique_servers.add((server_name, instance_name))
-
-            db_dev = DbDevInfo()
-            db_dev._class = "PowerConverterDevice"
-            db_dev.server = server_str
-            db_dev.name = pc_device_name
-
-            db.add_device(db_dev)
-            logger.info(f"⚡ Registered PC device {db_dev.name} (class=PowerConverterDevice, server={server_str})")
-        except Exception as e:
-            logger.error(f"❌ Failed to register power converter {pc_device_name}: {e}")
-
-        # register magnets driven by this PC
         for m in magnets:
-            magnet_name = m["name"]  # AN10-AR/EM/SCF.11
+            magnet_name = m["name"]       # e.g. AN10-AR/EM/SCF.11
+            magnet_uuid = m.get("uuid", "")
             try:
                 domain, family, _ = _split_domain_family_member(magnet_name)
-                server_name = domain
+                server_name   = domain
                 instance_name = family
-                server_str = f"{server_name}/{instance_name}"
+                server_str    = f"{server_name}/{instance_name}"
                 unique_servers.add((server_name, instance_name))
 
-                db_dev = DbDevInfo()
+                db_dev        = DbDevInfo()
                 db_dev._class = "MagnetDevice"
                 db_dev.server = server_str
-                db_dev.name = magnet_name
-
+                db_dev.name   = magnet_name
                 db.add_device(db_dev)
-                logger.info(f"🧲 Registered magnet device {db_dev.name} (class=MagnetDevice, server={server_str})")
+
+                # Store UUID so the device can uniquely identify its AT element
+                if magnet_uuid:
+                    try:
+                        db.put_device_property(
+                            magnet_name, {"element_uuid": [magnet_uuid]}
+                        )
+                    except Exception as e:
+                        logger.warning("Could not set uuid property for %s: %s",
+                                       magnet_name, e)
+
+                logger.info("🧲 Registered magnet %s uuid=%s (server=%s)",
+                            magnet_name, magnet_uuid, server_str)
             except Exception as e:
-                logger.error(f"❌ Failed to register magnet {magnet_name}: {e}")
+                logger.error("❌ Failed to register magnet %s: %s", magnet_name, e)
 
     # ------------------------------------------------------------
     # 2) Virtual / physics devices
@@ -247,7 +238,7 @@ def get_all_device_classes():
     """Return all device classes used by the servers."""
     return [
         MagnetDevice,
-        PowerConverterDevice,
+        # PowerConverterDevice,
         TwissOrbitDevice,
         BPMManagerDevice,
         CavityDevice,

@@ -142,8 +142,9 @@ def convert_read_commands(
 ):
     command = commands
     if output_view == backend_view:
-        # no need to convert
-        return commands
+        # No conversion needed — wrap each command in a list so that
+        # itertools.chain(*result) in trigger_read() flattens correctly
+        return [[cmd] for cmd in commands]
     elif output_view == "design":
         assert (
             backend_view == "device"
@@ -176,8 +177,9 @@ def convert_set_commands(
     """
 
     if commands_view == target_view:
-        # no need to convert
-        return commands
+        # No conversion needed — wrap each command in a list so that
+        # itertools.chain(*result) in set() flattens correctly
+        return [[cmd] for cmd in commands]
     elif commands_view == "design":
         assert (
                 target_view == "device"

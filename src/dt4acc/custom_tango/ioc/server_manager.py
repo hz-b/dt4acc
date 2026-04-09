@@ -26,6 +26,7 @@ Process topology
         and verify the system is alive end-to-end.
 """
 
+import at
 import asyncio
 import itertools
 import multiprocessing as mp
@@ -40,9 +41,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence
 
+from dt4acc_lib.bl.command_rewritter import CommandRewriter
+from dt4acc_lib.model.utils.command import BehaviourOnError, Command, ReadCommand
+from dt4acc_lib.pyat_simulator.accelerator_simulator import PyATAcceleratorSimulator
+from dt4acc_lib.pyat_simulator.simulator_backend import SimulatorBackend
 from tango import DeviceProxy, DevFailed
 
 from dt4acc.core.utils.logger import get_logger
+from dt4acc.custom_facility.soleil.liasion_translator_setup import load_managers
 
 logger = get_logger()
 
@@ -64,24 +70,24 @@ def _build_mexec():
     from dt4acc.core.bl.translating_command_execution_engine import (
         TranslatingCommandExecutionEngine,
     )
-    from accml_lib.custom.bessyii.liasion_translator_setup import load_managers
-    from accml_lib.custom.bessyii.pyat_simulator_backend import simulator_backend
 
     # filename = resources.files("dt4acc").joinpath(
     #     "custom_epics/data/standard/bessy2_storage_ring_reflat.json"
     # )
     filename = Path.home() / "Documents" / "dt4acc_soleil_twin_data" / "SOLEIL_II_V3631_sym1_V001_database.m"
-    backend = simulator_backend(filename)
-    _, lm, ts = load_managers()
+    acc= at.load_m(filename)
+    backend=SimulatorBackend(
+        name="SOLEIL_PYAT",
+        acc=PyATAcceleratorSimulator(at_lattice=acc),
+    )
+    lm, ts = load_managers()
 
-    from accml_lib.core.bl.command_rewritter import CommandRewriter
     cmd_rewriter = CommandRewriter(liaison_manager=lm, translation_service=ts)
 
     return TranslatingCommandExecutionEngine(
         backend=backend,
         cmd_rewriter=cmd_rewriter,
-        storage=None,
-        expected_view_for_output="device",
+        expected_view_for_output="design",
         num_readings=1,
     )
 
@@ -94,6 +100,9 @@ def _run_mexec_service():
     state-machine tasks (DelayExecution etc.) fire between RPC calls.
     Exposes SyncMexecProxy via multiprocessing.managers.
     """
+    import logging
+    logging.getLogger("transitions").setLevel(logging.WARNING)
+    logging.getLogger("transitions.core").setLevel(logging.WARNING)
     service_loop = asyncio.new_event_loop()
 
     def _run_loop():
@@ -114,7 +123,6 @@ def _run_mexec_service():
         """
 
         def sync_set(self, cmd_id: str, cmd_property: str, value: float):
-            from accml_lib.core.model.utils.command import Command, BehaviourOnError
             cmd = Command(
                 id=cmd_id,
                 property=cmd_property,
@@ -131,7 +139,6 @@ def _run_mexec_service():
             Accepts plain strings (serialisable across process boundary).
             Returns a list of (name, payload) tuples — simple pickable data.
             """
-            from accml_lib.core.model.utils.command import ReadCommand
             rcmds = [
                 ReadCommand(id=i, property=p)
                 for i, p in zip(rcmd_ids, rcmd_properties)
@@ -148,7 +155,6 @@ def _run_mexec_service():
             return out
 
         def sync_peek(self, rcmd_id: str, rcmd_property: str):
-            from accml_lib.core.model.utils.command import ReadCommand
             rcmds = [ReadCommand(id=rcmd_id, property=rcmd_property)]
             fut = asyncio.run_coroutine_threadsafe(
                 mexec.trigger_read(rcmds), service_loop
