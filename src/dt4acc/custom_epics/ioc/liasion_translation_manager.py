@@ -39,7 +39,7 @@ class LiaisonManager(LiaisonManagerBase):
             return self.inverse_lut[id_]
         except KeyError as ke:
             logger.error(
-                f"{self.__class__.__name__} I did not find id {id_} in lookup table: {ke}"
+                f"{self.__class__.__name__} I did not find id {id_} in lookup table: {ke}", exc_info=True
             )
 
 
@@ -268,12 +268,16 @@ def build_managers(
     inverse_lut.update(quad_updates)
 
     # Cavities and master clock
+    cavities = [elem["uuid"] for elem in elements if elem["type"] == "RFCavity"]
+    if len(cavities) == 0:
+        cavities = cavity_names
+
     inverse_lut.update(
         {
             DevicePropertyID(device_name=name, property="frequency"): (
                 LatticeElementPropertyID(element_name=name, property="frequency"),
             )
-            for name in cavity_names
+            for name in cavities
         }
     )
     inverse_lut.update(
@@ -283,7 +287,7 @@ def build_managers(
             ): tuple(
                 [
                     LatticeElementPropertyID(element_name=name, property="frequency")
-                    for name in cavity_names
+                    for name in cavities
                 ]
             )
         }
@@ -386,7 +390,7 @@ def build_managers(
             ): LinearUnitConversion(
                 slope=1e-3, intercept=0.0
             )  # BESSY II uses kHz for the cavities clock
-            for name in cavity_names
+            for name in cavities
         }
     )
 
@@ -400,7 +404,7 @@ def build_managers(
             ): LinearUnitConversion(
                 slope=1e-3, intercept=0.0
             )  # BESSY II uses kHz for the master clock
-            for name in cavity_names
+            for name in cavities
         }
     )
 

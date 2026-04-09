@@ -1,4 +1,5 @@
 # tango_device_setup.py
+from typing import Any
 
 from tango import Database, DbDevInfo, DevFailed
 from dt4acc.core.utils.logger import get_logger
@@ -32,6 +33,7 @@ def _register_dservers(db: Database, servers: set[tuple[str, str]]):
       server = AN10-AR/EM
       class  = DServer
     """
+    logger.info(f"🧱 Registering DServer devices ({len(servers)})")
     for server_name, instance_name in sorted(servers):
         dserver_name = f"dserver/{server_name}/{instance_name}"
         server_str = f"{server_name}/{instance_name}"
@@ -43,7 +45,7 @@ def _register_dservers(db: Database, servers: set[tuple[str, str]]):
 
         try:
             db.add_device(db_dev)
-            logger.info(f"🧱 Registered DServer device {dserver_name} (server={server_str})")
+            logger.debug(f"🧱 Registered DServer device {dserver_name} (server={server_str})")
         except DevFailed as e:
             # Ignore 'already exists' style errors, log others
             msg = str(e)
@@ -53,7 +55,7 @@ def _register_dservers(db: Database, servers: set[tuple[str, str]]):
                 logger.error(f"❌ Failed to register DServer {dserver_name}: {e}")
 
 
-def register_all_devices():
+def register_all_devices(elements: list[dict[str, Any]] | None = None):
     """
     Register ALL Soleil devices in the Tango DB.
 
@@ -75,7 +77,7 @@ def register_all_devices():
     # ------------------------------------------------------------
     # 1) Magnets & power converters
     # ------------------------------------------------------------
-    for pc_name in get_unique_power_converters():
+    for pc_name in get_unique_power_converters(elements):
         magnets = get_magnets_per_power_converters(pc_name)
 
         # Power converter name should already be Soleil-like, e.g. AN10-AR/EM/SCF.11-pc
@@ -95,7 +97,7 @@ def register_all_devices():
             db_dev.name = pc_device_name
 
             db.add_device(db_dev)
-            logger.info(f"⚡ Registered PC device {db_dev.name} (class=PowerConverterDevice, server={server_str})")
+            logger.debug(f"⚡ Registered PC device {db_dev.name} (class=PowerConverterDevice, server={server_str})")
         except Exception as e:
             logger.error(f"❌ Failed to register power converter {pc_device_name}: {e}")
 
@@ -115,7 +117,7 @@ def register_all_devices():
                 db_dev.name = magnet_name
 
                 db.add_device(db_dev)
-                logger.info(f"🧲 Registered magnet device {db_dev.name} (class=MagnetDevice, server={server_str})")
+                logger.debug(f"🧲 Registered magnet device {db_dev.name} (class=MagnetDevice, server={server_str})")
             except Exception as e:
                 logger.error(f"❌ Failed to register magnet {magnet_name}: {e}")
 
@@ -137,7 +139,7 @@ def register_all_devices():
         db_dev.server = server_str
         db_dev.name = twiss_name
         db.add_device(db_dev)
-        logger.info(f"📈 Registered virtual device {twiss_name} (class=TwissOrbitDevice, server={server_str})")
+        logger.debug(f"📈 Registered virtual device {twiss_name} (class=TwissOrbitDevice, server={server_str})")
     except Exception as e:
         logger.error(f"❌ Failed to register TwissOrbitDevice: {e}")
 
@@ -155,7 +157,7 @@ def register_all_devices():
         db_dev.server = server_str
         db_dev.name = mc_name
         db.add_device(db_dev)
-        logger.info(f"⏱ Registered virtual device {mc_name} (class=MasterClockDevice, server={server_str})")
+        logger.debug(f"⏱ Registered virtual device {mc_name} (class=MasterClockDevice, server={server_str})")
     except Exception as e:
         logger.error(f"❌ Failed to register MasterClockDevice: {e}")
 
@@ -173,7 +175,7 @@ def register_all_devices():
         db_dev.server = server_str
         db_dev.name = other_name
         db.add_device(db_dev)
-        logger.info(f"📦 Registered virtual device {other_name} (class=OtherPVsDevice, server={server_str})")
+        logger.debug(f"📦 Registered virtual device {other_name} (class=OtherPVsDevice, server={server_str})")
     except Exception as e:
         logger.error(f"❌ Failed to register OtherPVsDevice: {e}")
 
@@ -191,7 +193,7 @@ def register_all_devices():
         db_dev.server = server_str
         db_dev.name = tune_name
         db.add_device(db_dev)
-        logger.info(f"🎯 Registered virtual device {tune_name} (class=TuneDevice, server={server_str})")
+        logger.debug(f"🎯 Registered virtual device {tune_name} (class=TuneDevice, server={server_str})")
     except Exception as e:
         logger.error(f"❌ Failed to register TuneDevice: {e}")
 
@@ -209,13 +211,17 @@ def register_all_devices():
         db_dev.server = server_str
         db_dev.name = bpm_manager_name
         db.add_device(db_dev)
-        logger.info(f" Registered virtual device {bpm_manager_name} (class=BPMManagerDevice, server={server_str})")
+        logger.debug(f" Registered virtual device {bpm_manager_name} (class=BPMManagerDevice, server={server_str})")
     except Exception as e:
         logger.error(f" Failed to register BPMManagerDevice: {e}")
 
-    # Cavities: SOLEIL/RF/CAVH1T8R, etc.
-    for cav in cavity_names:
-        cav_name = f"SOLEIL/RF/{cav}"
+    # Cavities: use the Soleil element name from input data directly.
+    cavities = [elem["name"] for elem in elements if elem["type"] == "RFCavity"]
+    if len(cavities) == 0:
+        cavities = cavity_names
+
+    for cav in cavities:
+        cav_name = cav
         try:
             domain, family, _ = _split_domain_family_member(cav_name)
             server_name = domain
@@ -228,7 +234,7 @@ def register_all_devices():
             db_dev.server = server_str
             db_dev.name = cav_name
             db.add_device(db_dev)
-            logger.info(f"📡 Registered virtual device {cav_name} (class=CavityDevice, server={server_str})")
+            logger.debug(f"📡 Registered virtual device {cav_name} (class=CavityDevice, server={server_str})")
         except Exception as e:
             logger.error(f"❌ Failed to register CavityDevice {cav_name}: {e}")
 

@@ -210,7 +210,7 @@ class BPMManagerDevice(Device, AsyncMixin):
 
     def init_device(self):
         super().init_device()
-        logger.info("Initializing BPMManagerDevice")
+        logger.debug("Initializing BPMManagerDevice")
 
         self._bpm_names = []
         self._bpm_x = np.array([], dtype=np.float64)
@@ -268,7 +268,7 @@ class TuneDevice(Device):
 
     def init_device(self):
         super().init_device()
-        logger.info("Initializing TuneDevice")
+        logger.debug("Initializing TuneDevice")
 
         try:
             update_manager = get_update_manager()
@@ -314,7 +314,7 @@ class OtherPVsDevice(Device):
 
     def init_device(self):
         super().init_device()
-        logger.info("Initializing OtherdevDevice")
+        logger.debug("Initializing OtherdevDevice")
 
         self.values = {}
         self.values["temperature"] = 0.0
@@ -364,7 +364,7 @@ class MasterClockDevice(Device):
 
     def init_device(self):
         super().init_device()
-        logger.info("Initializing MasterClockDevice")
+        logger.debug("Initializing MasterClockDevice")
 
         try:
             update_manager = get_update_manager()
@@ -411,7 +411,7 @@ class CavityDevice(Device):
         try:
             update_manager = get_update_manager()
             val = update_manager.device_value_from_peeking_engine(
-                DevicePropertyID(self.name, "frequency")
+                DevicePropertyID(self.get_name(), "frequency")
             )
             self.freq = float(val)
         except Exception:

@@ -264,7 +264,7 @@ def main():
         sys.exit(1)
 
     # 2. Register devices in Tango DB
-    servers = register_all_devices()
+    servers = register_all_devices(elements)
     logger.warning(f"DB registration done. Need to start {len(servers)} servers.")
 
     # 3. Spawn one Tango server process per server/instance

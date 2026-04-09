@@ -38,7 +38,7 @@ class PowerConverterDevice(Device):
         domain, family, member = split_name(full_name)
         self.pc_name = full_name
 
-        logger.info(f"Initializing PowerConverterDevice: {self.pc_name}")
+        logger.debug(f"Initializing PowerConverterDevice: {self.pc_name}")
 
         # Use shared event loop to avoid exhausting file descriptors
         self._loop = get_shared_event_loop()

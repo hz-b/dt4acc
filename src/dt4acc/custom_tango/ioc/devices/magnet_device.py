@@ -51,7 +51,7 @@ class MagnetDevice(Device):
         self.family = family
         self.member = member
 
-        logger.info(f"Initializing MagnetDevice: {self.magnet_name}")
+        logger.debug(f"Initializing MagnetDevice: {self.magnet_name}")
 
         # Use shared event loop to avoid exhausting file descriptors
         self._loop = get_shared_event_loop()
