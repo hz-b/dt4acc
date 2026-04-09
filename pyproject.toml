@@ -20,8 +20,14 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Topic :: Scientific/Engineering :: Physics",
 ]
+
 dependencies = [
+    "dt4acc-lib",
+    "transitions",
+    "accelerator-toolbox"
 ]
+
+# Todo: fix that I don't need to give a specific path
 
 [project.urls]
 Homepage = "https://github.com/dt4acc/dt4acc"
@@ -44,5 +50,15 @@ tango = [
      "pytango"
 ]
 
+bessyii = [
+    "lat2db"
+]
 [project.scripts]
 dt4acc_softioc = "dt4acc_softioc:main"
+
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dt4acc"]
+
+[tool.hatch.build]
+dev-mode-dirs = ["src"]
