@@ -3,7 +3,7 @@ from importlib.resources import files
 from urllib.parse import quote_plus
 import os
 
-from ..core.utils.logger import get_logger
+from dt4acc.core.utils.logger import get_logger
 
 logger = get_logger()
 
