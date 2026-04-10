@@ -3,6 +3,7 @@ import itertools
 import multiprocessing.managers
 import multiprocessing.synchronize
 import os
+import queue
 import sys
 import time
 import signal
@@ -20,7 +21,6 @@ import multiprocessing as mp
 logger = get_logger()
 
 _MANAGER_HOST = "127.0.0.1"
-_MANAGER_PORT = 53000
 _MANAGER_AUTHKEY = b"dt4acc-tango-secret"
 
 def _select_heartbeat_device_name(elements) -> str:
@@ -42,7 +42,7 @@ def _select_heartbeat_device_name(elements) -> str:
 class UpdateManagerService(multiprocessing.managers.BaseManager):
     pass
 
-def _run_update_manager_service(elements=None, lattice_file: str | None = None):
+def _run_update_manager_service(port_queue, elements=None, lattice_file: str | None = None):
     import asyncio
     import concurrent.futures
     from dt4acc.core.bl.handlers import get_update_manager
@@ -95,14 +95,17 @@ def _run_update_manager_service(elements=None, lattice_file: str | None = None):
     UpdateManagerService.register("get_update_manager", callable=lambda: sync_instance)
 
     mgr = UpdateManagerService(
-        address=(_MANAGER_HOST, _MANAGER_PORT),
+        address=(_MANAGER_HOST, 0),
         authkey=_MANAGER_AUTHKEY
     )
+    server = mgr.get_server()
+    _, manager_port = server.address
+    port_queue.put(manager_port)
     try:
-        mgr.get_server().serve_forever()
+        server.serve_forever()
     except OSError as e:
         logger.error(
-            f"Failed to start UpdateManagerService on {_MANAGER_HOST}:{_MANAGER_PORT}: {e}"
+            f"Failed to start UpdateManagerService on {_MANAGER_HOST}:{manager_port}: {e}"
         )
         raise
 
@@ -110,10 +113,12 @@ async def _async_get_update_manager(elements=None, lattice_file: str | None = No
     """Load the UpdateManager on the service loop."""
     from dt4acc.core.bl.handlers import get_update_manager
     return get_update_manager(elements=elements, lattice_file=lattice_file)
-def _connect_to_update_manager_service():
+
+
+def _connect_to_update_manager_service(manager_port: int):
     UpdateManagerService.register("get_update_manager")
     client = UpdateManagerService(
-        address=(_MANAGER_HOST, _MANAGER_PORT),
+        address=(_MANAGER_HOST, manager_port),
         authkey=_MANAGER_AUTHKEY
     )
     client.connect()
@@ -238,14 +243,23 @@ def main():
     logger.info("Selected heartbeat device: %s", heartbeat_device_name)
 
     # 1. Start the UpdateManager service process — loads lattice ONCE
+    manager_port_queue = mp.Queue()
     svc_proc = mp.Process(
         target=_run_update_manager_service,
-        args=(elements, lattice_file),
+        args=(manager_port_queue, elements, lattice_file),
         name="update-manager-service",
         daemon=True,
     )
     svc_proc.start()
     logger.warning("UpdateManagerService started (pid=%s) — waiting for lattice...", svc_proc.pid)
+
+    try:
+        manager_port = manager_port_queue.get(timeout=30)
+    except queue.Empty:
+        logger.error("UpdateManagerService did not publish its listening port.")
+        sys.exit(1)
+
+    logger.warning("UpdateManagerService listening on %s:%s", _MANAGER_HOST, manager_port)
 
     # Wait until the service is reachable before spawning Tango processes
     for attempt in range(60):
@@ -254,7 +268,7 @@ def main():
             logger.error("UpdateManagerService died during startup!")
             sys.exit(1)
         try:
-            _connect_to_update_manager_service()
+            _connect_to_update_manager_service(manager_port)
             logger.warning("UpdateManagerService reachable after %.0fs.", attempt * 2.0)
             break
         except Exception:
@@ -293,7 +307,6 @@ def main():
         kwargs={
             "device_name": heartbeat_device_name,
             "attr_name": "magnetic_strength",
-            "delta": 0.001,
             "period_s": 1.0,
             "wait_connect_s": 5.0,
         },
@@ -313,7 +326,7 @@ def main():
         t_event = mp.Event()
         p = mp.Process(
             target=single_server.main_loop,
-            args=(server_name, instance_name, t_event),
+            args=(server_name, instance_name, manager_port, t_event),
             name=f"process-{server_name}-{instance_name}",
         )
         p.start()

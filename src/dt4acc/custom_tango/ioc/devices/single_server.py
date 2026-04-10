@@ -12,7 +12,7 @@ logger = get_logger()
 global_event_loop = None
 
 
-def _inject_shared_update_manager():
+def _inject_shared_update_manager(manager_port: int):
     """
     Pre-populate handlers._update_manager_instance with an async-compatible
     adapter over the shared service proxy — before any device's init_device()
@@ -21,7 +21,7 @@ def _inject_shared_update_manager():
     from dt4acc.custom_tango.ioc.devices.server_manager import _connect_to_update_manager_service
     import dt4acc.core.bl.handlers as handlers
 
-    raw_proxy = _connect_to_update_manager_service()
+    raw_proxy = _connect_to_update_manager_service(manager_port)
 
     class AsyncAdapterProxy:
         """
@@ -45,14 +45,14 @@ def _inject_shared_update_manager():
     logger.info("Injected shared UpdateManager proxy into handlers.")
 
 
-def main_loop(server_name: str, instance_name: str, event=None):
+def main_loop(server_name: str, instance_name: str, manager_port: int, event=None):
     try:
         if sys.platform != "win32":
             os.nice(4)
     except Exception:
         pass  # optional: log warning
     # Inject BEFORE Tango initialises any device
-    _inject_shared_update_manager()
+    _inject_shared_update_manager(manager_port)
 
     if event is None:
         def cb():
@@ -103,10 +103,14 @@ def main_loop(server_name: str, instance_name: str, event=None):
 
 
 def main():
-    if len(sys.argv) != 3:
-        print("Usage: single_server.py <server_name> <instance_name>")
+    if len(sys.argv) != 4:
+        print("Usage: single_server.py <server_name> <instance_name> <manager_port>")
         sys.exit(1)
-    main_loop(server_name=sys.argv[1], instance_name=sys.argv[2])
+    main_loop(
+        server_name=sys.argv[1],
+        instance_name=sys.argv[2],
+        manager_port=int(sys.argv[3]),
+    )
 
 
 if __name__ == "__main__":
