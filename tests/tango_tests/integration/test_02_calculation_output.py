@@ -4,14 +4,13 @@ test_02_calculation_output.py
 Verify that the backend calculations (twiss, orbit, tune) are computed
 and pushed to the virtual TANGO devices after the heartbeat fires.
 
-These tango_tests only READ — they do not write to any magnet.
+These tests only READ — they do not write to any magnet.
 They depend on the heartbeat being active and having fired at least once.
 """
 
 import time
 import pytest
 import numpy as np
-from ..conftest import SETTLE_S
 
 pytestmark = pytest.mark.integration
 
@@ -34,11 +33,14 @@ class TestOrbitData:
         assert not np.all(arr == 0.0), \
             "orbit_x is all zeros — calculation not pushed to TwissOrbitDevice"
 
-    def test_orbit_y_is_not_all_zeros(self, dp_twiss_orbit):
+    def test_orbit_y_is_finite_and_correct_length(self, dp_twiss_orbit):
+        """
+        orbit_y is legitimately all-zeros at nominal operating point
+        (no vertical errors or kicks). Just verify it's finite and the right length.
+        """
         arr = _arr(dp_twiss_orbit, "orbit_y")
         assert len(arr) >= 10, "orbit_y array too short"
-        assert not np.all(arr == 0.0), \
-            "orbit_y is all zeros — calculation not pushed to TwissOrbitDevice"
+        assert np.all(np.isfinite(arr)), "orbit_y contains NaN or Inf"
 
     def test_orbit_x_is_finite(self, dp_twiss_orbit):
         arr = _arr(dp_twiss_orbit, "orbit_x")

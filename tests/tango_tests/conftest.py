@@ -1,7 +1,7 @@
 """
 conftest.py
 ===========
-Pytest configuration and shared fixtures for the dt4acc TANGO integration tango_tests.
+Pytest configuration and shared fixtures for the dt4acc TANGO integration tests.
 """
 
 import time
@@ -20,13 +20,13 @@ except ImportError:
 
 def pytest_configure(config):
     config.addinivalue_line(
-        "markers", "integration: marks tango_tests as integration tango_tests (require running TANGO server)"
+        "markers", "integration: marks tests as integration tests (require running TANGO server)"
     )
     config.addinivalue_line(
-        "markers", "slow: marks tango_tests that write to magnets and wait for recalculation"
+        "markers", "slow: marks tests that write to magnets and wait for recalculation"
     )
     config.addinivalue_line(
-        "markers", "connectivity: marks basic device reachability tango_tests"
+        "markers", "connectivity: marks basic device reachability tests"
     )
 
 
@@ -40,8 +40,11 @@ TUNE_DEV         = "PHYSICS/SOLEIL/TUNE"
 MASTER_CLOCK_DEV = "PHYSICS/SOLEIL/MASTER_CLOCK"
 TEST_QUAD        = "an01-ar/em/cqln.03"
 TEST_STEERER_H   = "an20-ar/em/shf.06-cdlh.10"
+# Steerer used for beam-loss / reset test — aggressive kick causes divergence
+RESET_STEERER_H  = "an02-ar/em/scf.05-cdlh.04"
 
 SETTLE_S = 2.0   # seconds to wait after a write for delayed reads to propagate
+RESET_SETTLE_S = 5.0  # longer wait after reset — lattice reload + full recalculation
 
 
 # ---------------------------------------------------------------------------
@@ -82,6 +85,11 @@ def dp_quad():
 @pytest.fixture(scope="session")
 def dp_steerer_h():
     return _connect(TEST_STEERER_H)
+
+
+@pytest.fixture(scope="session")
+def dp_reset_steerer():
+    return _connect(RESET_STEERER_H)
 
 
 @pytest.fixture(scope="session")
