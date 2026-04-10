@@ -26,10 +26,12 @@ import itertools
 import traceback
 from typing import Sequence
 
-from dt4acc_lib.model.output.result import TranslatedReading, ReadTogetherAndTranslated
-from dt4acc_lib.model.utils.command import ReadCommand, Command
+from accml_lib.core.interfaces.utils.measurement_execution_engine import (
+    MeasurementExecutionEngine,
+)
+from accml_lib.core.model.output.result import ReadTogetherAndTranslated, TranslatedReading
+from accml_lib.core.model.utils.command import ReadCommand, Command
 
-from dt4acc.core.bl.translating_command_execution_engine import TranslatingCommandExecutionEngine
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.views.calculation_result_view import CalculationResultView
 
@@ -199,7 +201,7 @@ class TangoController:
     def __init__(
         self,
         *,
-        mexec: TranslatingCommandExecutionEngine,
+        mexec: MeasurementExecutionEngine,
         prefix: str,
         default_delayed_reads: Sequence[ReadCommand] = DEFAULT_DELAYED_READS,
         sync_reset=None,
@@ -245,7 +247,7 @@ class TangoController:
 
         fut = asyncio.run_coroutine_threadsafe(self._queue_loop(), shared_loop)
         self._pending_task = fut
-        logger.info("TangoController delayed execution task started on shared loop")
+        logger.debug("TangoController delayed execution task started on shared loop")
 
     async def update(
         self,

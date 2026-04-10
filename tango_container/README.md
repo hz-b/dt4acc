@@ -116,7 +116,7 @@ dev.current_setpoint = 5.1
 Navigate to the test examples directory:
 
 ```bash
-cd /opt/dt4acc/tests/example
+cd /opt/dt4acc/tango_tests/example
 ```
 
 #### Available Test Scripts

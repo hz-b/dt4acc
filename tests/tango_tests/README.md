@@ -19,14 +19,14 @@ tests/
 ## Running
 
 ```bash
-# All tests
+# All tango_tests
 pytest -v
 
 # Only connectivity (fast, no writes)
 pytest -v -m connectivity
 
 # Only output checks (reads only, waits for heartbeat)
-pytest -v tests/test_02_calculation_output.py
+pytest -v tango_tests/test_02_calculation_output.py
 
 # Full end-to-end (writes to magnets)
 pytest -v -m slow

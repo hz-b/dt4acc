@@ -105,7 +105,7 @@ def register_all_devices():
                         logger.warning("Could not set uuid property for %s: %s",
                                        magnet_name, e)
 
-                logger.info("🧲 Registered magnet %s uuid=%s (server=%s)",
+                logger.debug("🧲 Registered magnet %s uuid=%s (server=%s)",
                             magnet_name, magnet_uuid, server_str)
             except Exception as e:
                 logger.error("❌ Failed to register magnet %s: %s", magnet_name, e)

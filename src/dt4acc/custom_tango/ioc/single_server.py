@@ -16,9 +16,15 @@ Responsibilities
 """
 
 import asyncio
+import logging
 import os
 import sys
 from typing import Sequence
+
+# Suppress transitions state machine INFO logs — they fire on every
+# backend.set() call and flood the output (4 lines per state transition)
+logging.getLogger("transitions").setLevel(logging.WARNING)
+logging.getLogger("transitions.core").setLevel(logging.WARNING)
 
 from dt4acc_lib.model.output.result import TranslatedReading, ReadTogetherAndTranslated, SingleReading
 from dt4acc_lib.model.utils.command import ReadCommand, Command
@@ -136,13 +142,14 @@ def _inject_controller(prefix: str) -> None:
     Called before tango.server.run() so init_device() can call get_controller().
     """
     from dt4acc.custom_tango.ioc.server_manager import _connect_to_mexec_service
-    sync_proxy = _connect_to_mexec_service()
+    sync_proxy, sync_reset = _connect_to_mexec_service()
     mexec = AsyncMexecAdapter(sync_proxy)
 
     controller = TangoController(
         mexec=mexec,
         prefix=prefix,
         default_delayed_reads=DEFAULT_DELAYED_READS,
+        sync_reset=sync_reset,
     )
     set_controller(controller)
     logger.info("TangoController created and registered for prefix=%s", prefix)

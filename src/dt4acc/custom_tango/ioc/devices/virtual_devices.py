@@ -22,13 +22,13 @@ get_controller().update() instead of the old handle_device_update().
 import asyncio
 
 import numpy as np
-from dt4acc_lib.model.utils.command import ReadCommand, BehaviourOnError, Command
 from tango import DevState, DevFailed, DevDouble
 from tango.server import (
     Device, attribute, command,
     AttrDataFormat, device_property, AttrWriteType,
 )
 
+from dt4acc_lib.model.utils.command import Command, BehaviourOnError, ReadCommand
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
 from dt4acc.custom_tango.ioc.controller_registry import get_controller
@@ -158,6 +158,28 @@ class TwissOrbitDevice(Device, AsyncMixin):
         arr = np.asarray(values, dtype=np.float64).ravel()
         self._nu_y = arr
         self.push_change_event("nu_y", arr)
+
+    @command
+    def Reset(self):
+        """
+        Reset the digital twin to nominal state after beam loss.
+
+        Reloads the AT lattice from the original .m file, clears the
+        backend error state, and triggers a fresh twiss+orbit+tune
+        calculation. Use this when optics calculations fail after an
+        aggressive magnet change caused beam loss in the simulation.
+        """
+        logger.warning("TwissOrbitDevice.Reset: initiating backend reset...")
+        self.set_state(DevState.INIT)
+        try:
+            self._start_async()
+            get_controller().reset()
+            self.set_state(DevState.ON)
+            logger.warning("TwissOrbitDevice.Reset: complete — nominal state restored")
+        except Exception as exc:
+            logger.error("TwissOrbitDevice.Reset failed: %s", exc)
+            self.set_state(DevState.FAULT)
+            raise DevFailed(str(exc))
 
 
 # ===============================================================

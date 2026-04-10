@@ -1,7 +1,7 @@
 """
 conftest.py
 ===========
-Pytest configuration and shared fixtures for the dt4acc TANGO integration tests.
+Pytest configuration and shared fixtures for the dt4acc TANGO integration tango_tests.
 """
 
 import time
@@ -20,13 +20,13 @@ except ImportError:
 
 def pytest_configure(config):
     config.addinivalue_line(
-        "markers", "integration: marks tests as integration tests (require running TANGO server)"
+        "markers", "integration: marks tango_tests as integration tango_tests (require running TANGO server)"
     )
     config.addinivalue_line(
-        "markers", "slow: marks tests that write to magnets and wait for recalculation"
+        "markers", "slow: marks tango_tests that write to magnets and wait for recalculation"
     )
     config.addinivalue_line(
-        "markers", "connectivity: marks basic device reachability tests"
+        "markers", "connectivity: marks basic device reachability tango_tests"
     )
 
 

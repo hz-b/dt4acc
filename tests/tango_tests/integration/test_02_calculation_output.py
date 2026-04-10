@@ -4,7 +4,7 @@ test_02_calculation_output.py
 Verify that the backend calculations (twiss, orbit, tune) are computed
 and pushed to the virtual TANGO devices after the heartbeat fires.
 
-These tests only READ — they do not write to any magnet.
+These tango_tests only READ — they do not write to any magnet.
 They depend on the heartbeat being active and having fired at least once.
 """
 

@@ -29,6 +29,7 @@ Process topology
 import at
 import asyncio
 import itertools
+import logging
 import multiprocessing as mp
 import multiprocessing.managers
 import multiprocessing.synchronize
@@ -41,6 +42,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence
 
+# Suppress transitions state machine INFO logs across all processes
+logging.getLogger("transitions").setLevel(logging.WARNING)
+logging.getLogger("transitions.core").setLevel(logging.WARNING)
+
 from dt4acc_lib.bl.command_rewritter import CommandRewriter
 from dt4acc_lib.model.utils.command import BehaviourOnError, Command, ReadCommand
 from dt4acc_lib.pyat_simulator.accelerator_simulator import PyATAcceleratorSimulator
@@ -48,13 +53,16 @@ from dt4acc_lib.pyat_simulator.simulator_backend import SimulatorBackend
 from tango import DeviceProxy, DevFailed
 
 from dt4acc.core.utils.logger import get_logger
-from dt4acc.custom_facility.soleil.liasion_translator_setup import load_managers
+from dt4acc.custom_facility.bessyii.liasion_translator_setup import load_managers
 
 logger = get_logger()
 
 _MANAGER_HOST = "127.0.0.1"
 _MANAGER_PORT = 50200
 _MANAGER_AUTHKEY = b"dt4acc-tango-secret"
+
+# Lattice file — defined once here so both _build_mexec and sync_reset use it
+LATTICE_FILE = Path.home() / "Documents" / "dt4acc_soleil_twin_data" / "SOLEIL_II_V3631_sym1_V001_database.m"
 
 
 # ---------------------------------------------------------------------------
@@ -74,13 +82,13 @@ def _build_mexec():
     # filename = resources.files("dt4acc").joinpath(
     #     "custom_epics/data/standard/bessy2_storage_ring_reflat.json"
     # )
-    filename = Path.home() / "Documents" / "dt4acc_soleil_twin_data" / "SOLEIL_II_V3631_sym1_V001_database.m"
+    filename = LATTICE_FILE
     acc= at.load_m(filename)
     backend=SimulatorBackend(
         name="SOLEIL_PYAT",
         acc=PyATAcceleratorSimulator(at_lattice=acc),
     )
-    lm, ts = load_managers()
+    _, lm, ts = load_managers()
 
     cmd_rewriter = CommandRewriter(liaison_manager=lm, translation_service=ts)
 
@@ -103,6 +111,7 @@ def _run_mexec_service():
     import logging
     logging.getLogger("transitions").setLevel(logging.WARNING)
     logging.getLogger("transitions.core").setLevel(logging.WARNING)
+
     service_loop = asyncio.new_event_loop()
 
     def _run_loop():
@@ -154,19 +163,35 @@ def _run_mexec_service():
                     out.append((translated.cmd.id, translated.cmd.property, reading.payload))
             return out
 
-        def sync_peek(self, rcmd_id: str, rcmd_property: str):
-            rcmds = [ReadCommand(id=rcmd_id, property=rcmd_property)]
-            fut = asyncio.run_coroutine_threadsafe(
-                mexec.trigger_read(rcmds), service_loop
-            )
-            result = fut.result(timeout=30)
-            readings = result.all_readings()
-            if readings:
-                return readings[0].payload
-            return None
+        def sync_reset(self):
+            """
+            Reset the backend to nominal state:
+            1. Reload the AT lattice from the original .m file
+            2. Clear the error state → pending
+            3. Clear stored optics so next read recalculates fresh
+
+            Called by TwissOrbitDevice.Reset command via the Tango process.
+            """
+            import at
+            logger.warning("SyncMexecProxy.sync_reset: reloading lattice from file...")
+            try:
+                new_acc = at.load_m(LATTICE_FILE)
+                mexec.backend.acc.acc = new_acc
+                with mexec.backend.calculation_lock:
+                    if mexec.backend.model.is_error():
+                        mexec.backend.model.clear()
+                    elif not mexec.backend.model.is_pending():
+                        mexec.backend.model.changed()
+                    mexec.backend.optics = None
+                    mexec.backend.elem_names = None
+                logger.warning("SyncMexecProxy.sync_reset: lattice reloaded, state=pending")
+            except Exception as exc:
+                logger.error("SyncMexecProxy.sync_reset failed: %s", exc)
+                raise
 
     proxy = SyncMexecProxy()
     MexecManagerService.register("get_mexec_proxy", callable=lambda: proxy)
+    MexecManagerService.register("sync_reset", callable=proxy.sync_reset)
 
     mgr = MexecManagerService(
         address=(_MANAGER_HOST, _MANAGER_PORT),
@@ -181,12 +206,13 @@ async def _async_build_mexec():
 
 def _connect_to_mexec_service():
     MexecManagerService.register("get_mexec_proxy")
+    MexecManagerService.register("sync_reset")
     client = MexecManagerService(
         address=(_MANAGER_HOST, _MANAGER_PORT),
         authkey=_MANAGER_AUTHKEY,
     )
     client.connect()
-    return client.get_mexec_proxy()
+    return client.get_mexec_proxy(), client.sync_reset
 
 
 # ---------------------------------------------------------------------------

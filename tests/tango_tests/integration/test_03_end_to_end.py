@@ -1,10 +1,10 @@
 """
 test_03_end_to_end.py
 =====================
-End-to-end tests: write to a magnet device, verify that the backend
+End-to-end tango_tests: write to a magnet device, verify that the backend
 recalculates optics and pushes updated results to virtual devices.
 
-These are the most important tests — they verify the full data flow:
+These are the most important tango_tests — they verify the full data flow:
 
     MagnetDevice.write
       → SyncMexecProxy.sync_set (cross-process)

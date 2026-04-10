@@ -2,7 +2,7 @@
 test_01_connectivity.py
 =======================
 Verify all TANGO devices are registered, exported, and reachable.
-These are the fastest tests — no writes, no waits.
+These are the fastest tango_tests — no writes, no waits.
 """
 
 import pytest
