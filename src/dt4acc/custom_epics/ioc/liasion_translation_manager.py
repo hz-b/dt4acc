@@ -268,7 +268,11 @@ def build_managers(
     inverse_lut.update(quad_updates)
 
     # Cavities and master clock
-    cavities = [elem["uuid"] for elem in elements if elem["type"] == "RFCavity"]
+    cavities = [
+        elem.get("name", elem.get("uuid"))
+        for elem in (elements or [])
+        if elem["type"] == "RFCavity" and elem.get("name", elem.get("uuid")) is not None
+    ]
     if len(cavities) == 0:
         cavities = cavity_names
 
