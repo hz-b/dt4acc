@@ -26,9 +26,9 @@ import itertools
 import traceback
 from typing import Sequence
 
+from dt4acc_lib.interfaces.utils.command_execution_engine import CommandExecutionEngine
 from dt4acc_lib.model.output.result import TranslatedReading, ReadTogetherAndTranslated
 from dt4acc_lib.model.utils.command import ReadCommand, Command
-
 from dt4acc.core.bl.translating_command_execution_engine import TranslatingCommandExecutionEngine
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.views.calculation_result_view import CalculationResultView
@@ -52,7 +52,7 @@ DEFAULT_DELAYED_READS: Sequence[ReadCommand] = (
 
 class TangoView:
     """
-    Receives calculation results from the new backend (accml_lib types) and
+    Receives calculation results from the new backend (dt4acc_lib types) and
     adapts them into what CalculationResultView expects (old model types),
     then calls the appropriate push method.
 
@@ -106,6 +106,13 @@ class TangoView:
         (reading,) = result.readings
         tune = reading.payload           # Tune(.x, .y) from new backend
         await self._calc_view.push_tune(tune)
+
+    async def push_invalid(self) -> None:
+        """
+        Push NaN arrays to all virtual devices — called when beam is lost
+        so clients can detect invalid/stale data rather than seeing old values.
+        """
+        await self._calc_view.push_invalid()
 
 
 
@@ -217,18 +224,64 @@ class TangoController:
         """
         Reset backend to nominal state and trigger fresh calculations.
         Called from TwissOrbitDevice.Reset command.
+
+        NOTE: Do NOT call push_invalid() here — Reset runs inside the
+        TwissOrbitDevice Tango thread which holds the serialization monitor.
+        push_invalid() tries to call command_inout on TwissOrbitDevice via
+        DeviceProxy → deadlock → 10s timeout → sync_reset never reached.
+        The fresh calculation queued at the end will overwrite stale values.
         """
         if self._sync_reset is None:
             raise RuntimeError("TangoController: no sync_reset callable registered")
         logger.warning("TangoController.reset: resetting backend to nominal state...")
-        self._sync_reset()
-        # Queue fresh full calculation on shared loop
+
         from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
         shared_loop = get_shared_event_loop()
+
+        # Reload lattice + clear error state
+        self._sync_reset()
+
+        # Queue fresh full calculation
         asyncio.run_coroutine_threadsafe(
             self._enqueue(list(self.default_delayed_reads)), shared_loop
         ).result(timeout=10)
+
+        # Refresh all MagnetDevice local attributes from the reloaded lattice
+        self._refresh_all_magnet_devices()
+
         logger.warning("TangoController.reset: done — recalculation queued")
+
+    def _refresh_all_magnet_devices(self) -> None:
+        """
+        Refresh all MagnetDevice local attributes from the reloaded lattice.
+        Uses bulk cache refresh (3 cross-process calls total) then broadcasts
+        RefreshFromCache to all devices — no individual backend RPCs per magnet.
+        """
+        try:
+            # Step 1: bulk-read all nominal values into the process cache
+            from dt4acc.custom_tango.ioc.single_server import (
+                refresh_cache_from_lattice, _my_magnet_uuids
+            )
+            from dt4acc.custom_tango.ioc.server_manager import _connect_to_mexec_service
+            sync_proxy, _ = _connect_to_mexec_service()
+            refresh_cache_from_lattice(sync_proxy, _my_magnet_uuids)
+
+            # Step 2: tell each MagnetDevice to read from cache (instant, no RPC)
+            from tango import Database, DeviceProxy
+            db = Database()
+            dev_list = db.get_device_exported_for_class("MagnetDevice")
+            count = 0
+            for dev_name in dev_list.value_string:
+                try:
+                    dp = DeviceProxy(str(dev_name))
+                    dp.set_timeout_millis(1000)
+                    dp.command_inout("RefreshFromCache")
+                    count += 1
+                except Exception as exc:
+                    logger.debug("RefreshFromCache failed for %s: %s", dev_name, exc)
+            logger.warning("TangoController.reset: RefreshFromCache sent to %d magnets", count)
+        except Exception as exc:
+            logger.warning("TangoController.reset: could not refresh magnets: %s", exc)
 
     def start(self) -> None:
         """Start the delayed execution loop on the shared event loop."""
@@ -277,6 +330,16 @@ class TangoController:
         """Direct read from the backend — used for initial value peek at startup."""
         return await self.mexec.trigger_read(reads)
 
+    async def _push_invalid(self) -> None:
+        """
+        Push NaN arrays to all virtual devices when backend calculation fails.
+        This signals to clients that the data is invalid (beam lost).
+        """
+        try:
+            await self.view.push_invalid()
+        except Exception as exc:
+            logger.error("TangoController: failed to push invalid state: %s", exc)
+
     async def _enqueue(self, reads: Sequence[ReadCommand]) -> None:
         if self.cmd_queue is None:
             logger.debug("TangoController: queue not yet started — delayed reads dropped")
@@ -307,13 +370,16 @@ class TangoController:
         except Exception as exc:
             logger.error("TangoController: backend read failed for %s: %s", t_rcmds, exc)
             traceback.print_exc()
-            return   # log and continue — never kill the loop
+            # Push NaN to all virtual devices so clients know data is invalid
+            await self._push_invalid()
+            return   # never kill the loop
 
         if len(read_result.data) != len(t_rcmds):
             logger.error(
                 "TangoController: sent %d read commands, got %d results — skipping",
                 len(t_rcmds), len(read_result.data),
             )
+            await self._push_invalid()
             return
 
         for rcmd, translated in zip(t_rcmds, read_result.data):

@@ -102,14 +102,56 @@ class AsyncMexecAdapter:
         return ReadTogetherAndTranslated(data=data, start=now, end=now)
 
 
-# Process-global cache: uuid → initial main_strength value
+# Process-global cache: uuid → {property: value}
 # Populated by _preload_initial_values() before init_device() runs.
-_initial_strength_cache: dict = {}
+# Re-populated by refresh_cache_from_lattice() after reset.
+_initial_strength_cache: dict = {}  # uuid → float (main_strength)
+_nominal_cache: dict = {}           # uuid → {"main_strength": f, "x_kick": f, "y_kick": f}
+_my_magnet_uuids: list = []         # UUIDs of magnets in this server process
 
 
 def get_initial_strength(uuid: str) -> float:
     """Called by MagnetDevice.init_device() to get cached initial value."""
     return _initial_strength_cache.get(uuid, 0.0)
+
+
+def get_nominal_values(uuid: str) -> dict:
+    """Called by MagnetDevice.RefreshFromCache() after reset."""
+    return _nominal_cache.get(uuid, {"main_strength": 0.0, "x_kick": 0.0, "y_kick": 0.0})
+
+
+def refresh_cache_from_lattice(sync_proxy, magnet_uuids: list) -> None:
+    """
+    Bulk-read main_strength, x_kick, y_kick for all magnets in one batch.
+    Called after reset to refresh the nominal cache without individual RPCs.
+    One sync_trigger_read per property = 3 cross-process calls total,
+    regardless of the number of magnets.
+    """
+    global _initial_strength_cache, _nominal_cache
+    if not magnet_uuids:
+        return
+
+    logger.warning("Refreshing nominal cache for %d magnets...", len(magnet_uuids))
+    new_cache = {uuid: {"main_strength": 0.0, "x_kick": 0.0, "y_kick": 0.0}
+                 for uuid in magnet_uuids}
+
+    for prop in ("main_strength", "x_kick", "y_kick"):
+        try:
+            ids  = list(magnet_uuids)
+            props = [prop] * len(ids)
+            raw = sync_proxy.sync_trigger_read(ids, props)
+            for rcmd_id, rcmd_prop, payload in raw:
+                if payload is not None and rcmd_id in new_cache:
+                    try:
+                        new_cache[rcmd_id][prop] = float(payload)
+                    except (TypeError, ValueError):
+                        pass
+        except Exception as exc:
+            logger.warning("refresh_cache_from_lattice: %s failed: %s", prop, exc)
+
+    _nominal_cache = new_cache
+    _initial_strength_cache = {uuid: v["main_strength"] for uuid, v in new_cache.items()}
+    logger.warning("Nominal cache refreshed for %d magnets.", len(new_cache))
 
 
 def _preload_initial_values(sync_proxy, magnet_uuids: list) -> None:
@@ -123,8 +165,8 @@ def _preload_initial_values(sync_proxy, magnet_uuids: list) -> None:
 
     logger.warning("Pre-loading initial values for %d magnets...", len(magnet_uuids))
     try:
-        ids   = [uuid for uuid in magnet_uuids]
-        props = ["main_strength"] * len(magnet_uuids)
+        ids   = list(magnet_uuids)
+        props = ["main_strength"] * len(ids)
         raw = sync_proxy.sync_trigger_read(ids, props)
         for rcmd_id, rcmd_prop, payload in raw:
             if payload is not None:
@@ -163,6 +205,7 @@ def main_loop(server_name: str, instance_name: str, event=None):
     import logging
     logging.getLogger("transitions").setLevel(logging.WARNING)
     logging.getLogger("transitions.core").setLevel(logging.WARNING)
+
     os.nice(4)
 
     prefix = os.environ.get("DT4ACC_PREFIX", os.getlogin())
@@ -175,7 +218,7 @@ def main_loop(server_name: str, instance_name: str, event=None):
     try:
         from dt4acc.custom_epics.data.querries import get_magnets_per_power_converters, get_unique_power_converters
         from dt4acc.custom_tango.ioc.server_manager import _connect_to_mexec_service
-        sync_proxy = _connect_to_mexec_service()
+        sync_proxy, _ = _connect_to_mexec_service()
 
         # Collect UUIDs for magnets belonging to this server/instance
         my_uuids = []
@@ -187,6 +230,10 @@ def main_loop(server_name: str, instance_name: str, event=None):
                     uuid = m.get("uuid", "")
                     if uuid:
                         my_uuids.append(uuid)
+
+        # Store as process-global so _refresh_all_magnet_devices can reuse after reset
+        global _my_magnet_uuids
+        _my_magnet_uuids = my_uuids
 
         _preload_initial_values(sync_proxy, my_uuids)
     except Exception as exc:

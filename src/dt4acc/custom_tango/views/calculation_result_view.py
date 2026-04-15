@@ -226,3 +226,57 @@ class CalculationResultView:
     async def push_value(self, elm_update) -> None:
         """Element update — no-op for now."""
         pass
+
+    async def push_invalid(self) -> None:
+        """
+        Push sentinel values to all virtual devices to signal beam loss.
+
+        Uses zeros/empty arrays instead of NaN because:
+        - Tango READ_WRITE attributes reject NaN (API_WAttrOutsideLimit)
+        - TwissOrbitDevice is in the same process — DeviceProxy causes
+          thread lock conflict (serialization monitor). TwissOrbitDevice
+          has push_change_event which works in-process via the event system.
+
+        For TwissOrbitDevice we push a single-element zero array so clients
+        can detect the length change (4238 elements → 1) as a beam-loss signal.
+        BPM and Tune get zeros.
+        """
+        loop = asyncio.get_running_loop()
+        zero_arr = [0.0]
+
+        # TwissOrbitDevice — push via commands (same process, different thread,
+        # but command_inout can deadlock). Use a short timeout and swallow errors.
+        try:
+            dev = DeviceProxy(self._twiss_orbit_dev())
+            dev.set_timeout_millis(500)
+            for cmd in ("push_orbit_x", "push_orbit_y",
+                        "push_beta_x",  "push_beta_y",
+                        "push_alpha_x", "push_alpha_y",
+                        "push_nu_x",    "push_nu_y"):
+                try:
+                    await loop.run_in_executor(
+                        None, lambda c=cmd: dev.command_inout(c, zero_arr))
+                except Exception:
+                    pass  # best-effort — don't block on monitor contention
+        except Exception as exc:
+            logger.debug("push_invalid: TwissOrbitDevice push failed: %s", exc)
+
+        # BPMManagerDevice — zeros are valid
+        try:
+            bpm = DeviceProxy(self._bpm_dev())
+            await loop.run_in_executor(
+                None, lambda: bpm.write_attribute("bpm_x_attr", zero_arr))
+            await loop.run_in_executor(
+                None, lambda: bpm.write_attribute("bpm_y_attr", zero_arr))
+        except Exception as exc:
+            logger.debug("push_invalid: BPMManagerDevice push failed: %s", exc)
+
+        # TuneDevice — zeros are valid
+        try:
+            tune = DeviceProxy(self._tune_dev())
+            await loop.run_in_executor(
+                None, lambda: tune.write_attribute("hor",  0.0))
+            await loop.run_in_executor(
+                None, lambda: tune.write_attribute("vert", 0.0))
+        except Exception as exc:
+            logger.debug("push_invalid: TuneDevice push failed: %s", exc)

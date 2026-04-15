@@ -205,3 +205,23 @@ class MagnetDevice(Device):
         self._y = 0.0
         logger.info("%s: reset", self.magnet_name)
         self.set_state(DevState.STANDBY)
+
+    @command
+    def RefreshFromCache(self) -> None:
+        """
+        Read nominal values from the process-local cache and update attributes.
+        Called after TwissOrbitDevice.Reset — no cross-process RPC, instant.
+        The cache is populated by bulk refresh in TangoController.reset().
+        """
+        try:
+            from dt4acc.custom_tango.ioc.single_server import get_nominal_values
+            vals = get_nominal_values(self.lattice_id)
+            self._magnetic_strength = vals["main_strength"]
+            self._magnetic_strength_readback = vals["main_strength"]
+            self._x = vals["x_kick"]
+            self._y = vals["y_kick"]
+            self._current = 0.0
+            logger.info("%s: RefreshFromCache done — strength=%.6f x=%.6f y=%.6f",
+                        self.magnet_name, self._magnetic_strength, self._x, self._y)
+        except Exception as exc:
+            logger.error("%s: RefreshFromCache failed: %s", self.magnet_name, exc)
