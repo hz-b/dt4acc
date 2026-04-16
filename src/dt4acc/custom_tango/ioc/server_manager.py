@@ -53,7 +53,6 @@ from dt4acc_lib.pyat_simulator.simulator_backend import SimulatorBackend
 from tango import DeviceProxy, DevFailed
 
 from dt4acc.core.utils.logger import get_logger
-from dt4acc.custom_facility.bessyii.liasion_translator_setup import load_managers
 
 logger = get_logger()
 
@@ -61,8 +60,28 @@ _MANAGER_HOST = "127.0.0.1"
 _MANAGER_PORT = 50200
 _MANAGER_AUTHKEY = b"dt4acc-tango-secret"
 
-# Lattice file — defined once here so both _build_mexec and sync_reset use it
-LATTICE_FILE = Path.home() / "Documents" / "dt4acc_soleil_twin_data" / "SOLEIL_II_V3631_sym1_V001_database.m"
+# ---------------------------------------------------------------------------
+# Facility configuration — set by the launch script before calling main()
+# ---------------------------------------------------------------------------
+
+# Path to the AT lattice .m file
+LATTICE_FILE: Path = None
+
+# Callable that returns (yellow_pages, liaison_manager, translator_service)
+# Default: BESSY II / SOLEIL setup from liasion_translator_setup
+LOAD_MANAGERS_FN = None
+
+# Heartbeat device and attribute
+HEARTBEAT_DEVICE = "AN01-AR/EM-QP/QF01.01"  # "an01-ar/em/cqln.03"
+HEARTBEAT_ATTR   = "magnetic_strength"
+
+
+def _get_load_managers():
+    """Return the load_managers callable, falling back to default if not set."""
+    if LOAD_MANAGERS_FN is not None:
+        return LOAD_MANAGERS_FN
+    from dt4acc.custom_facility.bessyii.liasion_translator_setup import load_managers
+    return load_managers
 
 
 # ---------------------------------------------------------------------------
@@ -79,15 +98,15 @@ def _build_mexec():
         TranslatingCommandExecutionEngine,
     )
 
-    # filename = resources.files("dt4acc").joinpath(
-    #     "custom_epics/data/standard/bessy2_storage_ring_reflat.json"
-    # )
     filename = LATTICE_FILE
-    acc= at.load_m(filename)
-    backend=SimulatorBackend(
-        name="SOLEIL_PYAT",
+    if filename is None:
+        raise ValueError("LATTICE_FILE not set — call configure() or set server_manager.LATTICE_FILE before main()")
+    acc = at.load_m(filename)
+    backend = SimulatorBackend(
+        name="Facility speficic PYAT",
         acc=PyATAcceleratorSimulator(at_lattice=acc),
     )
+    load_managers = _get_load_managers()
     _, lm, ts = load_managers()
 
     cmd_rewriter = CommandRewriter(liaison_manager=lm, translation_service=ts)
@@ -379,8 +398,8 @@ def main():
         target=_magnet_heartbeat,
         args=(start_evt, stop_evt),
         kwargs=dict(
-            device_name="an01-ar/em/cqln.03",
-            attr_name="magnetic_strength",
+            device_name=HEARTBEAT_DEVICE,
+            attr_name=HEARTBEAT_ATTR,
             delta=0.001,
             period_s=1.0,
             wait_connect_s=5.0,

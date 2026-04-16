@@ -12,10 +12,10 @@ logger = get_logger()
 
 
 def split_name(name: str):
-    """Split Soleil Tango device name 'AN10-AR/EM/SCF.11'."""
+    """Split Tango device name 'AN10-AR/EM/SCF.11'."""
     parts = name.split("/")
     if len(parts) != 3:
-        raise DevFailed(f"Invalid Soleil magnet name '{name}'")
+        raise DevFailed(f"Invalid magnet name '{name}'")
     return parts[0], parts[1], parts[2]
 
 
@@ -78,6 +78,7 @@ class MagnetDevice(Device):
         self._current = 0.0
         self._x = 0.0
         self._y = 0.0
+        self._frequency = 0.0
 
         self.set_state(DevState.ON)
 
@@ -183,6 +184,29 @@ class MagnetDevice(Device):
                 cmd=Command(
                     id=self.lattice_id,
                     property="y_kick",
+                    value=value,
+                    behaviour_on_error=BehaviourOnError.stop,
+                ),
+                reads=[],
+                delayed_reads=[],
+            )
+        )
+
+    @attribute(dtype=float, access=AttrWriteType.READ_WRITE,
+               label="Frequency", unit="Hz")
+    def frequency(self) -> float:
+        return self._frequency
+
+    @frequency.write
+    def frequency(self, value: float) -> None:
+        """Write cavity frequency — only meaningful for RFCavity type devices."""
+        value = float(value)
+        self._frequency = value
+        self._async(
+            get_controller().update(
+                cmd=Command(
+                    id=self.lattice_id,
+                    property="frequency",
                     value=value,
                     behaviour_on_error=BehaviourOnError.stop,
                 ),

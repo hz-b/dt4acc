@@ -171,19 +171,13 @@ class CalculationResultView:
         self.prefix = prefix
 
     def _twiss_orbit_dev(self) -> str:
-        if self.prefix and "/" in self.prefix:
-            return f"{self.prefix}/TWISS_ORBIT"
-        return "PHYSICS/SOLEIL/TWISS_ORBIT"
+        return "simulator/ringsimulator/ringsimulator"
 
     def _bpm_dev(self) -> str:
-        if self.prefix and "/" in self.prefix:
-            return f"{self.prefix}/BPM"
-        return "PHYSICS/SOLEIL/BPM"
+        return "simulator/ringsimulator/ringsimulator"
 
     def _tune_dev(self) -> str:
-        if self.prefix and "/" in self.prefix:
-            return f"{self.prefix}/TUNE"
-        return "PHYSICS/SOLEIL/TUNE"
+        return "simulator/ringsimulator/ringsimulator"
 
     async def push_orbit(self, orbit_result) -> None:
         """
