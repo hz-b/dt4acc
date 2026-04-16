@@ -97,6 +97,12 @@ def parse_args():
         default=50200,
         help="TCP port for the MexecService manager (default: 50200)",
     )
+    parser.add_argument(
+        "--view",
+    type=str,
+    default=os.environ.get("DT4ACC_VIEW", "design"),
+    help="Design or Device view"
+    )
     return parser.parse_args()
 
 
@@ -134,11 +140,12 @@ def main():
     # Import and configure server_manager
     from dt4acc.custom_tango.ioc import server_manager
 
-    server_manager.LATTICE_FILE      = args.lattice
-    server_manager.LOAD_MANAGERS_FN  = _soleil_load_managers
-    server_manager.HEARTBEAT_DEVICE  = args.heartbeat_device
-    server_manager.HEARTBEAT_ATTR    = args.heartbeat_attr
-    server_manager._MANAGER_PORT     = args.port
+    server_manager.LATTICE_FILE             = args.lattice
+    server_manager.LOAD_MANAGERS_FN         = _soleil_load_managers
+    server_manager.HEARTBEAT_DEVICE         = args.heartbeat_device
+    server_manager.HEARTBEAT_ATTR           = args.heartbeat_attr
+    server_manager._MANAGER_PORT            = args.port
+    server_manager.EXPECTED_VIEW            = args.view
 
     # Launch
     server_manager.main()
