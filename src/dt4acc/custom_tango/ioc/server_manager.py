@@ -70,7 +70,7 @@ LATTICE_FILE: Path = None
 # Callable that returns (yellow_pages, liaison_manager, translator_service)
 # Default: BESSY II / SOLEIL setup from liasion_translator_setup
 LOAD_MANAGERS_FN = None
-expected_view_for_output = "device"
+EXPECTED_VIEW = "device"
 # Heartbeat device and attribute
 HEARTBEAT_DEVICE = "AN01-AR/EM-QP/QF01.01"  # "an01-ar/em/cqln.03"
 HEARTBEAT_ATTR   = "magnetic_strength"
@@ -114,7 +114,7 @@ def _build_mexec():
     return TranslatingCommandExecutionEngine(
         backend=backend,
         cmd_rewriter=cmd_rewriter,
-        expected_view_for_output=expected_view_for_output,
+        expected_view_for_output=EXPECTED_VIEW,
         num_readings=1,
     )
 
