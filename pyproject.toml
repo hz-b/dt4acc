@@ -54,8 +54,8 @@ bessyii = [
     "lat2db"
 ]
 [project.scripts]
-dt4acc_softioc = "dt4acc_softioc:main"
-
+dt4acc_bessyii = "dt4acc.custom_facility.bessyii.run_bessyii_twin:main"
+dt4acc_soleil = "dt4acc.custom_facility.soleil.run_soleil_twin:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/dt4acc"]
