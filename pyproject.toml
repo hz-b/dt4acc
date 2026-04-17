@@ -23,8 +23,12 @@ classifiers = [
 
 dependencies = [
     "dt4acc-lib",
-    "transitions",
-    "accelerator-toolbox"
+    # for BESSY II
+    # actually required by custom bessyii
+    # currently bessyii load managers used by
+    # soleil too...
+    # these depend on yaml
+    "pyaml",
 ]
 
 # Todo: fix that I don't need to give a specific path
