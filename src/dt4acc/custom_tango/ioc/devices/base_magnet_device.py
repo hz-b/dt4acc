@@ -8,18 +8,19 @@ Each subclass exposes only the attributes relevant to its physical type.
 
 import asyncio
 
+from dt4acc_lib.model.utils import tango_resource_locator
 from tango import DevState, DevFailed
 from tango.server import Device, device_property
 
 from dt4acc.core.utils.logger import get_logger
-from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
 from dt4acc.custom_tango.ioc.controller_registry import get_controller
+from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
 
 logger = get_logger()
 
 
 def split_name(name: str):
-    """Split Soleil Tango device name 'AN10-AR/EM/SCF.11'."""
+    """Split Tango device name 'AN10-AR/EM/SCF.11'."""
     parts = name.split("/")
     if len(parts) != 3:
         raise DevFailed(f"Invalid magnet name '{name}'")
@@ -45,19 +46,14 @@ class BaseMagnetDevice(Device):
         self.set_state(DevState.INIT)
 
         full_name = self.get_name()
-        domain, family, member = split_name(full_name)
-
-        self.magnet_name = full_name
-        self.domain      = domain
-        self.family      = family
-        self.member      = member
+        self.trl = tango_resource_locator.TangoResourceLocator.from_trl(full_name)
 
         # UUID is the unique key into the pyAT lattice.
         # Falls back to member name if not set (shouldn't happen after registration).
-        self.lattice_id = self.element_uuid if self.element_uuid else self.member
+        self.lattice_id = self.element_uuid if self.element_uuid else self.trl.member
 
         logger.info("Initializing %s: %s lattice_id=%s",
-                    self.__class__.__name__, self.magnet_name, self.lattice_id)
+                    self.__class__.__name__, self.trl.as_trl(), self.lattice_id)
 
         self._loop = get_shared_event_loop()
         self.set_state(DevState.ON)

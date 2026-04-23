@@ -2,16 +2,9 @@
 virtual_devices.py
 ==================
 
-Single virtual Tango device for the SOLEIL digital twin:
+Single virtual Tango device for the digital twin:
 
     simulator/ringsimulator/ringsimulator  (RingSimulatorDevice)
-
-Replaces the previous separate devices:
-    PHYSICS/SOLEIL/TWISS_ORBIT
-    PHYSICS/SOLEIL/BPM
-    PHYSICS/SOLEIL/TUNE
-    PHYSICS/SOLEIL/MASTER_CLOCK
-    PHYSICS/SOLEIL/OTHERS
 """
 
 import asyncio

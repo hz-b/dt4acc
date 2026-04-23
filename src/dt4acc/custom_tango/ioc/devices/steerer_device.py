@@ -44,7 +44,7 @@ class HorizontalSteererDevice(BaseMagnetDevice):
     @command
     def reset(self) -> None:
         self._x = 0.0
-        logger.info("%s: reset", self.magnet_name)
+        logger.info("%s: reset", self.trl.as_trl())
         self.set_state(DevState.STANDBY)
 
     @command
@@ -54,9 +54,9 @@ class HorizontalSteererDevice(BaseMagnetDevice):
             vals = get_nominal_values(self.lattice_id)
             self._x = vals["x_kick"]
             logger.info("%s: RefreshFromCache done — x_kick=%.6f",
-                        self.magnet_name, self._x)
+                        self.trl.as_trl(), self._x)
         except Exception as exc:
-            logger.error("%s: RefreshFromCache failed: %s", self.magnet_name, exc)
+            logger.error("%s: RefreshFromCache failed: %s", self.trl.as_trl(), exc)
 
 
 class VerticalSteererDevice(BaseMagnetDevice):
@@ -83,7 +83,7 @@ class VerticalSteererDevice(BaseMagnetDevice):
     @command
     def reset(self) -> None:
         self._y = 0.0
-        logger.info("%s: reset", self.magnet_name)
+        logger.info("%s: reset", self.trl.as_trl())
         self.set_state(DevState.STANDBY)
 
     @command
@@ -93,6 +93,6 @@ class VerticalSteererDevice(BaseMagnetDevice):
             vals = get_nominal_values(self.lattice_id)
             self._y = vals["y_kick"]
             logger.info("%s: RefreshFromCache done — y_kick=%.6f",
-                        self.magnet_name, self._y)
+                        self.trl.as_trl(), self._y)
         except Exception as exc:
-            logger.error("%s: RefreshFromCache failed: %s", self.magnet_name, exc)
+            logger.error("%s: RefreshFromCache failed: %s", self.trl.as_trl(), exc)

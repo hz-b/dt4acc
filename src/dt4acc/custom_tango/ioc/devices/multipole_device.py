@@ -1,5 +1,5 @@
 """
-quad_sext_oct_device.py
+multipole_device.py
 ========================
 Tango device for Quadrupoles, Sextupoles, and Octupoles.
 Exposes: magnetic_strength (READ_WRITE) + magnetic_strength_readback (READ).
@@ -46,7 +46,7 @@ class QuadSextOctDevice(BaseMagnetDevice):
     def reset(self) -> None:
         self._magnetic_strength = 0.0
         self._magnetic_strength_readback = 0.0
-        logger.info("%s: reset", self.magnet_name)
+        logger.info("%s: reset", self.trl.as_trl())
         self.set_state(DevState.STANDBY)
 
     @command
@@ -58,6 +58,6 @@ class QuadSextOctDevice(BaseMagnetDevice):
             self._magnetic_strength = vals["main_strength"]
             self._magnetic_strength_readback = vals["main_strength"]
             logger.info("%s: RefreshFromCache done — strength=%.6f",
-                        self.magnet_name, self._magnetic_strength)
+                        self.trl.as_trl(), self._magnetic_strength)
         except Exception as exc:
-            logger.error("%s: RefreshFromCache failed: %s", self.magnet_name, exc)
+            logger.error("%s: RefreshFromCache failed: %s", self.trl.as_trl(), exc)

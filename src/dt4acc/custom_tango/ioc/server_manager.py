@@ -70,7 +70,7 @@ LATTICE_FILE: Path = None
 # Callable that returns (yellow_pages, liaison_manager, translator_service)
 LOAD_MANAGERS_FN = None
 
-# Expected view for output — "design" for SOLEIL (commands in lattice space)
+# Expected view for output — "design" for (commands in lattice space)
 EXPECTED_VIEW = "design"
 
 # Heartbeat — pure recalculation, no lattice writes, no noise

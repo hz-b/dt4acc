@@ -38,7 +38,7 @@ class CavityDevice(BaseMagnetDevice):
     @command
     def reset(self) -> None:
         self._frequency = 0.0
-        logger.info("%s: reset", self.magnet_name)
+        logger.info("%s: reset", self.trl.as_trl())
         self.set_state(DevState.STANDBY)
 
     @command
@@ -48,6 +48,6 @@ class CavityDevice(BaseMagnetDevice):
             vals = get_nominal_values(self.lattice_id)
             self._frequency = vals.get("frequency", 0.0)
             logger.info("%s: RefreshFromCache done — frequency=%.3f",
-                        self.magnet_name, self._frequency)
+                        self.trl.as_trl(), self._frequency)
         except Exception as exc:
-            logger.error("%s: RefreshFromCache failed: %s", self.magnet_name, exc)
+            logger.error("%s: RefreshFromCache failed: %s", self.trl.as_trl(), exc)

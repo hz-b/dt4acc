@@ -8,7 +8,7 @@ from dt4acc.config.data.querries import (
     get_unique_power_converters_type_specified,
 )
 
-from dt4acc.custom_tango.ioc.devices.quad_sext_oct_device import QuadSextOctDevice
+from dt4acc.custom_tango.ioc.devices.multipole_device import MultipoleDevice
 from dt4acc.custom_tango.ioc.devices.steerer_device import HorizontalSteererDevice, VerticalSteererDevice
 from dt4acc.custom_tango.ioc.devices.skew_quad_device import SkewQuadDevice
 from dt4acc.custom_tango.ioc.devices.cavity_device import CavityDevice
@@ -18,10 +18,10 @@ logger = get_logger()
 
 # Map JSON "type" field → Tango device class name
 _TYPE_TO_CLASS = {
-    "Quadrupole":    "QuadSextOctDevice",
-    "Sextupole":     "QuadSextOctDevice",
-    "Octupole":      "QuadSextOctDevice",
-    "Multipole":     "QuadSextOctDevice",
+    "Quadrupole":    "MultipoleDevice",
+    "Sextupole":     "MultipoleDevice",
+    "Octupole":      "MultipoleDevice",
+    "Multipole":     "MultipoleDevice",
     "Steerer":       None,   # determined by is_horizontal/is_vertical below
     "SkewQuadrupole": "SkewQuadDevice",
     "RFCavity":      "CavityDevice",
@@ -41,7 +41,7 @@ def _split_domain_family_member(device_name: str):
     """AN10-AR/EM/SCF.11 -> ('AN10-AR', 'EM', 'SCF.11')"""
     parts = device_name.split("/")
     if len(parts) != 3:
-        raise ValueError(f"Invalid Soleil device name: {device_name}")
+        raise ValueError(f"Invalid device name: {device_name}")
     return parts[0], parts[1], parts[2]
 
 
@@ -77,9 +77,9 @@ def _register_dservers(db: Database, servers: set[tuple[str, str]]):
 
 def register_all_devices():
     """
-    Register ALL Soleil devices in the Tango DB.
+    Register ALL devices in the Tango DB.
 
-    - Device *names* are the Soleil-style names (AN10-AR/EM/SCF.11, ...).
+    - Device *names* are the names (AN10-AR/EM/SCF.11, ...).
     - For each device name:
         domain  -> server_name
         family  -> instance_name
@@ -92,7 +92,7 @@ def register_all_devices():
     db = Database()
     unique_servers: set[tuple[str, str]] = set()
 
-    logger.info("📝 Registering ALL Soleil devices into Tango DB...")
+    logger.info("📝 Registering ALL devices into Tango DB...")
 
     # ------------------------------------------------------------
     # 1) Magnets — registered by Tango name, UUID stored as DB property
@@ -116,7 +116,7 @@ def register_all_devices():
                 if magnet_type == "Steerer":
                     class_name = _steerer_class(magnet_name)
                 else:
-                    class_name = _TYPE_TO_CLASS.get(magnet_type, "QuadSextOctDevice")
+                    class_name = _TYPE_TO_CLASS.get(magnet_type, "MultipoleDevice")
 
                 db_dev        = DbDevInfo()
                 db_dev._class = class_name
@@ -147,7 +147,7 @@ def register_all_devices():
             dev_name  = m["name"]
             dev_uuid  = m.get("uuid", "")
             dev_type  = m.get("type", "")
-            class_name = _TYPE_TO_CLASS.get(dev_type, "QuadSextOctDevice")
+            class_name = _TYPE_TO_CLASS.get(dev_type, "MultipoleDevice")
             try:
                 domain, family, _ = _split_domain_family_member(dev_name)
                 server_name   = domain
@@ -173,7 +173,7 @@ def register_all_devices():
                 logger.error("❌ Failed to register %s %s: %s", dev_type, dev_name, e)
 
     # ------------------------------------------------------------
-    # 3) Single RingSimulatorDevice — replaces all PHYSICS/SOLEIL/* devices
+    # 3) Single RingSimulatorDevice — replaces all devices
     # ------------------------------------------------------------
     try:
         domain, family, _ = _split_domain_family_member(RING_SIM_DEV)
@@ -205,7 +205,7 @@ def register_all_devices():
 def get_all_device_classes():
     """Return all device classes used by the servers."""
     return [
-        QuadSextOctDevice,
+        MultipoleDevice,
         HorizontalSteererDevice,
         VerticalSteererDevice,
         SkewQuadDevice,

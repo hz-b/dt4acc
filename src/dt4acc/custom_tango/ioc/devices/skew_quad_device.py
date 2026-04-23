@@ -45,7 +45,7 @@ class SkewQuadDevice(BaseMagnetDevice):
     @command
     def reset(self) -> None:
         self._skew_quad_strength = 0.0
-        logger.info("%s: reset", self.magnet_name)
+        logger.info("%s: reset", self.trl.as_trl())
         self.set_state(DevState.STANDBY)
 
     @command
@@ -55,6 +55,6 @@ class SkewQuadDevice(BaseMagnetDevice):
             vals = get_nominal_values(self.lattice_id)
             self._skew_quad_strength = vals.get("skew_quad_strength", 0.0)
             logger.info("%s: RefreshFromCache done — skew_quad_strength=%.6f",
-                        self.magnet_name, self._skew_quad_strength)
+                        self.trl.as_trl(), self._skew_quad_strength)
         except Exception as exc:
-            logger.error("%s: RefreshFromCache failed: %s", self.magnet_name, exc)
+            logger.error("%s: RefreshFromCache failed: %s", self.trl.as_trl(), exc)
