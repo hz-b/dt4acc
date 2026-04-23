@@ -148,8 +148,6 @@ Install required repositories (here shown for BESSY II:
    python3 -m pip install \
       "dt4acc-lib @ git+https://github.com/dt4acc/dt4acc-lib.git" \
       "dt4acc[epics,bessyii] @ git+https://github.com/dt4acc/dt4acc.git" 
-   pip install git+https://github.com/dt4acc/dt4acc-lib
-   pip install git+https://github.com/dt4acc/dt4acc
 
 Requirements:
 
