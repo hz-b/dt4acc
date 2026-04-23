@@ -64,6 +64,24 @@ class YellowPages(FamilyTree):
     def vertical_steerer_names(self) -> Sequence[str]:
         return self.get("vertical_steerers")
 
+    def skew_quad_names(self) -> Sequence[str]:
+        """Return names of all CQLN/CQLT skew quadrupole correctors on octupoles."""
+        return self.get("skew_quads")
+
+    def cavity_names(self) -> Sequence[str]:
+        return self.get("cavities")
+
+    def octupole_names(self) -> Sequence[str]:
+        return self.get("octupoles")
+
+
+    def skew_quad_host_id(self, element_name: str) -> str:
+        """
+        Return the host element ID for a given skew quad corrector name.
+        Returns "CQLN:<uuid>" or "CQLT:<uuid>" — parsed by accelerator_simulator.get().
+        """
+        return self._d["skew_quad_host_ids"][element_name]
+
 
 def soleil_yellow_pages() -> YellowPages:
     """
@@ -99,6 +117,15 @@ def soleil_yellow_pages() -> YellowPages:
         if e["type"] == "Steerer" and is_vertical(e)
     ]
 
+    # SkewQuadrupoles: CQLN/CQLT correctors on octupoles
+    # uuid in JSON is "CQLN:<host_uuid>" or "CQLT:<host_uuid>"
+    skew_quad_elements = [e for e in elements if e["type"] == "SkewQuadrupole"]
+    skew_quads = [e["name"] for e in skew_quad_elements]
+    # Map device name → prefixed host id e.g. "CQLN:OH2_QCORROCT_2_001"
+    skew_quad_host_ids = {e["name"]: e["uuid"] for e in skew_quad_elements}
+    cavities = [e["name"] for e in elements if e["type"] == "RFCavity"]
+    octupoles = [e["name"] for e in elements if e["type"] == "Octupole"]
+
     d = dict(
         quadrupoles=quadrupoles,
         sextupoles=sextupoles,
@@ -106,6 +133,10 @@ def soleil_yellow_pages() -> YellowPages:
         multipoles=multipoles,
         horizontal_steerers=horizontal_steerers,
         vertical_steerers=vertical_steerers,
+        skew_quads=skew_quads,
+        skew_quad_host_ids=skew_quad_host_ids,
+        cavities=cavities,
+        octupoles=octupoles
     )
 
     return YellowPages(d)

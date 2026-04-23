@@ -14,9 +14,9 @@ from typing import Dict, Sequence, Tuple, List
 import jsons
 import yaml
 
-from dt4acc.custom_facility.bessyii.model.config.elementmodel import MagnetElementSetup
-from dt4acc.custom_facility.bessyii.model.config.magnet import MagneticObject
-from dt4acc.custom_facility.bessyii.model.config.power_converter import PowerConverter
+from dt4acc.custom_facility.model.config.elementmodel import MagnetElementSetup
+from dt4acc.custom_facility.model.config.magnet import MagneticObject
+from dt4acc.custom_facility.model.config.power_converter import PowerConverter
 from dt4acc_lib.bl.yellow_pages import YellowPages
 from dt4acc_lib.bl.unit_conversion import EnergyDependentLinearUnitConversion
 from dt4acc_lib.interfaces.utils.yellow_pages import YellowPagesBase

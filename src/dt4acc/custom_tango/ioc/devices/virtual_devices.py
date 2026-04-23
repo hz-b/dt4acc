@@ -247,8 +247,3 @@ class RingSimulatorDevice(Device, AsyncMixin):
             logger.error("RingSimulatorDevice.Reset failed: %s", exc)
             self.set_state(DevState.FAULT)
             raise DevFailed(str(exc))
-
-
-def get_all_device_classes():
-    from dt4acc.custom_tango.ioc.devices.magnet_device import MagnetDevice
-    return [MagnetDevice, RingSimulatorDevice]

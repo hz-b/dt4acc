@@ -79,11 +79,13 @@ HEARTBEAT_PERIOD = 1.0
 
 
 def _get_load_managers():
-    """Return the load_managers callable, falling back to default if not set."""
-    if LOAD_MANAGERS_FN is not None:
-        return LOAD_MANAGERS_FN
-    from dt4acc.custom_facility.bessyii.liasion_translator_setup import load_managers
-    return load_managers
+    """Return the load_managers callable set by the launch script."""
+    if LOAD_MANAGERS_FN is None:
+        raise ValueError(
+            "LOAD_MANAGERS_FN not set — set server_manager.LOAD_MANAGERS_FN "
+            "in the launch script before calling main()"
+        )
+    return LOAD_MANAGERS_FN
 
 
 # ---------------------------------------------------------------------------
@@ -111,7 +113,7 @@ def _build_mexec():
         acc=PyATAcceleratorSimulator(at_lattice=acc),
     )
     load_managers = _get_load_managers()
-    _, lm, ts = load_managers()
+    lm, ts = load_managers()
 
     cmd_rewriter = CommandRewriter(liaison_manager=lm, translation_service=ts)
 
