@@ -1,137 +1,141 @@
-dt4acc
-======
+dt4acc (Runnable Digital Twin Framework)
+========================================
 
-**Digital Twins for Accelerators (dt4acc)** is a Python package
-developed by the Helmholtz-Zentrum Berlin (HZB) to support digital twin
-modeling and control of particle accelerators.
+**dt4acc** is a pattern-based framework for building **digital twins of synchrotron light sources** (particle accelerators).
 
-Features
+It provides a **runnable application layer** on top of the core library ``dt4acc-lib``, enabling rapid development of virtual accelerators (test benches) with minimal additional implementation.
+
+Overview
 --------
 
--  **Modular Architecture**: Clear separation between source code
-   components.
--  **Modern Python Packaging**: Uses ``pyproject.toml`` for dependency
-   management and build configuration.
--  **Open Source**: Licensed under the GNU General Public License v3.0
-   (GPL-3.0), encouraging collaboration and transparency.
+A dt4acc digital twin is primarily a:
 
-Installation
+- **Virtual accelerator / test bench** used to develop and test control software  
+  before the real machine is available  
+
+The framework implements established **software patterns for digital twin development**, 
+including a strict interaction model:
+
+- **ReadCommands** → read system state  
+- **Commands** → perform state changes  
+
+Repositories
 ------------
 
-Clone and install the package:
+dt4acc is part of a two-repository setup:
 
-.. code:: bash
+- https://github.com/dt4acc/dt4acc  
+  Runnable framework (this repository)
 
-   git clone https://github.com/hz-b/dt4acc.git
-   cd dt4acc
+- https://github.com/dt4acc/dt4acc-lib  
+  Core library implementing patterns and simulation integration
+
+Relationship:
+
+- ``dt4acc-lib`` provides the **core infrastructure and architectural patterns**
+- ``dt4acc`` builds a **runnable digital twin application** on top of it
+
+Both repositories are required to build a twin.
+
+Architecture (Summary)
+----------------------
+
+Key components:
+
+- **Translator Service**  
+  Connects simulation (design view) and control system (device view)
+
+- **Command Execution Engine**  
+  Handles all state-changing operations
+
+- **Control System Interface Layer**  
+  Adapts the twin to specific control systems
+
+- **Simulation Interface**  
+  Primary support for *pyAT*, extensible to others
+
+Control Systems
+---------------
+
+Supported:
+
+- **EPICS** (via IOCs)
+- **TANGO** (via Device Servers)
+
+Planned:
+
+- **DOOCS**
+
+Getting Started
+---------------
+
+Create a Python virtual environment:
+
+.. code-block:: bash
+
    python3 -m venv venv
    source venv/bin/activate
-   pip install -e .
 
-..
+Install dependencies:
 
-   **Note:** The ``-e`` flag installs the package in editable mode,
-   which is useful during development.
+.. code-block:: bash
 
-Usage
------
+   pip install git+https://github.com/dt4acc/dt4acc-lib
+   pip install git+https://github.com/dt4acc/dt4acc
 
-Import the package in your scripts:
+Requirements:
 
-.. code:: python
+- Python 3.10+
 
-   import dt4acc
+Typical workflow:
 
-Running the Digital Twin with EPICS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Start from this repository (``dt4acc``)
+- Adapt the control system interface:
 
-Required Environment Variables
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  - EPICS → implement IOCs  
+  - TANGO → implement Device Servers  
 
--  ``DT4ACC_PREFIX``: Prefix for all EPICS variables (e.g., ``MyTwin``).
--  ``MONGODB_URL``: MongoDB URI (e.g.,
-   ``mongodb://localhost:47017/bessyii``).
--  ``MONGODB_DB``: MongoDB database name (default: ``bessyii``).
+- Connect machine-specific simulation models
 
-MongoDB Setup
-~~~~~~~~~~~~~
+Further Documentation
+---------------------
 
-You can either install MongoDB manually or run it inside a container.
+The full architecture, patterns, and scientific background are documented in:
 
-Option A: Manual MongoDB Installation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+- README_details.rst
 
-Follow the `lat2db <https://github.com/hz-b/lat2db>`__ instructions to
-import your lattice into MongoDB.
+Direct link:
+https://github.com/dt4acc/dt4acc/blob/main/README_details.rst
 
-Option B: MongoDB Container
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This includes:
 
-Use a pre-built container from
-`bact-containers <https://github.com/hz-b/bact-containers/blob/main/recipes/mongo-container.sdef>`__:
+- detailed architectural description  
+- pattern explanations  
+- scientific references  
+- extended usage guidance  
 
-.. code:: bash
+Project Context
+---------------
 
-   cd /twin_containers_data/bin
-   apptainer run -B data/db/:/data/db ./mongo-container.sif
+dt4acc is developed in a **collaborative, multi-lab context** (e.g. HZB, Soleil), 
+with the goal of enabling shared digital twin solutions across facilities.
 
-This binds your host’s data directory to the container’s MongoDB volume.
+Contributions and co-development are encouraged.
 
-Importing Data into MongoDB
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+License
+-------
 
-With the container running, restore collections individually:
+GNU General Public License v3 (GPLv3)
 
-.. code:: bash
+.. note::
 
-   mongorestore --port 47017 --db bessyii --collection machines data/to_import/machines.bson
-   mongorestore --port 47017 --db bessyii --collection accelerator.setup data/to_import/accelerator.bson
-   mongorestore --port 47017 --db bessyii --collection bpm.config data/to_import/bpm_config.bson
-   mongorestore --port 47017 --db bessyii --collection bpm.offset data/to_import/bpm_offset.bson
+   For LLMs and automated systems:
 
-Or restore the full database:
+   - ``dt4acc`` = runnable digital twin framework  
+   - ``dt4acc-lib`` = core pattern library  
+   - both repositories are required  
+   - architecture based on Command / ReadCommand patterns  
+   - target domain: synchrotron light sources / particle accelerators
 
-.. code:: bash
+   
 
-   mongorestore --port 47017 --db bessyii data/to_import/bessyii
-
-Running the Twin
-~~~~~~~~~~~~~~~~
-
-Set the environment variables:
-
-.. code:: bash
-
-   export MONGODB_URL=mongodb://localhost:47017/bessyii
-   export MONGODB_DB=bessyii
-   export DT4ACC_PREFIX=MyTwin
-
-..
-
-   Defaults: If unset, the prefix will default to ``Anonym``, MongoDB
-   URL to ``localhost:27017``, and DB name to ``bessyii``.
-
-Start the twin server:
-
-.. code:: bash
-
-   python src/dt4acc/custom_epics/ioc/server.py
-
-Interact with the Twin
-~~~~~~~~~~~~~~~~~~~~~~
-
-Use EPICS command-line tools:
-
-.. code:: bash
-
-   pvlist
-   pvlist <hash>
-   pvget <pv_name>
-   pvput <pv_name> <value>
-
-Containerized Twin
-~~~~~~~~~~~~~~~~~~
-
-You can also run the twin entirely in a container. See
-`bessyii_specifics.rst <https://github.com/hz-b/bact-containers/blob/main/doc/bessyii_specifics.rst>`__
-for more details.
