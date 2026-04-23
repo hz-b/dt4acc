@@ -48,6 +48,9 @@ def get_magnets():
     wanted = {"Quadrupole", "Sextupole", "Steerer", "RFCavity"}
     return (d for d in _DATA if _match(d, "type", wanted))
 
+def get_cavity_names() -> List[str]:
+    wanted = {"RFCavity"}
+    return [d.uuid for d in _DATA if _match(d, "type", wanted)]
 
 def get_magnets_per_power_converters(pc: str) -> List[Dict[str, Any]]:
     """Return all magnets driven by the given power-converter name."""

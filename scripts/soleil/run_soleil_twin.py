@@ -27,7 +27,7 @@ Environment variables (all optional, CLI args take precedence)
 --------------------------------------------------------------
     DT4ACC_LATTICE_FILE   Path to the SOLEIL AT lattice .m file
     DT4ACC_TANGO_HOST     Tango database host:port  (default: localhost:10000)
-    DT4ACC_HEARTBEAT_DEV  Magnet device used for heartbeat writes
+    DT4ACC_VIEW           Design or Device view (default: design)
 """
 
 import argparse
@@ -39,8 +39,8 @@ from pathlib import Path
 # Resolve paths — script lives at scripts/soleil/, src is two levels up
 # ---------------------------------------------------------------------------
 
-SCRIPTS_DIR = Path(__file__).resolve().parent          # scripts/soleil/
-ROOT_DIR    = SCRIPTS_DIR.parent.parent                 # project root
+SCRIPTS_DIR = Path(__file__).resolve().parent
+ROOT_DIR    = SCRIPTS_DIR.parent.parent
 SRC_DIR     = ROOT_DIR / "src"
 
 if str(SRC_DIR) not in sys.path:
@@ -57,8 +57,9 @@ DEFAULT_LATTICE_FILE = (
     / "SOLEIL_II_V3635_STAB_SYM1_SB3_MULT7_4SX60_V001_Nomenclature.m"
 )
 
-DEFAULT_HEARTBEAT_DEVICE = "AN01-AR/EM-QP/QF01.01"
-DEFAULT_HEARTBEAT_ATTR   = "magnetic_strength"
+# Calculation heartbeat: recalculates twiss+orbit+tune every N seconds
+# WITHOUT changing the lattice — zero noise, reflects current state
+DEFAULT_HEARTBEAT_PERIOD_S = 1.0
 
 
 # ---------------------------------------------------------------------------
@@ -73,8 +74,7 @@ def parse_args():
         "--lattice",
         type=Path,
         default=Path(os.environ.get("DT4ACC_LATTICE_FILE", DEFAULT_LATTICE_FILE)),
-        help="Path to the SOLEIL AT lattice .m file "
-             f"(default: {DEFAULT_LATTICE_FILE})",
+        help=f"Path to the SOLEIL AT lattice .m file (default: {DEFAULT_LATTICE_FILE})",
     )
     parser.add_argument(
         "--tango-host",
@@ -82,14 +82,10 @@ def parse_args():
         help="Tango database host:port (default: localhost:10000)",
     )
     parser.add_argument(
-        "--heartbeat-device",
-        default=os.environ.get("DT4ACC_HEARTBEAT_DEV", DEFAULT_HEARTBEAT_DEVICE),
-        help=f"Magnet device for heartbeat writes (default: {DEFAULT_HEARTBEAT_DEVICE})",
-    )
-    parser.add_argument(
-        "--heartbeat-attr",
-        default=DEFAULT_HEARTBEAT_ATTR,
-        help=f"Attribute to write for heartbeat (default: {DEFAULT_HEARTBEAT_ATTR})",
+        "--heartbeat-period",
+        type=float,
+        default=DEFAULT_HEARTBEAT_PERIOD_S,
+        help=f"Recalculation period in seconds, 0 to disable (default: {DEFAULT_HEARTBEAT_PERIOD_S})",
     )
     parser.add_argument(
         "--port",
@@ -99,9 +95,9 @@ def parse_args():
     )
     parser.add_argument(
         "--view",
-    type=str,
-    default=os.environ.get("DT4ACC_VIEW", "design"),
-    help="Design or Device view"
+        type=str,
+        default=os.environ.get("DT4ACC_VIEW", "design"),
+        help="Design or Device view (default: design)",
     )
     return parser.parse_args()
 
@@ -123,31 +119,27 @@ def _soleil_load_managers():
 def main():
     args = parse_args()
 
-    # Validate lattice file
     if not args.lattice.exists():
         print(f"ERROR: Lattice file not found: {args.lattice}", file=sys.stderr)
         sys.exit(1)
 
-    print(f"SOLEIL twin server starting")
-    print(f"  Lattice : {args.lattice}")
-    print(f"  TANGO   : {args.tango_host}")
-    print(f"  Heartbeat: {args.heartbeat_device}.{args.heartbeat_attr}")
-    print(f"  MexecPort: {args.port}")
+    print("SOLEIL twin server starting")
+    print(f"  Lattice          : {args.lattice}")
+    print(f"  TANGO            : {args.tango_host}")
+    print(f"  Recalc period    : {args.heartbeat_period}s (no lattice changes)")
+    print(f"  MexecPort        : {args.port}")
+    print(f"  View             : {args.view}")
 
-    # Set TANGO_HOST before importing anything that touches Tango
     os.environ["TANGO_HOST"] = args.tango_host
 
-    # Import and configure server_manager
     from dt4acc.custom_tango.ioc import server_manager
 
-    server_manager.LATTICE_FILE             = args.lattice
-    server_manager.LOAD_MANAGERS_FN         = _soleil_load_managers
-    server_manager.HEARTBEAT_DEVICE         = args.heartbeat_device
-    server_manager.HEARTBEAT_ATTR           = args.heartbeat_attr
-    server_manager._MANAGER_PORT            = args.port
-    server_manager.EXPECTED_VIEW            = args.view
+    server_manager.LATTICE_FILE      = args.lattice
+    server_manager.LOAD_MANAGERS_FN  = _soleil_load_managers
+    server_manager.HEARTBEAT_PERIOD  = args.heartbeat_period
+    server_manager._MANAGER_PORT     = args.port
+    server_manager.EXPECTED_VIEW     = args.view
 
-    # Launch
     server_manager.main()
 
 

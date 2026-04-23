@@ -68,12 +68,14 @@ _MANAGER_AUTHKEY = b"dt4acc-tango-secret"
 LATTICE_FILE: Path = None
 
 # Callable that returns (yellow_pages, liaison_manager, translator_service)
-# Default: BESSY II / SOLEIL setup from liasion_translator_setup
 LOAD_MANAGERS_FN = None
-EXPECTED_VIEW = "device"
-# Heartbeat device and attribute
-HEARTBEAT_DEVICE = "AN01-AR/EM-QP/QF01.01"  # "an01-ar/em/cqln.03"
-HEARTBEAT_ATTR   = "magnetic_strength"
+
+# Expected view for output — "design" for SOLEIL (commands in lattice space)
+EXPECTED_VIEW = "design"
+
+# Heartbeat — pure recalculation, no lattice writes, no noise
+# Set by the launch script. Period in seconds (0 = disabled).
+HEARTBEAT_PERIOD = 1.0
 
 
 def _get_load_managers():
@@ -100,10 +102,12 @@ def _build_mexec():
 
     filename = LATTICE_FILE
     if filename is None:
-        raise ValueError("LATTICE_FILE not set — call configure() or set server_manager.LATTICE_FILE before main()")
+        raise ValueError(
+            "LATTICE_FILE not set — set server_manager.LATTICE_FILE before main()"
+        )
     acc = at.load_m(filename)
     backend = SimulatorBackend(
-        name="Facility speficic PYAT",
+        name="Facility specific PYAT",
         acc=PyATAcceleratorSimulator(at_lattice=acc),
     )
     load_managers = _get_load_managers()
@@ -122,10 +126,6 @@ def _build_mexec():
 def _run_mexec_service():
     """
     Entry point for the MexecService process.
-
-    Starts a persistent asyncio event loop so that the backend's
-    state-machine tasks (DelayExecution etc.) fire between RPC calls.
-    Exposes SyncMexecProxy via multiprocessing.managers.
     """
     import logging
     logging.getLogger("transitions").setLevel(logging.WARNING)
@@ -139,16 +139,12 @@ def _run_mexec_service():
 
     threading.Thread(target=_run_loop, daemon=True, name="mexec-service-loop").start()
 
-    # Build mexec on the service loop so its internals are bound to it
     future = asyncio.run_coroutine_threadsafe(_async_build_mexec(), service_loop)
     mexec = future.result(timeout=120)
     logger.warning("MexecService: lattice ready, mexec built.")
 
     class SyncMexecProxy:
-        """
-        Synchronous wrapper around mexec for crossing the process boundary.
-        All async calls are submitted to the service loop and block until done.
-        """
+        """Synchronous wrapper around mexec for crossing the process boundary."""
 
         def sync_set(self, cmd_id: str, cmd_property: str, value: float):
             cmd = Command(
@@ -163,10 +159,6 @@ def _run_mexec_service():
             return fut.result(timeout=30)
 
         def sync_trigger_read(self, rcmd_ids: Sequence[str], rcmd_properties: Sequence[str]):
-            """
-            Accepts plain strings (serialisable across process boundary).
-            Returns a list of (name, payload) tuples — simple pickable data.
-            """
             rcmds = [
                 ReadCommand(id=i, property=p)
                 for i, p in zip(rcmd_ids, rcmd_properties)
@@ -175,7 +167,6 @@ def _run_mexec_service():
                 mexec.trigger_read(rcmds), service_loop
             )
             result = fut.result(timeout=30)
-            # Return only picklable data: list of (rcmd_id, rcmd_property, payload)
             out = []
             for translated in result.data:
                 for reading in translated.readings:
@@ -184,12 +175,10 @@ def _run_mexec_service():
 
         def sync_reset(self):
             """
-            Reset the backend to nominal state:
-            1. Reload the AT lattice from the original .m file
-            2. Clear the error state → pending
-            3. Clear stored optics so next read recalculates fresh
-
-            Called by TwissOrbitDevice.Reset command via the Tango process.
+            Reset backend to nominal state:
+            1. Reload AT lattice from .m file
+            2. Clear error state → pending
+            3. Clear stored optics
             """
             import at
             logger.warning("SyncMexecProxy.sync_reset: reloading lattice from file...")
@@ -251,52 +240,67 @@ def _wait_for_heartbeat_start(start_evt, stop_evt):
             logger.warning("%.1f min: waiting for tango devices to start", dt)
 
 
-def _magnet_heartbeat(
-        start_evt, stop_evt,
-        device_name="an01-ar/em/cqln.03",
-        attr_name="magnetic_strength",
-        delta=0.001,
-        period_s=1.0,
-        wait_connect_s=5.0,
-):
+# ---------------------------------------------------------------------------
+# Calculation heartbeat — no writes, no lattice perturbation
+# ---------------------------------------------------------------------------
+
+def _wait_for_heartbeat_start(start_evt, stop_evt):
+    start = time.time()
+    for cnt in itertools.count():
+        if start_evt.is_set():
+            return True
+        if stop_evt.is_set():
+            return False
+        time.sleep(0.2)
+        if (cnt % (5 * 30)) == 0:
+            dt = (time.time() - start) / 60
+            logger.warning("%.1f min: waiting for tango devices to start", dt)
+
+
+def _calculation_heartbeat(start_evt, stop_evt, period_s=1.0):
+    """
+    Heartbeat that triggers a full twiss+orbit+tune recalculation every
+    period_s seconds WITHOUT writing to or changing the lattice.
+
+    The calculation uses the current lattice state — so:
+    - On startup it reflects nominal values
+    - After a magnet write it reflects the changed lattice
+    - Between writes it is stable and does not add any noise
+
+    Results are pushed to RingSimulatorDevice via the TangoController
+    queue — the same path as a normal magnet write.
+    """
     if not _wait_for_heartbeat_start(start_evt, stop_evt):
-        logger.warning("Heartbeat exiting before devices ready.")
+        logger.warning("Calculation heartbeat exiting before devices ready.")
         return
 
-    logger.warning("Heartbeat: connecting to %s", device_name)
-    dev, base, sign = None, None, +1.0
+    logger.warning("Calculation heartbeat started — recalculating every %.1fs", period_s)
 
+    # Connect to the RingSimulatorDevice to trigger recalculation via Recalculate command
+    from tango import DeviceProxy, DevFailed
+    from dt4acc.custom_tango.ioc.devices.virtual_devices import RING_SIM_DEV
+
+    dev = None
     while not stop_evt.is_set():
         try:
-            dev = DeviceProxy(device_name)
-            base = float(dev.read_attribute(attr_name).value)
-            logger.warning("Heartbeat: %s reachable, base=%.6f", device_name, base)
+            dev = DeviceProxy(RING_SIM_DEV)
+            dev.ping()
+            logger.warning("Calculation heartbeat: %s reachable", RING_SIM_DEV)
             break
-        except DevFailed as e:
-            logger.warning("Heartbeat DevFailed: %s", e)
-        except Exception as e:
-            logger.error("Heartbeat connect error: %s", e)
-        stop_evt.wait(wait_connect_s)
+        except Exception as exc:
+            logger.warning("Calculation heartbeat: waiting for %s: %s", RING_SIM_DEV, exc)
+            stop_evt.wait(5.0)
 
     if stop_evt.is_set():
         return
 
     while not stop_evt.is_set():
         try:
-            dev.write_attribute(attr_name, float(base + sign * delta))
-            sign *= -1.0
-        except DevFailed as e:
-            logger.warning("Heartbeat write failed: %s", e)
-            while not stop_evt.is_set():
-                try:
-                    base = float(dev.read_attribute(attr_name).value)
-                    break
-                except Exception as e:
-                    logger.warning("Heartbeat reconnect: %s", e)
-                stop_evt.wait(wait_connect_s)
-        except Exception as e:
-            logger.error("Heartbeat error: %s", e)
-            stop_evt.wait(1.0)
+            dev.command_inout("Recalculate")
+        except DevFailed as exc:
+            logger.warning("Calculation heartbeat: Recalculate failed: %s", exc)
+        except Exception as exc:
+            logger.error("Calculation heartbeat error: %s", exc)
         stop_evt.wait(period_s)
 
 
@@ -306,8 +310,8 @@ def _magnet_heartbeat(
 
 @dataclass
 class ProcessMonitor:
-    event: Any  # multiprocessing.synchronize.Event
-    process: Any  # multiprocessing.process.BaseProcess
+    event: Any
+    process: Any
     server_name: str
     instance_name: str
 
@@ -345,7 +349,7 @@ def _wait_all_started(monitors: Sequence[ProcessMonitor]) -> bool:
 def main():
     os.environ.setdefault("TANGO_HOST", "localhost:10000")
 
-    # 1. Start the MexecService — loads lattice ONCE, serves via TCP socket
+    # 1. Start MexecService
     svc_proc = mp.Process(
         target=_run_mexec_service,
         name="mexec-service",
@@ -391,23 +395,21 @@ def main():
         ))
         time.sleep(0.3)
 
-    # 4. Heartbeat thread — starts writing to a magnet once all devices are up
+    # 4. Calculation heartbeat — recalculates twiss+orbit+tune every second
+    #    without writing to or changing the lattice (zero noise)
     start_evt = threading.Event()
-    stop_evt = threading.Event()
-    hb = threading.Thread(
-        target=_magnet_heartbeat,
-        args=(start_evt, stop_evt),
-        kwargs=dict(
-            device_name=HEARTBEAT_DEVICE,
-            attr_name=HEARTBEAT_ATTR,
-            delta=0.001,
-            period_s=1.0,
-            wait_connect_s=5.0,
-        ),
-        daemon=True,
-        name="magnet-heartbeat",
-    )
-    hb.start()
+    stop_evt  = threading.Event()
+    if HEARTBEAT_PERIOD > 0:
+        hb = threading.Thread(
+            target=_calculation_heartbeat,
+            args=(start_evt, stop_evt),
+            kwargs=dict(period_s=HEARTBEAT_PERIOD),
+            daemon=True,
+            name="calculation-heartbeat",
+        )
+        hb.start()
+    else:
+        logger.warning("Calculation heartbeat disabled (HEARTBEAT_PERIOD=0)")
 
     def _shutdown(*_):
         logger.warning("Shutting down.")

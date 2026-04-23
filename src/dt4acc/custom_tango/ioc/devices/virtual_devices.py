@@ -2,7 +2,16 @@
 virtual_devices.py
 ==================
 
+Single virtual Tango device for the SOLEIL digital twin:
+
     simulator/ringsimulator/ringsimulator  (RingSimulatorDevice)
+
+Replaces the previous separate devices:
+    PHYSICS/SOLEIL/TWISS_ORBIT
+    PHYSICS/SOLEIL/BPM
+    PHYSICS/SOLEIL/TUNE
+    PHYSICS/SOLEIL/MASTER_CLOCK
+    PHYSICS/SOLEIL/OTHERS
 """
 
 import asyncio
@@ -12,8 +21,8 @@ from tango.server import Device, attribute, command, AttrDataFormat, device_prop
 
 from dt4acc_lib.model.utils.command import Command, BehaviourOnError, ReadCommand
 from dt4acc.core.utils.logger import get_logger
-from .shared_event_loop import get_shared_event_loop
-from ...ioc.controller_registry import get_controller
+from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
+from dt4acc.custom_tango.ioc.controller_registry import get_controller
 
 logger = get_logger()
 
@@ -205,6 +214,25 @@ class RingSimulatorDevice(Device, AsyncMixin):
         self.push_change_event("nu_y", arr)
 
     # Reset
+    @command
+    def Recalculate(self):
+        """
+        Trigger a fresh twiss+orbit+tune calculation on the CURRENT lattice
+        state without changing anything.
+
+        Called by the calculation heartbeat every second, and can also be
+        called manually after a measurement to get an updated result.
+        Does NOT perturb the lattice — zero noise.
+        """
+        try:
+            self._async(
+                get_controller()._enqueue(
+                    list(get_controller().default_delayed_reads)
+                )
+            )
+        except Exception as exc:
+            logger.debug("RingSimulatorDevice.Recalculate: %s", exc)
+
     @command
     def Reset(self):
         """Reset the digital twin to nominal state after beam loss."""

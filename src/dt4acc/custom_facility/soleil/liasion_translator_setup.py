@@ -12,8 +12,8 @@ from dt4acc_lib.interfaces.utils.translator_service import TranslatorServiceBase
 from dt4acc_lib.interfaces.utils.yellow_pages import YellowPagesBase
 from dt4acc_lib.model.utils.identifiers import LatticeElementPropertyID, DevicePropertyID, ConversionID
 
-from data.constants import ring_parameters, cavity_names
-from data.querries import get_magnets
+from dt4acc.config.data.constants import ring_parameters
+from dt4acc.config.data.querries import get_magnets, get_cavity_names as cavity_names
 from dt4acc.custom_facility.bessyii.model.config.elementmodel import MagnetElementSetup
 from dt4acc.custom_facility.soleil.soleil_yellow_pages import soleil_yellow_pages
 
@@ -292,7 +292,7 @@ def build_managers():
             DevicePropertyID(device_name=name, property="frequency"): (
                 LatticeElementPropertyID(element_name=name, property="frequency"),
             )
-            for name in cavity_names
+            for name in cavity_names()
         }
     )
     inverse_lut.update(
@@ -302,7 +302,7 @@ def build_managers():
             ): tuple(
                 [
                     LatticeElementPropertyID(element_name=name, property="frequency")
-                    for name in cavity_names
+                    for name in cavity_names()
                 ]
             )
         }
@@ -405,7 +405,7 @@ def build_managers():
             ): LinearUnitConversion(
                 slope=1e-3, intercept=0.0
             )  # BESSY II uses kHz for the cavities clock
-            for name in cavity_names
+            for name in cavity_names()
         }
     )
 
@@ -419,7 +419,7 @@ def build_managers():
             ): LinearUnitConversion(
                 slope=1e-3, intercept=0.0
             )  # BESSY II uses kHz for the master clock
-            for name in cavity_names
+            for name in cavity_names()
         }
     )
 
