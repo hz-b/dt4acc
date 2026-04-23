@@ -522,7 +522,7 @@ def build_managers():
     )
 
     tm = TranslatorService(translator_lut)
-    return lm, tm
+    return yp, lm, tm
 
 
 if __name__ == "__main__":

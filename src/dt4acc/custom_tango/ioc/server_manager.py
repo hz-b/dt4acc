@@ -113,7 +113,7 @@ def _build_mexec():
         acc=PyATAcceleratorSimulator(at_lattice=acc),
     )
     load_managers = _get_load_managers()
-    lm, ts = load_managers()
+    _, lm, ts = load_managers()
 
     cmd_rewriter = CommandRewriter(liaison_manager=lm, translation_service=ts)
 

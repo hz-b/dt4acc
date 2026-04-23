@@ -14,7 +14,7 @@ from dt4acc.core.utils.logger import get_logger
 logger = get_logger()
 
 
-class QuadSextOctDevice(BaseMagnetDevice):
+class MultipoleDevice(BaseMagnetDevice):
     """
     Tango device for Quadrupoles, Sextupoles, and Octupoles.
     Only exposes magnetic_strength and its readback.
