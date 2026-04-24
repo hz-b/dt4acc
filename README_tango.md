@@ -8,7 +8,7 @@ and the `dt4acc_lib` accelerator model library.
 ## Architecture Overview
 
 ```
-scripts/soleil/run_soleil_twin.py       ← SOLEIL launch script (facility config)
+src/dt4acc/custom_facility/soleil/run_soleil_twin.py  ← SOLEIL launch script (facility config)
     │
     └── dt4acc.custom_tango.ioc.server_manager.main()
             │
@@ -19,7 +19,7 @@ scripts/soleil/run_soleil_twin.py       ← SOLEIL launch script (facility confi
             │
             ├── TangoServerProcess × N  (one per domain/family)
             │     Each connects to MexecService.
-            │     Runs tango.server.run([MultipoleDevice, ...])
+            │     Runs tango.server.run([QuadSextOctDevice, ...])
             │
             └── calculation-heartbeat-thread
                   Calls RingSimulatorDevice.Recalculate() every second.
@@ -28,14 +28,14 @@ scripts/soleil/run_soleil_twin.py       ← SOLEIL launch script (facility confi
 
 ### Device classes
 
-| Class                     | JSON type | Attributes |
-|---------------------------|---|---|
-| `MultipoleDevice`         | Quadrupole, Sextupole, Octupole | `magnetic_strength`, `magnetic_strength_readback` |
+| Class | JSON type | Attributes |
+|---|---|---|
+| `QuadSextOctDevice` | Quadrupole, Sextupole, Octupole | `magnetic_strength`, `magnetic_strength_readback` |
 | `HorizontalSteererDevice` | Steerer (CDLH/CDRH) | `x_kick` |
-| `VerticalSteererDevice`   | Steerer (CDLV/CDRV) | `y_kick` |
-| `SkewQuadDevice`          | SkewQuadrupole (CQLN/CQLT) | `skew_quad_strength` |
-| `CavityDevice`            | RFCavity | `frequency` |
-| `RingSimulatorDevice`     | — | `orbit_x/y`, `beta/alpha/nu_x/y`, `bpm_x/y_attr`, `hor`, `vert`, `reference_frequency` |
+| `VerticalSteererDevice` | Steerer (CDLV/CDRV) | `y_kick` |
+| `SkewQuadDevice` | SkewQuadrupole (CQLN/CQLT) | `skew_quad_strength` |
+| `CavityDevice` | RFCavity | `frequency` |
+| `RingSimulatorDevice` | — | `orbit_x/y`, `beta/alpha/nu_x/y`, `bpm_x/y_attr`, `hor`, `vert`, `reference_frequency` |
 
 ### Single virtual device
 
@@ -67,6 +67,13 @@ The Tango database runs inside an Apptainer container provided by SOLEIL:
 apptainer run oras://gitlab-registry.synchrotron-soleil.fr/software-control-system/containers/apptainer/tango:latest
 ```
 
+Verify it is reachable:
+
+```bash
+export TANGO_HOST=localhost:10000
+tango_admin --ping-database
+```
+
 ---
 
 ## Step 2 — Prepare the JSON database
@@ -74,7 +81,7 @@ apptainer run oras://gitlab-registry.synchrotron-soleil.fr/software-control-syst
 If you have updated the YAML lattice file, regenerate the JSON:
 
 ```bash
-cd scripts/soleil
+cd src/dt4acc/custom_facility/soleil
 python yml2json_soleil.py
 # Output: accelerator_setup.json
 # Move it to ~/Documents/dt4acc_soleil_twin_data/
@@ -88,13 +95,13 @@ When device names or types have changed, wipe all existing dt4acc devices before
 
 ```bash
 # Preview what will be deleted (safe — no changes)
-python scripts/soleil/cleanup_tango_db.py --dry-run
+python src/dt4acc/custom_facility/soleil/cleanup_tango_db.py --dry-run
 
 # Delete everything
-python scripts/soleil/cleanup_tango_db.py --yes
+python src/dt4acc/custom_facility/soleil/cleanup_tango_db.py --yes
 ```
 
-This removes all `MultipoleDevice`, `HorizontalSteererDevice`, `VerticalSteererDevice`,
+This removes all `QuadSextOctDevice`, `HorizontalSteererDevice`, `VerticalSteererDevice`,
 `SkewQuadDevice`, `CavityDevice`, and `RingSimulatorDevice` registrations, plus their
 server entries. Old class names (`MagnetDevice`, `TwissOrbitDevice`, etc.) are also
 cleaned up.
@@ -109,18 +116,21 @@ source venv_acc/bin/activate
 
 # Default — uses the standard lattice path:
 # ~/Documents/dt4acc_soleil_twin_data/SOLEIL_II_V3635_...m
-python scripts/soleil/run_soleil_twin.py
+python -m dt4acc.custom_facility.soleil.run_soleil_twin
 
 # Custom lattice file
-python scripts/soleil/run_soleil_twin.py \
+python -m dt4acc.custom_facility.soleil.run_soleil_twin \
     --lattice /path/to/SOLEIL_II_lattice.m
 
+# Custom TANGO host
+python -m dt4acc.custom_facility.soleil.run_soleil_twin \
+    --tango-host tango-db.soleil.fr:10000
 
 # Slower heartbeat (recalculate every 5s instead of 1s)
-python scripts/soleil/run_soleil_twin.py --heartbeat-period 5
+python -m dt4acc.custom_facility.soleil.run_soleil_twin --heartbeat-period 5
 
 # Disable heartbeat entirely (manual Recalculate only)
-python scripts/soleil/run_soleil_twin.py --heartbeat-period 0
+python -m dt4acc.custom_facility.soleil.run_soleil_twin --heartbeat-period 0
 ```
 
 On startup the server prints:
@@ -215,6 +225,9 @@ src/dt4acc/
 │       └── querries.py               ← JSON database access
 ├── custom_facility/
 │   └── soleil/
+│       ├── run_soleil_twin.py            ← SOLEIL launch script
+│       ├── cleanup_tango_db.py           ← wipe Tango DB before restart
+│       ├── yml2json_soleil.py            ← YAML → JSON converter
 │       ├── liasion_translator_setup.py   ← SOLEIL liaison + translator
 │       └── soleil_yellow_pages.py        ← SOLEIL element name registry
 └── custom_tango/
@@ -231,11 +244,10 @@ src/dt4acc/
             ├── virtual_devices.py        ← RingSimulatorDevice
             └── tango_device_setup.py     ← DB registration
 
-scripts/
-└── soleil/
-    ├── run_soleil_twin.py            ← SOLEIL launch script
-    ├── cleanup_tango_db.py           ← wipe Tango DB before restart
-    └── yml2json_soleil.py            ← YAML → JSON converter
+src/dt4acc/custom_facility/soleil/
+    ├── run_soleil_twin.py        ← SOLEIL launch script
+    ├── cleanup_tango_db.py       ← wipe Tango DB before restart
+    └── yml2json_soleil.py        ← YAML → JSON converter
 ```
 
 ---
@@ -244,9 +256,9 @@ scripts/
 
 To run the digital twin for a different facility:
 
-1. Create `scripts/<facility>/run_<facility>_twin.py` — set `LATTICE_FILE`,
+1. Create `src/dt4acc/custom_facility/<facility>/run_<facility>_twin.py` — set `LATTICE_FILE`,
    `LOAD_MANAGERS_FN`, and `HEARTBEAT_PERIOD`.
-2. Create `src/dt4acc/custom_facility/<facility>/liasion_translator_setup.py`
+2. Add `src/dt4acc/custom_facility/<facility>/liasion_translator_setup.py`
    with facility-specific `build_managers()` and `load_managers()`.
 3. Create `src/dt4acc/custom_facility/<facility>/<facility>_yellow_pages.py`
    with element name lists.
