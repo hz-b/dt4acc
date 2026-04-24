@@ -29,6 +29,7 @@ dependencies = [
     # soleil too...
     # these depend on yaml
     "pyaml",
+    "pydantic",
 ]
 
 # Todo: fix that I don't need to give a specific path
