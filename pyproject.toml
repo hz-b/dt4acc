@@ -23,8 +23,12 @@ classifiers = [
 
 dependencies = [
     "dt4acc-lib",
-    "transitions",
-    "accelerator-toolbox"
+    # for BESSY II
+    # actually required by custom bessyii
+    # currently bessyii load managers used by
+    # soleil too...
+    # these depend on yaml
+    "pyaml",
 ]
 
 # Todo: fix that I don't need to give a specific path
@@ -54,8 +58,8 @@ bessyii = [
     "lat2db"
 ]
 [project.scripts]
-dt4acc_softioc = "dt4acc_softioc:main"
-
+dt4acc_bessyii = "dt4acc.custom_facility.bessyii.run_bessyii_twin:main"
+dt4acc_soleil = "dt4acc.custom_facility.soleil.run_soleil_twin:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/dt4acc"]
