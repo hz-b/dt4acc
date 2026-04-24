@@ -12,10 +12,20 @@ from dt4acc_lib.interfaces.utils.translator_service import TranslatorServiceBase
 from dt4acc_lib.interfaces.utils.yellow_pages import YellowPagesBase
 from dt4acc_lib.model.utils.identifiers import LatticeElementPropertyID, DevicePropertyID, ConversionID
 
-from dt4acc.config.data.constants import ring_parameters
-from dt4acc.config.data.querries import get_magnets, get_cavity_names as cavity_names
-from dt4acc.custom_facility.bessyii.model.config.elementmodel import MagnetElementSetup
+from dt4acc.config.data.querries import get_magnets, get_magnets_per_power_converters
+from dt4acc.custom_facility.model.config.elementmodel import MagnetElementSetup
 from dt4acc.custom_facility.soleil.soleil_yellow_pages import soleil_yellow_pages
+from dt4acc.config.data.constants import ring_parameters
+
+
+def _get_cavity_names() -> list:
+    """Return cavity device names (not UUIDs) for use in liaison LUTs."""
+    from dt4acc.config.data.querries import get_unique_power_converters_type_specified, get_magnets_per_power_converters
+    cavity_names = []
+    for pc in get_unique_power_converters_type_specified(["RFCavity"]):
+        for m in get_magnets_per_power_converters(pc):
+            cavity_names.append(m["name"])
+    return cavity_names
 
 logger = logging.getLogger("dt4acc")
 
@@ -27,6 +37,19 @@ def load_managers() -> (YellowPagesBase, LiaisonManagerBase, TranslatorServiceBa
     Todo:
         appropriate to separate caching from loading?
     """
+    # Register SOLEIL-specific addon proxies.
+    # CQLN (slow normal quadrupolar corrector) → PolynomA[1] → corrector_type="skew"
+    # CQLT (slow turned quadrupolar corrector) → PolynomB[1] → corrector_type="normal"
+    # The prefix in the UUID ("CQLN:<uuid>", "CQLT:<uuid>") is SOLEIL nomenclature.
+    # The corrector_type values ("skew", "normal") are generic AT physics terms.
+    from dt4acc_lib.pyat_simulator.element_proxies import ADDON_PROXY_REGISTRY, SkewQuadCorrectorProxy
+    ADDON_PROXY_REGISTRY["CQLN"] = lambda el, eid, hid: SkewQuadCorrectorProxy(
+        el, element_id=eid, host_element_id=hid, corrector_type="skew"
+    )
+    ADDON_PROXY_REGISTRY["CQLT"] = lambda el, eid, hid: SkewQuadCorrectorProxy(
+        el, element_id=eid, host_element_id=hid, corrector_type="normal"
+    )
+
     return build_managers()
 
 
@@ -94,6 +117,7 @@ def remove_id(d: Dict) -> Dict:
 
 
 def magnet_infos_from_db() -> Sequence[MagnetElementSetup]:
+    from dt4acc.config.data.querries import get_magnets
     return [MagnetElementSetup(**remove_id(info)) for info in get_magnets()]
 
 
@@ -106,6 +130,12 @@ def element_method(element_name: str, yp: YellowPages):
         return "K"
     elif element_name in yp.sextupole_names():
         return "H"
+    elif element_name in yp.octupole_names():
+        return "main_strength"   # PolynomB[3] = K3 in AT
+    elif element_name in yp.skew_quad_names():
+        return "skew_quad_strength"
+    elif element_name in yp.cavity_names():
+        return "frequency"
     else:
         raise AssertionError(f"Don't know how to handle {element_name}")
 
@@ -131,6 +161,10 @@ def extract_host_element_name(element_name: str, yp: YellowPages) -> str:
         # if for some reason it’s not in the sextupole list, still return the stripped name
         return host_name
 
+    # skew quad corrector (CQLN/CQLT on octupole) → "CQLN:<host_uuid>" or "CQLT:<host_uuid>"
+    if element_name in yp.skew_quad_names():
+        return yp.skew_quad_host_id(element_name)
+
     # non-steerer: host is the element itself
     return element_name
 
@@ -141,7 +175,7 @@ def construct_energy_independent_linear_conversion(
     if slope is None:
         raise AssertionError("Refusing creating linear unit conversion without slope")
     return EnergyIndependentLinearUnitConversionInfo(
-        slope=1.0 / slope, intercept=0.0, brho=ring_parameters.brho
+        slope=1.0, intercept=0.0, brho=ring_parameters.brho
     )
 
 class LookupElement(metaclass=ABCMeta):
@@ -168,6 +202,7 @@ def build_managers():
     """
     yp = soleil_yellow_pages()
     infos = magnet_infos_from_db()
+    cavity_names = _get_cavity_names()   # device names e.g. ["AN02-SD/RF-CAV/CAV", ...]
 
     magnet_types = set([info.type for info in infos])
     # Make sure that names are unique ... everything down the list depends on it
@@ -286,13 +321,43 @@ def build_managers():
         )
     inverse_lut.update(quad_updates)
 
+    # Octupoles — direct main_strength property
+    inverse_lut.update(
+        {
+            DevicePropertyID(device_name=info.pc, property="set_current"): (
+                LatticeElementPropertyID(
+                    element_name=info.name, property="main_strength"
+                ),
+            )
+            for info in infos
+            if info.type == "Octupole"
+        }
+    )
+
+    # SkewQuadrupoles (CQLN/CQLT correctors on octupoles)
+    # The element_name is the CQLN/CQLT Tango device name.
+    # The host element id is "CQLN:<uuid>" or "CQLT:<uuid>" — parsed by
+    # accelerator_simulator.get() to dispatch to SkewQuadCorrectorProxy.
+    inverse_lut.update(
+        {
+            DevicePropertyID(device_name=info.name, property="skew_quad_strength"): (
+                LatticeElementPropertyID(
+                    element_name=extract_host_element_name(info.name, yp=yp),
+                    property="skew_quad_strength",
+                ),
+            )
+            for info in infos
+            if info.type == "SkewQuadrupole"
+        }
+    )
+
     # Cavities and master clock
     inverse_lut.update(
         {
             DevicePropertyID(device_name=name, property="frequency"): (
                 LatticeElementPropertyID(element_name=name, property="frequency"),
             )
-            for name in cavity_names()
+            for name in cavity_names
         }
     )
     inverse_lut.update(
@@ -302,7 +367,7 @@ def build_managers():
             ): tuple(
                 [
                     LatticeElementPropertyID(element_name=name, property="frequency")
-                    for name in cavity_names()
+                    for name in cavity_names
                 ]
             )
         }
@@ -392,6 +457,39 @@ def build_managers():
         }
     )
 
+    # Octupoles — main_strength = PolynomB[3] = K3, slope=1.0
+    translator_lut.update(
+        {
+            ConversionID(
+                lattice_property_id=LatticeElementPropertyID(
+                    element_name=info.name, property="main_strength"
+                ),
+                device_property_id=DevicePropertyID(
+                    device_name=info.pc, property="set_current"
+                ),
+            ): construct_energy_independent_linear_conversion(slope=info.magnetic_strength)
+            for info in infos
+            if info.type == "Octupole"
+        }
+    )
+
+    # SkewQuadrupoles — slope=1.0, no unit conversion (strength in 1/m²)
+    translator_lut.update(
+        {
+            ConversionID(
+                lattice_property_id=LatticeElementPropertyID(
+                    element_name=extract_host_element_name(info.name, yp=yp),
+                    property="skew_quad_strength",
+                ),
+                device_property_id=DevicePropertyID(
+                    device_name=info.name, property="skew_quad_strength"
+                ),
+            ): LinearUnitConversion(slope=1.0, intercept=0.0)
+            for info in infos
+            if info.type == "SkewQuadrupole"
+        }
+    )
+
     # cavities
     translator_lut.update(
         {
@@ -405,7 +503,7 @@ def build_managers():
             ): LinearUnitConversion(
                 slope=1e-3, intercept=0.0
             )  # BESSY II uses kHz for the cavities clock
-            for name in cavity_names()
+            for name in cavity_names
         }
     )
 
@@ -419,12 +517,12 @@ def build_managers():
             ): LinearUnitConversion(
                 slope=1e-3, intercept=0.0
             )  # BESSY II uses kHz for the master clock
-            for name in cavity_names()
+            for name in cavity_names
         }
     )
 
     tm = TranslatorService(translator_lut)
-    return lm, tm
+    return yp, lm, tm
 
 
 if __name__ == "__main__":

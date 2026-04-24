@@ -8,10 +8,33 @@ from dt4acc.config.data.querries import (
     get_unique_power_converters_type_specified,
 )
 
-from .magnet_device import MagnetDevice
-from .virtual_devices import RingSimulatorDevice, RING_SIM_DEV
+from dt4acc.custom_tango.ioc.devices.multipole_device import MultipoleDevice
+from dt4acc.custom_tango.ioc.devices.steerer_device import HorizontalSteererDevice, VerticalSteererDevice
+from dt4acc.custom_tango.ioc.devices.skew_quad_device import SkewQuadDevice
+from dt4acc.custom_tango.ioc.devices.cavity_device import CavityDevice
+from dt4acc.custom_tango.ioc.devices.virtual_devices import RingSimulatorDevice, RING_SIM_DEV
 
 logger = get_logger()
+
+# Map JSON "type" field → Tango device class name
+_TYPE_TO_CLASS = {
+    "Quadrupole":    "MultipoleDevice",
+    "Sextupole":     "MultipoleDevice",
+    "Octupole":      "MultipoleDevice",
+    "Multipole":     "MultipoleDevice",
+    "Steerer":       None,   # determined by is_horizontal/is_vertical below
+    "SkewQuadrupole": "SkewQuadDevice",
+    "RFCavity":      "CavityDevice",
+}
+
+def _steerer_class(name: str) -> str:
+    """Determine steerer class from device name."""
+    if "CDLH" in name or "CDRH" in name:
+        return "HorizontalSteererDevice"
+    if "CDLV" in name or "CDRV" in name:
+        return "VerticalSteererDevice"
+    # Unknown orientation — default to both kicks via a generic fallback
+    return "HorizontalSteererDevice"
 
 
 def _split_domain_family_member(device_name: str):
@@ -79,8 +102,9 @@ def register_all_devices():
     for pc_name in get_unique_power_converters():
         magnets = get_magnets_per_power_converters(pc_name)
         for m in magnets:
-            magnet_name = m["name"]       # e.g. AN10-AR/EM/SCF.11
+            magnet_name = m["name"]
             magnet_uuid = m.get("uuid", "")
+            magnet_type = m.get("type", "")
             try:
                 domain, family, _ = _split_domain_family_member(magnet_name)
                 server_name   = domain
@@ -88,8 +112,14 @@ def register_all_devices():
                 server_str    = f"{server_name}/{instance_name}"
                 unique_servers.add((server_name, instance_name))
 
+                # Pick the correct Tango class for this physical type
+                if magnet_type == "Steerer":
+                    class_name = _steerer_class(magnet_name)
+                else:
+                    class_name = _TYPE_TO_CLASS.get(magnet_type, "MultipoleDevice")
+
                 db_dev        = DbDevInfo()
-                db_dev._class = "MagnetDevice"
+                db_dev._class = class_name
                 db_dev.server = server_str
                 db_dev.name   = magnet_name
                 db.add_device(db_dev)
@@ -110,40 +140,40 @@ def register_all_devices():
                 logger.error("❌ Failed to register magnet %s: %s", magnet_name, e)
 
     # ------------------------------------------------------------
-    # 2) Cavities — registered as MagnetDevice (same as magnets)
+    # 2) Cavities and SkewQuadrupoles — registered as typed devices
     # ------------------------------------------------------------
-    for pc_name in get_unique_power_converters_type_specified(["RFCavity"]):
+    for pc_name in get_unique_power_converters_type_specified(["RFCavity", "SkewQuadrupole"]):
         for m in get_magnets_per_power_converters(pc_name):
-            cav_name = m["name"]       # e.g. AN02-SD/RF-CAV/CAV
-            cav_uuid = m.get("uuid", "")
+            dev_name  = m["name"]
+            dev_uuid  = m.get("uuid", "")
+            dev_type  = m.get("type", "")
+            class_name = _TYPE_TO_CLASS.get(dev_type, "MultipoleDevice")
             try:
-                domain, family, _ = _split_domain_family_member(cav_name)
+                domain, family, _ = _split_domain_family_member(dev_name)
                 server_name   = domain
                 instance_name = family
                 server_str    = f"{server_name}/{instance_name}"
                 unique_servers.add((server_name, instance_name))
 
                 db_dev        = DbDevInfo()
-                db_dev._class = "MagnetDevice"
+                db_dev._class = class_name
                 db_dev.server = server_str
-                db_dev.name   = cav_name
+                db_dev.name   = dev_name
                 db.add_device(db_dev)
 
-                if cav_uuid:
+                if dev_uuid:
                     try:
-                        db.put_device_property(
-                            cav_name, {"element_uuid": [cav_uuid]}
-                        )
+                        db.put_device_property(dev_name, {"element_uuid": [dev_uuid]})
                     except Exception as e:
-                        logger.warning("Could not set uuid for cavity %s: %s", cav_name, e)
+                        logger.warning("Could not set uuid for %s: %s", dev_name, e)
 
-                logger.info("📡 Registered cavity %s uuid=%s (server=%s)",
-                            cav_name, cav_uuid, server_str)
+                logger.info("📡 Registered %s %s uuid=%s (server=%s)",
+                            class_name, dev_name, dev_uuid, server_str)
             except Exception as e:
-                logger.error("❌ Failed to register cavity %s: %s", cav_name, e)
+                logger.error("❌ Failed to register %s %s: %s", dev_type, dev_name, e)
 
     # ------------------------------------------------------------
-    # 3) Single RingSimulatorDevice
+    # 3) Single RingSimulatorDevice — replaces all devices
     # ------------------------------------------------------------
     try:
         domain, family, _ = _split_domain_family_member(RING_SIM_DEV)
@@ -174,4 +204,11 @@ def register_all_devices():
 
 def get_all_device_classes():
     """Return all device classes used by the servers."""
-    return [MagnetDevice, RingSimulatorDevice]
+    return [
+        MultipoleDevice,
+        HorizontalSteererDevice,
+        VerticalSteererDevice,
+        SkewQuadDevice,
+        CavityDevice,
+        RingSimulatorDevice,
+    ]

@@ -2,16 +2,9 @@
 virtual_devices.py
 ==================
 
-Single virtual Tango device for the SOLEIL digital twin:
+Single virtual Tango device for the digital twin:
 
     simulator/ringsimulator/ringsimulator  (RingSimulatorDevice)
-
-Replaces the previous separate devices:
-    PHYSICS/SOLEIL/TWISS_ORBIT
-    PHYSICS/SOLEIL/BPM
-    PHYSICS/SOLEIL/TUNE
-    PHYSICS/SOLEIL/MASTER_CLOCK
-    PHYSICS/SOLEIL/OTHERS
 """
 
 import asyncio
@@ -247,8 +240,3 @@ class RingSimulatorDevice(Device, AsyncMixin):
             logger.error("RingSimulatorDevice.Reset failed: %s", exc)
             self.set_state(DevState.FAULT)
             raise DevFailed(str(exc))
-
-
-def get_all_device_classes():
-    from dt4acc.custom_tango.ioc.devices.magnet_device import MagnetDevice
-    return [MagnetDevice, RingSimulatorDevice]

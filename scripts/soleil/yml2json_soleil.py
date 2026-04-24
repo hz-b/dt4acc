@@ -3,7 +3,7 @@ import json
 from bson import ObjectId
 
 # classes considered magnets
-MAGNET_CLASSES = {"Quadrupole", "Sextupole", "Multipole", "Bend", "RFCavity"}
+MAGNET_CLASSES = {"Quadrupole", "Sextupole", "Multipole", "Bend", "RFCavity", "Octupole"}
 
 INPUT_YAML = "SOLEIL_II_V3635_STAB_SYM1_SB3_MULT7_4SX60_V001.yaml"
 OUTPUT_JSON = "accelerator_setup.json"
@@ -73,6 +73,41 @@ def main():
                     "k": 1.0
                 }
                 output.append(steerer_3rd)
+
+        # --- Skew quadrupole correctors for Octupoles with TANGO_2ND/3RD ---
+        # CQLN → slow normal quadrupolar corrector → PolynomA[1] (skew quad)
+        # CQLT → slow turned quadrupolar corrector → PolynomB[1] (normal quad)
+        # Both share the same UUID as the host octupole (same AT element)
+        if cls == "Octupole":
+            for tango_key in ("TANGO_2ND", "TANGO_3RD"):
+                corr_name = nomenclature.get(tango_key)
+                if not corr_name:
+                    continue
+
+                # Determine corrector type from the device name suffix
+                # e.g. OH.02-CQLN.02 → CQLN, OH.01-CQLT.01 → CQLT
+                if "CQLN" in corr_name:
+                    corr_type = "CQLN"
+                elif "CQLT" in corr_name:
+                    corr_type = "CQLT"
+                else:
+                    # Unknown corrector type — skip with a warning
+                    import sys
+                    print(f"WARNING: unknown corrector type in {corr_name!r} — skipping", file=sys.stderr)
+                    continue
+
+                corr_obj = {
+                    "_id": {"$oid": str(ObjectId())},
+                    "uuid": f"{corr_type}:{uuid}",  # e.g. "CQLN:OH2_QCORROCT_2_001"
+                    "type": "SkewQuadrupole",
+                    "corrector_type": corr_type,   # "CQLN" or "CQLT"
+                    "FamName": fam_name,      # same FamName as host octupole
+                    "name": corr_name,
+                    "magnetic_strength": 0.0,
+                    "pc": f"{corr_name}-pc",
+                    "k": 0.0
+                }
+                output.append(corr_obj)
 
     with open(OUTPUT_JSON, "w") as f:
         json.dump(output, f, indent=2)

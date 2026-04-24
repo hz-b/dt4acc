@@ -15,7 +15,7 @@ logger = get_logger()
 def split_name(name: str):
     parts = name.split("/")
     if len(parts) != 3:
-        raise DevFailed(f"Invalid Soleil Tango PC name '{name}'")
+        raise DevFailed(f"Invalid Tango PC name '{name}'")
     return parts[0], parts[1], parts[2]
 
 

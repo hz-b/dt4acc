@@ -19,7 +19,7 @@ from dt4acc_lib.model.utils.identifiers import LatticeElementPropertyID, DeviceP
 from dt4acc_lib.model.utils.liaison_manager_lookup_table import LiaisonManagerInverseLookupTable, LiaisonManagerForwardLookupTable
 from dt4acc_lib.model.utils.translator_manager_lookup_table import TranslatorLookupTable
 
-logger = logging.getLogger("accml")
+logger = logging.getLogger("dt4acc")
 
 
 @functools.lru_cache(maxsize=1)

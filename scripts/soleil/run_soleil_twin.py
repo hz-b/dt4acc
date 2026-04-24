@@ -108,7 +108,7 @@ def parse_args():
 
 def _soleil_load_managers():
     """Load the SOLEIL liaison manager and translator service."""
-    from dt4acc.custom_facility.bessyii.liasion_translator_setup import load_managers
+    from dt4acc.custom_facility.soleil.liasion_translator_setup import load_managers
     return load_managers()
 
 

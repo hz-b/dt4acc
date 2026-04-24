@@ -26,7 +26,6 @@ import itertools
 import traceback
 from typing import Sequence
 
-from dt4acc_lib.interfaces.utils.command_execution_engine import CommandExecutionEngine
 from dt4acc_lib.model.output.result import TranslatedReading, ReadTogetherAndTranslated
 from dt4acc_lib.model.utils.command import ReadCommand, Command
 from dt4acc.core.bl.translating_command_execution_engine import TranslatingCommandExecutionEngine

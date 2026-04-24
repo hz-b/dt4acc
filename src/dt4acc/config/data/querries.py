@@ -45,7 +45,7 @@ def _match(doc: Dict[str, Any], field: str, allowed: Iterable[str]) -> bool:
 # -----------------------------------------------------------------
 def get_magnets():
     """Return all Quadrupole/Sextupole/Steerer magnets as an iterator."""
-    wanted = {"Quadrupole", "Sextupole", "Steerer", "RFCavity"}
+    wanted = {"Quadrupole", "Sextupole", "Steerer", "RFCavity", "Octupole", "SkewQuadrupole"}
     return (d for d in _DATA if _match(d, "type", wanted))
 
 def get_cavity_names() -> List[str]:
@@ -59,7 +59,7 @@ def get_magnets_per_power_converters(pc: str) -> List[Dict[str, Any]]:
 
 def get_unique_power_converters() -> List[str]:
     """Distinct list of power-converter names for Quad/Sext/Steerer magnets."""
-    wanted = {"Quadrupole", "Sextupole", "Steerer"}
+    wanted = {"Quadrupole", "Sextupole", "Steerer", "RFCavity", "Octupole", "SkewQuadrupole"}
     return sorted({d["pc"] for d in _DATA if _match(d, "type", wanted)})
 
 
