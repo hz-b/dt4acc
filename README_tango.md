@@ -19,7 +19,7 @@ src/dt4acc/custom_facility/soleil/run_soleil_twin.py  ← SOLEIL launch script (
             │
             ├── TangoServerProcess × N  (one per domain/family)
             │     Each connects to MexecService.
-            │     Runs tango.server.run([QuadSextOctDevice, ...])
+            │     Runs tango.server.run([MultipoleDevice, ...])
             │
             └── calculation-heartbeat-thread
                   Calls RingSimulatorDevice.Recalculate() every second.
@@ -30,7 +30,7 @@ src/dt4acc/custom_facility/soleil/run_soleil_twin.py  ← SOLEIL launch script (
 
 | Class | JSON type | Attributes |
 |---|---|---|
-| `QuadSextOctDevice` | Quadrupole, Sextupole, Octupole | `magnetic_strength`, `magnetic_strength_readback` |
+| `MultipoleDevice` | Quadrupole, Sextupole, Octupole | `magnetic_strength`, `magnetic_strength_readback` |
 | `HorizontalSteererDevice` | Steerer (CDLH/CDRH) | `x_kick` |
 | `VerticalSteererDevice` | Steerer (CDLV/CDRV) | `y_kick` |
 | `SkewQuadDevice` | SkewQuadrupole (CQLN/CQLT) | `skew_quad_strength` |
@@ -101,7 +101,7 @@ python src/dt4acc/custom_facility/soleil/cleanup_tango_db.py --dry-run
 python src/dt4acc/custom_facility/soleil/cleanup_tango_db.py --yes
 ```
 
-This removes all `QuadSextOctDevice`, `HorizontalSteererDevice`, `VerticalSteererDevice`,
+This removes all `MultipoleDevice`, `HorizontalSteererDevice`, `VerticalSteererDevice`,
 `SkewQuadDevice`, `CavityDevice`, and `RingSimulatorDevice` registrations, plus their
 server entries. Old class names (`MagnetDevice`, `TwissOrbitDevice`, etc.) are also
 cleaned up.
