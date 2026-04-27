@@ -1,5 +1,5 @@
 """
-multipole_device.py
+quad_sext_oct_device.py
 ========================
 Tango device for Quadrupoles, Sextupoles, and Octupoles.
 Exposes: magnetic_strength (READ_WRITE) + magnetic_strength_readback (READ).
@@ -27,8 +27,17 @@ class MultipoleDevice(BaseMagnetDevice):
         self._magnetic_strength_readback = self._magnetic_strength
 
     @attribute(dtype=float, access=AttrWriteType.READ_WRITE,
-               label="Magnetic strength", unit="1/m")
+               label="Magnetic strength", unit="1/m",
+               polling_period=1000)
     def magnetic_strength(self) -> float:
+        try:
+            from dt4acc.custom_tango.ioc.single_server import peek_from_lattice
+            val = peek_from_lattice(self.lattice_id, "main_strength")
+            if val != 0.0:
+                self._magnetic_strength = val
+                self._magnetic_strength_readback = val
+        except Exception:
+            pass
         return self._magnetic_strength
 
     @magnetic_strength.write
@@ -46,7 +55,7 @@ class MultipoleDevice(BaseMagnetDevice):
     def reset(self) -> None:
         self._magnetic_strength = 0.0
         self._magnetic_strength_readback = 0.0
-        logger.info("%s: reset", self.trl.as_trl())
+        logger.info("%s: reset", self.magnet_name)
         self.set_state(DevState.STANDBY)
 
     @command
@@ -58,6 +67,6 @@ class MultipoleDevice(BaseMagnetDevice):
             self._magnetic_strength = vals["main_strength"]
             self._magnetic_strength_readback = vals["main_strength"]
             logger.info("%s: RefreshFromCache done — strength=%.6f",
-                        self.trl.as_trl(), self._magnetic_strength)
+                        self.magnet_name, self._magnetic_strength)
         except Exception as exc:
-            logger.error("%s: RefreshFromCache failed: %s", self.trl.as_trl(), exc)
+            logger.error("%s: RefreshFromCache failed: %s", self.magnet_name, exc)

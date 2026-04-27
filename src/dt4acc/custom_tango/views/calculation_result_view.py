@@ -95,7 +95,7 @@ async def update_bpms_dev(dev_name: str, orbit_result) -> None:
     x = to_float_list(orbit_result.x)
     y = to_float_list(orbit_result.y)
 
-    bpm_mask = [n.upper().startswith("BPM") for n in names]
+    bpm_mask = [n.startswith("BPM") for n in names]
     bpm_names = [n for n, keep in zip(names, bpm_mask) if keep]
     bpm_x     = [v for v, keep in zip(x,     bpm_mask) if keep]
     bpm_y     = [v for v, keep in zip(y,     bpm_mask) if keep]

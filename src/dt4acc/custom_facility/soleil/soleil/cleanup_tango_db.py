@@ -44,11 +44,11 @@ MANAGED_CLASSES = {
     "MagnetDevice",
     "RingSimulatorDevice",
     # Legacy virtual devices — safe to remove even if already gone
-    "TwissOrbitDevice",
-    "BPMManagerDevice",
+    "VerticalSteererDevice",
+    "SkewQuadDevice",
     "TuneDevice",
-    "MasterClockDevice",
-    "OtherPVsDevice",
+    "MultipoleDevice",
+    "HorizontalSteererDevice",
     "CavityDevice",
     "PowerConverterDevice",
 }

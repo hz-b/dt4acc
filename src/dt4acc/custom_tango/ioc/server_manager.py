@@ -47,6 +47,45 @@ logging.getLogger("transitions").setLevel(logging.WARNING)
 logging.getLogger("transitions.core").setLevel(logging.WARNING)
 
 from dt4acc_lib.bl.command_rewritter import CommandRewriter
+
+
+# Virtual result element IDs — these are computed by the backend (twiss, tune,
+# track, orbit) and never exist in the AT lattice. In device view the liaison
+# has no conversion for them so inverse_read_command must pass them through
+# unchanged, exactly as design view does.
+_VIRTUAL_RESULT_IDS = frozenset({"twiss", "tune", "track", "orbit"})
+
+
+class VirtualPassthroughCommandRewriter(CommandRewriter):
+    """
+    CommandRewriter that short-circuits virtual result IDs (twiss, tune,
+    track, orbit). These are not AT lattice elements — they are computed
+    results published by SimulatorBackend.
+
+    All four methods are overridden so that both the routing (read commands)
+    and the value conversion (set commands / data conversion) bypass the
+    liaison and translator entirely for these virtual IDs.
+    """
+
+    def inverse_read_command(self, command):
+        if command.id in _VIRTUAL_RESULT_IDS:
+            return [command]
+        return super().inverse_read_command(command)
+
+    def forward_read_command(self, command):
+        if command.id in _VIRTUAL_RESULT_IDS:
+            return [command]
+        return super().forward_read_command(command)
+
+    def inverse(self, cmd):
+        if cmd.id in _VIRTUAL_RESULT_IDS:
+            return [cmd]
+        return super().inverse(cmd)
+
+    def forward(self, cmd):
+        if cmd.id in _VIRTUAL_RESULT_IDS:
+            return [cmd]
+        return super().forward(cmd)
 from dt4acc_lib.model.utils.command import BehaviourOnError, Command, ReadCommand
 from dt4acc_lib.pyat_simulator.accelerator_simulator import PyATAcceleratorSimulator
 from dt4acc_lib.pyat_simulator.simulator_backend import SimulatorBackend
@@ -64,18 +103,36 @@ _MANAGER_AUTHKEY = b"dt4acc-tango-secret"
 # Facility configuration — set by the launch script before calling main()
 # ---------------------------------------------------------------------------
 
-# Path to the AT lattice .m file
+# Path to the AT lattice file (.m or .json)
 LATTICE_FILE: Path = None
 
 # Callable that returns (yellow_pages, liaison_manager, translator_service)
 LOAD_MANAGERS_FN = None
 
-# Expected view for output — "design" for (commands in lattice space)
+# Expected view for output — "design" for SOLEIL (commands in lattice space)
 EXPECTED_VIEW = "design"
 
 # Heartbeat — pure recalculation, no lattice writes, no noise
 # Set by the launch script. Period in seconds (0 = disabled).
 HEARTBEAT_PERIOD = 1.0
+
+
+def _load_lattice(path: Path):
+    """
+    Load an AT lattice from file. Supports:
+      .m    — MATLAB/Octave format via at.load_m()
+      .json — atjson v1 format via at.load_json()
+    """
+    suffix = path.suffix.lower()
+    if suffix == ".json":
+        return at.load_json(str(path))
+    elif suffix == ".m":
+        return at.load_m(path)
+    else:
+        raise ValueError(
+            f"Unsupported lattice file format: {suffix!r}. "
+            "Expected .m (MATLAB) or .json (atjson v1)."
+        )
 
 
 def _get_load_managers():
@@ -107,7 +164,7 @@ def _build_mexec():
         raise ValueError(
             "LATTICE_FILE not set — set server_manager.LATTICE_FILE before main()"
         )
-    acc = at.load_m(filename)
+    acc = _load_lattice(filename)
     backend = SimulatorBackend(
         name="Facility specific PYAT",
         acc=PyATAcceleratorSimulator(at_lattice=acc),
@@ -115,7 +172,7 @@ def _build_mexec():
     load_managers = _get_load_managers()
     _, lm, ts = load_managers()
 
-    cmd_rewriter = CommandRewriter(liaison_manager=lm, translation_service=ts)
+    cmd_rewriter = VirtualPassthroughCommandRewriter(liaison_manager=lm, translation_service=ts)
 
     return TranslatingCommandExecutionEngine(
         backend=backend,
@@ -160,6 +217,21 @@ def _run_mexec_service():
             )
             return fut.result(timeout=30)
 
+        def sync_peek(self, element_id: str, prop: str) -> float:
+            """Read a single element property directly from AT backend,
+            bypassing liaison and translator. Used by MultipoleDevice polling
+            to stay in sync with PC writes in device view.
+            element_id is a FamName uuid (e.g. 'sqfi73'), prop is the AT
+            property name (e.g. 'main_strength').
+            """
+            async def _peek():
+                return await mexec.backend.read(element_id, prop)
+            fut = asyncio.run_coroutine_threadsafe(_peek(), service_loop)
+            try:
+                return float(fut.result(timeout=5))
+            except Exception:
+                return 0.0
+
         def sync_trigger_read(self, rcmd_ids: Sequence[str], rcmd_properties: Sequence[str]):
             rcmds = [
                 ReadCommand(id=i, property=p)
@@ -185,7 +257,7 @@ def _run_mexec_service():
             import at
             logger.warning("SyncMexecProxy.sync_reset: reloading lattice from file...")
             try:
-                new_acc = at.load_m(LATTICE_FILE)
+                new_acc = _load_lattice(LATTICE_FILE)
                 mexec.backend.acc.acc = new_acc
                 with mexec.backend.calculation_lock:
                     if mexec.backend.model.is_error():
@@ -202,6 +274,7 @@ def _run_mexec_service():
     proxy = SyncMexecProxy()
     MexecManagerService.register("get_mexec_proxy", callable=lambda: proxy)
     MexecManagerService.register("sync_reset", callable=proxy.sync_reset)
+    MexecManagerService.register("sync_peek", callable=proxy.sync_peek)
 
     mgr = MexecManagerService(
         address=(_MANAGER_HOST, _MANAGER_PORT),
@@ -217,6 +290,7 @@ async def _async_build_mexec():
 def _connect_to_mexec_service():
     MexecManagerService.register("get_mexec_proxy")
     MexecManagerService.register("sync_reset")
+    MexecManagerService.register("sync_peek")
     client = MexecManagerService(
         address=(_MANAGER_HOST, _MANAGER_PORT),
         authkey=_MANAGER_AUTHKEY,

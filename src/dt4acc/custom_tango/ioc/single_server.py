@@ -108,6 +108,31 @@ class AsyncMexecAdapter:
 _initial_strength_cache: dict = {}  # uuid → float (main_strength)
 _nominal_cache: dict = {}           # uuid → {"main_strength": f, "x_kick": f, "y_kick": f}
 _my_magnet_uuids: list = []         # UUIDs of magnets in this server process
+_sync_proxy = None                  # MexecService proxy for live reads
+_device_view = False                # True only for device-view facilities (e.g. MAX IV)
+
+
+def enable_device_view_readback() -> None:
+    """Call from facility startup script to enable live AT readback on polling.
+    Must be called before tango.server.run() — e.g. in run_maxiv_r1_twin.py.
+    In design view (SOLEIL) this is never called so peek_from_lattice returns 0.0.
+    """
+    global _device_view
+    _device_view = True
+
+
+def peek_from_lattice(element_id: str, prop: str) -> float:
+    """Live read of a single element property from AT via MexecService.
+    Only active in device view (MAX IV). Returns 0.0 in design view (SOLEIL)
+    so the cached value is kept unchanged — no regression for SOLEIL.
+    """
+    global _sync_proxy, _device_view
+    if not _device_view or _sync_proxy is None:
+        return 0.0
+    try:
+        return _sync_proxy.sync_peek(element_id, prop)
+    except Exception:
+        return 0.0
 
 
 def get_initial_strength(uuid: str) -> float:
@@ -185,6 +210,8 @@ def _inject_controller(prefix: str) -> None:
     """
     from dt4acc.custom_tango.ioc.server_manager import _connect_to_mexec_service
     sync_proxy, sync_reset = _connect_to_mexec_service()
+    global _sync_proxy
+    _sync_proxy = sync_proxy
     mexec = AsyncMexecAdapter(sync_proxy)
 
     controller = TangoController(

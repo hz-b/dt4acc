@@ -62,24 +62,11 @@ class PowerConverterDevice(Device):
         self.set_state(DevState.ON)
 
     def _peek_initial_current(self) -> float:
-        """Read set_current from the backend at startup."""
-        try:
-            result = self._async(
-                get_controller().trigger_read(
-                    [ReadCommand(id=self.pc_name, property="set_current")]
-                )
-            )
-            readings = result.all_readings()
-            if readings:
-                val = readings[0].payload
-                if isinstance(val, (list, np.ndarray)):
-                    return float(np.mean(val))
-                return float(val)
-        except Exception as exc:
-            logger.warning(
-                "%s: could not read initial set_current: %s — defaulting to 0.0",
-                self.pc_name, exc,
-            )
+        """
+        Digital twin — no real machine connected, initial current is always 0.0.
+        Reading from the backend at startup is not meaningful and would require
+        the full liaison/AT chain to be ready, which it is not yet at init time.
+        """
         return 0.0
 
     # ------------------------------------------------------------------
