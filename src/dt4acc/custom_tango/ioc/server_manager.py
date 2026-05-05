@@ -29,6 +29,7 @@ Process topology
 import at
 import asyncio
 import itertools
+import importlib
 import logging
 import multiprocessing as mp
 import multiprocessing.managers
@@ -117,6 +118,21 @@ EXPECTED_VIEW = "design"
 HEARTBEAT_PERIOD = 1.0
 
 
+def _configure_accelerator_setup_file(accelerator_setup_file=None) -> None:
+    if accelerator_setup_file is None:
+        return
+
+    from dt4acc.config.data import querries as config_queries
+    from dt4acc.custom_epics.data import querries as epics_queries
+    from dt4acc.custom_facility.soleil import liasion_translator_setup
+    from dt4acc.custom_facility.soleil import soleil_yellow_pages
+
+    config_queries.configure_data_file(accelerator_setup_file)
+    epics_queries.configure_data_file(accelerator_setup_file)
+    soleil_yellow_pages.configure_accelerator_setup_file(accelerator_setup_file)
+    liasion_translator_setup.load_managers.cache_clear()
+
+
 def _load_lattice(path: Path):
     """
     Load an AT lattice from file. Supports:
@@ -135,14 +151,43 @@ def _load_lattice(path: Path):
         )
 
 
-def _get_load_managers():
+def _resolve_load_managers(load_managers=None):
     """Return the load_managers callable set by the launch script."""
-    if LOAD_MANAGERS_FN is None:
+    if load_managers is not None:
+        if callable(load_managers):
+            return load_managers
+        module_name, _, function_name = str(load_managers).partition(":")
+        if not module_name or not function_name:
+            raise ValueError("load_managers must use 'module:function' syntax")
+        module = importlib.import_module(module_name)
+        return getattr(module, function_name)
+
+    if LOAD_MANAGERS_FN is not None:
+        return LOAD_MANAGERS_FN
+
+    spec = os.environ.get("DT4ACC_LOAD_MANAGERS")
+    if spec:
+        module_name, _, function_name = spec.partition(":")
+        if not module_name or not function_name:
+            raise ValueError("DT4ACC_LOAD_MANAGERS must use 'module:function' syntax")
+        module = importlib.import_module(module_name)
+        return getattr(module, function_name)
+
+    raise ValueError(
+        "LOAD_MANAGERS_FN not set — set server_manager.LOAD_MANAGERS_FN "
+        "or DT4ACC_LOAD_MANAGERS before calling main()"
+    )
+
+
+def _get_lattice_file(lattice_file=None) -> Path:
+    """Return the configured lattice file in parent and spawned children."""
+    filename = lattice_file or LATTICE_FILE or os.environ.get("DT4ACC_LATTICE_FILE")
+    if filename is None:
         raise ValueError(
-            "LOAD_MANAGERS_FN not set — set server_manager.LOAD_MANAGERS_FN "
-            "in the launch script before calling main()"
+            "LATTICE_FILE not set — set server_manager.LATTICE_FILE "
+            "or DT4ACC_LATTICE_FILE before main()"
         )
-    return LOAD_MANAGERS_FN
+    return Path(filename)
 
 
 # ---------------------------------------------------------------------------
@@ -153,39 +198,54 @@ class MexecManagerService(multiprocessing.managers.BaseManager):
     pass
 
 
-def _build_mexec():
+def _build_mexec(
+    lattice_file=None,
+    load_managers=None,
+    expected_view=None,
+    accelerator_setup_file=None,
+):
     """Build the TranslatingCommandExecutionEngine on the service process."""
+    _configure_accelerator_setup_file(accelerator_setup_file)
+
     from dt4acc.core.bl.translating_command_execution_engine import (
         TranslatingCommandExecutionEngine,
     )
 
-    filename = LATTICE_FILE
-    if filename is None:
-        raise ValueError(
-            "LATTICE_FILE not set — set server_manager.LATTICE_FILE before main()"
-        )
+    filename = _get_lattice_file(lattice_file)
     acc = _load_lattice(filename)
     backend = SimulatorBackend(
         name="Facility specific PYAT",
         acc=PyATAcceleratorSimulator(at_lattice=acc),
     )
-    load_managers = _get_load_managers()
-    _, lm, ts = load_managers()
+    resolved_load_managers = _resolve_load_managers(load_managers)
+    _, lm, ts = resolved_load_managers()
 
     cmd_rewriter = VirtualPassthroughCommandRewriter(liaison_manager=lm, translation_service=ts)
 
     return TranslatingCommandExecutionEngine(
         backend=backend,
         cmd_rewriter=cmd_rewriter,
-        expected_view_for_output=EXPECTED_VIEW,
+        expected_view_for_output=expected_view or os.environ.get("DT4ACC_VIEW", EXPECTED_VIEW),
         num_readings=1,
     )
 
 
-def _run_mexec_service():
+def _run_mexec_service(
+    manager_port=None,
+    lattice_file=None,
+    load_managers=None,
+    expected_view=None,
+    accelerator_setup_file=None,
+):
     """
     Entry point for the MexecService process.
     """
+    global _MANAGER_PORT
+    if manager_port is not None:
+        _MANAGER_PORT = int(manager_port)
+    else:
+        _MANAGER_PORT = int(os.environ.get("DT4ACC_MEXEC_PORT", _MANAGER_PORT))
+
     import logging
     logging.getLogger("transitions").setLevel(logging.WARNING)
     logging.getLogger("transitions.core").setLevel(logging.WARNING)
@@ -198,7 +258,15 @@ def _run_mexec_service():
 
     threading.Thread(target=_run_loop, daemon=True, name="mexec-service-loop").start()
 
-    future = asyncio.run_coroutine_threadsafe(_async_build_mexec(), service_loop)
+    future = asyncio.run_coroutine_threadsafe(
+        _async_build_mexec(
+            lattice_file,
+            load_managers,
+            expected_view,
+            accelerator_setup_file,
+        ),
+        service_loop,
+    )
     mexec = future.result(timeout=120)
     logger.warning("MexecService: lattice ready, mexec built.")
 
@@ -257,7 +325,7 @@ def _run_mexec_service():
             import at
             logger.warning("SyncMexecProxy.sync_reset: reloading lattice from file...")
             try:
-                new_acc = _load_lattice(LATTICE_FILE)
+                new_acc = _load_lattice(_get_lattice_file(lattice_file))
                 mexec.backend.acc.acc = new_acc
                 with mexec.backend.calculation_lock:
                     if mexec.backend.model.is_error():
@@ -283,16 +351,27 @@ def _run_mexec_service():
     mgr.get_server().serve_forever()
 
 
-async def _async_build_mexec():
-    return _build_mexec()
+async def _async_build_mexec(
+    lattice_file=None,
+    load_managers=None,
+    expected_view=None,
+    accelerator_setup_file=None,
+):
+    return _build_mexec(
+        lattice_file,
+        load_managers,
+        expected_view,
+        accelerator_setup_file,
+    )
 
 
-def _connect_to_mexec_service():
+def _connect_to_mexec_service(manager_port=None):
     MexecManagerService.register("get_mexec_proxy")
     MexecManagerService.register("sync_reset")
     MexecManagerService.register("sync_peek")
+    manager_port = int(manager_port or os.environ.get("DT4ACC_MEXEC_PORT", _MANAGER_PORT))
     client = MexecManagerService(
-        address=(_MANAGER_HOST, _MANAGER_PORT),
+        address=(_MANAGER_HOST, manager_port),
         authkey=_MANAGER_AUTHKEY,
     )
     client.connect()
@@ -422,12 +501,43 @@ def _wait_all_started(monitors: Sequence[ProcessMonitor]) -> bool:
 # Main
 # ---------------------------------------------------------------------------
 
-def main():
+def main(
+    lattice_file=None,
+    load_managers=None,
+    heartbeat_period=None,
+    manager_port=None,
+    expected_view=None,
+    accelerator_setup_file=None,
+):
+    global LATTICE_FILE, LOAD_MANAGERS_FN, HEARTBEAT_PERIOD, _MANAGER_PORT, EXPECTED_VIEW
+
+    if lattice_file is not None:
+        LATTICE_FILE = Path(lattice_file)
+    if callable(load_managers):
+        LOAD_MANAGERS_FN = load_managers
+    elif load_managers is not None:
+        LOAD_MANAGERS_FN = None
+    if heartbeat_period is not None:
+        HEARTBEAT_PERIOD = heartbeat_period
+    if manager_port is not None:
+        _MANAGER_PORT = int(manager_port)
+    if expected_view is not None:
+        EXPECTED_VIEW = expected_view
+
     os.environ.setdefault("TANGO_HOST", "localhost:10000")
+    _configure_accelerator_setup_file(accelerator_setup_file)
+    load_managers_arg = load_managers if load_managers is not None else LOAD_MANAGERS_FN
 
     # 1. Start MexecService
     svc_proc = mp.Process(
         target=_run_mexec_service,
+        args=(
+            _MANAGER_PORT,
+            str(_get_lattice_file()),
+            load_managers_arg,
+            EXPECTED_VIEW,
+            str(accelerator_setup_file) if accelerator_setup_file is not None else None,
+        ),
         name="mexec-service",
         daemon=True,
     )
@@ -440,7 +550,7 @@ def main():
             logger.error("MexecService died during startup!")
             sys.exit(1)
         try:
-            _connect_to_mexec_service()
+            _connect_to_mexec_service(_MANAGER_PORT)
             logger.warning("MexecService reachable after %.0fs", attempt * 2.0)
             break
         except Exception:
@@ -461,7 +571,13 @@ def main():
         evt = mp.Event()
         p = mp.Process(
             target=single_server.main_loop,
-            args=(server_name, instance_name, evt),
+            args=(
+                server_name,
+                instance_name,
+                evt,
+                _MANAGER_PORT,
+                str(accelerator_setup_file) if accelerator_setup_file is not None else None,
+            ),
             name=f"tango-{server_name}-{instance_name}",
         )
         p.start()
@@ -469,7 +585,28 @@ def main():
             event=evt, process=p,
             server_name=server_name, instance_name=instance_name,
         ))
-        time.sleep(0.3)
+
+        start_deadline = time.time() + 180.0
+        while not evt.wait(0.5):
+            if not p.is_alive() or p.exitcode:
+                logger.error("Process %s/%s died during startup", server_name, instance_name)
+                for pm in monitors:
+                    try:
+                        pm.process.terminate()
+                    except Exception:
+                        pass
+                svc_proc.terminate()
+                sys.exit(1)
+            if time.time() > start_deadline:
+                logger.error("Timed out while starting %s/%s", server_name, instance_name)
+                for pm in monitors:
+                    try:
+                        pm.process.terminate()
+                    except Exception:
+                        pass
+                svc_proc.terminate()
+                sys.exit(1)
+        logger.warning("%s/%s signalled startup", server_name, instance_name)
 
     # 4. Calculation heartbeat — recalculates twiss+orbit+tune every second
     #    without writing to or changing the lattice (zero noise)

@@ -49,7 +49,7 @@ class PowerConverterDevice(Device):
         domain, family, member = split_name(full_name)
         self.pc_name = full_name
 
-        logger.info("Initializing PowerConverterDevice: %s", self.pc_name)
+        logger.debug("Initializing PowerConverterDevice: %s", self.pc_name)
 
         self._loop = get_shared_event_loop()
 

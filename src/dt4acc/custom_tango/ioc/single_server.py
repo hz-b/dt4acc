@@ -203,13 +203,13 @@ def _preload_initial_values(sync_proxy, magnet_uuids: list) -> None:
     except Exception as exc:
         logger.warning("Bulk pre-load failed: %s — devices will start at 0.0", exc)
 
-def _inject_controller(prefix: str) -> None:
+def _inject_controller(prefix: str, manager_port=None) -> None:
     """
     Build AsyncMexecAdapter + TangoController and register in controller_registry.
     Called before tango.server.run() so init_device() can call get_controller().
     """
     from dt4acc.custom_tango.ioc.server_manager import _connect_to_mexec_service
-    sync_proxy, sync_reset = _connect_to_mexec_service()
+    sync_proxy, sync_reset = _connect_to_mexec_service(manager_port)
     global _sync_proxy
     _sync_proxy = sync_proxy
     mexec = AsyncMexecAdapter(sync_proxy)
@@ -228,24 +228,47 @@ def _inject_controller(prefix: str) -> None:
 # main_loop — called by server_manager for each (server_name, instance_name)
 # ---------------------------------------------------------------------------
 
-def main_loop(server_name: str, instance_name: str, event=None):
+def _configure_accelerator_setup_file(accelerator_setup_file=None) -> None:
+    if accelerator_setup_file is None:
+        return
+
+    from dt4acc.config.data import querries as config_queries
+    from dt4acc.custom_epics.data import querries as epics_queries
+    from dt4acc.custom_facility.soleil import liasion_translator_setup
+    from dt4acc.custom_facility.soleil import soleil_yellow_pages
+
+    config_queries.configure_data_file(accelerator_setup_file)
+    epics_queries.configure_data_file(accelerator_setup_file)
+    soleil_yellow_pages.configure_accelerator_setup_file(accelerator_setup_file)
+    liasion_translator_setup.load_managers.cache_clear()
+
+
+def main_loop(
+    server_name: str,
+    instance_name: str,
+    event=None,
+    manager_port=None,
+    accelerator_setup_file=None,
+):
     import logging
     logging.getLogger("transitions").setLevel(logging.WARNING)
     logging.getLogger("transitions.core").setLevel(logging.WARNING)
+    _configure_accelerator_setup_file(accelerator_setup_file)
 
-    os.nice(4)
+    if hasattr(os, "nice"):
+        os.nice(4)
 
     prefix = os.environ.get("DT4ACC_PREFIX", os.getlogin())
 
     # Inject controller BEFORE Tango initialises any device
-    _inject_controller(prefix)
+    _inject_controller(prefix, manager_port)
 
     # Bulk pre-load initial values for all magnets in this server/instance.
     # One RPC call for all magnets instead of one per magnet in init_device().
     try:
         from dt4acc.custom_epics.data.querries import get_magnets_per_power_converters, get_unique_power_converters
         from dt4acc.custom_tango.ioc.server_manager import _connect_to_mexec_service
-        sync_proxy, _ = _connect_to_mexec_service()
+        sync_proxy, _ = _connect_to_mexec_service(manager_port)
 
         # Collect UUIDs for magnets belonging to this server/instance
         my_uuids = []

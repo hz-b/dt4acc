@@ -111,8 +111,9 @@ class TranslatorService(TranslatorServiceBase):
 
 def remove_id(d: Dict) -> Dict:
     nd = d.copy()
-    del d
-    del nd["_id"]
+    nd.pop("_id", None)
+    if "uuid" in nd and "uuids" not in nd:
+        nd["uuids"] = [nd.pop("uuid")]
     return nd
 
 

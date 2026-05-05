@@ -1,8 +1,26 @@
 import json
+import os
 from abc import ABCMeta, abstractmethod
 from enum import Enum
 from pathlib import Path
 from typing import Sequence, Union
+
+
+_DEFAULT_ACCELERATOR_SETUP_FILE = (
+    Path.home() / "Documents" / "dt4acc_config_data" / "accelerator_setup.json"
+)
+_ACCELERATOR_SETUP_FILE = Path(
+    os.environ.get("DT4ACC_ACCELERATOR_SETUP_FILE", _DEFAULT_ACCELERATOR_SETUP_FILE)
+)
+
+
+def configure_accelerator_setup_file(path: str | Path) -> None:
+    global _ACCELERATOR_SETUP_FILE
+    _ACCELERATOR_SETUP_FILE = Path(path)
+
+
+def get_accelerator_setup_file() -> Path:
+    return _ACCELERATOR_SETUP_FILE
 
 
 class FamilyTree(metaclass=ABCMeta):
@@ -89,7 +107,7 @@ def soleil_yellow_pages() -> YellowPages:
     from ~/Documents/soleil/accelerator_setup.json.
     """
 
-    data_file = Path.home() / "Documents" / "dt4acc_soleil_twin_data" / "accelerator_setup.json"
+    data_file = _ACCELERATOR_SETUP_FILE
     elements = json.loads(data_file.read_text())
 
     def is_horizontal(e: dict) -> bool:

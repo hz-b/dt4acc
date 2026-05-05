@@ -32,6 +32,7 @@ Environment variables (all optional, CLI args take precedence)
 
 import argparse
 import os
+import socket
 import sys
 from pathlib import Path
 
@@ -55,6 +56,13 @@ DEFAULT_LATTICE_FILE = (
     / "Documents"
     / "dt4acc_soleil_twin_data"
     / "SOLEIL_II_V3635_STAB_SYM1_SB3_MULT7_4SX60_V001_Nomenclature.m"
+)
+
+DEFAULT_ACCELERATOR_SETUP_FILE = (
+    Path.home()
+    / "Documents"
+    / "dt4acc_config_data"
+    / "accelerator_setup.json"
 )
 
 # Calculation heartbeat: recalculates twiss+orbit+tune every N seconds
@@ -82,6 +90,20 @@ def parse_args():
         help="Tango database host:port (default: localhost:10000)",
     )
     parser.add_argument(
+        "--accelerator-setup-file",
+        type=Path,
+        default=Path(
+            os.environ.get(
+                "DT4ACC_ACCELERATOR_SETUP_FILE",
+                DEFAULT_ACCELERATOR_SETUP_FILE,
+            )
+        ),
+        help=(
+            "Path to accelerator_setup.json "
+            f"(default: {DEFAULT_ACCELERATOR_SETUP_FILE})"
+        ),
+    )
+    parser.add_argument(
         "--heartbeat-period",
         type=float,
         default=DEFAULT_HEARTBEAT_PERIOD_S,
@@ -90,8 +112,8 @@ def parse_args():
     parser.add_argument(
         "--port",
         type=int,
-        default=50200,
-        help="TCP port for the MexecService manager (default: 50200)",
+        default=0,
+        help="TCP port for the MexecService manager, 0 chooses a free local port (default: 0)",
     )
     parser.add_argument(
         "--view",
@@ -112,22 +134,36 @@ def _soleil_load_managers():
     return load_managers()
 
 
+def _pick_free_local_port() -> int:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind(("127.0.0.1", 0))
+        return sock.getsockname()[1]
+
+
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
 def main():
     args = parse_args()
+    mexec_port = args.port or _pick_free_local_port()
 
     if not args.lattice.exists():
         print(f"ERROR: Lattice file not found: {args.lattice}", file=sys.stderr)
         sys.exit(1)
+    if not args.accelerator_setup_file.exists():
+        print(
+            f"ERROR: accelerator setup file not found: {args.accelerator_setup_file}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
     print("SOLEIL twin server starting")
     print(f"  Lattice          : {args.lattice}")
+    print(f"  Accelerator setup: {args.accelerator_setup_file}")
     print(f"  TANGO            : {args.tango_host}")
     print(f"  Recalc period    : {args.heartbeat_period}s (no lattice changes)")
-    print(f"  MexecPort        : {args.port}")
+    print(f"  MexecPort        : {mexec_port}")
     print(f"  View             : {args.view}")
 
     os.environ["TANGO_HOST"] = args.tango_host
@@ -137,10 +173,19 @@ def main():
     server_manager.LATTICE_FILE      = args.lattice
     server_manager.LOAD_MANAGERS_FN  = _soleil_load_managers
     server_manager.HEARTBEAT_PERIOD  = args.heartbeat_period
-    server_manager._MANAGER_PORT     = args.port
+    server_manager._MANAGER_PORT     = mexec_port
     server_manager.EXPECTED_VIEW     = args.view
 
-    server_manager.main()
+    server_manager.main(
+        lattice_file=args.lattice,
+        load_managers=(
+            "dt4acc.custom_facility.soleil.liasion_translator_setup:load_managers"
+        ),
+        heartbeat_period=args.heartbeat_period,
+        manager_port=mexec_port,
+        expected_view=args.view,
+        accelerator_setup_file=args.accelerator_setup_file,
+    )
 
 
 if __name__ == "__main__":

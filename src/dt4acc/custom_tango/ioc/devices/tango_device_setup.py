@@ -74,7 +74,7 @@ def _register_dservers(db: Database, servers: set[tuple[str, str]]):
 
         try:
             db.add_device(db_dev)
-            logger.info(f"🧱 Registered DServer device {dserver_name} (server={server_str})")
+            logger.debug(f"🧱 Registered DServer device {dserver_name} (server={server_str})")
         except DevFailed as e:
             # Ignore 'already exists' style errors, log others
             msg = str(e)
@@ -143,7 +143,7 @@ def register_all_devices():
                         logger.warning("Could not set uuid property for %s: %s",
                                        magnet_name, e)
 
-                logger.info("🧲 Registered magnet %s uuid=%s (server=%s)",
+                logger.debug("🧲 Registered magnet %s uuid=%s (server=%s)",
                             magnet_name, magnet_uuid, server_str)
             except Exception as e:
                 logger.error("❌ Failed to register magnet %s: %s", magnet_name, e)
@@ -171,7 +171,7 @@ def register_all_devices():
             db_dev.name   = pc_name
             db.add_device(db_dev)
 
-            logger.info("⚡ Registered PC %s (server=%s)", pc_name, server_str)
+            logger.debug("⚡ Registered PC %s (server=%s)", pc_name, server_str)
         except Exception as e:
             logger.warning("Skipping PC %s (not a valid TRL?): %s", pc_name, e)
 

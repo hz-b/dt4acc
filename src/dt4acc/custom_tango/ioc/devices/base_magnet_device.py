@@ -52,7 +52,7 @@ class BaseMagnetDevice(Device):
         # Falls back to member name if not set (shouldn't happen after registration).
         self.lattice_id = self.element_uuid if self.element_uuid else self.trl.member
 
-        logger.info("Initializing %s: %s lattice_id=%s",
+        logger.debug("Initializing %s: %s lattice_id=%s",
                     self.__class__.__name__, self.trl.as_trl(), self.lattice_id)
 
         self._loop = get_shared_event_loop()
