@@ -16,6 +16,7 @@ Responsibilities
 """
 
 import asyncio
+import getpass
 import logging
 import os
 import sys
@@ -258,7 +259,7 @@ def main_loop(
     if hasattr(os, "nice"):
         os.nice(4)
 
-    prefix = os.environ.get("DT4ACC_PREFIX", os.getlogin())
+    prefix = os.environ.get("DT4ACC_PREFIX", getpass.getuser())
 
     # Inject controller BEFORE Tango initialises any device
     _inject_controller(prefix, manager_port)
