@@ -75,6 +75,36 @@ class AsyncMexecAdapter:
             lambda: self._proxy.sync_reference_frequency(),
         )
 
+    async def update_bpm_positions(
+        self,
+        names: Sequence[str],
+        x_values: Sequence[float],
+        y_values: Sequence[float],
+    ) -> None:
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(
+            None,
+            lambda: self._proxy.sync_update_bpm_positions(
+                list(names),
+                list(x_values),
+                list(y_values),
+            ),
+        )
+
+    async def clear_bpm_positions(self) -> None:
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(
+            None,
+            lambda: self._proxy.sync_clear_bpm_positions(),
+        )
+
+    async def bpm_position(self, bpm_uuid: str):
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            None,
+            lambda: self._proxy.sync_bpm_position(bpm_uuid),
+        )
+
     async def trigger_read(self, rcmds: Sequence[ReadCommand]) -> ReadTogetherAndTranslated:
         loop = asyncio.get_running_loop()
         ids   = [r.id for r in rcmds]

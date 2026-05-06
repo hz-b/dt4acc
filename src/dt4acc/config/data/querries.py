@@ -68,6 +68,12 @@ def get_magnets_per_power_converters(pc: str) -> List[Dict[str, Any]]:
     return [d for d in _data() if d.get("pc") == pc]
 
 
+def get_devices_type_specified(type_list: Iterable[str]) -> List[Dict[str, Any]]:
+    """Return all control-system entries whose type is in type_list."""
+    wanted = set(type_list)
+    return [d for d in _data() if _match(d, "type", wanted)]
+
+
 def get_unique_power_converters() -> List[str]:
     """Distinct list of power-converter names for magnet elements."""
     wanted = {

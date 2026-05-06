@@ -79,10 +79,12 @@ class TangoView:
         self,
         *,
         prefix: str,
+        mexec=None,
         position_name_resolver: Optional[PositionNameResolver] = None,
     ):
         self._calc_view = CalculationResultView(prefix=prefix)
         self._prefix = prefix
+        self._mexec = mexec
         self._position_name_resolver = position_name_resolver
 
     async def dispatch(self, rcmd: ReadCommand, result: TranslatedReading) -> None:
@@ -102,9 +104,16 @@ class TangoView:
     async def _push_orbit(self, result: TranslatedReading) -> None:
         (reading,) = result.readings
         track = reading.payload          # CalculatedTrack from new backend
-        await self._calc_view.push_orbit(
-            _OrbitAdapter(track, position_name_resolver=self._position_name_resolver)
+        orbit = _OrbitAdapter(
+            track,
+            position_name_resolver=self._position_name_resolver,
         )
+        if self._mexec is not None and hasattr(self._mexec, "update_bpm_positions"):
+            try:
+                await self._mexec.update_bpm_positions(orbit.names, orbit.x, orbit.y)
+            except Exception as exc:
+                logger.warning("TangoView: BPM cache update failed: %s", exc)
+        await self._calc_view.push_orbit(orbit)
 
     async def _push_twiss(self, result: TranslatedReading) -> None:
         (reading,) = result.readings
@@ -233,6 +242,7 @@ class TangoController:
         self.mexec = mexec
         self.view = TangoView(
             prefix=prefix,
+            mexec=mexec,
             position_name_resolver=position_name_resolver,
         )
         self.default_delayed_reads = tuple(default_delayed_reads)
@@ -395,6 +405,11 @@ class TangoController:
         This signals to clients that the data is invalid (beam lost).
         """
         try:
+            if hasattr(self.mexec, "clear_bpm_positions"):
+                try:
+                    await self.mexec.clear_bpm_positions()
+                except Exception as exc:
+                    logger.debug("TangoController: BPM cache clear failed: %s", exc)
             await self.view.push_invalid()
         except Exception as exc:
             logger.error("TangoController: failed to push invalid state: %s", exc)

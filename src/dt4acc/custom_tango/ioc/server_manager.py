@@ -390,6 +390,7 @@ def _run_mexec_service(
     )
     mexec = future.result(timeout=120)
     logger.warning("MexecService: lattice ready, mexec built.")
+    bpm_positions: dict[str, tuple[float, float]] = {}
 
     class SyncMexecProxy:
         """Synchronous wrapper around mexec for crossing the process boundary."""
@@ -434,6 +435,32 @@ def _run_mexec_service(
                 return float(fut.result(timeout=5))
             except Exception:
                 return 0.0
+
+        def sync_update_bpm_positions(
+            self,
+            names: Sequence[str],
+            x_values: Sequence[float],
+            y_values: Sequence[float],
+        ) -> None:
+            """Store the latest BPM positions by BPM UUID."""
+            next_positions = {}
+            for name, x, y in zip(names, x_values, y_values):
+                bpm_id = str(name)
+                if not bpm_id.upper().startswith("BPM"):
+                    continue
+                next_positions[bpm_id] = (float(x), float(y))
+            bpm_positions.clear()
+            bpm_positions.update(next_positions)
+
+        def sync_clear_bpm_positions(self) -> None:
+            bpm_positions.clear()
+
+        def sync_bpm_position(self, bpm_uuid: str):
+            values = bpm_positions.get(str(bpm_uuid))
+            if values is None:
+                return (False, 0.0, 0.0)
+            x, y = values
+            return (True, float(x), float(y))
 
         def sync_set_reference_frequency(self, reference_frequency_khz: float):
             """Set master-clock RF in kHz while preserving cavity harmonic ratios."""
@@ -576,17 +603,31 @@ def _calculation_heartbeat(start_evt, stop_evt, period_s=1.0):
         logger.warning("Calculation heartbeat exiting before devices ready.")
         return
 
-    logger.warning("Calculation heartbeat started — recalculating every %.1fs", period_s)
+    proxy_timeout_ms = max(
+        1000,
+        _env_int("DT4ACC_HEARTBEAT_TANGO_TIMEOUT_MS", 60000),
+    )
+    logger.warning(
+        "Calculation heartbeat started — recalculating every %.1fs "
+        "(Tango timeout=%d ms)",
+        period_s,
+        proxy_timeout_ms,
+    )
 
     # Connect to the RingSimulatorDevice to trigger recalculation via Recalculate command
     from tango import DeviceProxy, DevFailed
     from dt4acc.custom_tango.ioc.devices.virtual_devices import RING_SIM_DEV
 
+    def _connect_ring_simulator():
+        proxy = DeviceProxy(RING_SIM_DEV)
+        proxy.set_timeout_millis(proxy_timeout_ms)
+        proxy.ping()
+        return proxy
+
     dev = None
     while not stop_evt.is_set():
         try:
-            dev = DeviceProxy(RING_SIM_DEV)
-            dev.ping()
+            dev = _connect_ring_simulator()
             logger.warning("Calculation heartbeat: %s reachable", RING_SIM_DEV)
             break
         except Exception as exc:
@@ -598,11 +639,20 @@ def _calculation_heartbeat(start_evt, stop_evt, period_s=1.0):
 
     while not stop_evt.is_set():
         try:
+            if dev is None:
+                dev = _connect_ring_simulator()
             dev.command_inout("Recalculate")
         except DevFailed as exc:
-            logger.warning("Calculation heartbeat: Recalculate failed: %s", exc)
+            logger.warning(
+                "Calculation heartbeat: Recalculate failed "
+                "(timeout=%d ms, proxy will be recreated): %s",
+                proxy_timeout_ms,
+                exc,
+            )
+            dev = None
         except Exception as exc:
             logger.error("Calculation heartbeat error: %s", exc)
+            dev = None
         stop_evt.wait(period_s)
 
 
@@ -619,6 +669,59 @@ class ProcessMonitor:
 
     def trl_prefix(self):
         return f"{self.server_name}/{self.instance_name}"
+
+
+def _env_int(name: str, default: int) -> int:
+    try:
+        return int(os.environ.get(name, default))
+    except (TypeError, ValueError):
+        return default
+
+
+def _env_float(name: str, default: float) -> float:
+    try:
+        return float(os.environ.get(name, default))
+    except (TypeError, ValueError):
+        return default
+
+
+def _terminate_monitors(monitors: Sequence[ProcessMonitor]) -> None:
+    for pm in monitors:
+        try:
+            pm.process.terminate()
+        except Exception:
+            pass
+
+
+def _wait_started(monitors: Sequence[ProcessMonitor], timeout_s: float) -> bool:
+    start = time.time()
+    remaining = {pm.trl_prefix(): pm for pm in monitors}
+
+    for cnt in itertools.count():
+        dt = time.time() - start
+        newly_ready = {k: pm for k, pm in remaining.items() if pm.event.is_set()}
+        for k in newly_ready:
+            logger.warning("%.2f min: %s signalled startup", dt / 60.0, k)
+            remaining.pop(k)
+        if not remaining:
+            return True
+
+        for pm in monitors:
+            if not pm.process.is_alive() or pm.process.exitcode:
+                logger.error("Process %s (pid=%s) died", pm.trl_prefix(), pm.process.pid)
+                return False
+
+        if dt > timeout_s:
+            logger.error(
+                "Timed out after %.1fs while starting %s",
+                timeout_s,
+                list(remaining),
+            )
+            return False
+
+        time.sleep(0.2)
+        if (cnt % (5 * 30)) == 0:
+            logger.warning("%.2f min: still waiting for %s", dt / 60.0, list(remaining))
 
 
 def _wait_all_started(monitors: Sequence[ProcessMonitor]) -> bool:
@@ -718,48 +821,47 @@ def main(
     # 3. Spawn one Tango server process per (server_name, instance_name)
     from dt4acc.custom_tango.ioc import single_server
     monitors = []
-    for server_name, instance_name in servers:
-        evt = mp.Event()
-        p = mp.Process(
-            target=single_server.main_loop,
-            args=(
-                server_name,
-                instance_name,
-                evt,
-                _MANAGER_PORT,
-                str(accelerator_setup_file) if accelerator_setup_file is not None else None,
-                POSITION_NAME_RESOLVER_FN,
-                str(_get_lattice_file()),
-            ),
-            name=f"tango-{server_name}-{instance_name}",
-        )
-        p.start()
-        monitors.append(ProcessMonitor(
-            event=evt, process=p,
-            server_name=server_name, instance_name=instance_name,
-        ))
+    configured_batch_size = _env_int("DT4ACC_TANGO_START_BATCH_SIZE", 1)
+    batch_size = len(servers) if configured_batch_size == 0 else max(1, configured_batch_size)
+    start_timeout_s = max(1.0, _env_float("DT4ACC_TANGO_START_TIMEOUT_S", 240.0))
+    logger.warning(
+        "Starting Tango servers in batches of %d (configured=%d, timeout %.1fs per batch). "
+        "Keep batch_size=1 if the Tango database reports DbExportDevice "
+        "serialization-monitor timeouts.",
+        batch_size,
+        configured_batch_size,
+        start_timeout_s,
+    )
+    for index in range(0, len(servers), batch_size):
+        batch = servers[index:index + batch_size]
+        batch_monitors = []
+        for server_name, instance_name in batch:
+            evt = mp.Event()
+            p = mp.Process(
+                target=single_server.main_loop,
+                args=(
+                    server_name,
+                    instance_name,
+                    evt,
+                    _MANAGER_PORT,
+                    str(accelerator_setup_file) if accelerator_setup_file is not None else None,
+                    POSITION_NAME_RESOLVER_FN,
+                    str(_get_lattice_file()),
+                ),
+                name=f"tango-{server_name}-{instance_name}",
+            )
+            p.start()
+            pm = ProcessMonitor(
+                event=evt, process=p,
+                server_name=server_name, instance_name=instance_name,
+            )
+            monitors.append(pm)
+            batch_monitors.append(pm)
 
-        start_deadline = time.time() + 180.0
-        while not evt.wait(0.5):
-            if not p.is_alive() or p.exitcode:
-                logger.error("Process %s/%s died during startup", server_name, instance_name)
-                for pm in monitors:
-                    try:
-                        pm.process.terminate()
-                    except Exception:
-                        pass
-                svc_proc.terminate()
-                sys.exit(1)
-            if time.time() > start_deadline:
-                logger.error("Timed out while starting %s/%s", server_name, instance_name)
-                for pm in monitors:
-                    try:
-                        pm.process.terminate()
-                    except Exception:
-                        pass
-                svc_proc.terminate()
-                sys.exit(1)
-        logger.warning("%s/%s signalled startup", server_name, instance_name)
+        if not _wait_started(batch_monitors, start_timeout_s):
+            _terminate_monitors(monitors)
+            svc_proc.terminate()
+            sys.exit(1)
 
     # 4. Calculation heartbeat — recalculates twiss+orbit+tune every second
     #    without writing to or changing the lattice (zero noise)
@@ -780,11 +882,7 @@ def main(
     def _shutdown(*_):
         logger.warning("Shutting down.")
         stop_evt.set()
-        for pm in monitors:
-            try:
-                pm.process.terminate()
-            except Exception:
-                pass
+        _terminate_monitors(monitors)
         svc_proc.terminate()
         time.sleep(1.0)
         sys.exit(0)
