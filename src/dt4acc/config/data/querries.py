@@ -20,7 +20,7 @@ from typing import Iterable, List, Dict, Any
 # locate and load the data file once; keep it cached in _DATA
 # -----------------------------------------------------------------
 
-_DATA_FILE = Path.home() / "Documents" / "dt4acc_soleil_twin_data" / "accelerator_setup.json"
+_DATA_FILE = Path.home() / "Documents" / "dt4acc_config_data" / "accelerator_setup.json"
 
 with _DATA_FILE.open() as fp:
     _DATA: List[Dict[str, Any]] = json.load(fp)
@@ -40,7 +40,7 @@ def get_magnets():
     """Return all magnet elements as an iterator."""
     wanted = {
         "Quadrupole", "Sextupole", "Steerer", "RFCavity", "SkewQuadrupole",
-        "Multipole", "Octupole"  # MAX IV types
+        "Multipole", "Bend", "Octupole"
     }
     return (d for d in _DATA if _match(d, "type", wanted))
 
@@ -54,7 +54,7 @@ def get_unique_power_converters() -> List[str]:
     """Distinct list of power-converter names for magnet elements."""
     wanted = {
         "Quadrupole", "Sextupole", "Steerer", "SkewQuadrupole",
-        "Multipole", "Octupole"   # MAX IV types
+        "Multipole", "Octupole" , "Bend"
     }
     return sorted({d["pc"] for d in _DATA if _match(d, "type", wanted) and d.get("pc")})
 
@@ -63,7 +63,6 @@ def get_unique_power_converters_type_specified(type_list: Iterable[str]) -> List
     """Distinct list of power-converter names for the supplied magnet types."""
     wanted = set(type_list)
     return sorted({d["pc"] for d in _DATA if _match(d, "type", wanted)})
-
 
 def get_bpms() -> List[Dict[str, Any]]:
     """Return all BPM entries from the setup JSON."""

@@ -307,7 +307,7 @@ def get_all_device_classes():
         VerticalSteererDevice,
         SkewQuadDevice,
         CavityDevice,
-        # PowerConverterDevice,
+        PowerConverterDevice,
         RingSimulatorDevice,
-        BPMDevice,
+        BPMDevice
     ]
