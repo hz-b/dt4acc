@@ -20,9 +20,9 @@ class BESSYIIPyAtAcceleratorSimulator(PyATAcceleratorSimulator):
             #       to yellow
             host_element_id = get_element_id_of_host(element_id)
             elements = self.acc.get_elements(host_element_id)
-            (element,) = elements
+            (_,) = elements
             return instantiate_addon_proxy(
-                element, element_id=element_id, host_element_id=host_element_id
+                elements, element_id=element_id, host_element_id=host_element_id
             )
         else:
             raise ValueError(f"Got too many elements for {element_id}")
@@ -44,7 +44,7 @@ def get_element_id_of_host(element_id: str) -> str:
     raise ValueError(f"Unknown element id: {element_id}")
 
 
-def instantiate_addon_proxy(element, *, element_id, host_element_id):
+def instantiate_addon_proxy(elements, *, element_id, host_element_id):
     """
     Instantiates the correct proxy for the given sub lattice and element ID.
     Used by the EPICS path (H/V prefix convention).
@@ -72,7 +72,7 @@ def instantiate_addon_proxy(element, *, element_id, host_element_id):
         raise ValueError(f"Unknown correction plane for element ID: {element_id}")
 
     return KickAngleCorrectorProxy(
-        element,
+        elements,
         element_id=element_id,
         host_element_id=host_element_id,
     )
