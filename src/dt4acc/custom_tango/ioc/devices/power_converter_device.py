@@ -1,6 +1,7 @@
 import asyncio
 
 import numpy as np
+from dt4acc_lib.model.utils import tango_resource_locator
 from dt4acc_lib.model.utils.command import ReadCommand, BehaviourOnError, Command
 from tango import DevState, DevFailed
 from tango.server import Device, attribute, device_property, AttrWriteType
@@ -10,14 +11,6 @@ from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_l
 from dt4acc.custom_tango.ioc.controller_registry import get_controller
 
 logger = get_logger()
-
-
-def split_name(name: str):
-    parts = name.split("/")
-    if len(parts) != 3:
-        raise DevFailed(f"Invalid Tango PC name '{name}'")
-    return parts[0], parts[1], parts[2]
-
 
 class PowerConverterDevice(Device):
     """
@@ -46,7 +39,7 @@ class PowerConverterDevice(Device):
         self.set_state(DevState.INIT)
 
         full_name = self.get_name()
-        domain, family, member = split_name(full_name)
+        self.trl = tango_resource_locator.TangoResourceLocator.from_trl(full_name)
         self.pc_name = full_name
 
         logger.info("Initializing PowerConverterDevice: %s", self.pc_name)

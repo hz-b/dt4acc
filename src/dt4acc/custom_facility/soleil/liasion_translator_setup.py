@@ -98,11 +98,6 @@ def _remove_id(d: Dict) -> Dict:
     return nd
 
 
-def _get_cavity_names() -> list:
-    """Return cavity device names directly from the setup JSON."""
-    return [m["name"] for m in get_magnets() if m.get("type") == "RFCavity"]
-
-
 def magnet_infos_from_db() -> Sequence[MagnetElementSetup]:
     known = {
         "name", "magnetic_strength", "uuids", "curves", "length",
@@ -162,7 +157,7 @@ def build_managers():
     """
     yp = soleil_yellow_pages()
     infos = magnet_infos_from_db()
-    cavity_names = _get_cavity_names()
+    cavity_names = yp.cavity_names()
 
     # Sanity check: names must be unique
     magnet_names = [info.name for info in infos]
