@@ -24,7 +24,7 @@ data into TwissOrbitDevice / BPMManagerDevice / TuneDevice via DeviceProxy.
 import asyncio
 import itertools
 import traceback
-from typing import Sequence
+from typing import Callable, Optional, Sequence
 
 from dt4acc_lib.model.output.result import TranslatedReading, ReadTogetherAndTranslated
 from dt4acc_lib.model.utils.command import ReadCommand, Command
@@ -33,6 +33,8 @@ from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.views.calculation_result_view import CalculationResultView
 
 logger = get_logger()
+
+PositionNameResolver = Callable[[object, int], str]
 
 # ---------------------------------------------------------------------------
 # Default delayed reads — same as EPICS default_delayed_reads
@@ -73,9 +75,15 @@ class TangoView:
           CalculationResultView has no push_tune — we push directly
     """
 
-    def __init__(self, *, prefix: str):
+    def __init__(
+        self,
+        *,
+        prefix: str,
+        position_name_resolver: Optional[PositionNameResolver] = None,
+    ):
         self._calc_view = CalculationResultView(prefix=prefix)
         self._prefix = prefix
+        self._position_name_resolver = position_name_resolver
 
     async def dispatch(self, rcmd: ReadCommand, result: TranslatedReading) -> None:
         """Route a single translated reading to the appropriate push method."""
@@ -94,7 +102,9 @@ class TangoView:
     async def _push_orbit(self, result: TranslatedReading) -> None:
         (reading,) = result.readings
         track = reading.payload          # CalculatedTrack from new backend
-        await self._calc_view.push_orbit(_OrbitAdapter(track))
+        await self._calc_view.push_orbit(
+            _OrbitAdapter(track, position_name_resolver=self._position_name_resolver)
+        )
 
     async def _push_twiss(self, result: TranslatedReading) -> None:
         (reading,) = result.readings
@@ -116,13 +126,22 @@ class TangoView:
 
 
 
+def default_position_name(position, index: int) -> str:
+    return str(position.name)
+
+
 class _OrbitAdapter:
     __slots__ = ("x", "y", "names", "x0", "found")
 
-    def __init__(self, track):
+    def __init__(
+        self,
+        track,
+        position_name_resolver: Optional[PositionNameResolver] = None,
+    ):
+        resolver = position_name_resolver or default_position_name
         self.x     = [p.x    for p in track.track]
         self.y     = [p.y    for p in track.track]
-        self.names = [p.name for p in track.track]
+        self.names = [resolver(p, index) for index, p in enumerate(track.track)]
         self.x0    = []
         self.found = True
 
@@ -209,9 +228,13 @@ class TangoController:
         prefix: str,
         default_delayed_reads: Sequence[ReadCommand] = DEFAULT_DELAYED_READS,
         sync_reset=None,
+        position_name_resolver: Optional[PositionNameResolver] = None,
     ):
         self.mexec = mexec
-        self.view = TangoView(prefix=prefix)
+        self.view = TangoView(
+            prefix=prefix,
+            position_name_resolver=position_name_resolver,
+        )
         self.default_delayed_reads = tuple(default_delayed_reads)
         self._sync_reset = sync_reset  # callable: reloads lattice + clears error state
 
@@ -259,25 +282,36 @@ class TangoController:
         try:
             # Step 1: bulk-read all nominal values into the process cache
             from dt4acc.custom_tango.ioc.single_server import (
-                refresh_cache_from_lattice, _my_magnet_uuids
+                refresh_cache_from_lattice, _my_nominal_reads
             )
             from dt4acc.custom_tango.ioc.server_manager import _connect_to_mexec_service
             sync_proxy, _ = _connect_to_mexec_service()
-            refresh_cache_from_lattice(sync_proxy, _my_magnet_uuids)
+            refresh_cache_from_lattice(sync_proxy, _my_nominal_reads)
 
             # Step 2: tell each MagnetDevice to read from cache (instant, no RPC)
             from tango import Database, DeviceProxy
             db = Database()
-            dev_list = db.get_device_exported_for_class("MagnetDevice")
             count = 0
-            for dev_name in dev_list.value_string:
+            for class_name in (
+                "MultipoleDevice",
+                "HorizontalSteererDevice",
+                "VerticalSteererDevice",
+                "SkewQuadDevice",
+                "CavityDevice",
+            ):
                 try:
-                    dp = DeviceProxy(str(dev_name))
-                    dp.set_timeout_millis(1000)
-                    dp.command_inout("RefreshFromCache")
-                    count += 1
+                    dev_list = db.get_device_exported_for_class(class_name)
                 except Exception as exc:
-                    logger.debug("RefreshFromCache failed for %s: %s", dev_name, exc)
+                    logger.debug("Device list failed for %s: %s", class_name, exc)
+                    continue
+                for dev_name in dev_list.value_string:
+                    try:
+                        dp = DeviceProxy(str(dev_name))
+                        dp.set_timeout_millis(1000)
+                        dp.command_inout("RefreshFromCache")
+                        count += 1
+                    except Exception as exc:
+                        logger.debug("RefreshFromCache failed for %s: %s", dev_name, exc)
             logger.warning("TangoController.reset: RefreshFromCache sent to %d magnets", count)
         except Exception as exc:
             logger.warning("TangoController.reset: could not refresh magnets: %s", exc)
@@ -314,6 +348,8 @@ class TangoController:
         """
         # 1. Mutate the backend lattice
         await self.mexec.set([cmd])
+        if cmd.id == "master_clock" and cmd.property == "reference_frequency":
+            self._refresh_cavity_devices()
 
         # 2. Immediate reads — e.g. readback current after setting a magnet
         if reads:
@@ -324,6 +360,30 @@ class TangoController:
         # 3. Queue delayed reads
         all_delayed = list(self.default_delayed_reads) + list(delayed_reads)
         await self._enqueue(all_delayed)
+
+    def _refresh_cavity_devices(self) -> None:
+        """Refresh cavity Tango attributes after a master-clock RF write."""
+        try:
+            from tango import Database, DeviceProxy
+            db = Database()
+            try:
+                dev_list = db.get_device_exported_for_class("CavityDevice")
+            except Exception as exc:
+                logger.debug("Device list failed for CavityDevice: %s", exc)
+                return
+
+            count = 0
+            for dev_name in dev_list.value_string:
+                try:
+                    dp = DeviceProxy(str(dev_name))
+                    dp.set_timeout_millis(1000)
+                    dp.command_inout("RefreshFromCache")
+                    count += 1
+                except Exception as exc:
+                    logger.debug("Cavity RefreshFromCache failed for %s: %s", dev_name, exc)
+            logger.warning("TangoController: refreshed %d RF cavity devices", count)
+        except Exception as exc:
+            logger.warning("TangoController: could not refresh RF cavity devices: %s", exc)
 
     async def trigger_read(self, reads: Sequence[ReadCommand]) -> ReadTogetherAndTranslated:
         """Direct read from the backend — used for initial value peek at startup."""

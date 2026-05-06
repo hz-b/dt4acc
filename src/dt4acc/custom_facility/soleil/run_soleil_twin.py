@@ -185,6 +185,9 @@ def main():
         manager_port=mexec_port,
         expected_view=args.view,
         accelerator_setup_file=args.accelerator_setup_file,
+        position_name_resolver=(
+            "dt4acc.custom_facility.soleil.orbit_names:soleil_position_name"
+        ),
     )
 
 

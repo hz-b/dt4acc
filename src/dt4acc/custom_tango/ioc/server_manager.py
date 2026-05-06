@@ -48,6 +48,7 @@ logging.getLogger("transitions").setLevel(logging.WARNING)
 logging.getLogger("transitions.core").setLevel(logging.WARNING)
 
 from dt4acc_lib.bl.command_rewritter import CommandRewriter
+from dt4acc_lib.pyat_simulator.accelerator_simulator import PyATAcceleratorSimulator
 
 
 # Virtual result element IDs — these are computed by the backend (twiss, tune,
@@ -87,8 +88,123 @@ class VirtualPassthroughCommandRewriter(CommandRewriter):
         if cmd.id in _VIRTUAL_RESULT_IDS:
             return [cmd]
         return super().forward(cmd)
+
+
+class VoltageAwareElementProxy:
+    """Add generic RFCavity voltage support to dt4acc-lib element proxies."""
+
+    def __init__(self, wrapped):
+        self._wrapped = wrapped
+
+    def __getattr__(self, name):
+        return getattr(self._wrapped, name)
+
+    def _elements(self):
+        try:
+            elements = list(self._wrapped._obj)
+        except Exception as exc:
+            raise NotImplementedError(
+                "voltage handling requires an AT element proxy with element storage"
+            ) from exc
+        if not elements:
+            raise NotImplementedError("voltage handling requires at least one AT element")
+        return elements
+
+    async def update(self, property_id: str, value: object):
+        if property_id != "voltage":
+            return await self._wrapped.update(property_id, value)
+
+        elements = self._elements()
+        voltage = float(value) / len(elements)
+        for element in elements:
+            if not hasattr(element, "Voltage"):
+                raise NotImplementedError(
+                    f"Element {getattr(element, 'FamName', element)!r} has no Voltage property"
+                )
+            element.update(Voltage=voltage)
+
+    def peek(self, property_id: str) -> float:
+        if property_id != "voltage":
+            return self._wrapped.peek(property_id)
+
+        voltage = 0.0
+        for element in self._elements():
+            if not hasattr(element, "Voltage"):
+                raise NotImplementedError(
+                    f"Element {getattr(element, 'FamName', element)!r} has no Voltage property"
+                )
+            voltage += float(element.Voltage)
+        return voltage
+
+
+class VoltageAwarePyATAcceleratorSimulator(PyATAcceleratorSimulator):
+    """PyAT simulator with local support for reading/writing RFCavity voltage."""
+
+    def get(self, element_id):
+        return VoltageAwareElementProxy(super().get(element_id))
+
+
+def _rf_cavities_from_lattice(lattice):
+    return [
+        element
+        for element in lattice
+        if getattr(element, "Frequency", None) is not None
+    ]
+
+
+def _reference_cavity_from_lattice(lattice):
+    cavities = [
+        element
+        for element in _rf_cavities_from_lattice(lattice)
+        if float(getattr(element, "Frequency", 0.0) or 0.0) > 0.0
+    ]
+    if not cavities:
+        return None
+
+    harmonic_number = getattr(lattice, "harmonic_number", None)
+    if harmonic_number is not None:
+        for element in cavities:
+            if getattr(element, "HarmNumber", None) == harmonic_number:
+                return element
+
+    return min(cavities, key=lambda element: float(element.Frequency))
+
+
+def _reference_frequency_khz_from_backend(backend) -> float:
+    reference = _reference_cavity_from_lattice(backend.acc.acc)
+    if reference is None:
+        return 0.0
+    return float(reference.Frequency) * 1e-3
+
+
+def _set_reference_frequency_khz_on_backend(backend, reference_frequency_khz: float) -> None:
+    """Set all RF cavity frequencies from a master-clock value in kHz.
+
+    The reference cavity is the one matching the lattice harmonic number when
+    available. Other cavities keep their HarmNumber ratio to that reference, so
+    harmonic cavities remain harmonic instead of being forced to the same Hz.
+    """
+    reference = _reference_cavity_from_lattice(backend.acc.acc)
+    if reference is None:
+        raise ValueError("No RF cavity with a positive Frequency was found in the lattice")
+
+    reference_hz = float(reference_frequency_khz) * 1e3
+    reference_harmonic = getattr(reference, "HarmNumber", None)
+
+    with backend.calculation_lock:
+        if backend.model.is_error():
+            raise ValueError("SimulatorBackend is in error state; call Reset before writing RF")
+        backend.model.changed()
+        for cavity in _rf_cavities_from_lattice(backend.acc.acc):
+            harmonic = getattr(cavity, "HarmNumber", None)
+            if reference_harmonic and harmonic:
+                frequency = reference_hz * float(harmonic) / float(reference_harmonic)
+            else:
+                frequency = reference_hz
+            cavity.update(Frequency=frequency)
+
+
 from dt4acc_lib.model.utils.command import BehaviourOnError, Command, ReadCommand
-from dt4acc_lib.pyat_simulator.accelerator_simulator import PyATAcceleratorSimulator
 from dt4acc_lib.pyat_simulator.simulator_backend import SimulatorBackend
 from tango import DeviceProxy, DevFailed
 
@@ -109,6 +225,11 @@ LATTICE_FILE: Path = None
 
 # Callable that returns (yellow_pages, liaison_manager, translator_service)
 LOAD_MANAGERS_FN = None
+
+# Optional "module:function" or callable used by Tango orbit publishing to name
+# positions. Facility-specific launchers may set it; the generic default is
+# CalculatedPosition.name.
+POSITION_NAME_RESOLVER_FN = None
 
 # Expected view for output — "design" for SOLEIL (commands in lattice space)
 EXPECTED_VIEW = "design"
@@ -215,7 +336,7 @@ def _build_mexec(
     acc = _load_lattice(filename)
     backend = SimulatorBackend(
         name="Facility specific PYAT",
-        acc=PyATAcceleratorSimulator(at_lattice=acc),
+        acc=VoltageAwarePyATAcceleratorSimulator(at_lattice=acc),
     )
     resolved_load_managers = _resolve_load_managers(load_managers)
     _, lm, ts = resolved_load_managers()
@@ -274,6 +395,9 @@ def _run_mexec_service(
         """Synchronous wrapper around mexec for crossing the process boundary."""
 
         def sync_set(self, cmd_id: str, cmd_property: str, value: float):
+            if cmd_id == "master_clock" and cmd_property == "reference_frequency":
+                return self.sync_set_reference_frequency(value)
+
             cmd = Command(
                 id=cmd_id,
                 property=cmd_property,
@@ -299,6 +423,29 @@ def _run_mexec_service(
                 return float(fut.result(timeout=5))
             except Exception:
                 return 0.0
+
+        def sync_reference_frequency(self) -> float:
+            """Return the current reference RF frequency in kHz."""
+            fut = asyncio.run_coroutine_threadsafe(
+                asyncio.to_thread(_reference_frequency_khz_from_backend, mexec.backend),
+                service_loop,
+            )
+            try:
+                return float(fut.result(timeout=5))
+            except Exception:
+                return 0.0
+
+        def sync_set_reference_frequency(self, reference_frequency_khz: float):
+            """Set master-clock RF in kHz while preserving cavity harmonic ratios."""
+            fut = asyncio.run_coroutine_threadsafe(
+                asyncio.to_thread(
+                    _set_reference_frequency_khz_on_backend,
+                    mexec.backend,
+                    reference_frequency_khz,
+                ),
+                service_loop,
+            )
+            return fut.result(timeout=30)
 
         def sync_trigger_read(self, rcmd_ids: Sequence[str], rcmd_properties: Sequence[str]):
             rcmds = [
@@ -508,8 +655,9 @@ def main(
     manager_port=None,
     expected_view=None,
     accelerator_setup_file=None,
+    position_name_resolver=None,
 ):
-    global LATTICE_FILE, LOAD_MANAGERS_FN, HEARTBEAT_PERIOD, _MANAGER_PORT, EXPECTED_VIEW
+    global LATTICE_FILE, LOAD_MANAGERS_FN, HEARTBEAT_PERIOD, _MANAGER_PORT, EXPECTED_VIEW, POSITION_NAME_RESOLVER_FN
 
     if lattice_file is not None:
         LATTICE_FILE = Path(lattice_file)
@@ -523,8 +671,11 @@ def main(
         _MANAGER_PORT = int(manager_port)
     if expected_view is not None:
         EXPECTED_VIEW = expected_view
+    if position_name_resolver is not None:
+        POSITION_NAME_RESOLVER_FN = position_name_resolver
 
     os.environ.setdefault("TANGO_HOST", "localhost:10000")
+    os.environ["DT4ACC_LATTICE_FILE"] = str(_get_lattice_file())
     _configure_accelerator_setup_file(accelerator_setup_file)
     load_managers_arg = load_managers if load_managers is not None else LOAD_MANAGERS_FN
 
@@ -577,6 +728,8 @@ def main(
                 evt,
                 _MANAGER_PORT,
                 str(accelerator_setup_file) if accelerator_setup_file is not None else None,
+                POSITION_NAME_RESOLVER_FN,
+                str(_get_lattice_file()),
             ),
             name=f"tango-{server_name}-{instance_name}",
         )

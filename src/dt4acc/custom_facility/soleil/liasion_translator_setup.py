@@ -363,6 +363,14 @@ def build_managers():
     )
     inverse_lut.update(
         {
+            DevicePropertyID(device_name=name, property="voltage"): (
+                LatticeElementPropertyID(element_name=name, property="voltage"),
+            )
+            for name in cavity_names
+        }
+    )
+    inverse_lut.update(
+        {
             DevicePropertyID(
                 device_name="master_clock", property="reference_frequency"
             ): tuple(
@@ -504,6 +512,20 @@ def build_managers():
             ): LinearUnitConversion(
                 slope=1e-3, intercept=0.0
             )  # BESSY II uses kHz for the cavities clock
+            for name in cavity_names
+        }
+    )
+
+    translator_lut.update(
+        {
+            ConversionID(
+                lattice_property_id=LatticeElementPropertyID(
+                    element_name=name, property="voltage"
+                ),
+                device_property_id=DevicePropertyID(
+                    device_name=name, property="voltage"
+                ),
+            ): LinearUnitConversion(slope=1.0, intercept=0.0)
             for name in cavity_names
         }
     )

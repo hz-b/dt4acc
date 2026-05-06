@@ -34,7 +34,7 @@ src/dt4acc/custom_facility/soleil/run_soleil_twin.py  ← SOLEIL launch script (
 | `HorizontalSteererDevice` | Steerer (CDLH/CDRH) | `x_kick` |
 | `VerticalSteererDevice` | Steerer (CDLV/CDRV) | `y_kick` |
 | `SkewQuadDevice` | SkewQuadrupole (CQLN/CQLT) | `skew_quad_strength` |
-| `CavityDevice` | RFCavity | `frequency` |
+| `CavityDevice` | RFCavity | `frequency`, `voltage` |
 | `RingSimulatorDevice` | — | `orbit_x/y`, `beta/alpha/nu_x/y`, `bpm_x/y_attr`, `hor`, `vert`, `reference_frequency` |
 
 ### Single virtual device

@@ -18,6 +18,8 @@ from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_l
 
 logger = get_logger()
 
+ASYNC_WRITE_TIMEOUT_S = 60.0
+
 
 def split_name(name: str):
     """Split Tango device name 'AN10-AR/EM/SCF.11'."""
@@ -62,7 +64,7 @@ class BaseMagnetDevice(Device):
         """Submit coroutine to shared loop, block until done, raise DevFailed on error."""
         try:
             fut = asyncio.run_coroutine_threadsafe(coro, self._loop)
-            return fut.result(timeout=10)
+            return fut.result(timeout=ASYNC_WRITE_TIMEOUT_S)
         except Exception as exc:
             raise DevFailed(str(exc))
 

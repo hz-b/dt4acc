@@ -16,6 +16,7 @@ Responsibilities
 """
 
 import asyncio
+import importlib
 import getpass
 import logging
 import os
@@ -67,6 +68,13 @@ class AsyncMexecAdapter:
                 lambda: self._proxy.sync_set(_id, _prop, _val),
             )
 
+    async def reference_frequency(self) -> float:
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            None,
+            lambda: self._proxy.sync_reference_frequency(),
+        )
+
     async def trigger_read(self, rcmds: Sequence[ReadCommand]) -> ReadTogetherAndTranslated:
         loop = asyncio.get_running_loop()
         ids   = [r.id for r in rcmds]
@@ -103,14 +111,27 @@ class AsyncMexecAdapter:
         return ReadTogetherAndTranslated(data=data, start=now, end=now)
 
 
-# Process-global cache: uuid → {property: value}
+# Process-global cache: element id → {property: value}
 # Populated by _preload_initial_values() before init_device() runs.
 # Re-populated by refresh_cache_from_lattice() after reset.
 _initial_strength_cache: dict = {}  # uuid → float (main_strength)
-_nominal_cache: dict = {}           # uuid → {"main_strength": f, "x_kick": f, "y_kick": f}
+_nominal_cache: dict = {}           # element id → {property: value}
+_static_nominal_cache: dict = {}    # values derived without backend RPC
 _my_magnet_uuids: list = []         # UUIDs of magnets in this server process
+_my_nominal_reads: dict = {}        # element id → set[property]
 _sync_proxy = None                  # MexecService proxy for live reads
 _device_view = False                # True only for device-view facilities (e.g. MAX IV)
+
+_PROPERTIES_BY_DEVICE_TYPE = {
+    "Quadrupole": ("main_strength",),
+    "Sextupole": ("main_strength",),
+    "Octupole": ("main_strength",),
+    "Multipole": ("main_strength",),
+    "Bend": ("main_strength",),
+    "Steerer": ("x_kick", "y_kick"),
+    "SkewQuadrupole": ("skew_quad_strength",),
+    "RFCavity": ("frequency", "voltage"),
+}
 
 
 def enable_device_view_readback() -> None:
@@ -138,73 +159,223 @@ def peek_from_lattice(element_id: str, prop: str) -> float:
 
 def get_initial_strength(uuid: str) -> float:
     """Called by MagnetDevice.init_device() to get cached initial value."""
-    return _initial_strength_cache.get(uuid, 0.0)
+    return get_initial_value(uuid, "main_strength")
+
+
+def get_initial_value(element_id: str, property_name: str, default: float = 0.0) -> float:
+    """Called by Tango devices to get cached initial values."""
+    try:
+        return float(_nominal_cache.get(element_id, {}).get(property_name, default))
+    except (TypeError, ValueError):
+        return default
 
 
 def get_nominal_values(uuid: str) -> dict:
     """Called by MagnetDevice.RefreshFromCache() after reset."""
-    return _nominal_cache.get(uuid, {"main_strength": 0.0, "x_kick": 0.0, "y_kick": 0.0})
+    return _nominal_cache.get(
+        uuid,
+        {
+            "main_strength": 0.0,
+            "x_kick": 0.0,
+            "y_kick": 0.0,
+            "skew_quad_strength": 0.0,
+            "frequency": 0.0,
+            "voltage": 0.0,
+            "reference_frequency": 0.0,
+        },
+    )
 
 
-def refresh_cache_from_lattice(sync_proxy, magnet_uuids: list) -> None:
-    """
-    Bulk-read main_strength, x_kick, y_kick for all magnets in one batch.
-    Called after reset to refresh the nominal cache without individual RPCs.
-    One sync_trigger_read per property = 3 cross-process calls total,
-    regardless of the number of magnets.
-    """
-    global _initial_strength_cache, _nominal_cache
-    if not magnet_uuids:
-        return
+def refresh_nominal_values(element_id: str, properties: Sequence[str]) -> dict:
+    """Refresh this server process cache for one element from the backend."""
+    if _sync_proxy is None:
+        return get_nominal_values(element_id)
+    id_to_properties = {element_id: set(properties)}
+    values = _read_values_from_lattice(_sync_proxy, id_to_properties)
+    _nominal_cache.setdefault(element_id, {}).update(values.get(element_id, {}))
+    return get_nominal_values(element_id)
 
-    logger.warning("Refreshing nominal cache for %d magnets...", len(magnet_uuids))
-    new_cache = {uuid: {"main_strength": 0.0, "x_kick": 0.0, "y_kick": 0.0}
-                 for uuid in magnet_uuids}
 
-    for prop in ("main_strength", "x_kick", "y_kick"):
+def _read_values_from_lattice(sync_proxy, id_to_properties: dict) -> dict:
+    new_cache = {
+        element_id: {prop: 0.0 for prop in properties}
+        for element_id, properties in id_to_properties.items()
+    }
+    properties = sorted({prop for props in id_to_properties.values() for prop in props})
+    for prop in properties:
+        ids = [
+            element_id
+            for element_id, props in id_to_properties.items()
+            if prop in props and element_id != "master_clock"
+        ]
+        if not ids:
+            continue
         try:
-            ids  = list(magnet_uuids)
-            props = [prop] * len(ids)
-            raw = sync_proxy.sync_trigger_read(ids, props)
+            raw = sync_proxy.sync_trigger_read(ids, [prop] * len(ids))
             for rcmd_id, rcmd_prop, payload in raw:
-                if payload is not None and rcmd_id in new_cache:
-                    try:
-                        new_cache[rcmd_id][prop] = float(payload)
-                    except (TypeError, ValueError):
-                        pass
-        except Exception as exc:
-            logger.warning("refresh_cache_from_lattice: %s failed: %s", prop, exc)
-
-    _nominal_cache = new_cache
-    _initial_strength_cache = {uuid: v["main_strength"] for uuid, v in new_cache.items()}
-    logger.warning("Nominal cache refreshed for %d magnets.", len(new_cache))
-
-
-def _preload_initial_values(sync_proxy, magnet_uuids: list) -> None:
-    """
-    Bulk-read main_strength for all magnets in one batch before Tango starts.
-    Populates _initial_strength_cache so init_device() needs no RPC calls.
-    """
-    global _initial_strength_cache
-    if not magnet_uuids:
-        return
-
-    logger.warning("Pre-loading initial values for %d magnets...", len(magnet_uuids))
-    try:
-        ids   = list(magnet_uuids)
-        props = ["main_strength"] * len(ids)
-        raw = sync_proxy.sync_trigger_read(ids, props)
-        for rcmd_id, rcmd_prop, payload in raw:
-            if payload is not None:
+                if payload is None or rcmd_id not in new_cache:
+                    continue
                 try:
-                    _initial_strength_cache[rcmd_id] = float(payload)
+                    new_cache[rcmd_id][rcmd_prop] = float(payload)
                 except (TypeError, ValueError):
                     pass
-        logger.warning("Pre-loaded %d initial values.", len(_initial_strength_cache))
+        except Exception as exc:
+            logger.warning("refresh_cache_from_lattice: %s failed: %s", prop, exc)
+    for element_id, values in _static_nominal_cache.items():
+        new_cache.setdefault(element_id, {}).update(values)
+    return new_cache
+
+
+def refresh_cache_from_lattice(sync_proxy, id_to_properties) -> None:
+    """
+    Bulk-read nominal properties for all devices in one batch per property.
+    Called after reset to refresh the nominal cache without individual RPCs.
+    """
+    global _initial_strength_cache, _nominal_cache
+    if not id_to_properties:
+        return
+    if isinstance(id_to_properties, (list, tuple, set)):
+        id_to_properties = {
+            element_id: {"main_strength", "x_kick", "y_kick"}
+            for element_id in id_to_properties
+        }
+
+    logger.warning("Refreshing nominal cache for %d element ids...", len(id_to_properties))
+    new_cache = _read_values_from_lattice(sync_proxy, id_to_properties)
+    _nominal_cache = new_cache
+    _initial_strength_cache = {
+        element_id: values.get("main_strength", 0.0)
+        for element_id, values in new_cache.items()
+    }
+    logger.warning("Nominal cache refreshed for %d element ids.", len(new_cache))
+
+
+def _preload_initial_values(sync_proxy, id_to_properties: dict) -> None:
+    """
+    Bulk-read nominal values before Tango starts so init_device() needs no RPCs.
+    """
+    global _initial_strength_cache, _nominal_cache
+    if not id_to_properties:
+        return
+
+    logger.warning("Pre-loading initial values for %d element ids...", len(id_to_properties))
+    try:
+        _nominal_cache = _read_values_from_lattice(sync_proxy, id_to_properties)
+        _initial_strength_cache = {
+            element_id: values.get("main_strength", 0.0)
+            for element_id, values in _nominal_cache.items()
+        }
+        logger.warning("Pre-loaded initial values for %d element ids.", len(_nominal_cache))
     except Exception as exc:
         logger.warning("Bulk pre-load failed: %s — devices will start at 0.0", exc)
 
-def _inject_controller(prefix: str, manager_port=None) -> None:
+
+def _element_id_from_config_entry(entry: dict):
+    uuid = entry.get("uuid")
+    if uuid:
+        return uuid
+    uuids = entry.get("uuids")
+    if uuids:
+        return uuids[0]
+    return None
+
+
+def _device_properties(entry: dict) -> tuple:
+    return _PROPERTIES_BY_DEVICE_TYPE.get(entry.get("type", ""), ("main_strength",))
+
+
+def _nominal_reads_for_server(server_name: str, instance_name: str) -> dict:
+    from dt4acc.config.data.querries import get_magnets
+
+    reads: dict[str, set[str]] = {}
+    for entry in get_magnets():
+        device_name = entry.get("name", "")
+        parts = device_name.split("/")
+        if len(parts) != 3 or parts[0] != server_name or parts[1] != instance_name:
+            continue
+        element_id = _element_id_from_config_entry(entry)
+        if not element_id:
+            continue
+        reads.setdefault(element_id, set()).update(_device_properties(entry))
+    return reads
+
+
+def _reference_frequency_from_lattice(lattice_file=None) -> float:
+    if lattice_file is None:
+        return 0.0
+    try:
+        import at
+        from pathlib import Path
+
+        path = Path(lattice_file)
+        if path.suffix.lower() == ".json":
+            lattice = at.load_json(str(path))
+        elif path.suffix.lower() == ".m":
+            lattice = at.load_m(path)
+        else:
+            return 0.0
+
+        cavities = [
+            element
+            for element in lattice
+            if getattr(element, "Frequency", 0.0)
+        ]
+        if not cavities:
+            return 0.0
+
+        harmonic_number = getattr(lattice, "harmonic_number", None)
+        if harmonic_number is not None:
+            matching = [
+                element for element in cavities
+                if getattr(element, "HarmNumber", None) == harmonic_number
+            ]
+            if matching:
+                return float(matching[0].Frequency) * 1e-3
+
+        return min(float(element.Frequency) for element in cavities if element.Frequency > 0) * 1e-3
+    except Exception as exc:
+        logger.warning("Could not derive RF reference frequency from lattice: %s", exc)
+        return 0.0
+
+
+def _add_reference_frequency_if_needed(
+    id_to_properties: dict,
+    server_name: str,
+    instance_name: str,
+    lattice_file=None,
+) -> None:
+    global _static_nominal_cache
+    if (server_name, instance_name) != ("simulator", "ringsimulator"):
+        return
+    reference_frequency = _reference_frequency_from_lattice(lattice_file)
+    id_to_properties.setdefault("master_clock", set()).add("reference_frequency")
+    _static_nominal_cache.setdefault("master_clock", {})[
+        "reference_frequency"
+    ] = reference_frequency
+
+def _resolve_position_name_resolver(position_name_resolver, lattice_file=None):
+    if position_name_resolver is None:
+        return None
+    if callable(position_name_resolver):
+        return position_name_resolver
+
+    module_name, _, function_name = str(position_name_resolver).partition(":")
+    if not module_name or not function_name:
+        raise ValueError("position_name_resolver must use 'module:function' syntax")
+
+    module = importlib.import_module(module_name)
+    configure = getattr(module, "configure_lattice_file", None)
+    if configure is not None and lattice_file is not None:
+        configure(lattice_file)
+    return getattr(module, function_name)
+
+
+def _inject_controller(
+    prefix: str,
+    manager_port=None,
+    position_name_resolver=None,
+    lattice_file=None,
+) -> None:
     """
     Build AsyncMexecAdapter + TangoController and register in controller_registry.
     Called before tango.server.run() so init_device() can call get_controller().
@@ -220,6 +391,10 @@ def _inject_controller(prefix: str, manager_port=None) -> None:
         prefix=prefix,
         default_delayed_reads=DEFAULT_DELAYED_READS,
         sync_reset=sync_reset,
+        position_name_resolver=_resolve_position_name_resolver(
+            position_name_resolver,
+            lattice_file=lattice_file,
+        ),
     )
     set_controller(controller)
     logger.info("TangoController created and registered for prefix=%s", prefix)
@@ -250,6 +425,8 @@ def main_loop(
     event=None,
     manager_port=None,
     accelerator_setup_file=None,
+    position_name_resolver=None,
+    lattice_file=None,
 ):
     import logging
     logging.getLogger("transitions").setLevel(logging.WARNING)
@@ -262,31 +439,33 @@ def main_loop(
     prefix = os.environ.get("DT4ACC_PREFIX", getpass.getuser())
 
     # Inject controller BEFORE Tango initialises any device
-    _inject_controller(prefix, manager_port)
+    _inject_controller(
+        prefix,
+        manager_port,
+        position_name_resolver=position_name_resolver,
+        lattice_file=lattice_file,
+    )
 
-    # Bulk pre-load initial values for all magnets in this server/instance.
-    # One RPC call for all magnets instead of one per magnet in init_device().
+    # Bulk pre-load initial values for all devices in this server/instance.
+    # One RPC call per property instead of one per device in init_device().
     try:
-        from dt4acc.custom_epics.data.querries import get_magnets_per_power_converters, get_unique_power_converters
         from dt4acc.custom_tango.ioc.server_manager import _connect_to_mexec_service
         sync_proxy, _ = _connect_to_mexec_service(manager_port)
 
-        # Collect UUIDs for magnets belonging to this server/instance
-        my_uuids = []
-        for pc_name in get_unique_power_converters():
-            for m in get_magnets_per_power_converters(pc_name):
-                magnet_name = m["name"]  # e.g. AN01-AR/EM/CQLN.03
-                parts = magnet_name.split("/")
-                if len(parts) == 3 and parts[0] == server_name and parts[1] == instance_name:
-                    uuid = m.get("uuid", "")
-                    if uuid:
-                        my_uuids.append(uuid)
+        my_nominal_reads = _nominal_reads_for_server(server_name, instance_name)
+        _add_reference_frequency_if_needed(
+            my_nominal_reads,
+            server_name,
+            instance_name,
+            lattice_file=lattice_file,
+        )
 
         # Store as process-global so _refresh_all_magnet_devices can reuse after reset
-        global _my_magnet_uuids
-        _my_magnet_uuids = my_uuids
+        global _my_magnet_uuids, _my_nominal_reads
+        _my_nominal_reads = my_nominal_reads
+        _my_magnet_uuids = list(my_nominal_reads)
 
-        _preload_initial_values(sync_proxy, my_uuids)
+        _preload_initial_values(sync_proxy, my_nominal_reads)
     except Exception as exc:
         logger.warning("Pre-load setup failed: %s — devices will start at 0.0", exc)
 

@@ -22,6 +22,7 @@ logger = get_logger()
 RING_SIM_DEV = "simulator/ringsimulator/ringsimulator"
 MAX_ELEMS = 6000
 MAX_BPMS  = 4096
+ASYNC_COMMAND_TIMEOUT_S = 60.0
 
 
 class AsyncMixin:
@@ -31,7 +32,7 @@ class AsyncMixin:
     def _async(self, coro):
         try:
             fut = asyncio.run_coroutine_threadsafe(coro, self._loop)
-            return fut.result(timeout=10)
+            return fut.result(timeout=ASYNC_COMMAND_TIMEOUT_S)
         except Exception as exc:
             raise DevFailed(str(exc))
 
@@ -58,10 +59,15 @@ class RingSimulatorDevice(Device, AsyncMixin):
         self._bpm_y     = np.array([], dtype=np.float64)
         self._tune_hor  = 0.0
         self._tune_vert = 0.0
-        self._reference_frequency = 0.0
+        from dt4acc.custom_tango.ioc.single_server import get_initial_value
+        self._reference_frequency = get_initial_value(
+            "master_clock",
+            "reference_frequency",
+        )
         for attr_name in ("orbit_x", "orbit_y",
                           "beta_x", "beta_y", "alpha_x", "alpha_y", "nu_x", "nu_y",
-                          "bpm_x_attr", "bpm_y_attr", "hor", "vert"):
+                          "bpm_x_attr", "bpm_y_attr", "hor", "vert",
+                          "reference_frequency"):
             self.set_change_event(attr_name, True, False)
         self.set_state(DevState.ON)
 
@@ -144,6 +150,7 @@ class RingSimulatorDevice(Device, AsyncMixin):
     def reference_frequency(self, value: float):
         value = float(value)
         self._reference_frequency = value
+        self.push_change_event("reference_frequency", self._reference_frequency)
         self._async(
             get_controller().update(
                 cmd=Command(
@@ -155,6 +162,22 @@ class RingSimulatorDevice(Device, AsyncMixin):
                 reads=[], delayed_reads=[],
             )
         )
+
+    @command
+    def RefreshFromCache(self) -> None:
+        """Refresh the displayed master-clock frequency from the backend."""
+        try:
+            self._start_async()
+            self._reference_frequency = float(
+                self._async(get_controller().mexec.reference_frequency())
+            )
+            self.push_change_event("reference_frequency", self._reference_frequency)
+            logger.info(
+                "RingSimulatorDevice.RefreshFromCache done — reference_frequency=%.3f",
+                self._reference_frequency,
+            )
+        except Exception as exc:
+            logger.error("RingSimulatorDevice.RefreshFromCache failed: %s", exc)
 
     # Orbit push commands
     @command(dtype_in=(float,))
@@ -234,6 +257,7 @@ class RingSimulatorDevice(Device, AsyncMixin):
         try:
             self._start_async()
             get_controller().reset()
+            self.RefreshFromCache()
             self.set_state(DevState.ON)
             logger.warning("RingSimulatorDevice.Reset: complete — nominal state restored")
         except Exception as exc:
