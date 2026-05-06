@@ -51,18 +51,22 @@ def get_magnets_per_power_converters(pc: str) -> List[Dict[str, Any]]:
 
 
 def get_unique_power_converters() -> List[str]:
-    """Distinct list of power-converter names for magnet elements."""
+    """Distinct list of power-converter names for magnet elements.
+    Skips entries where pc is None (e.g. SOLEIL design view has no PCs)."""
     wanted = {
         "Quadrupole", "Sextupole", "Steerer", "SkewQuadrupole",
-        "Multipole", "Octupole" , "Bend"
+        "Multipole", "Bend", "Octupole"
     }
-    return sorted({d["pc"] for d in _DATA if _match(d, "type", wanted) and d.get("pc")})
+    return sorted({d["pc"] for d in _DATA
+                   if _match(d, "type", wanted) and d.get("pc")})
 
 
 def get_unique_power_converters_type_specified(type_list: Iterable[str]) -> List[str]:
     """Distinct list of power-converter names for the supplied magnet types."""
     wanted = set(type_list)
-    return sorted({d["pc"] for d in _DATA if _match(d, "type", wanted)})
+    return sorted({d["pc"] for d in _DATA
+                   if _match(d, "type", wanted) and d.get("pc")})
+
 
 def get_bpms() -> List[Dict[str, Any]]:
     """Return all BPM entries from the setup JSON."""

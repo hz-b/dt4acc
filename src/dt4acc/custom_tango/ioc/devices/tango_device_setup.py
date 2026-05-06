@@ -151,31 +151,32 @@ def register_all_devices():
                 logger.error("❌ Failed to register magnet %s: %s", magnet_name, e)
 
     # ------------------------------------------------------------
-    # 2) Power converters — registered as PowerConverterDevice (device view)
-    #    Each PC TRL becomes a Tango device so current can be written to it.
-    #    Skipped if the PC name is not a valid 3-part TRL (e.g. cavity PCs).
+    # 2) Power converters — device view only.
+    #    In design view the magnet device is the control source — no PC devices.
     # ------------------------------------------------------------
-    registered_pcs = set()
-    for pc_name in get_unique_power_converters():
-        if pc_name in registered_pcs:
-            continue
-        registered_pcs.add(pc_name)
-        try:
-            domain, family, _ = _split_domain_family_member(pc_name)
-            server_name   = domain
-            instance_name = family
-            server_str    = f"{server_name}/{instance_name}"
-            unique_servers.add((server_name, instance_name))
+    from dt4acc.custom_tango.ioc.server_manager import EXPECTED_VIEW
+    if EXPECTED_VIEW == "device":
+        registered_pcs = set()
+        for pc_name in get_unique_power_converters():
+            if pc_name in registered_pcs:
+                continue
+            registered_pcs.add(pc_name)
+            try:
+                domain, family, _ = _split_domain_family_member(pc_name)
+                server_name   = domain
+                instance_name = family
+                server_str    = f"{server_name}/{instance_name}"
+                unique_servers.add((server_name, instance_name))
 
-            db_dev        = DbDevInfo()
-            db_dev._class = "PowerConverterDevice"
-            db_dev.server = server_str
-            db_dev.name   = pc_name
-            db.add_device(db_dev)
+                db_dev        = DbDevInfo()
+                db_dev._class = "PowerConverterDevice"
+                db_dev.server = server_str
+                db_dev.name   = pc_name
+                db.add_device(db_dev)
 
-            logger.info("⚡ Registered PC %s (server=%s)", pc_name, server_str)
-        except Exception as e:
-            logger.warning("Skipping PC %s (not a valid TRL?): %s", pc_name, e)
+                logger.info("⚡ Registered PC %s (server=%s)", pc_name, server_str)
+            except Exception as e:
+                logger.warning("Skipping PC %s (not a valid TRL?): %s", pc_name, e)
 
     # ------------------------------------------------------------
     # 2) Cavities and SkewQuadrupoles — registered as typed devices
@@ -309,5 +310,5 @@ def get_all_device_classes():
         CavityDevice,
         PowerConverterDevice,
         RingSimulatorDevice,
-        BPMDevice
+        BPMDevice,
     ]
