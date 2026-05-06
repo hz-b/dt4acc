@@ -6,6 +6,7 @@ from dt4acc.config.data.querries import (
     get_unique_power_converters,
     get_magnets_per_power_converters,
     get_unique_power_converters_type_specified,
+    get_bpms,
 )
 
 from dt4acc.custom_tango.ioc.devices.multipole_device import MultipoleDevice
@@ -13,6 +14,8 @@ from dt4acc.custom_tango.ioc.devices.steerer_device import HorizontalSteererDevi
 from dt4acc.custom_tango.ioc.devices.skew_quad_device import SkewQuadDevice
 from dt4acc.custom_tango.ioc.devices.cavity_device import CavityDevice
 from dt4acc.custom_tango.ioc.devices.virtual_devices import RingSimulatorDevice, RING_SIM_DEV
+from dt4acc.custom_tango.ioc.devices.power_converter_device import PowerConverterDevice
+from dt4acc.custom_tango.ioc.devices.bpm_device import BPMDevice
 
 logger = get_logger()
 
@@ -27,13 +30,21 @@ _TYPE_TO_CLASS = {
     "RFCavity":      "CavityDevice",
 }
 
-def _steerer_class(name: str) -> str:
-    """Determine steerer class from device name."""
-    if "CDLH" in name or "CDRH" in name:
+def _steerer_class(name: str, subtype: str = None) -> str:
+    """
+    Determine steerer class from device name or subtype field.
+    subtype="H"/"V" is set by MAX IV JSON generator.
+    SOLEIL uses name patterns (CDLH/CDLV).
+    """
+    if subtype == "H":
         return "HorizontalSteererDevice"
-    if "CDLV" in name or "CDRV" in name:
+    if subtype == "V":
         return "VerticalSteererDevice"
-    # Unknown orientation — default to both kicks via a generic fallback
+    # SOLEIL fallback — name-based detection
+    if "CDLH" in name or "CDRH" in name or "CRFCX" in name or "CRCOX" in name:
+        return "HorizontalSteererDevice"
+    if "CDLV" in name or "CDRV" in name or "CRFCY" in name or "CRCOY" in name:
+        return "VerticalSteererDevice"
     return "HorizontalSteererDevice"
 
 
@@ -41,7 +52,7 @@ def _split_domain_family_member(device_name: str):
     """AN10-AR/EM/SCF.11 -> ('AN10-AR', 'EM', 'SCF.11')"""
     parts = device_name.split("/")
     if len(parts) != 3:
-        raise ValueError(f"Invalid device name: {device_name}")
+        raise ValueError(f"Invalid Soleil device name: {device_name}")
     return parts[0], parts[1], parts[2]
 
 
@@ -77,9 +88,9 @@ def _register_dservers(db: Database, servers: set[tuple[str, str]]):
 
 def register_all_devices():
     """
-    Register ALL devices in the Tango DB.
+    Register ALL Soleil devices in the Tango DB.
 
-    - Device *names* are the names (AN10-AR/EM/SCF.11, ...).
+    - Device *names* are the Soleil-style names (AN10-AR/EM/SCF.11, ...).
     - For each device name:
         domain  -> server_name
         family  -> instance_name
@@ -95,16 +106,16 @@ def register_all_devices():
     logger.info("📝 Registering ALL devices into Tango DB...")
 
     # ------------------------------------------------------------
-    # 1) Magnets — registered by Tango name, UUID stored as DB property
-    #    so init_device can look up the unique AT element.
-    #    Power converters are NOT registered as Tango devices.
+    # 1) Magnets — registered by Tango name (magnet TRL)
+    #    UUID/uuids stored as DB property for AT element lookup.
     # ------------------------------------------------------------
     for pc_name in get_unique_power_converters():
         magnets = get_magnets_per_power_converters(pc_name)
         for m in magnets:
             magnet_name = m["name"]
-            magnet_uuid = m.get("uuid", "")
+            magnet_uuid = m.get("uuid", "") or (m.get("uuids", [""])[0] if m.get("uuids") else "")
             magnet_type = m.get("type", "")
+            magnet_subtype = m.get("subtype", "")
             try:
                 domain, family, _ = _split_domain_family_member(magnet_name)
                 server_name   = domain
@@ -114,7 +125,7 @@ def register_all_devices():
 
                 # Pick the correct Tango class for this physical type
                 if magnet_type == "Steerer":
-                    class_name = _steerer_class(magnet_name)
+                    class_name = _steerer_class(magnet_name, subtype=magnet_subtype)
                 else:
                     class_name = _TYPE_TO_CLASS.get(magnet_type, "MultipoleDevice")
 
@@ -138,6 +149,33 @@ def register_all_devices():
                             magnet_name, magnet_uuid, server_str)
             except Exception as e:
                 logger.error("❌ Failed to register magnet %s: %s", magnet_name, e)
+
+    # ------------------------------------------------------------
+    # 2) Power converters — registered as PowerConverterDevice (device view)
+    #    Each PC TRL becomes a Tango device so current can be written to it.
+    #    Skipped if the PC name is not a valid 3-part TRL (e.g. cavity PCs).
+    # ------------------------------------------------------------
+    registered_pcs = set()
+    for pc_name in get_unique_power_converters():
+        if pc_name in registered_pcs:
+            continue
+        registered_pcs.add(pc_name)
+        try:
+            domain, family, _ = _split_domain_family_member(pc_name)
+            server_name   = domain
+            instance_name = family
+            server_str    = f"{server_name}/{instance_name}"
+            unique_servers.add((server_name, instance_name))
+
+            db_dev        = DbDevInfo()
+            db_dev._class = "PowerConverterDevice"
+            db_dev.server = server_str
+            db_dev.name   = pc_name
+            db.add_device(db_dev)
+
+            logger.info("⚡ Registered PC %s (server=%s)", pc_name, server_str)
+        except Exception as e:
+            logger.warning("Skipping PC %s (not a valid TRL?): %s", pc_name, e)
 
     # ------------------------------------------------------------
     # 2) Cavities and SkewQuadrupoles — registered as typed devices
@@ -173,7 +211,7 @@ def register_all_devices():
                 logger.error("❌ Failed to register %s %s: %s", dev_type, dev_name, e)
 
     # ------------------------------------------------------------
-    # 3) Single RingSimulatorDevice — replaces all devices
+    # 3) Single RingSimulatorDevice — replaces all PHYSICS/SOLEIL/* devices
     # ------------------------------------------------------------
     try:
         domain, family, _ = _split_domain_family_member(RING_SIM_DEV)
@@ -191,11 +229,70 @@ def register_all_devices():
     except Exception as e:
         logger.error("❌ Failed to register RingSimulatorDevice: %s", e)
 
+    # ------------------------------------------------------------
+    # 4) BPM devices — one per Monitor element, read-only
+    # ------------------------------------------------------------
+    # Build s_pos → AT element index map by loading the lattice directly.
+    # AT element s positions are computed via at.get_s_pos() — not stored
+    # on individual elements.
+    bpm_index_map: dict = {}  # uuid → AT element index
+    try:
+        import at as _at
+        from dt4acc.custom_tango.ioc.server_manager import LATTICE_FILE, _load_lattice
+        if LATTICE_FILE is not None:
+            lattice = _load_lattice(LATTICE_FILE)
+            for i, elem in enumerate(lattice):
+                if getattr(elem, "FamName", None) in ("BPM", "FBPM"):
+                    uuid = getattr(elem, "UUID", None)
+                    if uuid:
+                        bpm_index_map[uuid] = i
+            logger.info("BPM registration: resolved %d BPM orbit indices from lattice",
+                        len(bpm_index_map))
+            if bpm_index_map:
+                sample = list(bpm_index_map.items())[:3]
+                logger.info("BPM registration: sample uuid→index: %s", sample)
+    except Exception as e:
+        logger.warning("BPM registration: could not build orbit index map: %s", e)
+
+    for bpm in get_bpms():
+        bpm_name = bpm.get("name")
+        bpm_uuid = bpm.get("uuid")
+        bpm_spos = float(bpm.get("s_pos", 0.0))
+        if not bpm_name:
+            continue
+
+        # Find orbit index by UUID match
+        orbit_index = bpm_index_map.get(bpm_uuid, -1)
+        if orbit_index == -1:
+            logger.warning("BPM %s: uuid=%s not found in lattice BPM map", bpm_name, bpm_uuid)
+
+        try:
+            domain, family, member = _split_domain_family_member(bpm_name)
+            server_name   = domain
+            instance_name = family
+            server_str    = f"{server_name}/{instance_name}"
+            unique_servers.add((server_name, instance_name))
+
+            db_dev        = DbDevInfo()
+            db_dev._class = "BPMDevice"
+            db_dev.server = server_str
+            db_dev.name   = bpm_name
+            db.add_device(db_dev)
+            db.put_device_property(bpm_name, {
+                "lattice_id":  [bpm_uuid],
+                "s_pos":       [str(bpm_spos)],
+                "orbit_index": [str(orbit_index)],
+            })
+            logger.info("📡 Registered BPMDevice %s uuid=%s s_pos=%.3f orbit_index=%d (server=%s)",
+                        bpm_name, bpm_uuid, bpm_spos, orbit_index, server_str)
+        except Exception as e:
+            logger.error("❌ Failed to register BPMDevice %s: %s", bpm_name, e)
+
     logger.info("✔ Unique (server_name, instance_name) pairs: %s", unique_servers)
     logger.info("✔ Device registration DONE. We have %d servers to start.", len(unique_servers))
 
     # ------------------------------------------------------------
-    # 4) Make sure dserver/<server_name>/<instance_name> exists
+    # 5) Make sure dserver/<server_name>/<instance_name> exists
     # ------------------------------------------------------------
     _register_dservers(db, unique_servers)
 
@@ -210,5 +307,7 @@ def get_all_device_classes():
         VerticalSteererDevice,
         SkewQuadDevice,
         CavityDevice,
+        # PowerConverterDevice,
         RingSimulatorDevice,
+        BPMDevice,
     ]

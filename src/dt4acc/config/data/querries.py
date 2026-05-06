@@ -21,13 +21,6 @@ from typing import Iterable, List, Dict, Any
 # -----------------------------------------------------------------
 
 _DATA_FILE = Path.home() / "Documents" / "dt4acc_soleil_twin_data" / "accelerator_setup.json"
-# _DATA_FILE = (
-#         Path(__file__)
-#         .resolve()  # .../src/dt4acc/custom_epics/queries_json.py
-#         .parent  # .../src/dt4acc/custom_epics/data
-#         / "standard"
-#         / "accelerator_setup.json"
-# )
 
 with _DATA_FILE.open() as fp:
     _DATA: List[Dict[str, Any]] = json.load(fp)
@@ -44,13 +37,13 @@ def _match(doc: Dict[str, Any], field: str, allowed: Iterable[str]) -> bool:
 # public API – identical signatures to the Mongo version
 # -----------------------------------------------------------------
 def get_magnets():
-    """Return all Quadrupole/Sextupole/Steerer magnets as an iterator."""
-    wanted = {"Quadrupole", "Sextupole", "Steerer", "RFCavity", "Octupole", "SkewQuadrupole"}
+    """Return all magnet elements as an iterator."""
+    wanted = {
+        "Quadrupole", "Sextupole", "Steerer", "RFCavity", "SkewQuadrupole",
+        "Multipole", "Octupole"  # MAX IV types
+    }
     return (d for d in _DATA if _match(d, "type", wanted))
 
-def get_cavity_names() -> List[str]:
-    wanted = {"RFCavity"}
-    return [d.uuid for d in _DATA if _match(d, "type", wanted)]
 
 def get_magnets_per_power_converters(pc: str) -> List[Dict[str, Any]]:
     """Return all magnets driven by the given power-converter name."""
@@ -58,9 +51,12 @@ def get_magnets_per_power_converters(pc: str) -> List[Dict[str, Any]]:
 
 
 def get_unique_power_converters() -> List[str]:
-    """Distinct list of power-converter names for Quad/Sext/Steerer magnets."""
-    wanted = {"Quadrupole", "Sextupole", "Steerer", "RFCavity", "Octupole", "SkewQuadrupole"}
-    return sorted({d["pc"] for d in _DATA if _match(d, "type", wanted)})
+    """Distinct list of power-converter names for magnet elements."""
+    wanted = {
+        "Quadrupole", "Sextupole", "Steerer", "SkewQuadrupole",
+        "Multipole", "Octupole"   # MAX IV types
+    }
+    return sorted({d["pc"] for d in _DATA if _match(d, "type", wanted) and d.get("pc")})
 
 
 def get_unique_power_converters_type_specified(type_list: Iterable[str]) -> List[str]:
@@ -68,20 +64,7 @@ def get_unique_power_converters_type_specified(type_list: Iterable[str]) -> List
     wanted = set(type_list)
     return sorted({d["pc"] for d in _DATA if _match(d, "type", wanted)})
 
-#
-# def get_magnets():
-#     return collection.find({"type": {"$in": ["Quadrupole", "Sextupole", "Steerer"]}})
-#
-#
-# def get_magnets_per_power_converters(pc):
-#     return list(collection.find({"pc": pc}))
-#
-#
-# def get_unique_power_converters():
-#     """Fetch unique power converter names from magnets in the DB."""
-#     return collection.distinct("pc", {"type": {"$in": ["Quadrupole", "Sextupole", "Steerer"]}})
-#
-#
-# def get_unique_power_converters_type_specified(type_list):
-#     """Fetch unique power converter names from magnets in the DB."""
-#     return collection.distinct("pc", {"type": {"$in": type_list}})
+
+def get_bpms() -> List[Dict[str, Any]]:
+    """Return all BPM entries from the setup JSON."""
+    return [d for d in _DATA if d.get("type") == "BPM"]

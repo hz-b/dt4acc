@@ -12,7 +12,6 @@ from dt4acc_lib.interfaces.utils.translator_service import TranslatorServiceBase
 from dt4acc_lib.interfaces.utils.yellow_pages import YellowPagesBase
 from dt4acc_lib.model.utils.identifiers import LatticeElementPropertyID, DevicePropertyID, ConversionID
 
-from dt4acc.config.data.querries import get_magnets, get_magnets_per_power_converters
 from dt4acc.custom_facility.model.config.elementmodel import MagnetElementSetup
 from dt4acc.custom_facility.soleil.soleil_yellow_pages import soleil_yellow_pages
 from dt4acc.config.data.constants import ring_parameters
@@ -38,16 +37,16 @@ def load_managers() -> (YellowPagesBase, LiaisonManagerBase, TranslatorServiceBa
         appropriate to separate caching from loading?
     """
     # Register SOLEIL-specific addon proxies.
-    # CQLN (slow normal quadrupolar corrector) → PolynomA[1] → corrector_type="skew"
-    # CQLT (slow turned quadrupolar corrector) → PolynomB[1] → corrector_type="normal"
+    # CQLN (Correcteur Quadrupolaire L Normal) → PolynomB[1] → corrector_type="normal"
+    # CQLT (Correcteur Quadrupolaire L Tourné) → PolynomA[1] → corrector_type="skew"
     # The prefix in the UUID ("CQLN:<uuid>", "CQLT:<uuid>") is SOLEIL nomenclature.
     # The corrector_type values ("skew", "normal") are generic AT physics terms.
     from dt4acc_lib.pyat_simulator.element_proxies import ADDON_PROXY_REGISTRY, SkewQuadCorrectorProxy
     ADDON_PROXY_REGISTRY["CQLN"] = lambda el, eid, hid: SkewQuadCorrectorProxy(
-        el, element_id=eid, host_element_id=hid, corrector_type="skew"
+        el, element_id=eid, host_element_id=hid, corrector_type="normal"
     )
     ADDON_PROXY_REGISTRY["CQLT"] = lambda el, eid, hid: SkewQuadCorrectorProxy(
-        el, element_id=eid, host_element_id=hid, corrector_type="normal"
+        el, element_id=eid, host_element_id=hid, corrector_type="skew"
     )
 
     return build_managers()

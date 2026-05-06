@@ -4,6 +4,7 @@ from bson import ObjectId
 
 # classes considered magnets
 MAGNET_CLASSES = {"Quadrupole", "Sextupole", "Multipole", "Bend", "RFCavity", "Octupole"}
+BPM_CLASSES = {"Monitor"}
 
 INPUT_YAML = "SOLEIL_II_V3635_STAB_SYM1_SB3_MULT7_4SX60_V001.yaml"
 OUTPUT_JSON = "accelerator_setup.json"
@@ -24,8 +25,23 @@ def main():
         fam_name = lattice.get("FamName")
         name = nomenclature.get("TANGO")
 
-        # skip non-magnets or entries lacking a name
-        if cls not in MAGNET_CLASSES or not name:
+        if not name:
+            continue
+
+        # --- BPMs ---
+        if cls in BPM_CLASSES:
+            output.append({
+                "_id": {"$oid": str(ObjectId())},
+                "uuid": uuid,
+                "type": "BPM",
+                "FamName": fam_name,
+                "name": name,
+                "s_pos": localisation.get("S_pos", 0.0),
+            })
+            continue
+
+        # skip non-magnets
+        if cls not in MAGNET_CLASSES:
             continue
 
         # base magnet (as in your original script)
@@ -36,7 +52,7 @@ def main():
             "FamName": fam_name,             # FamName copied
             "name": name,
             "magnetic_strength": 1.0,
-            "pc": f"{name}-pc",
+            # "pc": f"{name}-pc", // no power converter for soleil
             "k": 1.0
         }
         output.append(base_obj)
