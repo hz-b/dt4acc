@@ -375,6 +375,10 @@ def build_managers():
         DevicePropertyID(device_name="orbit", property="pos")
     ] = (LatticeElementPropertyID(element_name="orbit", property="pos"),)
 
+    inverse_lut[
+        DevicePropertyID(device_name="chromaticity", property="transversal")
+    ] = (LatticeElementPropertyID(element_name="chromaticity", property="transversal"),)
+
     # Wrap plain dict into LiaisonManagerInverseLookupTable as required by dt4acc_lib
     inverse_lut_table = LiaisonManagerInverseLookupTable(
         lut=[
@@ -453,6 +457,7 @@ def build_managers():
     for virtual_id, prop in [
         ("twiss", "parameters"),
         ("tune",  "transversal"),
+        ("chromaticity", "transversal"),
         ("track", "pos"),
         ("orbit", "pos"),
     ]:
