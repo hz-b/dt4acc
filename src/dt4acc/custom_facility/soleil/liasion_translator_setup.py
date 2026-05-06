@@ -6,13 +6,6 @@ Design-view architecture: the magnet Tango device IS the control source.
 There are no power converters — the magnet device writes K/H/x_kick/y_kick
 directly to the AT element. The liaison maps device properties to lattice
 element properties 1:1.
-
-Imports follow dt4acc conventions:
-    from dt4acc.custom_facility.model.config.elementmodel import MagnetElementSetup
-    from dt4acc.config.data.constants import ring_parameters
-    StateConversion from dt4acc_lib.interfaces.utils.state_conversion (never quoted)
-
-build_managers() always returns (yp, lm, tm) — three values.
 """
 
 import functools
@@ -26,7 +19,6 @@ from dt4acc_lib.bl.yellow_pages import YellowPages
 from dt4acc_lib.interfaces.utils.liaison_manager import LiaisonManagerBase
 from dt4acc_lib.interfaces.utils.state_conversion import StateConversion
 from dt4acc_lib.interfaces.utils.translator_service import TranslatorServiceBase
-from dt4acc_lib.interfaces.utils.yellow_pages import YellowPagesBase
 from dt4acc_lib.model.utils.identifiers import (
     LatticeElementPropertyID, DevicePropertyID, ConversionID
 )
