@@ -14,7 +14,7 @@ from dt4acc.core.bl.translating_command_execution_engine import TranslatingComma
 from dt4acc.custom_epics.ioc.orbit_pva import OrbitTwinServer
 from dt4acc.custom_epics.ioc.server import View, Controller, dispatcher
 from dt4acc.custom_facility.bessyii.liasion_translator_setup import load_managers
-from dt4acc_lib.pyat_simulator.accelerator_simulator import PyATAcceleratorSimulator
+from dt4acc.custom_facility.bessyii.pyat_accelerator_simulator import BESSYIIPyAtAcceleratorSimulator
 
 
 logging.basicConfig(level=logging.WARNING)
@@ -41,7 +41,7 @@ def main():
     acc = bessyii_pyat_lattice(filename=filename)
     backend=SimulatorBackend(
         name="BESSYII_on_PyAT",
-        acc=PyATAcceleratorSimulator(at_lattice=acc),
+        acc=BESSYIIPyAtAcceleratorSimulator(at_lattice=acc),
     )
 
     _, lm, ts = load_managers()
