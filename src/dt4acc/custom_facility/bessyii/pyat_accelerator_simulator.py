@@ -4,15 +4,20 @@ from dt4acc_lib.pyat_simulator.element_proxies import (
     ElementProxy,
 )
 from dt4acc_lib.interfaces.simulator.element import ElementInterface
+from dt4acc_lib.pyat_simulator.proxies.proxy_factory import ElementProxyFactory
 
 
 class BESSYIIPyAtAcceleratorSimulator(PyATAcceleratorSimulator):
+    def __init__(self, *, at_lattice, proxy_factory: ElementProxyFactory):
+        super().__init__(at_lattice=at_lattice)
+        self.proxy_factory = proxy_factory
+
     def get(self, element_id: str) -> ElementInterface:
         elements = self.acc.get_elements(element_id)
         # should be unique
         if len(elements) == 1:
             (element,) = elements
-            return ElementProxy(elements, element_id=element_id)
+            return self.proxy_factory.get_proxy(element, element_id=element_id)
         elif len(elements) == 0:
             # Todo: should not be necessary any more,
             #       liaison manager needs to be updated here
