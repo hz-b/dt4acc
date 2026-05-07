@@ -53,7 +53,7 @@ if str(SRC_DIR) not in sys.path:
 DEFAULT_LATTICE_FILE = (
     Path.home()
     / "Documents"
-    / "dt4acc_soleil_twin_data"
+    / "dt4acc_config_data"
     / "SOLEIL_II_V3635_STAB_SYM1_SB3_MULT7_4SX60_V001_Nomenclature.m"
 )
 

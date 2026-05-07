@@ -40,7 +40,7 @@ def get_magnets():
     """Return all magnet elements as an iterator."""
     wanted = {
         "Quadrupole", "Sextupole", "Steerer", "RFCavity", "SkewQuadrupole",
-        "Multipole", "Bend", "Octupole"  # MAX IV types
+        "Multipole", "Bend", "Octupole"
     }
     return (d for d in _DATA if _match(d, "type", wanted))
 
@@ -51,33 +51,23 @@ def get_magnets_per_power_converters(pc: str) -> List[Dict[str, Any]]:
 
 
 def get_unique_power_converters() -> List[str]:
-    """Distinct list of power-converter names for magnet elements."""
+    """Distinct list of power-converter names for magnet elements.
+    Skips entries where pc is None (e.g. SOLEIL design view has no PCs)."""
     wanted = {
         "Quadrupole", "Sextupole", "Steerer", "SkewQuadrupole",
-        "Multipole", "Bend",   # MAX IV types
+        "Multipole", "Bend", "Octupole"
     }
-    return sorted({d["pc"] for d in _DATA if _match(d, "type", wanted) and d.get("pc")})
+    return sorted({d["pc"] for d in _DATA
+                   if _match(d, "type", wanted) and d.get("pc")})
 
 
 def get_unique_power_converters_type_specified(type_list: Iterable[str]) -> List[str]:
     """Distinct list of power-converter names for the supplied magnet types."""
     wanted = set(type_list)
-    return sorted({d["pc"] for d in _DATA if _match(d, "type", wanted)})
+    return sorted({d["pc"] for d in _DATA
+                   if _match(d, "type", wanted) and d.get("pc")})
 
-#
-# def get_magnets():
-#     return collection.find({"type": {"$in": ["Quadrupole", "Sextupole", "Steerer"]}})
-#
-#
-# def get_magnets_per_power_converters(pc):
-#     return list(collection.find({"pc": pc}))
-#
-#
-# def get_unique_power_converters():
-#     """Fetch unique power converter names from magnets in the DB."""
-#     return collection.distinct("pc", {"type": {"$in": ["Quadrupole", "Sextupole", "Steerer"]}})
-#
-#
-# def get_unique_power_converters_type_specified(type_list):
-#     """Fetch unique power converter names from magnets in the DB."""
-#     return collection.distinct("pc", {"type": {"$in": type_list}})
+
+def get_bpms() -> List[Dict[str, Any]]:
+    """Return all BPM entries from the setup JSON."""
+    return [d for d in _DATA if d.get("type") == "BPM"]

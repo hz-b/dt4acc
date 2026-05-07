@@ -5,6 +5,7 @@ virtual_devices.py
 Single virtual Tango device for the digital twin:
 
     simulator/ringsimulator/ringsimulator  (RingSimulatorDevice)
+
 """
 
 import asyncio
@@ -22,6 +23,22 @@ logger = get_logger()
 RING_SIM_DEV = "simulator/ringsimulator/ringsimulator"
 MAX_ELEMS = 6000
 MAX_BPMS  = 4096
+
+# ---------------------------------------------------------------------------
+# Module-level orbit cache — updated by RingSimulatorDevice.push_orbit_x/y
+# and read by BPMDevice without any cross-process calls.
+# ---------------------------------------------------------------------------
+_orbit_x_cache: np.ndarray = np.array([], dtype=np.float64)
+_orbit_y_cache: np.ndarray = np.array([], dtype=np.float64)
+
+
+def get_orbit_at_index(index: int):
+    """Return (x, y) from the latest orbit cache at the given AT element index.
+    Returns (0.0, 0.0) if the cache is empty or index is out of range.
+    """
+    if index < len(_orbit_x_cache) and index < len(_orbit_y_cache):
+        return float(_orbit_x_cache[index]), float(_orbit_y_cache[index])
+    return 0.0, 0.0
 
 
 class AsyncMixin:
@@ -58,6 +75,8 @@ class RingSimulatorDevice(Device, AsyncMixin):
         self._bpm_y     = np.array([], dtype=np.float64)
         self._tune_hor  = 0.0
         self._tune_vert = 0.0
+        self._xi_x      = 0.0
+        self._xi_y      = 0.0
         self._reference_frequency = 0.0
         for attr_name in ("orbit_x", "orbit_y",
                           "beta_x", "beta_y", "alpha_x", "alpha_y", "nu_x", "nu_y",
@@ -118,22 +137,19 @@ class RingSimulatorDevice(Device, AsyncMixin):
         self._bpm_y = np.asarray(values, dtype=np.float64)
         self.push_change_event("bpm_y_attr", self._bpm_y)
 
-    # Tune
-    @attribute(dtype=DevDouble, access=AttrWriteType.READ_WRITE, label="Horizontal tune")
+    # Tune — READ ONLY. Tunes are computed by AT, not settable directly.
+    @attribute(dtype=DevDouble, label="Horizontal tune")
     def hor(self): return self._tune_hor
 
-    @hor.write
-    def hor(self, value):
-        self._tune_hor = float(value)
-        self.push_change_event("hor", self._tune_hor)
-
-    @attribute(dtype=DevDouble, access=AttrWriteType.READ_WRITE, label="Vertical tune")
+    @attribute(dtype=DevDouble, label="Vertical tune")
     def vert(self): return self._tune_vert
 
-    @vert.write
-    def vert(self, value):
-        self._tune_vert = float(value)
-        self.push_change_event("vert", self._tune_vert)
+    # Chromaticity — READ ONLY. Computed by AT alongside tune.
+    @attribute(dtype=DevDouble, label="Horizontal chromaticity")
+    def xi_x(self): return self._xi_x
+
+    @attribute(dtype=DevDouble, label="Vertical chromaticity")
+    def xi_y(self): return self._xi_y
 
     # Master clock
     @attribute(dtype=DevDouble, access=AttrWriteType.READ_WRITE,
@@ -159,14 +175,18 @@ class RingSimulatorDevice(Device, AsyncMixin):
     # Orbit push commands
     @command(dtype_in=(float,))
     def push_orbit_x(self, values):
+        global _orbit_x_cache
         arr = np.asarray(values, dtype=np.float64).ravel()
         self._orbit_x = arr
+        _orbit_x_cache = arr
         self.push_change_event("orbit_x", arr)
 
     @command(dtype_in=(float,))
     def push_orbit_y(self, values):
+        global _orbit_y_cache
         arr = np.asarray(values, dtype=np.float64).ravel()
         self._orbit_y = arr
+        _orbit_y_cache = arr
         self.push_change_event("orbit_y", arr)
 
     # Twiss push commands
@@ -206,6 +226,24 @@ class RingSimulatorDevice(Device, AsyncMixin):
         self._nu_y = arr
         self.push_change_event("nu_y", arr)
 
+    @command(dtype_in=(float,))
+    def push_tune(self, values):
+        """Called by the heartbeat with [tune_x, tune_y] from AT."""
+        if len(values) >= 2:
+            self._tune_hor  = float(values[0])
+            self._tune_vert = float(values[1])
+            self.push_change_event("hor",  self._tune_hor)
+            self.push_change_event("vert", self._tune_vert)
+
+    @command(dtype_in=(float,))
+    def push_chromaticity(self, values):
+        """Called by the heartbeat with [xi_x, xi_y] from AT."""
+        if len(values) >= 2:
+            self._xi_x = float(values[0])
+            self._xi_y = float(values[1])
+            self.push_change_event("xi_x", self._xi_x)
+            self.push_change_event("xi_y", self._xi_y)
+
     # Reset
     @command
     def Recalculate(self):
@@ -216,6 +254,7 @@ class RingSimulatorDevice(Device, AsyncMixin):
         Called by the calculation heartbeat every second, and can also be
         called manually after a measurement to get an updated result.
         Does NOT perturb the lattice — zero noise.
+        Sets State=FAULT if beam is lost (NaN/inf in AT optics), ON on recovery.
         """
         try:
             self._async(
@@ -223,8 +262,18 @@ class RingSimulatorDevice(Device, AsyncMixin):
                     list(get_controller().default_delayed_reads)
                 )
             )
+            # Successful calculation — restore ON if we were in FAULT
+            if self.get_state() == DevState.FAULT:
+                self.set_state(DevState.ON)
         except Exception as exc:
-            logger.debug("RingSimulatorDevice.Recalculate: %s", exc)
+            msg = str(exc)
+            if "infs or NaN" in msg or "nan" in msg.lower() or "inf" in msg.lower():
+                logger.warning("RingSimulatorDevice: beam lost — setting FAULT state")
+                self.set_state(DevState.FAULT)
+                self.set_status("Beam lost: lattice optics diverged (NaN/inf). "
+                                "Reset magnets to nominal and call Reset.")
+            else:
+                logger.debug("RingSimulatorDevice.Recalculate: %s", exc)
 
     @command
     def Reset(self):

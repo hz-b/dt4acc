@@ -95,7 +95,8 @@ async def update_bpms_dev(dev_name: str, orbit_result) -> None:
     x = to_float_list(orbit_result.x)
     y = to_float_list(orbit_result.y)
 
-    bpm_mask = [n.startswith("BPM") for n in names]
+    bpm_mask = [n.upper().startswith("BPM") or n.upper().startswith("FBPM")
+                for n in names]
     bpm_names = [n for n, keep in zip(names, bpm_mask) if keep]
     bpm_x     = [v for v, keep in zip(x,     bpm_mask) if keep]
     bpm_y     = [v for v, keep in zip(y,     bpm_mask) if keep]
@@ -146,7 +147,8 @@ async def update_twiss_dev(dev_name: str, twiss_result) -> None:
 
 async def update_tune_dev(dev_name: str, tune_result) -> None:
     """
-    Push tune scalars to TuneDevice via attribute writes.
+    Push tune scalars to RingSimulatorDevice via push_tune command.
+    hor/vert are read-only attributes — values are pushed via command.
 
     tune_result must have:
         .x : float  (horizontal tune)
@@ -154,8 +156,10 @@ async def update_tune_dev(dev_name: str, tune_result) -> None:
     """
     device = DeviceProxy(dev_name)
     loop = asyncio.get_running_loop()
-    await loop.run_in_executor(None, lambda: device.write_attribute("hor",  float(tune_result.x)))
-    await loop.run_in_executor(None, lambda: device.write_attribute("vert", float(tune_result.y)))
+    await loop.run_in_executor(
+        None,
+        lambda: device.command_inout("push_tune", [float(tune_result.x), float(tune_result.y)])
+    )
 
 
 class CalculationResultView:
@@ -217,6 +221,20 @@ class CalculationResultView:
             return
         await update_tune_dev(self._tune_dev(), tune_result)
 
+    async def push_chromaticity(self, chroma_result) -> None:
+        """Push chromaticity (xi_x, xi_y) to RingSimulatorDevice."""
+        if chroma_result is None:
+            return
+        device = DeviceProxy(self._tune_dev())  # same device — ringsimulator
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(
+            None,
+            lambda: device.command_inout(
+                "push_chromaticity",
+                [float(chroma_result.x), float(chroma_result.y)]
+            )
+        )
+
     async def push_value(self, elm_update) -> None:
         """Element update — no-op for now."""
         pass
@@ -240,6 +258,8 @@ class CalculationResultView:
 
         # TwissOrbitDevice — push via commands (same process, different thread,
         # but command_inout can deadlock). Use a short timeout and swallow errors.
+        # Note: push_orbit_x/y are included here — individual BPMDevices subscribe
+        # to orbit_x/y change events and will receive zeros automatically.
         try:
             dev = DeviceProxy(self._twiss_orbit_dev())
             dev.set_timeout_millis(500)
@@ -255,22 +275,12 @@ class CalculationResultView:
         except Exception as exc:
             logger.debug("push_invalid: TwissOrbitDevice push failed: %s", exc)
 
-        # BPMManagerDevice — zeros are valid
-        try:
-            bpm = DeviceProxy(self._bpm_dev())
-            await loop.run_in_executor(
-                None, lambda: bpm.write_attribute("bpm_x_attr", zero_arr))
-            await loop.run_in_executor(
-                None, lambda: bpm.write_attribute("bpm_y_attr", zero_arr))
-        except Exception as exc:
-            logger.debug("push_invalid: BPMManagerDevice push failed: %s", exc)
-
-        # TuneDevice — zeros are valid
+        # TuneDevice — push via command (hor/vert are read-only attributes)
         try:
             tune = DeviceProxy(self._tune_dev())
             await loop.run_in_executor(
-                None, lambda: tune.write_attribute("hor",  0.0))
+                None, lambda: tune.command_inout("push_tune", [0.0, 0.0]))
             await loop.run_in_executor(
-                None, lambda: tune.write_attribute("vert", 0.0))
+                None, lambda: tune.command_inout("push_chromaticity", [0.0, 0.0]))
         except Exception as exc:
             logger.debug("push_invalid: TuneDevice push failed: %s", exc)
