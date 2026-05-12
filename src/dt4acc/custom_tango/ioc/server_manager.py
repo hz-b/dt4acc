@@ -53,7 +53,7 @@ from dt4acc_lib.bl.command_rewritter import CommandRewriter
 # track, orbit) and never exist in the AT lattice. In device view the liaison
 # has no conversion for them so inverse_read_command must pass them through
 # unchanged, exactly as design view does.
-_VIRTUAL_RESULT_IDS = frozenset({"twiss", "tune", "track", "orbit"})
+_VIRTUAL_RESULT_IDS = frozenset({"twiss", "tune", "track", "orbit", "chromaticity"})
 
 
 class VirtualPassthroughCommandRewriter(CommandRewriter):
@@ -224,12 +224,17 @@ def _run_mexec_service():
             element_id is a FamName uuid (e.g. 'sqfi73'), prop is the AT
             property name (e.g. 'main_strength').
             """
+            logger.debug("sync_peek: element_id=%r prop=%r", element_id, prop)
             async def _peek():
                 return await mexec.backend.read(element_id, prop)
             fut = asyncio.run_coroutine_threadsafe(_peek(), service_loop)
             try:
-                return float(fut.result(timeout=5))
-            except Exception:
+                result = float(fut.result(timeout=5))
+                logger.debug("sync_peek: element_id=%r -> %.6f", element_id, result)
+                return result
+            except Exception as exc:
+                logger.warning("sync_peek failed for element_id=%r prop=%r: %s",
+                               element_id, prop, exc)
                 return 0.0
 
         def sync_trigger_read(self, rcmd_ids: Sequence[str], rcmd_properties: Sequence[str]):

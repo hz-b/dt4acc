@@ -26,6 +26,7 @@ import itertools
 import traceback
 from typing import Sequence
 
+from dt4acc_lib.interfaces.utils.command_execution_engine import CommandExecutionEngine
 from dt4acc_lib.model.output.result import TranslatedReading, ReadTogetherAndTranslated
 from dt4acc_lib.model.utils.command import ReadCommand, Command
 from dt4acc.core.bl.translating_command_execution_engine import TranslatingCommandExecutionEngine
@@ -41,7 +42,8 @@ logger = get_logger()
 DEFAULT_DELAYED_READS: Sequence[ReadCommand] = (
     ReadCommand("track", "pos"),
     ReadCommand("twiss", "parameters"),
-    ReadCommand("tune", "transversal"),  # TuneElement.get() only accepts "transversal"
+    ReadCommand("tune", "transversal"),
+    ReadCommand("chromaticity", "transversal"),
 )
 
 
@@ -86,6 +88,8 @@ class TangoView:
                 await self._push_twiss(result)
             elif rcmd.id == "tune":
                 await self._push_tune(result)
+            elif rcmd.id == "chromaticity":
+                await self._push_chromaticity(result)
             else:
                 logger.debug("TangoView: no handler for %s — skipping", rcmd)
         except Exception as exc:
@@ -103,8 +107,13 @@ class TangoView:
 
     async def _push_tune(self, result: TranslatedReading) -> None:
         (reading,) = result.readings
-        tune = reading.payload           # Tune(.x, .y) from new backend
+        tune = reading.payload
         await self._calc_view.push_tune(tune)
+
+    async def _push_chromaticity(self, result: TranslatedReading) -> None:
+        (reading,) = result.readings
+        chroma = reading.payload           # Tune(.x, .y) reused for xi_x, xi_y
+        await self._calc_view.push_chromaticity(chroma)
 
     async def push_invalid(self) -> None:
         """
@@ -253,11 +262,9 @@ class TangoController:
     def _refresh_all_magnet_devices(self) -> None:
         """
         Refresh all MagnetDevice local attributes from the reloaded lattice.
-        Uses bulk cache refresh (3 cross-process calls total) then broadcasts
-        RefreshFromCache to all devices — no individual backend RPCs per magnet.
+        Bulk cache refresh (3 cross-process calls) then RefreshFromCache per device.
         """
         try:
-            # Step 1: bulk-read all nominal values into the process cache
             from dt4acc.custom_tango.ioc.single_server import (
                 refresh_cache_from_lattice, _my_magnet_uuids
             )
@@ -265,7 +272,6 @@ class TangoController:
             sync_proxy, _ = _connect_to_mexec_service()
             refresh_cache_from_lattice(sync_proxy, _my_magnet_uuids)
 
-            # Step 2: tell each MagnetDevice to read from cache (instant, no RPC)
             from tango import Database, DeviceProxy
             db = Database()
             dev_list = db.get_device_exported_for_class("MagnetDevice")

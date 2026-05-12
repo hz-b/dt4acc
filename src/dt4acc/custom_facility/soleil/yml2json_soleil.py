@@ -4,6 +4,7 @@ from bson import ObjectId
 
 # classes considered magnets
 MAGNET_CLASSES = {"Quadrupole", "Sextupole", "Multipole", "Bend", "RFCavity", "Octupole"}
+BPM_CLASSES = {"Monitor"}  # covers both BPM and FBPM — FamName distinguished by uuid prefix
 
 INPUT_YAML = "SOLEIL_II_V3635_STAB_SYM1_SB3_MULT7_4SX60_V001.yaml"
 OUTPUT_JSON = "accelerator_setup.json"
@@ -24,16 +25,31 @@ def main():
         fam_name = lattice.get("FamName")
         name = nomenclature.get("TANGO")
 
-        # skip non-magnets or entries lacking a name
-        if cls not in MAGNET_CLASSES or not name:
+        if not name:
+            continue
+
+        # --- BPMs ---
+        if cls in BPM_CLASSES:
+            output.append({
+                "_id": {"$oid": str(ObjectId())},
+                "uuid": uuid,
+                "type": "BPM",
+                "FamName": fam_name,
+                "name": name,
+                "s_pos": localisation.get("S_pos", 0.0),
+            })
+            continue
+
+        # skip non-magnets
+        if cls not in MAGNET_CLASSES:
             continue
 
         # base magnet (as in your original script)
         base_obj = {
             "_id": {"$oid": str(ObjectId())},
-            "uuid": uuid,                     # YAML entry key
+            "uuid": uuid,
             "type": cls,
-            "FamName": fam_name,             # FamName copied
+            "FamName": fam_name,
             "name": name,
             "magnetic_strength": 1.0,
             "pc": f"{name}-pc",
@@ -56,7 +72,7 @@ def main():
                     "name": tango_2nd,
                     "magnetic_strength": 1.0,
                     "pc": f"{tango_2nd}-pc",
-                    "k": 1.0
+                                    "k": 1.0
                 }
                 output.append(steerer_2nd)
 
@@ -70,7 +86,7 @@ def main():
                     "name": tango_3rd,
                     "magnetic_strength": 1.0,
                     "pc": f"{tango_3rd}-pc",
-                    "k": 1.0
+                                    "k": 1.0
                 }
                 output.append(steerer_3rd)
 
@@ -105,7 +121,7 @@ def main():
                     "name": corr_name,
                     "magnetic_strength": 0.0,
                     "pc": f"{corr_name}-pc",
-                    "k": 0.0
+                                    "k": 0.0
                 }
                 output.append(corr_obj)
 
