@@ -6,37 +6,24 @@ Data model of dt4acc core part
    :caption: Contents:
 
 
-Element model
--------------
+Output
+------
 
-.. automodule:: dt4acc.core.model.elementmodel
+Calculated Track
+~~~~~~~~~~~~~~~~
+
+.. automodule:: dt4acc.core.model.output.calculated_track
     :members:
     :undoc-members:
     :show-inheritance:
 
 
-Element update
---------------
 
-.. automodule:: dt4acc.core.model.element_upate
+Twiss
+~~~~~
+
+.. automodule:: dt4acc.core.model.output.twiss
     :members:
     :undoc-members:
     :show-inheritance:
 
-
-Data model for orbit
---------------------
-
-.. automodule:: dt4acc.core.model.orbit
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Data model for twiss
---------------------
-
-.. automodule:: dt4acc.core.model.twiss
-    :members:
-    :undoc-members:
-    :show-inheritance:
