@@ -7,6 +7,7 @@ from importlib import resources
 
 from softioc import builder, softioc
 
+from dt4acc_lib.pyat_simulator.proxies.proxy_factory import ElementProxyFactory
 from dt4acc_lib.pyat_simulator.simulator_backend import SimulatorBackend
 from dt4acc_lib.bl.command_rewritter import CommandRewriter
 from dt4acc_lib.model.utils.command import ReadCommand
@@ -41,7 +42,7 @@ def main():
     acc = bessyii_pyat_lattice(filename=filename)
     backend=SimulatorBackend(
         name="BESSYII_on_PyAT",
-        acc=BESSYIIPyAtAcceleratorSimulator(at_lattice=acc),
+        acc=BESSYIIPyAtAcceleratorSimulator(at_lattice=acc, proxy_factory=ElementProxyFactory()),
     )
 
     _, lm, ts = load_managers()
