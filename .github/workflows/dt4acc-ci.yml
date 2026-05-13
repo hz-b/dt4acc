@@ -41,7 +41,7 @@ jobs:
       - name: Checkout dt4acc-lib
         uses: actions/checkout@v6
         with:
-          repository: hz-b/dt4acc-lib
+          repository: dt4acc/dt4acc-lib
           path: dt4acc-lib
 
       - name: Set up Python
