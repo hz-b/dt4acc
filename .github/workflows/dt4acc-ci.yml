@@ -76,7 +76,7 @@ jobs:
           python -m pip install wheel/dt4acc_lib*.whl
           python3 -c "import dt4acc_lib"
           echo "Building dt4acc wheel"
-          python -m pip wheel --wheel-dir wheel/ ./
+          python -m pip wheel --wheel-dir wheel/ wheel/dt4acc_lib*.whl ./
 
       - name: Install dt4acc from wheel
         run: |
