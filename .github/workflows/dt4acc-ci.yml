@@ -72,10 +72,13 @@ jobs:
 
       - name: Build wheel
         run: |
+          find wheel/ -name 'dt4acc*'
+          python -m pip install wheel/dt4acc-lib*.whl
           python -m pip wheel --wheel-dir wheel/ ./
 
       - name: Install dt4acc from wheel
         run: |
+          find wheel/ -name 'dt4acc*'
           python -m pip install wheel/dt4acc-lib*.whl wheel/dt4acc-*.whl
 
       - name: Lint with flake8
