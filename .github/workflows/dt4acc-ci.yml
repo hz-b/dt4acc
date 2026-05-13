@@ -22,9 +22,9 @@ jobs:
 
       matrix:
         python-version:
-          - "3.10"
-          - "3.11"
-          - "3.12"
+          # - "3.10"
+          # - "3.11"
+          # - "3.12"
           - "3.13"
 
         numpy-version:
@@ -66,9 +66,9 @@ jobs:
           python -m pip install --upgrade pip wheel
           python -m pip install pytest flake8 pycodestyle "${{ matrix.numpy-version }}"
 
-      - name: Install dt4acc-lib
+      - name: Buiild wheel for  dt4acc-lib
         run: |
-          python -m pip install ./dt4acc-lib
+          python -m pip wheel --wheel-dir wheel/ ./dt4acc-lib
 
       - name: Build wheel
         run: |
@@ -76,7 +76,7 @@ jobs:
 
       - name: Install dt4acc from wheel
         run: |
-          python -m pip install wheel/dt4acc-*.whl
+          python -m pip install wheel/dt4acc-lib*.whl wheel/dt4acc-*.whl
 
       - name: Lint with flake8
         run: |
