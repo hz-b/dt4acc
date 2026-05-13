@@ -73,20 +73,22 @@ jobs:
       - name: Build wheel
         run: |
           find wheel/ -name 'dt4acc*'
-          python -m pip install wheel/dt4acc-lib*.whl
+          python -m pip install wheel/dt4acc_lib*.whl
+          python3 -c "import dt4acc_lib"
+          echo "Building dt4acc wheel"
           python -m pip wheel --wheel-dir wheel/ ./
 
       - name: Install dt4acc from wheel
         run: |
           find wheel/ -name 'dt4acc*'
-          python -m pip install wheel/dt4acc-lib*.whl wheel/dt4acc-*.whl
+          python -m pip install wheel/dt4acc_lib*.whl wheel/dt4acc-*.whl
 
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
-          flake8 dt4acc --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 src/dt4acc --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          flake8 dt4acc --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          flake8 src/dt4acc --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
       - name: Run tests
         run: |
