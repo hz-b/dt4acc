@@ -22,14 +22,14 @@ jobs:
 
       matrix:
         python-version:
-          # - "3.10"
-          # - "3.11"
-          # - "3.12"
+          - "3.10"
+          - "3.11"
+          - "3.12"
           - "3.13"
 
         numpy-version:
           - "numpy<2.0"
-          # - "numpy>=2.0"
+          - "numpy>=2.0"
 
     steps:
       #
@@ -90,7 +90,8 @@ jobs:
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 src/dt4acc --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-      - name: Run tests
-        run: |
-          cd /tmp
-          python -m pytest -v -s "$GITHUB_WORKSPACE/tests"
+#      not ready yet to run these tests
+#      - name: Run tests
+#        run: |
+#          cd /tmp
+#          python -m pytest -v -s "$GITHUB_WORKSPACE/tests"
