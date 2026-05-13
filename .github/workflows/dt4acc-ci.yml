@@ -3,11 +3,11 @@ name: dt4acc build
 on:
   push:
     branches:
-      - main
+      - dev/main
 
   pull_request:
     branches:
-      - main
+      - dev/main
 
 permissions:
   contents: read
