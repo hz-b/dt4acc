@@ -7,3 +7,4 @@ Application Programming Interface
 
    core.rst
    custom_epics.rst
+   custom_tango.rst

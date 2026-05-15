@@ -183,7 +183,8 @@ The architecture and patterns used in dt4acc are described in:
 
 .. [1] W. Sulaiman Khail, P. Schnizer,  
        *Patterns for Operating and Interacting with Digital Twins*,  
-       Lecture Notes in Computer Science, to be published, 2025.
+       Lecture Notes in Computer Science, vol 16493. Springer, Cham.
+       https://doi.org/10.1007/978-3-032-19154-0_5
 
 .. [2] W. Sulaiman Khail, P. Schnizer,  
        *Patterns in Digital Twin Development*,  
@@ -194,7 +195,7 @@ The architecture and patterns used in dt4acc are described in:
 .. [3] W. Sulaiman Khail, P. Schnizer,  
        *Digital Twin Applications in Accelerator Control Systems*,  
        Proceedings of ICALEPCS 2025.  
-       DOI: 10.18429/JACoW-ICALEPCS2025-MOBR002
+       https://doi.org/10.18429/JACoW-ICALEPCS2025-MOBR002
 
 These publications:
 

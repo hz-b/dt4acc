@@ -18,11 +18,11 @@ import sphinx_rtd_theme
 # -- Project information -----------------------------------------------------
 
 project = 'dt4acc'
-copyright = '2025, Waheedullah Sulaiman Khail, Pierre Schnizer'
+copyright = '2026, Helmholtz Zentrum Berlin'
 author = 'Waheedullah Sulaiman Khail, Pierre Schnizer'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.2'
+release = '0.3.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -32,13 +32,19 @@ release = '0.0.2'
 # ones.
 extensions = [
   'sphinx.ext.autodoc',
+  "sphinx.ext.autosummary",
   'sphinx.ext.napoleon',
   'sphinx.ext.intersphinx',
   'sphinx.ext.todo',
   'sphinx.ext.viewcode',
   'sphinx.ext.mathjax',
-  #'sphinxcontrib.email'
+  "myst_parser",
+  "sphinx_autodoc_typehints",
+  "sphinx_copybutton",
+  "sphinx_design",
+   "numpydoc",
 ]
+autosummary_generate = True
 
 # Napoleon settings
 napoleon_google_docstring = True
@@ -52,6 +58,13 @@ napoleon_use_admonition_for_references = False
 napoleon_use_ivar = True
 napoleon_use_param = True
 napoleon_use_rtype = True
+
+
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": False,
+    "show-inheritance": True,
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -73,8 +86,9 @@ todo_include_todos = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+# html_theme = 'alabaster'
 html_theme = 'sphinx_rtd_theme'
+html_theme = "furo"
 # html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 intersphinx_mapping = {
@@ -83,6 +97,7 @@ intersphinx_mapping = {
     'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
     # 'lat2db': ('http://docs.scipy.org/doc/scipy/reference/', None),
 }
+
 
 
 
