@@ -126,7 +126,7 @@ def peek_from_lattice(element_id: str, prop: str) -> float:
     Only active in device view (MAX IV). Returns 0.0 in design view (SOLEIL)
     so the cached value is kept unchanged — no regression for SOLEIL.
     """
-    global _sync_proxy, _device_view
+    global _sync_proxy, _device_view # noqa: F824
     if not _device_view or _sync_proxy is None:
         return 0.0
     try:
@@ -184,7 +184,7 @@ def _preload_initial_values(sync_proxy, magnet_uuids: list) -> None:
     Bulk-read main_strength for all magnets in one batch before Tango starts.
     Populates _initial_strength_cache so init_device() needs no RPC calls.
     """
-    global _initial_strength_cache
+    global _initial_strength_cache # noqa: F824
     if not magnet_uuids:
         return
 
