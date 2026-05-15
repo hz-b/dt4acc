@@ -26,7 +26,6 @@ import itertools
 import traceback
 from typing import Sequence
 
-from dt4acc_lib.interfaces.utils.command_execution_engine import CommandExecutionEngine
 from dt4acc_lib.model.output.result import TranslatedReading, ReadTogetherAndTranslated
 from dt4acc_lib.model.utils.command import ReadCommand, Command
 from dt4acc.core.bl.translating_command_execution_engine import TranslatingCommandExecutionEngine
@@ -243,7 +242,7 @@ class TangoController:
             raise RuntimeError("TangoController: no sync_reset callable registered")
         logger.warning("TangoController.reset: resetting backend to nominal state...")
 
-        from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
+        from dt4acc.core.bl.shared_event_loop import get_shared_event_loop
         shared_loop = get_shared_event_loop()
 
         # Reload lattice + clear error state
@@ -291,7 +290,7 @@ class TangoController:
     def start(self) -> None:
         """Start the delayed execution loop on the shared event loop."""
         assert self._pending_task is None, "TangoController.start() called twice"
-        from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
+        from dt4acc.core.bl.shared_event_loop import get_shared_event_loop
         shared_loop = get_shared_event_loop()
 
         # Always use the shared loop — it's the one we control and is
