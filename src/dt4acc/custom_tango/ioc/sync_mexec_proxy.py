@@ -11,7 +11,7 @@ logger = get_logger()
 class SyncMexecProxy:
     """Synchronous wrapper around mexec for crossing the process boundary."""
 
-    def __init__(self,*, mexec: CommandExecutionEngine, service_loop: asyncio.AbstractServer):
+    def __init__(self,*, mexec: CommandExecutionEngine, service_loop: asyncio.AbstractEventLoop):
         self.mexec = mexec
         self.service_loop = service_loop
 
@@ -97,3 +97,6 @@ class SyncMexecProxy:
         except Exception as exc:
             logger.error("SyncMexecProxy.sync_reset failed: %s", exc)
             raise
+
+
+__all__  = ["SyncMexecProxy"]
