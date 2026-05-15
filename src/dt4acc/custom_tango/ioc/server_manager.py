@@ -44,6 +44,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence
 
+from dt4acc.custom_tango.ioc.sync_mexec_proxy import SyncMexecProxy
+
 # Suppress transitions state machine INFO logs across all processes
 logging.getLogger("transitions").setLevel(logging.WARNING)
 logging.getLogger("transitions.core").setLevel(logging.WARNING)
@@ -204,91 +206,8 @@ def _run_mexec_service():
     mexec = future.result(timeout=120)
     logger.warning("MexecService: lattice ready, mexec built.")
 
-    class SyncMexecProxy:
-        """Synchronous wrapper around mexec for crossing the process boundary."""
 
-        def sync_set(self, cmd_id: str, cmd_property: str, value: float):
-            cmd = Command(
-                id=cmd_id,
-                property=cmd_property,
-                value=value,
-                behaviour_on_error=BehaviourOnError.stop,
-            )
-            fut = asyncio.run_coroutine_threadsafe(
-                mexec.set([cmd]), service_loop
-            )
-            return fut.result(timeout=30)
-
-        def sync_peek(self, element_id: str, prop: str) -> float:
-            """Read a single element property directly from AT backend,
-            bypassing liaison and translator. Used by MultipoleDevice polling
-            to stay in sync with PC writes in device view.
-            element_id is a FamName uuid (e.g. 'sqfi73'), prop is the AT
-            property name (e.g. 'main_strength').
-            """
-            logger.debug("sync_peek: element_id=%r prop=%r", element_id, prop)
-            async def _peek():
-                return await mexec.backend.read(element_id, prop)
-            fut = asyncio.run_coroutine_threadsafe(_peek(), service_loop)
-            try:
-                result = float(fut.result(timeout=5))
-                logger.debug("sync_peek: element_id=%r -> %.6f", element_id, result)
-                return result
-            except Exception as exc:
-                if prop == "main_strength"  and element_id.startswith("B"):
-                    # Todo: delete this swith
-                    # logger.info("sync_peek failed for element_id=%r prop=%r: %s",
-                    #                element_id, prop, exc)
-                    return 0.0
-                    # return math.nan
-
-                tmp = traceback.format_exception(type(exc), exc, exc.__traceback__) #: delete me
-                logger.warning("sync_peek failed for element_id=%r prop=%r: %s",
-                               element_id, prop, exc)
-                # Todo: No value was retrieved: better return an invalid value
-                # return math.nan
-                return 0.0
-
-        def sync_trigger_read(self, rcmd_ids: Sequence[str], rcmd_properties: Sequence[str]):
-            rcmds = [
-                ReadCommand(id=i, property=p)
-                for i, p in zip(rcmd_ids, rcmd_properties)
-            ]
-            fut = asyncio.run_coroutine_threadsafe(
-                mexec.trigger_read(rcmds), service_loop
-            )
-            result = fut.result(timeout=30)
-            out = []
-            for translated in result.data:
-                for reading in translated.readings:
-                    out.append((translated.cmd.id, translated.cmd.property, reading.payload))
-            return out
-
-        def sync_reset(self):
-            """
-            Reset backend to nominal state:
-            1. Reload AT lattice from .m file
-            2. Clear error state → pending
-            3. Clear stored optics
-            """
-            import at
-            logger.warning("SyncMexecProxy.sync_reset: reloading lattice from file...")
-            try:
-                new_acc = _load_lattice(LATTICE_FILE)
-                mexec.backend.acc.acc = new_acc
-                with mexec.backend.calculation_lock:
-                    if mexec.backend.model.is_error():
-                        mexec.backend.model.clear()
-                    elif not mexec.backend.model.is_pending():
-                        mexec.backend.model.changed()
-                    mexec.backend.optics = None
-                    mexec.backend.elem_names = None
-                logger.warning("SyncMexecProxy.sync_reset: lattice reloaded, state=pending")
-            except Exception as exc:
-                logger.error("SyncMexecProxy.sync_reset failed: %s", exc)
-                raise
-
-    proxy = SyncMexecProxy()
+    proxy = SyncMexecProxy(mexec=mexec, service_loop=service_loop)
     MexecManagerService.register("get_mexec_proxy", callable=lambda: proxy)
     MexecManagerService.register("sync_reset", callable=proxy.sync_reset)
     MexecManagerService.register("sync_peek", callable=proxy.sync_peek)
