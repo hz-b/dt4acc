@@ -27,3 +27,12 @@ class ControllerInterface(metaclass=ABCMeta):
     @abstractmethod
     async def trigger_read(self, reads: Sequence[ReadCommand]) -> ReadTogether:
         """just a simple wrapper of mexec.trigger_read"""
+
+    @abstractmethod
+    async def enqueue(self, reads: Sequence[ReadCommand]) -> None:
+        """enqueue a read command to be evaluated at the back engine with delay
+
+        Todo:
+            consider to match the method more to read
+            Should trigger_read be extened with a permittable delay?
+        """

@@ -257,13 +257,13 @@ class RingSimulatorDevice(Device, AsyncMixin):
         Sets State=FAULT if beam is lost (NaN/inf in AT optics), ON on recovery.
         """
         controller = get_controller()
-        assert callable(controller._enqueue)
+        assert callable(controller.enqueue)
         delayed_reads = get_controller().get_default_delayed_reads()
         assert delayed_reads, "No delayed reads were provided"
         try:
             self._async(
                 # Todo: provide a public method for it
-                get_controller()._enqueue(list(delayed_reads))
+                get_controller().enqueue(list(delayed_reads))
             )
             # Successful calculation — restore ON if we were in FAULT
             if self.get_state() == DevState.FAULT:

@@ -97,7 +97,7 @@ class Controller(ControllerInterface):
 
         # 3. Queue delayed reads
         all_delayed = list(self.default_delayed_reads) + list(delayed_reads)
-        await self._enqueue(all_delayed)
+        await self.enqueue(all_delayed)
 
     async def trigger_read(self, reads: Sequence[ReadCommand]) -> ReadTogetherAndTranslated:
         """Direct read from the backend — used for initial value peek at startup."""
@@ -113,7 +113,7 @@ class Controller(ControllerInterface):
         except Exception as exc:
             logger.error("%s: failed to push invalid state: %s", self.name, exc)
 
-    async def _enqueue(self, reads: Sequence[ReadCommand]) -> None:
+    async def enqueue(self, reads: Sequence[ReadCommand]) -> None:
         if self.cmd_queue is None:
             logger.warning("%s: queue not yet started — delayed reads dropped", self.name)
             return
