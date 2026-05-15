@@ -291,7 +291,7 @@ def main_loop(server_name: str, instance_name: str, event=None):
         # Import lazily here — after _inject_controller — to avoid circular imports
         from dt4acc.custom_tango.ioc.devices.tango_device_setup import get_all_device_classes
         device_classes = get_all_device_classes()
-        logger.warning(
+        logger.info(
             "Starting %s/%s with %d device classes",
             server_name, instance_name, len(device_classes),
         )
