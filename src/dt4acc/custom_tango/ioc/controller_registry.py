@@ -15,22 +15,24 @@ New dependency graph:
     magnet_device      → controller_registry  (reads the controller)
     tango_device_setup → (no controller dependency at all)           ✔
 """
+from typing import Union
 
+from dt4acc.core.interfaces.controller_interface import ControllerInterface
 from dt4acc.core.utils.logger import get_logger
 
 logger = get_logger()
 
-_controller = None
+_controller : Union[ControllerInterface, None] = None
 
 
-def set_controller(controller) -> None:
+def set_controller(controller: ControllerInterface) -> None:
     """Called once by single_server before tango.server.run()."""
     global _controller
     _controller = controller
     logger.info("TangoController registered in controller_registry")
 
 
-def get_controller():
+def get_controller() -> ControllerInterface:
     """Called by device write-handlers to reach the shared controller."""
     if _controller is None:
         raise RuntimeError(

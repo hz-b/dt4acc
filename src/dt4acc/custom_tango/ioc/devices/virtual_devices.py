@@ -256,11 +256,14 @@ class RingSimulatorDevice(Device, AsyncMixin):
         Does NOT perturb the lattice — zero noise.
         Sets State=FAULT if beam is lost (NaN/inf in AT optics), ON on recovery.
         """
+        controller = get_controller()
+        assert callable(controller._enqueue)
+        delayed_reads = get_controller().get_default_delayed_reads()
+        assert delayed_reads, "No delayed reads were provided"
         try:
             self._async(
-                get_controller()._enqueue(
-                    list(get_controller().default_delayed_reads)
-                )
+                # Todo: provide a public method for it
+                get_controller()._enqueue(list(delayed_reads))
             )
             # Successful calculation — restore ON if we were in FAULT
             if self.get_state() == DevState.FAULT:
