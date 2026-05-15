@@ -22,17 +22,12 @@ data into TwissOrbitDevice / BPMManagerDevice / TuneDevice via DeviceProxy.
 """
 
 import asyncio
-import itertools
-import traceback
 from typing import Sequence
 
 from dt4acc.core.interfaces.controller_interface import ControllerInterface
-from dt4acc.custom_tango.ioc.view import TangoView
-from dt4acc_lib.model.output.result import TranslatedReading, ReadTogetherAndTranslated, ReadTogether
+from dt4acc_lib.model.output.result import ReadTogether
 from dt4acc_lib.model.utils.command import ReadCommand, Command
-from dt4acc.core.bl.translating_command_execution_engine import TranslatingCommandExecutionEngine
 from dt4acc.core.utils.logger import get_logger
-from dt4acc.custom_tango.views.calculation_result_view import CalculationResultView
 
 logger = get_logger()
 

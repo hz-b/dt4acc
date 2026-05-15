@@ -22,7 +22,7 @@ import sys
 from typing import Sequence
 
 from dt4acc.core.bl.controller import Controller
-from dt4acc.custom_tango.ioc.view import TangoView
+from dt4acc.custom_tango.views.view import TangoView
 
 # Suppress transitions state machine INFO logs — they fire on every
 # backend.set() call and flood the output (4 lines per state transition)
