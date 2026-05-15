@@ -3,6 +3,7 @@ import traceback
 from typing import Sequence
 
 from dt4acc.core.utils.logger import get_logger
+from dt4acc.custom_tango.ioc.handle_lattice import _load_lattice
 from dt4acc_lib.interfaces.utils.command_execution_engine import CommandExecutionEngine
 from dt4acc_lib.model.utils.command import Command, BehaviourOnError, ReadCommand
 
@@ -85,7 +86,7 @@ class SyncMexecProxy:
         import at
         logger.warning("SyncMexecProxy.sync_reset: reloading lattice from file...")
         try:
-            new_acc = _load_lattice(LATTICE_FILE)
+            new_acc = load_lattice()
             self.mexec.backend.acc.acc = new_acc
             with self.mexec.backend.calculation_lock:
                 if self.mexec.backend.model.is_error():

@@ -25,10 +25,7 @@ Process topology
         Periodically writes to one magnet to keep calculations firing
         and verify the system is alive end-to-end.
 """
-import math
-import traceback
 
-import at
 import asyncio
 import itertools
 import logging
@@ -41,9 +38,9 @@ import sys
 import threading
 import time
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any, Sequence
 
+from dt4acc.custom_tango.ioc.handle_lattice import lattice_loader
 from dt4acc.custom_tango.ioc.sync_mexec_proxy import SyncMexecProxy
 from dt4acc.custom_tango.ioc.virtual_pass_through_command_rewriter import VirtualPassthroughCommandRewriter
 
@@ -51,15 +48,9 @@ from dt4acc.custom_tango.ioc.virtual_pass_through_command_rewriter import Virtua
 logging.getLogger("transitions").setLevel(logging.WARNING)
 logging.getLogger("transitions.core").setLevel(logging.WARNING)
 
-from dt4acc_lib.bl.command_rewritter import CommandRewriter
-
-
-
-
 
 from dt4acc_lib.pyat_simulator.accelerator_simulator import PyATAcceleratorSimulator
 from dt4acc_lib.pyat_simulator.simulator_backend import SimulatorBackend
-from tango import DeviceProxy, DevFailed
 
 from dt4acc.core.utils.logger import get_logger
 
@@ -74,7 +65,6 @@ _MANAGER_AUTHKEY = b"dt4acc-tango-secret"
 # ---------------------------------------------------------------------------
 
 # Path to the AT lattice file (.m or .json)
-LATTICE_FILE: Path = None
 
 # Callable that returns (yellow_pages, liaison_manager, translator_service)
 LOAD_MANAGERS_FN = None
@@ -85,24 +75,6 @@ EXPECTED_VIEW = "design"
 # Heartbeat — pure recalculation, no lattice writes, no noise
 # Set by the launch script. Period in seconds (0 = disabled).
 HEARTBEAT_PERIOD = 1.0
-
-
-def _load_lattice(path: Path):
-    """
-    Load an AT lattice from file. Supports:
-      .m    — MATLAB/Octave format via at.load_m()
-      .json — atjson v1 format via at.load_json()
-    """
-    suffix = path.suffix.lower()
-    if suffix == ".json":
-        return at.load_json(str(path))
-    elif suffix == ".m":
-        return at.load_m(path)
-    else:
-        raise ValueError(
-            f"Unsupported lattice file format: {suffix!r}. "
-            "Expected .m (MATLAB) or .json (atjson v1)."
-        )
 
 
 def _get_load_managers():
@@ -129,12 +101,7 @@ def _build_mexec():
         TranslatingCommandExecutionEngine,
     )
 
-    filename = LATTICE_FILE
-    if filename is None:
-        raise ValueError(
-            "LATTICE_FILE not set — set server_manager.LATTICE_FILE before main()"
-        )
-    acc = _load_lattice(filename)
+    acc = lattice_loader.load()
     backend = SimulatorBackend(
         name="Facility specific PYAT",
         acc=PyATAcceleratorSimulator(at_lattice=acc),
