@@ -97,11 +97,18 @@ class Controller(ControllerInterface):
 
         # 3. Queue delayed reads
         all_delayed = list(self.default_delayed_reads) + list(delayed_reads)
-        await self.enqueue(all_delayed)
+        await self._enqueue(all_delayed)
 
     async def trigger_read(self, reads: Sequence[ReadCommand]) -> ReadTogetherAndTranslated:
         """Direct read from the backend — used for initial value peek at startup."""
         return await self.mexec.trigger_read(reads)
+
+    async def reread_default_readings(self) -> None:
+        # Better fail if no default readings are available
+        # most probably the whole system will not work as the
+        # developer / user expects
+        assert self.default_delayed_reads, "No delayed reads were provided"
+        await self._enqueue(self.default_delayed_reads)
 
     async def _push_invalid(self) -> None:
         """
@@ -113,7 +120,7 @@ class Controller(ControllerInterface):
         except Exception as exc:
             logger.error("%s: failed to push invalid state: %s", self.name, exc)
 
-    async def enqueue(self, reads: Sequence[ReadCommand]) -> None:
+    async def _enqueue(self, reads: Sequence[ReadCommand]) -> None:
         if self.cmd_queue is None:
             logger.warning("%s: queue not yet started — delayed reads dropped", self.name)
             return

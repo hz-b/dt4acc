@@ -29,10 +29,14 @@ class ControllerInterface(metaclass=ABCMeta):
         """just a simple wrapper of mexec.trigger_read"""
 
     @abstractmethod
-    async def enqueue(self, reads: Sequence[ReadCommand]) -> None:
-        """enqueue a read command to be evaluated at the back engine with delay
+    async def reread_default_readings(self) -> None:
+        """Reread default readings
 
         Todo:
-            consider to match the method more to read
-            Should trigger_read be extened with a permittable delay?
+            consider if method is rally required.
+            Should caller not rather call trigger_read and know
+            which are the default values...
+
+            Could be that the controller should not know about the
+            default readings in the first place
         """

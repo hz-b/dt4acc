@@ -176,14 +176,14 @@ class TangoController(ControllerInterface):
     async def trigger_read(self, reads: Sequence[ReadCommand]) -> ReadTogether:
         return await self.delegate.trigger_read(reads=reads)
 
-    async def enqueue(self, reads: Sequence[ReadCommand]) -> None:
+    async def reread_default_readings(self) -> None:
         """
 
         Todo:
             provide a public method for it and add it to the controller
             interface
         """
-        return await self.delegate.enqueue(reads)
+        return await self.delegate.reread_default_readings()
 
     def get_default_delayed_reads(self) -> Sequence[ReadCommand]:
         return self.delegate.get_default_delayed_reads()
