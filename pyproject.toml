@@ -59,7 +59,7 @@ epics = [
 ]
 
 tango = [
-     "pytango"
+     "pytango!=10.1.*"
 ]
 
 bessyii = [
