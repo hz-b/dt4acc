@@ -1,9 +1,10 @@
 import asyncio
+import math
 import traceback
 from typing import Sequence
 
 from dt4acc.core.utils.logger import get_logger
-from dt4acc.custom_tango.ioc.handle_lattice import _load_lattice
+from dt4acc.custom_tango.ioc.handle_lattice import lattice_loader
 from dt4acc_lib.interfaces.utils.command_execution_engine import CommandExecutionEngine
 from dt4acc_lib.model.utils.command import Command, BehaviourOnError, ReadCommand
 
@@ -49,8 +50,8 @@ class SyncMexecProxy:
         except Exception as exc:
             if prop == "main_strength" and element_id.startswith("B"):
                 # Todo: delete this swith
-                # logger.info("sync_peek failed for element_id=%r prop=%r: %s",
-                #                element_id, prop, exc)
+                logger.info("sync_peek failed for element_id=%r prop=%r: %s",
+                                element_id, prop, exc)
                 return 0.0
                 # return math.nan
 
@@ -86,7 +87,8 @@ class SyncMexecProxy:
         import at
         logger.warning("SyncMexecProxy.sync_reset: reloading lattice from file...")
         try:
-            new_acc = load_lattice()
+            new_acc = lattice_loader.load()
+            # Todo: review how to clear errors in the lattice
             self.mexec.backend.acc.acc = new_acc
             with self.mexec.backend.calculation_lock:
                 if self.mexec.backend.model.is_error():
