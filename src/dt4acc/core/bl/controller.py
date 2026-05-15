@@ -51,11 +51,14 @@ class Controller(ControllerInterface):
             self._queue_loop(),
             name=f"controller-delayed-execution-task-{task_count}",
         )
-        
+
+    def get_default_delayed_reads(self) -> Sequence[ReadCommand]:
+        return self.default_delayed_reads
+
     def start(self) -> None:
         """Start the delayed execution loop on the shared event loop."""
         assert self.pending_task is None, f"{self.__class__.__name__}.start() called twice"
-        # todo: move this to core
+
         from dt4acc.core.bl.shared_event_loop import get_shared_event_loop
         shared_loop = get_shared_event_loop()
 
