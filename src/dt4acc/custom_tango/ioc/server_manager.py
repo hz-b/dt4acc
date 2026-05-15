@@ -25,6 +25,8 @@ Process topology
         Periodically writes to one magnet to keep calculations firing
         and verify the system is alive end-to-end.
 """
+import math
+import traceback
 
 import at
 import asyncio
@@ -233,8 +235,18 @@ def _run_mexec_service():
                 logger.debug("sync_peek: element_id=%r -> %.6f", element_id, result)
                 return result
             except Exception as exc:
+                if prop == "main_strength"  and element_id.startswith("B"):
+                    # Todo: delete this swith
+                    # logger.info("sync_peek failed for element_id=%r prop=%r: %s",
+                    #                element_id, prop, exc)
+                    return 0.0
+                    # return math.nan
+
+                tmp = traceback.format_exception(type(exc), exc, exc.__traceback__) #: delete me
                 logger.warning("sync_peek failed for element_id=%r prop=%r: %s",
                                element_id, prop, exc)
+                # Todo: No value was retrieved: better return an invalid value
+                # return math.nan
                 return 0.0
 
         def sync_trigger_read(self, rcmd_ids: Sequence[str], rcmd_properties: Sequence[str]):
@@ -408,7 +420,7 @@ def _wait_all_started(monitors: Sequence[ProcessMonitor]) -> bool:
         dt = (time.time() - start) / 60
         newly_ready = {k: pm for k, pm in remaining.items() if pm.event.is_set()}
         for k in newly_ready:
-            logger.warning("%.2f min: %s signalled startup", dt, k)
+            logger.info("%.2f min: %s signalled startup", dt, k)
             remaining.pop(k)
         if not remaining:
             return True
