@@ -64,12 +64,18 @@ class RingSimulatorDevice(Device, AsyncMixin):
             "master_clock",
             "reference_frequency",
         )
+        self._sync_reference_frequency_write_value()
         for attr_name in ("orbit_x", "orbit_y",
                           "beta_x", "beta_y", "alpha_x", "alpha_y", "nu_x", "nu_y",
                           "bpm_x_attr", "bpm_y_attr", "hor", "vert",
                           "reference_frequency"):
             self.set_change_event(attr_name, True, False)
         self.set_state(DevState.ON)
+
+    def _sync_reference_frequency_write_value(self) -> None:
+        """Keep the Tango write setpoint aligned with the displayed RF value."""
+        write_attr = self.get_device_attr().get_w_attr_by_name("reference_frequency")
+        write_attr.set_write_value(self._reference_frequency)
 
     # Orbit
     @attribute(dtype=DevDouble, dformat=AttrDataFormat.SPECTRUM, max_dim_x=MAX_ELEMS)
@@ -171,6 +177,7 @@ class RingSimulatorDevice(Device, AsyncMixin):
             self._reference_frequency = float(
                 self._async(get_controller().mexec.reference_frequency())
             )
+            self._sync_reference_frequency_write_value()
             self.push_change_event("reference_frequency", self._reference_frequency)
             logger.info(
                 "RingSimulatorDevice.RefreshFromCache done — reference_frequency=%.3f",
