@@ -56,6 +56,17 @@ from dt4acc_lib.pyat_simulator.accelerator_simulator import PyATAcceleratorSimul
 # has no conversion for them so inverse_read_command must pass them through
 # unchanged, exactly as design view does.
 _VIRTUAL_RESULT_IDS = frozenset({"twiss", "tune", "track", "orbit"})
+_DEDICATED_BPM_PREFIXES = ("BPM", "FBPM")
+
+
+def _is_dedicated_bpm_position_name(name: object) -> bool:
+    """Return True for orbit positions backing dedicated BPM Tango devices.
+
+    The global ring-simulator BPM spectra intentionally keep their historical
+    BPM-only contract elsewhere; this helper is only for the per-device cache
+    consumed by BpmDevice instances.
+    """
+    return str(name).upper().startswith(_DEDICATED_BPM_PREFIXES)
 
 
 class VirtualPassthroughCommandRewriter(CommandRewriter):
@@ -442,11 +453,11 @@ def _run_mexec_service(
             x_values: Sequence[float],
             y_values: Sequence[float],
         ) -> None:
-            """Store the latest BPM positions by BPM UUID."""
+            """Store the latest BPM/FBPM positions for dedicated Tango devices."""
             next_positions = {}
             for name, x, y in zip(names, x_values, y_values):
                 bpm_id = str(name)
-                if not bpm_id.upper().startswith("BPM"):
+                if not _is_dedicated_bpm_position_name(bpm_id):
                     continue
                 next_positions[bpm_id] = (float(x), float(y))
             bpm_positions.clear()

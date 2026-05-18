@@ -50,9 +50,12 @@ def _value(obj: Any, key: str):
     return value or None
 
 
+_DEDICATED_BPM_FAMILIES = {"BPM", "FBPM"}
+
+
 def soleil_position_name(position, index: int) -> str:
     name = str(position.name)
-    if name.upper() != "BPM":
+    if name.upper() not in _DEDICATED_BPM_FAMILIES:
         return name
 
     payload_uuid = _value(position, "UUID") or _value(position, "uuid")
@@ -62,12 +65,12 @@ def soleil_position_name(position, index: int) -> str:
     uuid_by_index = _load_uuid_by_index()
     if index >= len(uuid_by_index):
         raise RuntimeError(
-            f"SOLEIL BPM at orbit index {index} has no matching lattice element"
+            f"SOLEIL {name} at orbit index {index} has no matching lattice element"
         )
 
     lattice_uuid = uuid_by_index[index]
     if not lattice_uuid:
         raise RuntimeError(
-            f"SOLEIL BPM at orbit index {index} has no UUID in the AT lattice"
+            f"SOLEIL {name} at orbit index {index} has no UUID in the AT lattice"
         )
     return str(lattice_uuid)
