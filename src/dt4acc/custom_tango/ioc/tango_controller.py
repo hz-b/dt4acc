@@ -358,7 +358,11 @@ class TangoController:
         """
         # 1. Mutate the backend lattice
         await self.mexec.set([cmd])
-        if cmd.id == "master_clock" and cmd.property == "reference_frequency":
+        if (
+            cmd.id == "master_clock" and cmd.property == "reference_frequency"
+        ) or (
+            cmd.id == "rf_system" and cmd.property == "voltage"
+        ):
             self._refresh_cavity_devices()
 
         # 2. Immediate reads — e.g. readback current after setting a magnet

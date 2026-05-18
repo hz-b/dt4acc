@@ -75,6 +75,13 @@ class AsyncMexecAdapter:
             lambda: self._proxy.sync_reference_frequency(),
         )
 
+    async def rf_voltage(self) -> float:
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            None,
+            lambda: self._proxy.sync_rf_voltage(),
+        )
+
     async def update_bpm_positions(
         self,
         names: Sequence[str],
@@ -236,7 +243,7 @@ def _read_values_from_lattice(sync_proxy, id_to_properties: dict) -> dict:
         ids = [
             element_id
             for element_id, props in id_to_properties.items()
-            if prop in props and element_id != "master_clock"
+            if prop in props and element_id not in {"master_clock", "rf_system"}
         ]
         if not ids:
             continue
@@ -331,8 +338,18 @@ def _nominal_reads_for_server(server_name: str, instance_name: str) -> dict:
 
 
 def _reference_frequency_from_lattice(lattice_file=None) -> float:
+    reference_frequency, _ = _global_rf_values_from_lattice(lattice_file)
+    return reference_frequency
+
+
+def _rf_voltage_from_lattice(lattice_file=None) -> float:
+    _, rf_voltage = _global_rf_values_from_lattice(lattice_file)
+    return rf_voltage
+
+
+def _global_rf_values_from_lattice(lattice_file=None) -> tuple[float, float]:
     if lattice_file is None:
-        return 0.0
+        return 0.0, 0.0
     try:
         import at
         from pathlib import Path
@@ -343,7 +360,7 @@ def _reference_frequency_from_lattice(lattice_file=None) -> float:
         elif path.suffix.lower() == ".m":
             lattice = at.load_m(path)
         else:
-            return 0.0
+            return 0.0, 0.0
 
         cavities = [
             element
@@ -351,7 +368,7 @@ def _reference_frequency_from_lattice(lattice_file=None) -> float:
             if getattr(element, "Frequency", 0.0)
         ]
         if not cavities:
-            return 0.0
+            return 0.0, 0.0
 
         harmonic_number = getattr(lattice, "harmonic_number", None)
         if harmonic_number is not None:
@@ -360,15 +377,30 @@ def _reference_frequency_from_lattice(lattice_file=None) -> float:
                 if getattr(element, "HarmNumber", None) == harmonic_number
             ]
             if matching:
-                return float(matching[0].Frequency) * 1e-3
+                reference_frequency = float(matching[0].Frequency) * 1e-3
+                rf_voltage = sum(
+                    float(getattr(element, "Voltage", 0.0) or 0.0)
+                    for element in lattice
+                    if getattr(element, "Frequency", None) is not None
+                )
+                return reference_frequency, rf_voltage
 
-        return min(float(element.Frequency) for element in cavities if element.Frequency > 0) * 1e-3
+        reference_frequency = (
+            min(float(element.Frequency) for element in cavities if element.Frequency > 0)
+            * 1e-3
+        )
+        rf_voltage = sum(
+            float(getattr(element, "Voltage", 0.0) or 0.0)
+            for element in lattice
+            if getattr(element, "Frequency", None) is not None
+        )
+        return reference_frequency, rf_voltage
     except Exception as exc:
-        logger.warning("Could not derive RF reference frequency from lattice: %s", exc)
-        return 0.0
+        logger.warning("Could not derive global RF values from lattice: %s", exc)
+        return 0.0, 0.0
 
 
-def _add_reference_frequency_if_needed(
+def _add_global_rf_values_if_needed(
     id_to_properties: dict,
     server_name: str,
     instance_name: str,
@@ -377,11 +409,13 @@ def _add_reference_frequency_if_needed(
     global _static_nominal_cache
     if (server_name, instance_name) != ("simulator", "ringsimulator"):
         return
-    reference_frequency = _reference_frequency_from_lattice(lattice_file)
+    reference_frequency, rf_voltage = _global_rf_values_from_lattice(lattice_file)
     id_to_properties.setdefault("master_clock", set()).add("reference_frequency")
     _static_nominal_cache.setdefault("master_clock", {})[
         "reference_frequency"
     ] = reference_frequency
+    id_to_properties.setdefault("rf_system", set()).add("voltage")
+    _static_nominal_cache.setdefault("rf_system", {})["voltage"] = rf_voltage
 
 def _resolve_position_name_resolver(position_name_resolver, lattice_file=None):
     if position_name_resolver is None:
@@ -483,7 +517,7 @@ def main_loop(
         sync_proxy, _ = _connect_to_mexec_service(manager_port)
 
         my_nominal_reads = _nominal_reads_for_server(server_name, instance_name)
-        _add_reference_frequency_if_needed(
+        _add_global_rf_values_if_needed(
             my_nominal_reads,
             server_name,
             instance_name,

@@ -59,6 +59,12 @@ class TestDeviceConnectivity:
             assert expected in attr_names, \
                 f"RingSimulatorDevice missing attribute: {expected}"
 
+    def test_ring_sim_has_rf_attributes(self, dp_ring_sim):
+        attr_names = [a.name for a in dp_ring_sim.attribute_list_query()]
+        for expected in ("reference_frequency", "voltage"):
+            assert expected in attr_names, \
+                f"RingSimulatorDevice missing attribute: {expected}"
+
     def test_ring_sim_has_reset_and_recalculate_commands(self, dp_ring_sim):
         cmd_names = [c.cmd_name for c in dp_ring_sim.command_list_query()]
         assert "Reset" in cmd_names, "RingSimulatorDevice missing Reset command"

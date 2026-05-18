@@ -188,6 +188,14 @@ def _reference_frequency_khz_from_backend(backend) -> float:
     return float(reference.Frequency) * 1e-3
 
 
+def _rf_voltage_from_backend(backend) -> float:
+    """Return the total RF voltage carried by all cavities in volts."""
+    voltage = 0.0
+    for cavity in _rf_cavities_from_lattice(backend.acc.acc):
+        voltage += float(getattr(cavity, "Voltage", 0.0) or 0.0)
+    return voltage
+
+
 def _set_reference_frequency_khz_on_backend(backend, reference_frequency_khz: float) -> None:
     """Set all RF cavity frequencies from a master-clock value in kHz.
 
@@ -213,6 +221,46 @@ def _set_reference_frequency_khz_on_backend(backend, reference_frequency_khz: fl
             else:
                 frequency = reference_hz
             cavity.update(Frequency=frequency)
+
+
+def _set_rf_voltage_on_backend(backend, rf_voltage_v: float) -> None:
+    """Set total RF voltage while preserving the current cavity split when possible.
+
+    The SOLEIL lattice can contain both a fundamental cavity and harmonic
+    cavities. Scaling the existing voltage distribution keeps a harmonic cavity
+    at 0 V if it is currently disabled, instead of injecting an artificial share
+    of a global setpoint into it.
+    """
+    cavities = _rf_cavities_from_lattice(backend.acc.acc)
+    if not cavities:
+        raise ValueError("No RF cavity was found in the lattice")
+
+    requested_total = float(rf_voltage_v)
+    current_voltages = []
+    for cavity in cavities:
+        if not hasattr(cavity, "Voltage"):
+            raise ValueError(
+                f"RF cavity {getattr(cavity, 'FamName', cavity)!r} has no Voltage property"
+            )
+        current_voltages.append(float(cavity.Voltage))
+
+    current_total = sum(current_voltages)
+    reference = _reference_cavity_from_lattice(backend.acc.acc)
+
+    with backend.calculation_lock:
+        if backend.model.is_error():
+            raise ValueError("SimulatorBackend is in error state; call Reset before writing RF")
+        backend.model.changed()
+
+        if current_total:
+            scale = requested_total / current_total
+            for cavity, voltage in zip(cavities, current_voltages):
+                cavity.update(Voltage=voltage * scale)
+            return
+
+        fallback = reference or cavities[0]
+        for cavity in cavities:
+            cavity.update(Voltage=requested_total if cavity is fallback else 0.0)
 
 
 from dt4acc_lib.model.utils.command import BehaviourOnError, Command, ReadCommand
@@ -409,6 +457,8 @@ def _run_mexec_service(
         def sync_set(self, cmd_id: str, cmd_property: str, value: float):
             if cmd_id == "master_clock" and cmd_property == "reference_frequency":
                 return self.sync_set_reference_frequency(value)
+            if cmd_id == "rf_system" and cmd_property == "voltage":
+                return self.sync_set_rf_voltage(value)
 
             cmd = Command(
                 id=cmd_id,
@@ -440,6 +490,17 @@ def _run_mexec_service(
             """Return the current reference RF frequency in kHz."""
             fut = asyncio.run_coroutine_threadsafe(
                 asyncio.to_thread(_reference_frequency_khz_from_backend, mexec.backend),
+                service_loop,
+            )
+            try:
+                return float(fut.result(timeout=5))
+            except Exception:
+                return 0.0
+
+        def sync_rf_voltage(self) -> float:
+            """Return the current total RF voltage in volts."""
+            fut = asyncio.run_coroutine_threadsafe(
+                asyncio.to_thread(_rf_voltage_from_backend, mexec.backend),
                 service_loop,
             )
             try:
@@ -480,6 +541,18 @@ def _run_mexec_service(
                     _set_reference_frequency_khz_on_backend,
                     mexec.backend,
                     reference_frequency_khz,
+                ),
+                service_loop,
+            )
+            return fut.result(timeout=30)
+
+        def sync_set_rf_voltage(self, rf_voltage_v: float):
+            """Set total RF voltage in volts while preserving cavity voltage ratios."""
+            fut = asyncio.run_coroutine_threadsafe(
+                asyncio.to_thread(
+                    _set_rf_voltage_on_backend,
+                    mexec.backend,
+                    rf_voltage_v,
                 ),
                 service_loop,
             )

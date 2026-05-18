@@ -64,11 +64,16 @@ class RingSimulatorDevice(Device, AsyncMixin):
             "master_clock",
             "reference_frequency",
         )
+        self._voltage = get_initial_value(
+            "rf_system",
+            "voltage",
+        )
         self._sync_reference_frequency_write_value()
+        self._sync_voltage_write_value()
         for attr_name in ("orbit_x", "orbit_y",
                           "beta_x", "beta_y", "alpha_x", "alpha_y", "nu_x", "nu_y",
                           "bpm_x_attr", "bpm_y_attr", "hor", "vert",
-                          "reference_frequency"):
+                          "reference_frequency", "voltage"):
             self.set_change_event(attr_name, True, False)
         self.set_state(DevState.ON)
 
@@ -76,6 +81,11 @@ class RingSimulatorDevice(Device, AsyncMixin):
         """Keep the Tango write setpoint aligned with the displayed RF value."""
         write_attr = self.get_device_attr().get_w_attr_by_name("reference_frequency")
         write_attr.set_write_value(self._reference_frequency)
+
+    def _sync_voltage_write_value(self) -> None:
+        """Keep the Tango write setpoint aligned with the displayed RF voltage."""
+        write_attr = self.get_device_attr().get_w_attr_by_name("voltage")
+        write_attr.set_write_value(self._voltage)
 
     # Orbit
     @attribute(dtype=DevDouble, dformat=AttrDataFormat.SPECTRUM, max_dim_x=MAX_ELEMS)
@@ -147,7 +157,7 @@ class RingSimulatorDevice(Device, AsyncMixin):
         self._tune_vert = float(value)
         self.push_change_event("vert", self._tune_vert)
 
-    # Master clock
+    # RF system
     @attribute(dtype=DevDouble, access=AttrWriteType.READ_WRITE,
                label="Reference frequency", unit="kHz")
     def reference_frequency(self): return self._reference_frequency
@@ -169,19 +179,47 @@ class RingSimulatorDevice(Device, AsyncMixin):
             )
         )
 
+    @attribute(dtype=DevDouble, access=AttrWriteType.READ_WRITE,
+               label="Voltage", unit="V")
+    def voltage(self): return self._voltage
+
+    @voltage.write
+    def voltage(self, value: float):
+        value = float(value)
+        self._voltage = value
+        self.push_change_event("voltage", self._voltage)
+        self._async(
+            get_controller().update(
+                cmd=Command(
+                    id="rf_system",
+                    property="voltage",
+                    value=value,
+                    behaviour_on_error=BehaviourOnError.stop,
+                ),
+                reads=[], delayed_reads=[],
+            )
+        )
+
     @command
     def RefreshFromCache(self) -> None:
-        """Refresh the displayed master-clock frequency from the backend."""
+        """Refresh the displayed global RF values from the backend."""
         try:
             self._start_async()
             self._reference_frequency = float(
                 self._async(get_controller().mexec.reference_frequency())
             )
+            self._voltage = float(
+                self._async(get_controller().mexec.rf_voltage())
+            )
             self._sync_reference_frequency_write_value()
+            self._sync_voltage_write_value()
             self.push_change_event("reference_frequency", self._reference_frequency)
+            self.push_change_event("voltage", self._voltage)
             logger.info(
-                "RingSimulatorDevice.RefreshFromCache done — reference_frequency=%.3f",
+                "RingSimulatorDevice.RefreshFromCache done — "
+                "reference_frequency=%.3f voltage=%.3f",
                 self._reference_frequency,
+                self._voltage,
             )
         except Exception as exc:
             logger.error("RingSimulatorDevice.RefreshFromCache failed: %s", exc)
