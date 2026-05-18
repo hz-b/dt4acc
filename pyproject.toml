@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "dt4acc"
-version = "0.2.0"
+version = "0.3.0"
 description = "digital twin for accelerators"
 authors = [
   { name = "Waheedullah Sulaiman Khail" },
@@ -22,7 +22,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "dt4acc-lib",
+    "dt4acc-lib>=0.4",
     # for BESSY II
     # actually required by custom bessyii
     # currently bessyii load managers used by
