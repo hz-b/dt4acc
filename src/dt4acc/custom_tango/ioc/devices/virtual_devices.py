@@ -13,9 +13,9 @@ import numpy as np
 from tango import DevState, DevFailed, DevDouble, DevString
 from tango.server import Device, attribute, command, AttrDataFormat, device_property, AttrWriteType
 
+from dt4acc.core.bl.shared_event_loop import get_shared_event_loop
 from dt4acc_lib.model.utils.command import Command, BehaviourOnError, ReadCommand
 from dt4acc.core.utils.logger import get_logger
-from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
 from dt4acc.custom_tango.ioc.controller_registry import get_controller
 
 logger = get_logger()
@@ -256,11 +256,12 @@ class RingSimulatorDevice(Device, AsyncMixin):
         Does NOT perturb the lattice — zero noise.
         Sets State=FAULT if beam is lost (NaN/inf in AT optics), ON on recovery.
         """
+        controller = get_controller()
+        assert callable(controller.reread_default_readings)
         try:
             self._async(
-                get_controller()._enqueue(
-                    list(get_controller().default_delayed_reads)
-                )
+                # Todo: provide a public method for it
+                get_controller().reread_default_readings()
             )
             # Successful calculation — restore ON if we were in FAULT
             if self.get_state() == DevState.FAULT:

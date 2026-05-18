@@ -35,6 +35,8 @@ import os
 import sys
 from pathlib import Path
 
+from dt4acc.custom_tango.ioc import handle_lattice
+
 # ---------------------------------------------------------------------------
 # Defaults
 # ---------------------------------------------------------------------------
@@ -125,7 +127,7 @@ def main():
     from dt4acc.custom_tango.ioc.single_server import enable_device_view_readback
     enable_device_view_readback()
 
-    server_manager.LATTICE_FILE     = args.lattice
+    handle_lattice.lattice_loader.set_lattice_file(args.lattice)
     server_manager.LOAD_MANAGERS_FN = _maxiv_r1_load_managers
     server_manager.HEARTBEAT_PERIOD = args.heartbeat_period
     server_manager._MANAGER_PORT    = args.port

@@ -21,6 +21,9 @@ import os
 import sys
 from typing import Sequence
 
+from dt4acc.core.bl.controller import Controller
+from dt4acc.custom_tango.views.view import TangoView
+
 # Suppress transitions state machine INFO logs — they fire on every
 # backend.set() call and flood the output (4 lines per state transition)
 logging.getLogger("transitions").setLevel(logging.WARNING)
@@ -215,11 +218,17 @@ def _inject_controller(prefix: str) -> None:
     mexec = AsyncMexecAdapter(sync_proxy)
 
     controller = TangoController(
-        mexec=mexec,
-        prefix=prefix,
-        default_delayed_reads=DEFAULT_DELAYED_READS,
-        sync_reset=sync_reset,
+        name = "tango-ctrl",
+        controller_delegate = Controller(
+            name = "tango-dlgte-ctrl",
+            mexec = mexec,
+            default_delayed_reads = DEFAULT_DELAYED_READS,
+             # todo: find out which view is needed here
+            view = TangoView(prefix=prefix),
+            ),
+            sync_reset = sync_reset,
     )
+
     set_controller(controller)
     logger.info("TangoController created and registered for prefix=%s", prefix)
 
@@ -291,7 +300,7 @@ def main_loop(server_name: str, instance_name: str, event=None):
         # Import lazily here — after _inject_controller — to avoid circular imports
         from dt4acc.custom_tango.ioc.devices.tango_device_setup import get_all_device_classes
         device_classes = get_all_device_classes()
-        logger.warning(
+        logger.info(
             "Starting %s/%s with %d device classes",
             server_name, instance_name, len(device_classes),
         )

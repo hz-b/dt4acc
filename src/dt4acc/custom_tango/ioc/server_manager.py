@@ -26,7 +26,6 @@ Process topology
         and verify the system is alive end-to-end.
 """
 
-import at
 import asyncio
 import itertools
 import logging
@@ -39,57 +38,19 @@ import sys
 import threading
 import time
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any, Sequence
+
+from dt4acc.custom_tango.ioc.handle_lattice import lattice_loader
+from dt4acc.custom_tango.ioc.sync_mexec_proxy import SyncMexecProxy
+from dt4acc.custom_tango.ioc.virtual_pass_through_command_rewriter import VirtualPassthroughCommandRewriter
 
 # Suppress transitions state machine INFO logs across all processes
 logging.getLogger("transitions").setLevel(logging.WARNING)
 logging.getLogger("transitions.core").setLevel(logging.WARNING)
 
-from dt4acc_lib.bl.command_rewritter import CommandRewriter
 
-
-# Virtual result element IDs — these are computed by the backend (twiss, tune,
-# track, orbit) and never exist in the AT lattice. In device view the liaison
-# has no conversion for them so inverse_read_command must pass them through
-# unchanged, exactly as design view does.
-_VIRTUAL_RESULT_IDS = frozenset({"twiss", "tune", "track", "orbit", "chromaticity"})
-
-
-class VirtualPassthroughCommandRewriter(CommandRewriter):
-    """
-    CommandRewriter that short-circuits virtual result IDs (twiss, tune,
-    track, orbit). These are not AT lattice elements — they are computed
-    results published by SimulatorBackend.
-
-    All four methods are overridden so that both the routing (read commands)
-    and the value conversion (set commands / data conversion) bypass the
-    liaison and translator entirely for these virtual IDs.
-    """
-
-    def inverse_read_command(self, command):
-        if command.id in _VIRTUAL_RESULT_IDS:
-            return [command]
-        return super().inverse_read_command(command)
-
-    def forward_read_command(self, command):
-        if command.id in _VIRTUAL_RESULT_IDS:
-            return [command]
-        return super().forward_read_command(command)
-
-    def inverse(self, cmd):
-        if cmd.id in _VIRTUAL_RESULT_IDS:
-            return [cmd]
-        return super().inverse(cmd)
-
-    def forward(self, cmd):
-        if cmd.id in _VIRTUAL_RESULT_IDS:
-            return [cmd]
-        return super().forward(cmd)
-from dt4acc_lib.model.utils.command import BehaviourOnError, Command, ReadCommand
 from dt4acc_lib.pyat_simulator.accelerator_simulator import PyATAcceleratorSimulator
 from dt4acc_lib.pyat_simulator.simulator_backend import SimulatorBackend
-from tango import DeviceProxy, DevFailed
 
 from dt4acc.core.utils.logger import get_logger
 
@@ -104,7 +65,6 @@ _MANAGER_AUTHKEY = b"dt4acc-tango-secret"
 # ---------------------------------------------------------------------------
 
 # Path to the AT lattice file (.m or .json)
-LATTICE_FILE: Path = None
 
 # Callable that returns (yellow_pages, liaison_manager, translator_service)
 LOAD_MANAGERS_FN = None
@@ -115,24 +75,6 @@ EXPECTED_VIEW = "design"
 # Heartbeat — pure recalculation, no lattice writes, no noise
 # Set by the launch script. Period in seconds (0 = disabled).
 HEARTBEAT_PERIOD = 1.0
-
-
-def _load_lattice(path: Path):
-    """
-    Load an AT lattice from file. Supports:
-      .m    — MATLAB/Octave format via at.load_m()
-      .json — atjson v1 format via at.load_json()
-    """
-    suffix = path.suffix.lower()
-    if suffix == ".json":
-        return at.load_json(str(path))
-    elif suffix == ".m":
-        return at.load_m(path)
-    else:
-        raise ValueError(
-            f"Unsupported lattice file format: {suffix!r}. "
-            "Expected .m (MATLAB) or .json (atjson v1)."
-        )
 
 
 def _get_load_managers():
@@ -159,12 +101,7 @@ def _build_mexec():
         TranslatingCommandExecutionEngine,
     )
 
-    filename = LATTICE_FILE
-    if filename is None:
-        raise ValueError(
-            "LATTICE_FILE not set — set server_manager.LATTICE_FILE before main()"
-        )
-    acc = _load_lattice(filename)
+    acc = lattice_loader.load()
     backend = SimulatorBackend(
         name="Facility specific PYAT",
         acc=PyATAcceleratorSimulator(at_lattice=acc),
@@ -202,81 +139,8 @@ def _run_mexec_service():
     mexec = future.result(timeout=120)
     logger.warning("MexecService: lattice ready, mexec built.")
 
-    class SyncMexecProxy:
-        """Synchronous wrapper around mexec for crossing the process boundary."""
 
-        def sync_set(self, cmd_id: str, cmd_property: str, value: float):
-            cmd = Command(
-                id=cmd_id,
-                property=cmd_property,
-                value=value,
-                behaviour_on_error=BehaviourOnError.stop,
-            )
-            fut = asyncio.run_coroutine_threadsafe(
-                mexec.set([cmd]), service_loop
-            )
-            return fut.result(timeout=30)
-
-        def sync_peek(self, element_id: str, prop: str) -> float:
-            """Read a single element property directly from AT backend,
-            bypassing liaison and translator. Used by MultipoleDevice polling
-            to stay in sync with PC writes in device view.
-            element_id is a FamName uuid (e.g. 'sqfi73'), prop is the AT
-            property name (e.g. 'main_strength').
-            """
-            logger.debug("sync_peek: element_id=%r prop=%r", element_id, prop)
-            async def _peek():
-                return await mexec.backend.read(element_id, prop)
-            fut = asyncio.run_coroutine_threadsafe(_peek(), service_loop)
-            try:
-                result = float(fut.result(timeout=5))
-                logger.debug("sync_peek: element_id=%r -> %.6f", element_id, result)
-                return result
-            except Exception as exc:
-                logger.warning("sync_peek failed for element_id=%r prop=%r: %s",
-                               element_id, prop, exc)
-                return 0.0
-
-        def sync_trigger_read(self, rcmd_ids: Sequence[str], rcmd_properties: Sequence[str]):
-            rcmds = [
-                ReadCommand(id=i, property=p)
-                for i, p in zip(rcmd_ids, rcmd_properties)
-            ]
-            fut = asyncio.run_coroutine_threadsafe(
-                mexec.trigger_read(rcmds), service_loop
-            )
-            result = fut.result(timeout=30)
-            out = []
-            for translated in result.data:
-                for reading in translated.readings:
-                    out.append((translated.cmd.id, translated.cmd.property, reading.payload))
-            return out
-
-        def sync_reset(self):
-            """
-            Reset backend to nominal state:
-            1. Reload AT lattice from .m file
-            2. Clear error state → pending
-            3. Clear stored optics
-            """
-            import at
-            logger.warning("SyncMexecProxy.sync_reset: reloading lattice from file...")
-            try:
-                new_acc = _load_lattice(LATTICE_FILE)
-                mexec.backend.acc.acc = new_acc
-                with mexec.backend.calculation_lock:
-                    if mexec.backend.model.is_error():
-                        mexec.backend.model.clear()
-                    elif not mexec.backend.model.is_pending():
-                        mexec.backend.model.changed()
-                    mexec.backend.optics = None
-                    mexec.backend.elem_names = None
-                logger.warning("SyncMexecProxy.sync_reset: lattice reloaded, state=pending")
-            except Exception as exc:
-                logger.error("SyncMexecProxy.sync_reset failed: %s", exc)
-                raise
-
-    proxy = SyncMexecProxy()
+    proxy = SyncMexecProxy(mexec=mexec, service_loop=service_loop)
     MexecManagerService.register("get_mexec_proxy", callable=lambda: proxy)
     MexecManagerService.register("sync_reset", callable=proxy.sync_reset)
     MexecManagerService.register("sync_peek", callable=proxy.sync_peek)
@@ -408,7 +272,7 @@ def _wait_all_started(monitors: Sequence[ProcessMonitor]) -> bool:
         dt = (time.time() - start) / 60
         newly_ready = {k: pm for k, pm in remaining.items() if pm.event.is_set()}
         for k in newly_ready:
-            logger.warning("%.2f min: %s signalled startup", dt, k)
+            logger.info("%.2f min: %s signalled startup", dt, k)
             remaining.pop(k)
         if not remaining:
             return True

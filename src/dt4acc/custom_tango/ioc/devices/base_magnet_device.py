@@ -14,7 +14,7 @@ from tango.server import Device, device_property
 
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.controller_registry import get_controller
-from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
+from dt4acc.core.bl.shared_event_loop import get_shared_event_loop
 
 logger = get_logger()
 

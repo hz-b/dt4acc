@@ -239,9 +239,10 @@ def register_all_devices():
     bpm_index_map: dict = {}  # uuid → AT element index
     try:
         import at as _at
-        from dt4acc.custom_tango.ioc.server_manager import LATTICE_FILE, _load_lattice
-        if LATTICE_FILE is not None:
-            lattice = _load_lattice(LATTICE_FILE)
+        from dt4acc.custom_tango.ioc.handle_lattice import _load_lattice
+        from dt4acc.custom_tango.ioc.handle_lattice import default_lattice_filename
+        if default_lattice_filename is not None:
+            lattice = _load_lattice(default_lattice_filename)
             for i, elem in enumerate(lattice):
                 if getattr(elem, "FamName", None) in ("BPM", "FBPM"):
                     uuid = getattr(elem, "UUID", None)

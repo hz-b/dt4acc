@@ -27,3 +27,16 @@ class ControllerInterface(metaclass=ABCMeta):
     @abstractmethod
     async def trigger_read(self, reads: Sequence[ReadCommand]) -> ReadTogether:
         """just a simple wrapper of mexec.trigger_read"""
+
+    @abstractmethod
+    async def reread_default_readings(self) -> None:
+        """Reread default readings
+
+        Todo:
+            consider if method is rally required.
+            Should caller not rather call trigger_read and know
+            which are the default values...
+
+            Could be that the controller should not know about the
+            default readings in the first place
+        """

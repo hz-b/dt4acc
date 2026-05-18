@@ -7,13 +7,15 @@ from importlib import resources
 
 from softioc import builder, softioc
 
+from dt4acc.core.bl.controller import Controller
 from dt4acc_lib.pyat_simulator.proxies.proxy_factory import ElementProxyFactory
 from dt4acc_lib.pyat_simulator.simulator_backend import SimulatorBackend
 from dt4acc_lib.bl.command_rewritter import CommandRewriter
 from dt4acc_lib.model.utils.command import ReadCommand
 from dt4acc.core.bl.translating_command_execution_engine import TranslatingCommandExecutionEngine
 from dt4acc.custom_epics.ioc.orbit_pva import OrbitTwinServer
-from dt4acc.custom_epics.ioc.server import View, Controller, dispatcher
+from dt4acc.custom_epics.ioc.controller import Controller as EpicsController, dispatcher
+from dt4acc.custom_epics.ioc.view import View
 from dt4acc.custom_facility.bessyii.liasion_translator_setup import load_managers
 from dt4acc.custom_facility.bessyii.pyat_accelerator_simulator import BESSYIIPyAtAcceleratorSimulator
 
@@ -65,10 +67,10 @@ def main():
     orbit_server = OrbitTwinServer(prefix + ":ORBITCC:rdBpm")
     orbit_server.start()
     view = View(orbit_server=orbit_server)
-    controller = Controller(
-        view=view,
+    common_controller = Controller(
+        name="epics-delegate-ctrller",
         mexec=mexec,
-        builder=builder,
+        view=view,
         default_delayed_reads=[
             ReadCommand("track", "pos"),
             ReadCommand("twiss", "parameters"),
@@ -76,7 +78,13 @@ def main():
             ReadCommand("tune", "y"),
         ]
     )
+    controller = EpicsController(
+        name = "epics_controller",
+        controller_delegate=common_controller,
+        builder=builder,
+    )
     dispatcher(controller.startup)
+    common_controller.start()
     softioc.interactive_ioc(globals())
 
 

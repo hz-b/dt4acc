@@ -1,13 +1,14 @@
 import asyncio
 
 import numpy as np
+
+from dt4acc.core.bl.shared_event_loop import get_shared_event_loop
 from dt4acc_lib.model.utils import tango_resource_locator
 from dt4acc_lib.model.utils.command import ReadCommand, BehaviourOnError, Command
 from tango import DevState, DevFailed
 from tango.server import Device, attribute, device_property, AttrWriteType
 
 from dt4acc.core.utils.logger import get_logger
-from dt4acc.custom_tango.ioc.devices.shared_event_loop import get_shared_event_loop
 from dt4acc.custom_tango.ioc.controller_registry import get_controller
 
 logger = get_logger()
