@@ -239,20 +239,19 @@ def register_all_devices():
     bpm_index_map: dict = {}  # uuid → AT element index
     try:
         import at as _at
-        from dt4acc.custom_tango.ioc.handle_lattice import _load_lattice
-        from dt4acc.custom_tango.ioc.handle_lattice import default_lattice_filename
-        if default_lattice_filename is not None:
-            lattice = _load_lattice(default_lattice_filename)
-            for i, elem in enumerate(lattice):
-                if getattr(elem, "FamName", None) in ("BPM", "FBPM"):
-                    uuid = getattr(elem, "UUID", None)
-                    if uuid:
-                        bpm_index_map[uuid] = i
-            logger.info("BPM registration: resolved %d BPM orbit indices from lattice",
-                        len(bpm_index_map))
-            if bpm_index_map:
-                sample = list(bpm_index_map.items())[:3]
-                logger.info("BPM registration: sample uuid→index: %s", sample)
+        from dt4acc.custom_tango.ioc.handle_lattice import lattice_loader
+
+        lattice = lattice_loader.load()
+        for i, elem in enumerate(lattice):
+            if getattr(elem, "FamName", None) in ("BPM", "FBPM"):
+                uuid = getattr(elem, "UUID", None)
+                if uuid:
+                    bpm_index_map[uuid] = i
+        logger.info("BPM registration: resolved %d BPM orbit indices from lattice",
+                    len(bpm_index_map))
+        if bpm_index_map:
+            sample = list(bpm_index_map.items())[:3]
+            logger.info("BPM registration: sample uuid→index: %s", sample)
     except Exception as e:
         logger.warning("BPM registration: could not build orbit index map: %s", e)
 
