@@ -49,7 +49,9 @@ class SyncMexecProxy:
             return result
         except Exception as exc:
             if prop == "main_strength" and element_id.startswith("B"):
-                # Todo: delete this swith
+                # Todo: delete this branch
+                # currently only here for debug
+                # it does the same as the code below
                 logger.info("sync_peek failed for element_id=%r prop=%r: %s",
                                 element_id, prop, exc)
                 return 0.0
@@ -85,19 +87,11 @@ class SyncMexecProxy:
         3. Clear stored optics
         """
         import at
-        logger.warning("SyncMexecProxy.sync_reset: reloading lattice from file...")
+        logger.warning("SyncMexecProxy.sync_reset: resetting back end")
+
         try:
-            new_acc = lattice_loader.load()
-            # Todo: review how to clear errors in the lattice
-            self.mexec.backend.acc.acc = new_acc
-            with self.mexec.backend.calculation_lock:
-                if self.mexec.backend.model.is_error():
-                    self.mexec.backend.model.clear()
-                elif not self.mexec.backend.model.is_pending():
-                    self.mexec.backend.model.changed()
-                self.mexec.backend.optics = None
-                self.mexec.backend.elem_names = None
-            logger.warning("SyncMexecProxy.sync_reset: lattice reloaded, state=pending")
+            self.mexec.backend.reset()
+            logger.warning("SyncMexecProxy.sync_reset: backend reset")
         except Exception as exc:
             logger.error("SyncMexecProxy.sync_reset failed: %s", exc)
             raise
