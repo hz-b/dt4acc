@@ -46,7 +46,7 @@ def als_add_uuid_to_lattice_elements(elements: Sequence) -> Sequence:
         if elem.FamName.startswith("SECT"):
             nm.new_sector(elem.FamName)
         sector, child = nm.sector_child_for_family_name(elem.FamName)
-        elem.uuid = f"{elem.FamName}-sec_{sector}-child_{child}"
+        elem.UUID = f"{elem.FamName}-sec_{sector}-child_{child}"
         return elem
 
     return [add_uuid(elem) for elem in elements]

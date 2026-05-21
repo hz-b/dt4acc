@@ -45,7 +45,7 @@ def uuids_of_at_elements(
     indices = np.asarray(indices)
     assert np.all(indices > 0)
     indices = indices - 1
-    names = [elements[idx].uuid for idx in indices]
+    names = [elements[idx].UUID for idx in indices]
 
     for cnt, tmp  in enumerate(zip(indices, names)):
         idx, name = tmp
@@ -111,6 +111,10 @@ def create_yellow_pages_input(ao_table: Dict[str, FamilyInfoCollection], lat) ->
     # now build the yellow pages using member of
     # here one item can belong to more than one family
     yp_dict = defaultdict(list)
+
+    # always there
+    yp_dict["master_clock"] = ["master_clock"]
+
     for ref_fam_name, family_members in names.items():
         # These should be rather tags, and always a sequence!
         members_of = ao_table[ref_fam_name].member_of()
@@ -133,7 +137,7 @@ def get_element_uuids_for_device(ao_table, lat, dev_id: MMLStyleDeviceIdentifier
     device_index = sel.get_device_list().index(dev_id.mml_device_index())
     lattice_element_indices = np.asarray(sel.AT.get_element_indices()[device_index])
     assert (lattice_element_indices > 1).all()
-    uuid = [elem.uuid for elem in lat[lattice_element_indices - 1]]
+    uuid = [elem.UUID for elem in lat[lattice_element_indices - 1]]
     return uuid
 
 
@@ -144,7 +148,7 @@ def create_liaison_lut(yp: YellowPagesBase, ao: Dict[str, FamilyInfoCollection],
     for family_name, property in [
         # just to get started
         ("QUAD", "main_strength"), ("SEXT", "main_strength"),
-        ("HCM", "x_kick"), ("VCM", "y_kick")
+        ("HCM", "x_kick"), ("VCM", "y_kick"),
     ]:
         for corr in yp.get(family_name):
             dev_prop = DevicePropertyID(device_name=corr, property="set_current")
@@ -154,6 +158,20 @@ def create_liaison_lut(yp: YellowPagesBase, ao: Dict[str, FamilyInfoCollection],
             for elm_prop in elem_props:
                 forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop]))
             inverse_lut.append(LiaisonManagerInverseLookupElement(dev_id=dev_prop, lat_ids=elem_props))
+
+    # master clock defines frequency of cavity
+    for cav in yp.get("RF"):
+        dev_prop = DevicePropertyID(device_name=cav, property="frequency")
+        dev_prop_mc = DevicePropertyID(device_name="master_clock", property="reference_frequency")
+        element_names = get_element_uuids_for_device(ao_table=ao, lat=lat, dev_id=cav)
+        elem_props = [LatticeElementPropertyID(element_name=name, property="frequency") for name in element_names]
+
+        for elm_prop in elem_props:
+            # forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop]))
+            forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop_mc]))
+        # inverse_lut.append(LiaisonManagerInverseLookupElement(dev_id=dev_prop, lat_ids=elem_props))
+        inverse_lut.append(LiaisonManagerInverseLookupElement(dev_id=dev_prop_mc, lat_ids=elem_props))
+
 
     fwd = LiaisonManagerForwardLookupTable(forward_lut)
     bwd = LiaisonManagerInverseLookupTable(inverse_lut)
@@ -165,13 +183,37 @@ def create_liaison_lut(yp: YellowPagesBase, ao: Dict[str, FamilyInfoCollection],
 def create_translator_luts(yp: YellowPagesBase, lm: LiaisonManagerBase, ao: Dict[str, FamilyInfoCollection], lat) -> TranslatorLookupTable:
     translator_lut: List[TranslatorLookupTableElement] = []
 
+
+    # for dev_name in yp.get("RF"):
+    dev_name = "master_clock"
+    d = lm.objects_for_device(dev_name=dev_name)
+    src, = d
+    assert src.device_name == dev_name
+    tmp, = d.values()
+    tgt, = tmp
+
+    translator_lut.append(
+        TranslatorLookupTableElement(
+            conversion_id=ConversionID(tgt,src),
+            # As cavities are treated differently from magnets
+            # energy is a property of the beam as well as the
+            # energy of the reference particle
+            #
+            # "design energy" is what belongs to the lattice ant its
+            # design!
+            conversion_info=PolynomCoefficients(coeffs=[0.0, 1.0], energy_dependent=False),
+        )
+    )
+
+
     for dev_name in yp.get("HCM"):
         d = lm.objects_for_device(dev_name=dev_name)
         src, = d
         assert src.device_name == dev_name
-        tgt, = d.values()
+        tmp, = d.values()
+        tgt, = tmp
         coeffs = hcm_coefficients(src.device_name.mml_device_index())
-        # Need to check if that is the correct coefficent
+        # Need to check if that is the correct coefficient
         # For now I assume it returns a scale factor for k and B
         translator_lut.append(
             TranslatorLookupTableElement(
@@ -184,10 +226,11 @@ def create_translator_luts(yp: YellowPagesBase, lm: LiaisonManagerBase, ao: Dict
         d = lm.objects_for_device(dev_name=dev_name)
         src, = d
         assert src.device_name == dev_name
-        tgt, = d.values()
+        tmp, = d.values()
+        tgt, = tmp
 
         coeffs = vcm_coefficients(src.device_name.mml_device_index())
-        # Need to check if that is the correct coefficent
+        # Need to check if that is the correct coefficient
         translator_lut.append(
             TranslatorLookupTableElement(
                 conversion_id=ConversionID(tgt,src),
@@ -195,19 +238,21 @@ def create_translator_luts(yp: YellowPagesBase, lm: LiaisonManagerBase, ao: Dict
             )
         )
 
+
+
     for dev_name in yp.get("QUAD"):
         d = lm.objects_for_device(dev_name=dev_name)
         src, = d
         assert src.device_name == dev_name
-        tgt, = d.values()
+        tmp, = d.values()
+        tgt, = tmp
 
     for dev_name in yp.get("SEXT"):
         d = lm.objects_for_device(dev_name=dev_name)
-        src, = d
-        assert src.device_name == dev_name
-        tgt, = d.values()
+        # needs to be implemented
 
     r = TranslatorLookupTable(lut=translator_lut)
+    r.verify()
     return r
 
 
@@ -280,8 +325,8 @@ def load_ramp_data():
     return data
 
 
-def main():
-    ramp_data = load_ramp_data()
+def load_managers():
+    # ramp_data = load_ramp_data()
     pass
 
     lat = als_load_lattice(default_filename)
@@ -293,10 +338,12 @@ def main():
     fwd_lut, inv_lut = create_liaison_lut(yp, ao_model, lat)
     lm = LiaisonManager(forward_lut=fwd_lut, inverse_lut=inv_lut)
     ts_lut = create_translator_luts(yp, lm, ao_model, lat)
+    # Todo: get the brho of the storage ring
     ts = TranslatorService(lut=ts_lut, brho=None)
     ts
+    return yp, lm, ts
 
 
 
 if __name__ == "__main__":
-    main()
+    load_managers()

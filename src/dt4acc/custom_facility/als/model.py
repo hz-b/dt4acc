@@ -1,7 +1,10 @@
 from dataclasses import dataclass
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, Literal
+
+from pydantic import BaseModel
 
 from dt4acc_lib.model.utils.translator_manager_lookup_table import PolynomCoefficients
+from dt4acc_lib.model.utils.command import ReadCommand
 
 
 @dataclass(frozen=True)
@@ -29,3 +32,18 @@ class CoefficientsForDevices:
     # only for device / child pair
     for_device_pairs: Sequence[Tuple[int, int]] = ()
     coefficients: PolynomCoefficients = None
+
+
+
+class _ProcessVariableView(BaseModel):
+    rcmd: ReadCommand
+    pv_name: str
+    prec: int
+
+
+class Monitor(_ProcessVariableView):
+    record_type: Literal["ai", "longin"]
+
+class Setpoint(_ProcessVariableView):
+    record_type: Literal["ao", "longout"]
+    monitor: Monitor | None
