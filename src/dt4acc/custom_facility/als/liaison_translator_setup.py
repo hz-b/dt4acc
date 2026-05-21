@@ -1,65 +1,37 @@
 import itertools
-import logging
-import math
+import os
+import pprint
 from collections import defaultdict
+from pathlib import Path
 from typing import Dict, Tuple, Sequence, List, Union
 
 import numpy as np
-import pydantic
+import pandas as pd
 import xarray as xr
+from scipy.io import loadmat
 
 from bact_mml_json_importer.data_model.mml_ao import FamilyInfoCollection
-
 from dt4acc.custom_facility.als.hcm_coefficients import hcm_coefficients
 from dt4acc.custom_facility.als.model import MMLStyleDeviceIdentifier, Monitor, Setpoint
-from dt4acc.custom_facility.als.read_lattice import (
-    als_get_lattice,
-    default_filename,
-    default_energy,
-)
-from dt4acc.custom_facility.als.readin_ao import als_ring_ao_data, load_ramp_data
+from dt4acc.custom_facility.als.read_lattice import als_load_lattice, default_filename
+from dt4acc.custom_facility.als.readin_ao import als_ring_ao_data
 from dt4acc.custom_facility.als.vcm_coefficients import vcm_coefficients
 from dt4acc_lib.bl.liaison_manager import LiaisonManager
 from dt4acc_lib.bl.translator_service import TranslatorService
-from dt4acc_lib.bl.tune_translator import TuneConversion
 from dt4acc_lib.bl.yellow_pages import YellowPages
-from dt4acc_lib.bl.unit_conversion import calculate_brho, LinearUnitConversion
 from dt4acc_lib.interfaces.utils.liaison_manager import LiaisonManagerBase
 from dt4acc_lib.interfaces.utils.yellow_pages import YellowPagesBase
 from dt4acc_lib.model.utils.command import ReadCommand
-from dt4acc_lib.model.utils.identifiers import (
-    DevicePropertyID,
-    LatticeElementPropertyID,
-    ConversionID,
-)
-from dt4acc_lib.model.utils.liaison_manager_lookup_table import (
-    LiaisonManagerInverseLookupTable,
-    LiaisonManagerForwardLookupTable,
-    LiaisonManagerForwardLookupElement,
-    LiaisonManagerInverseLookupElement,
-)
-from dt4acc_lib.model.utils.translator_manager_lookup_table import (
-    TranslatorLookupTable,
-    TranslatorLookupTableElement,
-    PolynomCoefficients,
-    IdentityMapper,
-    MultiplyerScaledByEnergy,
-    NeedsAReference,
-    Range,
-    CurvePoint,
-)
-from dt4acc_lib.model.utils.translator_manager_lookup_table import (
-    TuneConversionCoefficients,
-)
-
-logger = logging.getLogger("dt4acc")
+from dt4acc_lib.model.utils.identifiers import DevicePropertyID, LatticeElementPropertyID, ConversionID
+from dt4acc_lib.model.utils.liaison_manager_lookup_table import LiaisonManagerInverseLookupTable, \
+    LiaisonManagerForwardLookupTable, LiaisonManagerForwardLookupElement, LiaisonManagerInverseLookupElement
+from dt4acc_lib.model.utils.translator_manager_lookup_table import TranslatorLookupTable, TranslatorLookupTableElement, \
+    PolynomCoefficients
+from interfaces.utils.translator_service import TranslatorServiceBase
 
 
 def uuids_of_at_elements(
-    elements: Sequence,
-    family_name: str,
-    indices: Sequence[int],
-    alternative_family_names: Sequence[str] = [],
+    elements: Sequence, family_name: str, indices: Sequence[int], alternative_family_names: Sequence[str] = []
 ) -> Sequence[str]:
     """Returns uuids of the lattice elments whose index is found at ATIndex
 
@@ -78,7 +50,7 @@ def uuids_of_at_elements(
     indices = indices - 1
     names = [elements[idx].UUID for idx in indices]
 
-    for cnt, tmp in enumerate(zip(indices, names)):
+    for cnt, tmp  in enumerate(zip(indices, names)):
         idx, name = tmp
         if not name.startswith(family_name):
             for alternate in alternative_family_names:
@@ -91,38 +63,16 @@ def uuids_of_at_elements(
     return names
 
 
-def extract_family_member_names(
-    lat,
-    ao_table: Dict[str, FamilyInfoCollection],
-    family_name: str,
-    alternative_family_names: Sequence[str] = None,
-) -> Sequence[str]:
+def extract_family_member_names(lat, ao_table: Dict[str, FamilyInfoCollection], family_name: str, alternative_family_names: Sequence[str] = None) -> Sequence[str]:
     alternative_family_names = alternative_family_names or []
+    indices = ao_table[family_name].AT.get_element_indices()
+    dev_list = ao_table[family_name].get_device_list()
 
-    ao_view = ao_table[family_name]
-    if ao_view.AT is None:
-        logger.warning(
-            f"No AT info given for {family_name}, thus not building yp field"
-        )
-        return
-    indices = ao_view.AT.get_element_indices()
-    dev_list = ao_view.get_device_list()
+    assert len(indices) == len(dev_list), f"Check failed for family {family_name} n indices = {len(indices)}, n devs = {len(dev_list)}"
 
-    assert len(indices) == len(
-        dev_list
-    ), f"Check failed for family {family_name} n indices = {len(indices)}, n devs = {len(dev_list)}"
-
-    uuids_of_at_elements(
-        lat,
-        family_name,
-        list(itertools.chain.from_iterable(indices)),
-        alternative_family_names=alternative_family_names,
-    )
+    uuids_of_at_elements(lat, family_name, list(itertools.chain.from_iterable(indices)), alternative_family_names=alternative_family_names)
     identifiers = [
-        MMLStyleDeviceIdentifier(
-            family=family_name, sector=int(sector), child=int(child)
-        )
-        for sector, child in dev_list
+        MMLStyleDeviceIdentifier(family=family_name, sector=int(sector), child=int(child)) for sector, child in dev_list
     ]
     return identifiers
 
@@ -136,66 +86,28 @@ standard_ao_families = dict(
 )
 
 
-def create_yellow_pages_input(
-    ao_table: Dict[str, FamilyInfoCollection], lat
-) -> Dict[str, Sequence[str]]:
+def create_yellow_pages_input(ao_table: Dict[str, FamilyInfoCollection], lat) -> Dict[str, Sequence[str]]:
     """
 
     Todo:
         use standard family names?
 
     """
-    standard_families = [
-        "QF",
-        "QD",
-        "SF",
-        "SD",
-        # This does not contain AT indices ....
-        "SHF",
-        "SHD",
-        "QFA",
-        "QDA",
-        "BPM",
-    ]
+    standard_families = ["QF", "QD", "SF", "SHF", "SHD", "QFA", "QDA", "BPM",]
     names = {
         fam: extract_family_member_names(lat, ao_table, fam)
         for fam in standard_families
     }
-
-    # extract can return None
-    names = {fam: names for fam, names in names.items() if names is not None}
-
-    names["BPMx"] = extract_family_member_names(
-        lat, ao_table, "BPMx", alternative_family_names=["BPM"]
-    )
-    names["BPMy"] = extract_family_member_names(
-        lat, ao_table, "BPMy", alternative_family_names=["BPM"]
-    )
-
-    names["BEND"] = extract_family_member_names(
-        lat, ao_table, "BEND", alternative_family_names=["BS"]
-    )
-    names["HCM"] = extract_family_member_names(
-        lat, ao_table, "HCM", alternative_family_names=["COR"]
-    )
-    names["VCM"] = extract_family_member_names(
-        lat, ao_table, "VCM", alternative_family_names=["COR"]
-    )
+    names["BEND"] = extract_family_member_names(lat, ao_table, "BEND", alternative_family_names=["BS"])
+    names["HCM"] = extract_family_member_names(lat, ao_table, "HCM", alternative_family_names=["COR"])
+    names["VCM"] = extract_family_member_names(lat, ao_table, "VCM", alternative_family_names=["COR"])
 
     # what are these ?
-    # names["BSC"] = extract_family_member_names(
-    #     lat, ao_table, "BSC", alternative_family_names=["BS"]
-    # )
-    names["SQSF"] = extract_family_member_names(
-        lat, ao_table, "SQSF", alternative_family_names=["SFF"]
-    )
-    names["SQSD"] = extract_family_member_names(
-        lat, ao_table, "SQSD", alternative_family_names=["SDD"]
-    )
+    names["BSC"] = extract_family_member_names(lat, ao_table, "BSC", alternative_family_names=["BS"])
+    names["SQSF"] = extract_family_member_names(lat, ao_table, "SQSF", alternative_family_names=["SFF"])
+    names["SQSD"] = extract_family_member_names(lat, ao_table, "SQSD", alternative_family_names=["SDD"])
 
-    names["RF"] = extract_family_member_names(
-        lat, ao_table, "RF", alternative_family_names=["CAV"]
-    )
+    names["RF"] = extract_family_member_names(lat, ao_table, "RF", alternative_family_names=["CAV"])
     defocusing_quads = extract_family_member_names(lat, ao_table, "QD")
     # dict(quadrupoles=)
 
@@ -212,9 +124,6 @@ def create_yellow_pages_input(
         for family_name in members_of:
             yp_dict[str(family_name)].extend(family_members)
 
-    # make them also accessible as neam tune_currection_quadrupoles
-    yp_dict["tune_correction_quadrupoles"] = yp_dict["Tune Corrector"]
-
     # print("names sorted to reference families")
     # pprint.pprint(names, compact=True)
 
@@ -223,15 +132,12 @@ def create_yellow_pages_input(
     # print(f"Total number of elements {np.sum([len(v) for v in names.values()])}")
     # print("Families not exported to yp:", set(tuple(ao_table)).difference(tuple(names)))
 
-    r = dict(yp_dict)
-    return r
+    return dict(yp_dict)
 
 
-def get_element_uuids_for_device(
-    ao_table, lat, dev_id: MMLStyleDeviceIdentifier
-) -> Sequence[str]:
+def get_element_uuids_for_device(ao_table, lat, dev_id: MMLStyleDeviceIdentifier) -> Sequence[str]:
     sel = ao_table[dev_id.family]
-    device_index = sel.get_device_index(*dev_id.mml_device_index())
+    device_index = sel.get_device_list().index(dev_id.mml_device_index())
     lattice_element_indices = np.asarray(sel.AT.get_element_indices()[device_index])
     assert (lattice_element_indices > 1).all()
     uuid = [elem.UUID for elem in lat[lattice_element_indices - 1]]
@@ -240,207 +146,34 @@ def get_element_uuids_for_device(
 
 def create_liaison_lut(
     yp: YellowPagesBase, ao_table: Dict[str, FamilyInfoCollection], lat
-) -> Tuple[
-    LiaisonManagerForwardLookupTable,
-    LiaisonManagerInverseLookupTable,
-    Sequence[Union[Monitor, Setpoint]],
-]:
+) -> Tuple[LiaisonManagerForwardLookupTable, LiaisonManagerInverseLookupTable, Sequence[Union[Monitor, Setpoint]]]:
     forward_lut = []
     inverse_lut = []
     process_variable_views: List[Union[Monitor, Setpoint]] = []
-
-    # Here one than more quadrupole or pv maps to one magnet
-    # so collect them first before building the elements
-    inv_lut_tmp = defaultdict(list)
-    pv_views = defaultdict(list)
-    for family_name, property in [
-        ("QUAD", "main_strength"),
-        ("SEXT", "main_strength"),
-    ]:
-        for dev_name in yp.get(family_name):
-            # Todo: rework this loop and use ao or yp as leading reference
-            # expect only one for forward but more than one for backward
-            dev_prop_set = DevicePropertyID(device_name=dev_name, property=property)
-            element_names = get_element_uuids_for_device(
-                ao_table=ao_table, lat=lat, dev_id=dev_name
-            )
-            elem_props = [
-                LatticeElementPropertyID(element_name=name, property=property)
-                for name in element_names
-            ]
-            delta_elem_props = [
-                LatticeElementPropertyID(
-                    element_name=name, property="delta_" + property
-                )
-                for name in element_names
-            ]
-
-            # for elm_prop in elem_props:
-            #    forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop_set]))
-            inv_lut_tmp[dev_prop_set].append(elem_props)
-
-            sel = ao_table[dev_prop_set.device_name.family]
-            device_index = sel.get_device_index(
-                *dev_prop_set.device_name.mml_device_index()
-            )
-
-            mon_pv = sel.Monitor.ChannelNames[device_index].strip()
-            set_pv = sel.Setpoint.ChannelNames[device_index].strip()
-            pv_views[set_pv].append(mon_pv)
-
-            # where it starts to call
-            mon_prop = DevicePropertyID(device_name=mon_pv, property="read_current")
-            setp_prop = DevicePropertyID(device_name=set_pv, property="set_current")
-
-            # for accml lib examples
-            delta_mon_prop = DevicePropertyID(
-                device_name=mon_pv, property="delta_read_current"
-            )
-            delta_setp_prop = DevicePropertyID(
-                device_name=set_pv, property="delta_set_current"
-            )
-
-            for elm_prop in elem_props:
-                forward_lut.append(
-                    LiaisonManagerForwardLookupElement(
-                        lat_id=elm_prop, dev_ids=[mon_prop]
-                    )
-                )
-            for delta_elm_prop in delta_elem_props:
-                forward_lut.append(
-                    LiaisonManagerForwardLookupElement(
-                        lat_id=delta_elm_prop, dev_ids=[delta_mon_prop]
-                    )
-                )
-            # forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[setp_prop]))
-            inv_lut_tmp[mon_prop].append(elem_props)
-            inv_lut_tmp[setp_prop].append(elem_props)
-            inv_lut_tmp[delta_mon_prop].append(delta_elem_props)
-            inv_lut_tmp[delta_setp_prop].append(delta_elem_props)
-
-    tmp = [
-        LiaisonManagerInverseLookupElement(
-            dev_id=dev_id, lat_ids=list(itertools.chain.from_iterable(lat_ids))
-        )
-        for dev_id, lat_ids in inv_lut_tmp.items()
-    ]
-    inverse_lut.extend(tmp)
-    del tmp, inv_lut_tmp
-
-    # deduce power converters from epics variables ....
-    def reduce_mon_pvs(mon_pvs: Sequence[str]) -> str:
-        if len(mon_pvs) > 1:
-            tmp = list(set(mon_pvs))
-            assert len(tmp) == 1
-            mon_pvs = tmp
-        (r,) = mon_pvs
-        return r
-
-    pv_views = {set_pv: reduce_mon_pvs(mon_pvs) for set_pv, mon_pvs in pv_views.items()}
-    for set_pv, mon_pv in pv_views.items():
-        # Todo: add flags if more than one value is added here
-        monitor = Monitor(
-            pv_name=mon_pv,
-            rcmd=ReadCommand(mon_pv, "read_current"),
-            prec=3,
-            record_type="ai",
-            returned_data="average",
-        )
-        rcmd = ReadCommand(set_pv, "set_current")
-        setp = Setpoint(
-            pv_name=set_pv,
-            rcmd=rcmd,
-            prec=3,
-            record_type="ao",
-            reads=[monitor.rcmd],
-            returned_data="average",
-        )
-        process_variable_views.extend([monitor, setp])
-    del pv_views
-
-    # BPMs are not directly handled within in translating
-    # mexec engine (yet)
-    # but the view can use this information
-    for family_name, property in [
-        ("BPMx", "dx"),
-        ("BPMy", "dy"),
-    ]:
-        for dev_name in yp.get(family_name):
-            # expect only one
-            dev_prop_set = DevicePropertyID(device_name=dev_name, property=property)
-            (bpm_name,) = get_element_uuids_for_device(
-                ao_table=ao_table, lat=lat, dev_id=dev_name
-            )
-            sel = ao_table[dev_name.family]
-            device_index = sel.get_device_index(*dev_name.mml_device_index())
-            mon_pv = sel.Monitor.ChannelNames[device_index].strip()
-            lat_prop = LatticeElementPropertyID(
-                element_name=bpm_name, property=property
-            )
-            forward_lut.append(
-                LiaisonManagerForwardLookupElement(
-                    lat_id=lat_prop, dev_ids=[dev_prop_set]
-                )
-            )
-            inverse_lut.append(
-                LiaisonManagerInverseLookupElement(
-                    dev_id=dev_prop_set,
-                    lat_ids=[lat_prop],
-                )
-            )
-            try:
-                mon = Monitor(
-                    pv_name=mon_pv,
-                    rcmd=ReadCommand(id=dev_name, property=property),
-                    prec=3,
-                    record_type="ai",
-                    update="delayed",
-                )
-            except pydantic.ValidationError as ex:
-                logger.error(f"Failed to add monitor for {dev_name}: {ex}")
-                continue
-            process_variable_views.append(mon)
-            pass
 
     for family_name, property in [
         # just to get started
         # Need to take care that process variables occur again!
         # For quads and sextupoles more than one variable is
         # in a line
-        ("HCM", "x_kick"),
-        ("VCM", "y_kick"),
+        # ("QUAD", "main_strength"),
+        # ("SEXT", "main_strength"),
+        ("HCM", "x_kick"), ("VCM", "y_kick"),
     ]:
         for corr in yp.get(family_name):
             # As if you could set current to a magnet
+            dev_prop = DevicePropertyID(device_name=corr, property="set_current")
 
-            element_names = get_element_uuids_for_device(
-                ao_table=ao_table, lat=lat, dev_id=corr
-            )
-            elem_props = [
-                LatticeElementPropertyID(element_name=name, property=property)
-                for name in element_names
-            ]
-
-            dev_prop_set = DevicePropertyID(device_name=corr, property="set_current")
-            dev_prop_read = DevicePropertyID(device_name=corr, property="read_current")
+            element_names = get_element_uuids_for_device(ao_table=ao_table, lat=lat, dev_id=corr)
+            elem_props = [LatticeElementPropertyID(element_name=name, property=property) for name in element_names]
 
             # for elm_prop in elem_props:
-            #    forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop_set]))
-            inverse_lut.extend(
-                [
-                    LiaisonManagerInverseLookupElement(
-                        dev_id=dev_prop_set, lat_ids=elem_props
-                    ),
-                    LiaisonManagerInverseLookupElement(
-                        dev_id=dev_prop_read, lat_ids=elem_props
-                    ),
-                ]
-            )
+            #    forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop]))
+            inverse_lut.append(LiaisonManagerInverseLookupElement(dev_id=dev_prop, lat_ids=elem_props))
 
-            sel = ao_table[dev_prop_set.device_name.family]
-            device_index = sel.get_device_index(
-                *dev_prop_set.device_name.mml_device_index()
-            )
+            rcmd = ReadCommand(id=corr, property="set_current")
+            sel = ao_table[dev_prop.device_name.family]
+            device_index = sel.get_device_list().index(dev_prop.device_name.mml_device_index())
 
             mon_pv = sel.Monitor.ChannelNames[device_index].strip()
             set_pv = sel.Setpoint.ChannelNames[device_index].strip()
@@ -450,425 +183,256 @@ def create_liaison_lut(
             setp_prop = DevicePropertyID(device_name=set_pv, property="set_current")
 
             for elm_prop in elem_props:
-                forward_lut.append(
-                    LiaisonManagerForwardLookupElement(
-                        lat_id=elm_prop, dev_ids=[mon_prop]
-                    )
-                )
+                forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[mon_prop]))
                 # forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[setp_prop]))
-            inverse_lut.append(
-                LiaisonManagerInverseLookupElement(dev_id=mon_prop, lat_ids=elem_props)
-            )
-            inverse_lut.append(
-                LiaisonManagerInverseLookupElement(dev_id=setp_prop, lat_ids=elem_props)
-            )
+            inverse_lut.append(LiaisonManagerInverseLookupElement(dev_id=mon_prop, lat_ids=elem_props))
+            inverse_lut.append(LiaisonManagerInverseLookupElement(dev_id=setp_prop, lat_ids=elem_props))
 
-            monitor = Monitor(
-                pv_name=mon_pv,
-                rcmd=ReadCommand(id=corr, property="read_current"),
-                prec=3,
-                record_type="ai",
-            )
-            setp = Setpoint(
-                pv_name=set_pv,
-                rcmd=ReadCommand(id=corr, property="set_current"),
-                prec=3,
-                record_type="ao",
-                reads=[monitor.rcmd],
-            )
+            monitor = Monitor(pv_name=mon_pv, rcmd=rcmd, prec=3, record_type="ai")
+            setp = Setpoint(pv_name=set_pv, rcmd=rcmd, prec=3, record_type="ao", reads=[monitor.rcmd])
             process_variable_views.extend([monitor, setp])
             pass
 
     # master clock defines frequency of cavity
     for cav in yp.get("RF"):
-        dev_prop_set = DevicePropertyID(device_name=cav, property="frequency")
-        dev_prop_mc = DevicePropertyID(
-            device_name="master_clock", property="reference_frequency"
-        )
-        element_names = get_element_uuids_for_device(
-            ao_table=ao_table, lat=lat, dev_id=cav
-        )
-        elem_props = [
-            LatticeElementPropertyID(element_name=name, property="frequency")
-            for name in element_names
-        ]
+        dev_prop = DevicePropertyID(device_name=cav, property="frequency")
+        dev_prop_mc = DevicePropertyID(device_name="master_clock", property="reference_frequency")
+        element_names = get_element_uuids_for_device(ao_table=ao_table, lat=lat, dev_id=cav)
+        elem_props = [LatticeElementPropertyID(element_name=name, property="frequency") for name in element_names]
 
         for elm_prop in elem_props:
-            # forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop_set]))
-            forward_lut.append(
-                LiaisonManagerForwardLookupElement(
-                    lat_id=elm_prop, dev_ids=[dev_prop_mc]
-                )
-            )
-        # inverse_lut.append(LiaisonManagerInverseLookupElement(dev_id=dev_prop_set, lat_ids=elem_props))
-        inverse_lut.append(
-            LiaisonManagerInverseLookupElement(dev_id=dev_prop_mc, lat_ids=elem_props)
-        )
+            # forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop]))
+            forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop_mc]))
+        # inverse_lut.append(LiaisonManagerInverseLookupElement(dev_id=dev_prop, lat_ids=elem_props))
+        inverse_lut.append(LiaisonManagerInverseLookupElement(dev_id=dev_prop_mc, lat_ids=elem_props))
 
-    inverse_lut += [
-        LiaisonManagerInverseLookupElement(
-            dev_id=DevicePropertyID(device_name="twiss", property="parameters"),
-            lat_ids=[
-                LatticeElementPropertyID(element_name="twiss", property="parameters")
-            ],
-        ),
-        LiaisonManagerInverseLookupElement(
-            dev_id=DevicePropertyID(device_name="track", property="pos"),
-            lat_ids=[LatticeElementPropertyID(element_name="track", property="pos")],
-        ),
-    ]
-    forward_lut += [
-        LiaisonManagerForwardLookupElement(
-            lat_id=LatticeElementPropertyID(
-                element_name="twiss", property="parameters"
-            ),
-            dev_ids=[DevicePropertyID(device_name="twiss", property="parameters")],
-        ),
-        LiaisonManagerForwardLookupElement(
-            lat_id=LatticeElementPropertyID(element_name="track", property="pos"),
-            dev_ids=[DevicePropertyID(device_name="track", property="pos")],
-        ),
-        # for tune correction: a frequency change in tune is translated to
-        #                      current change
-        LiaisonManagerForwardLookupElement(
-            lat_id=LatticeElementPropertyID(
-                element_name="tune", property="transversal"
-            ),
-            dev_ids=[
-                DevicePropertyID(device_name="tune", property="delta_set_current")
-            ],
-        ),
-    ]
-
-    inverse_lut.append(
-        LiaisonManagerInverseLookupElement(
-            dev_id=DevicePropertyID(device_name="tune", property="transversal"),
-            lat_ids=[
-                LatticeElementPropertyID(element_name="tune", property="transversal")
-            ],
-        )
-    )
 
     fwd = LiaisonManagerForwardLookupTable(forward_lut)
     inv = LiaisonManagerInverseLookupTable(inverse_lut)
     fwd.verify()
     inv.verify()
-    # what's the better way: this would be explicit
-    assert not inv.non_unique_entries()
     return fwd, inv, process_variable_views
 
 
-def create_translator_luts(
-    yp: YellowPagesBase,
-    lm: LiaisonManagerBase,
-    ao_table: Dict[str, FamilyInfoCollection],
-    ramp_data: Dict[str, xr.Dataset],
-    lat,
-    reference_energy,
-) -> TranslatorLookupTable:
+def create_translator_luts(yp: YellowPagesBase, lm: LiaisonManagerBase, ao_table: Dict[str, FamilyInfoCollection], lat) -> TranslatorLookupTable:
     translator_lut: List[TranslatorLookupTableElement] = []
+
 
     # for dev_name in yp.get("RF"):
     dev_name = "master_clock"
     d = lm.objects_for_device(dev_name=dev_name)
-    (src,) = d
+    src, = d
     assert src.device_name == dev_name
-    (tmp,) = d.values()
-    (tgt,) = tmp
+    tmp, = d.values()
+    tgt, = tmp
 
     translator_lut.append(
         TranslatorLookupTableElement(
-            conversion_id=ConversionID(tgt, src),
+            conversion_id=ConversionID(tgt,src),
             # As cavities are treated differently from magnets
             # energy is a property of the beam as well as the
             # energy of the reference particle
             #
             # "design energy" is what belongs to the lattice ant its
             # design!
-            conversion_info=PolynomCoefficients(
-                coeffs=[0.0, 1.0], energy_dependent=False
-            ),
+            conversion_info=PolynomCoefficients(coeffs=[0.0, 1.0], energy_dependent=False),
         )
     )
-    del d, src, tgt, tmp, dev_name
 
-    for family_name in "SHF", "SHD":
-        ao_view = ao_table[family_name]
-        # Todo: need to convert these ... post poned
 
-    # now to the energy dependent part: main magnets
-    for family_name in "QF", "QFA", "QD", "QDA", "SF", "SD":
-        ao_view = ao_table[family_name]
-        t_ramp_data = ramp_data[family_name]
+    for dev_name in yp.get("HCM"):
+        d = lm.objects_for_device(dev_name=dev_name)
+        src, = d
+        assert src.device_name == dev_name
+        tmp, = d.values()
+        tgt, = tmp
+        coeffs = hcm_coefficients(src.device_name.mml_device_index())
 
-        scale_by_energy = [
-            # exported data in GeV
-            # dt4acc uses SI units with eV extension
-            CurvePoint(float(indep) * 1e9, float(dep))
-            for indep, dep in zip(t_ramp_data.reference_energy, t_ramp_data.setpoint)
-        ]
+        sel = ao_table[src.device_name.family]
+        device_index = sel.get_device_list().index(src.device_name.mml_device_index())
 
-        # todo: need a better name for this device index
-        for device_index in ao_view.get_device_list():
-            dev_idx = ao_view.get_device_index(*device_index)
-            range = ao_view.Setpoint.Range[dev_idx]
-            assert ao_view.Setpoint.HW2PhysicsParams is None
+        mon_pv = sel.Monitor.ChannelNames[device_index].strip()
+        set_pv = sel.Setpoint.ChannelNames[device_index].strip()
 
-            sector, child = device_index
-            range = t_ramp_data.range.sel(sector=sector, child=child)
+        # where it starts to call
+        mon_prop = DevicePropertyID(device_name=mon_pv, property="read_current")
+        setp_prop = DevicePropertyID(device_name=set_pv, property="set_current")
 
-            setp_pv = ao_view.Setpoint.ChannelNames[dev_idx].strip()
-            mon_pv = ao_view.Setpoint.ChannelNames[dev_idx].strip()
-
-            src = DevicePropertyID(setp_pv, "set_current")
-            delta_src = DevicePropertyID(setp_pv, "delta_set_current")
-            targets = lm.inverse(src)
-            delta_targets = lm.inverse(delta_src)
-            assert targets, delta_targets
-            assert len(targets) == len(delta_targets)
-            # Need to understand why I get that many ...
-            for tgt, d_tgt in zip(targets, delta_targets):
-                conv = MultiplyerScaledByEnergy(
-                    reference_multiplyer=float(
-                        t_ramp_data.physics.sel(sector=sector, child=child)
-                    ),
-                    reference_energy=reference_energy,
-                    range=Range(min=float(range[0]), max=float(range[1])),
-                    scale_by_energy=scale_by_energy,
-                )
-
-                need_a_ref = NeedsAReference(
-                    design_view_read_commnd=ReadCommand(tgt.element_name, tgt.property),
-                    device_view_read_command=ReadCommand(src.device_name, src.property),
-                    translation_object=conv,
-                )  # For the magnet to current ... if neede
-                translator_lut.append(
-                    TranslatorLookupTableElement(
-                        conversion_id=ConversionID(tgt, src),
-                        conversion_info=conv,
-                    )
-                )
-                setp_pv = ao_view.Setpoint.ChannelNames[dev_idx].strip()
-                mon_pv = ao_view.Monitor.ChannelNames[dev_idx].strip()
-
-                # For the setpoint
-                translator_lut.append(
-                    TranslatorLookupTableElement(
-                        conversion_id=ConversionID(
-                            tgt,
-                            DevicePropertyID(
-                                device_name=setp_pv, property="set_current"
-                            ),
-                        ),
-                        conversion_info=conv,
-                    )
-                )
-                translator_lut.append(
-                    TranslatorLookupTableElement(
-                        conversion_id=ConversionID(
-                            d_tgt,
-                            DevicePropertyID(
-                                device_name=setp_pv, property="delta_set_current"
-                            ),
-                        ),
-                        conversion_info=need_a_ref,
-                    )
-                )
-                # For the readback
-                translator_lut.append(
-                    TranslatorLookupTableElement(
-                        conversion_id=ConversionID(
-                            tgt,
-                            DevicePropertyID(
-                                device_name=mon_pv, property="read_current"
-                            ),
-                        ),
-                        conversion_info=conv,
-                    )
-                )
-                translator_lut.append(
-                    TranslatorLookupTableElement(
-                        conversion_id=ConversionID(
-                            d_tgt,
-                            DevicePropertyID(
-                                device_name=mon_pv, property="delta_read_current"
-                            ),
-                        ),
-                        conversion_info=need_a_ref,
-                    )
-                )
-                pass
-
-    for family_name, property in [
-        ("BPMx", "dx"),
-        ("BPMy", "dy"),
-    ]:
-        ao_view = ao_table[family_name]
-        scale = ao_view.Monitor.Physics2HWParams
-        assert isinstance(scale, float)
-        assert math.isclose(scale, 1.0 / ao_view.Monitor.HW2PhysicsParams)
-
-        for dev_name in yp.get(family_name):
-            (element_name,) = get_element_uuids_for_device(
-                ao_table=ao_table, lat=lat, dev_id=dev_name
-            )
-            src = LatticeElementPropertyID(element_name, property)
-            (dst,) = lm.forward(src)
-
-            offset = ao_view.Offset[
-                ao_view.get_device_index(*dev_name.mml_device_index())
-            ]
-            conv = PolynomCoefficients(coeffs=[offset, scale], energy_dependent=False)
-            pass
-
-            translator_lut.append(
-                TranslatorLookupTableElement(
-                    conversion_id=ConversionID(src, dst),
-                    conversion_info=conv,
-                )
-            )
-
-    for family_name, coeff_retrieval in [
-        ("HCM", hcm_coefficients),
-        ("VCM", vcm_coefficients),
-    ]:
-        for dev_name in yp.get(family_name):
-            d = lm.objects_for_device(dev_name=dev_name)
-            for src, targets in d.items():
-                assert src.device_name == dev_name
-                (tgt,) = targets
-                coeffs = coeff_retrieval(src.device_name.mml_device_index())
-
-                sel = ao_table[src.device_name.family]
-                device_index = sel.get_device_index(*src.device_name.mml_device_index())
-
-                mon_pv = sel.Monitor.ChannelNames[device_index].strip()
-                set_pv = sel.Setpoint.ChannelNames[device_index].strip()
-
-                # where it starts to call
-                mon_prop = DevicePropertyID(device_name=mon_pv, property="read_current")
-                setp_prop = DevicePropertyID(device_name=set_pv, property="set_current")
-
-                # Need to check if that is the correct coefficient
-                # For now I assume it returns a scale factor for k and B
-                # these are for hardware to physics
-                assert not math.isclose(coeffs[0], 0.0, abs_tol=1e-12)
-                conv = PolynomCoefficients(
-                    coeffs=[0.0, 1.0 / coeffs[0]], energy_dependent=True
-                )
-                translator_lut.append(
-                    TranslatorLookupTableElement(
-                        conversion_id=ConversionID(tgt, src),
-                        conversion_info=conv,
-                    )
-                )
-                # Todo: this should be more automatic
-                translator_lut.append(
-                    TranslatorLookupTableElement(
-                        conversion_id=ConversionID(
-                            tgt,
-                            DevicePropertyID(
-                                device_name=src.device_name, property="read_current"
-                            ),
-                        ),
-                        conversion_info=conv,
-                    )
-                )
-
-                translator_lut.append(
-                    TranslatorLookupTableElement(
-                        conversion_id=ConversionID(tgt, mon_prop), conversion_info=conv
-                    )
-                )
-                translator_lut.append(
-                    TranslatorLookupTableElement(
-                        conversion_id=ConversionID(tgt, setp_prop), conversion_info=conv
-                    )
-                )
-                pass
-
-    translator_lut.extend(
-        [
+        # Need to check if that is the correct coefficient
+        # For now I assume it returns a scale factor for k and B
+        conv = PolynomCoefficients(coeffs=[0.0, coeffs[0]], energy_dependent=True)
+        translator_lut.append(
             TranslatorLookupTableElement(
-                ConversionID(
-                    LatticeElementPropertyID(
-                        element_name="twiss", property="parameters"
-                    ),
-                    DevicePropertyID(device_name="twiss", property="parameters"),
-                ),
-                IdentityMapper(),
-            ),
+                conversion_id=ConversionID(tgt, src),
+                conversion_info=conv,
+            )
+        )
+        # Todo: this should be more automatic
+        translator_lut.append(
             TranslatorLookupTableElement(
-                ConversionID(
-                    LatticeElementPropertyID(element_name="track", property="pos"),
-                    DevicePropertyID(device_name="track", property="pos"),
-                ),
-                IdentityMapper(),
-            ),
-        ]
-    )
+                conversion_id=ConversionID(tgt, DevicePropertyID(device_name=src.device_name, property="read_current")),
+                conversion_info=conv,
+            )
+        )
 
-    # Todo: fix me!
-    floquet_to_frequency = 500e3 / 328
-    translator_lut.append(
-        TranslatorLookupTableElement(
-            ConversionID(
-                lattice_property_id=LatticeElementPropertyID(
-                    element_name="tune", property="transversal"
-                ),
-                device_property_id=DevicePropertyID(
-                    device_name="tune", property="delta_set_current"
-                ),
-            ),
-            TuneConversionCoefficients(
-                PolynomCoefficients([0e0, floquet_to_frequency], energy_dependent=False)
-            ),
+        translator_lut.append(
+            TranslatorLookupTableElement(
+                conversion_id=ConversionID(tgt, mon_prop), conversion_info=conv)
         )
-    )
-    translator_lut.append(
-        TranslatorLookupTableElement(
-            ConversionID(
-                lattice_property_id=LatticeElementPropertyID(
-                    element_name="tune", property="transversal"
-                ),
-                device_property_id=DevicePropertyID(
-                    device_name="tune", property="transversal"
-                ),
-            ),
-            TuneConversionCoefficients(
-                PolynomCoefficients([0e0, floquet_to_frequency], energy_dependent=False)
-            ),
+        translator_lut.append(
+            TranslatorLookupTableElement(
+                conversion_id=ConversionID(tgt, setp_prop), conversion_info=conv)
         )
-    )
+        pass
+
+
+    for dev_name in yp.get("VCM"):
+
+        d = lm.objects_for_device(dev_name=dev_name)
+        src, = d
+        assert src.device_name == dev_name
+        tmp, = d.values()
+        tgt, = tmp
+
+        coeffs = vcm_coefficients(src.device_name.mml_device_index())
+        # Need to check if that is the correct coefficient
+        conv = PolynomCoefficients(coeffs=[0.0, coeffs[0]], energy_dependent=True)
+        translator_lut.append(
+            TranslatorLookupTableElement(
+                conversion_id=ConversionID(tgt,src),
+                conversion_info=conv
+            )
+        )
+        translator_lut.append(
+            TranslatorLookupTableElement(
+                conversion_id=ConversionID(tgt,DevicePropertyID(device_name=src.device_name, property="read_current")),
+                conversion_info=conv
+            )
+        )
+
+        sel = ao_table[src.device_name.family]
+        device_index = sel.get_device_list().index(src.device_name.mml_device_index())
+
+        mon_pv = sel.Monitor.ChannelNames[device_index].strip()
+        set_pv = sel.Setpoint.ChannelNames[device_index].strip()
+
+        # where it starts to call
+        mon_prop = DevicePropertyID(device_name=mon_pv, property="read_current")
+        setp_prop = DevicePropertyID(device_name=set_pv, property="set_current")
+
+        translator_lut.append(
+            TranslatorLookupTableElement(
+            conversion_id=ConversionID(tgt, mon_prop), conversion_info=conv)
+        )
+        translator_lut.append(
+            TranslatorLookupTableElement(
+                conversion_id=ConversionID(tgt, setp_prop), conversion_info=conv)
+        )
+        pass
+
+    # for dev_name in yp.get("QUAD"):
+    #     d = lm.objects_for_device(dev_name=dev_name)
+    #     src, = d
+    #     assert src.device_name == dev_name
+    #     tmp, = d.values()
+    #     tgt, = tmp
+    #
+    # for dev_name in yp.get("SEXT"):
+    #    d = lm.objects_for_device(dev_name=dev_name)
+    #     # needs to be implemented
 
     r = TranslatorLookupTable(lut=translator_lut)
     r.verify()
     return r
 
 
-def load_managers(lat=None):
+def to_single_vector(data) -> Sequence[float]:
+    t_data = data
+    # Go down as long as the contained element
+    # still contains only one element
+    while True:
+        try:
+            l =  len(t_data)
+        except TypeError:
+            return t_data
+
+        if len(t_data) == 1:
+            t_data, = t_data
+        else:
+            break
+        dtype = t_data.dtype
+        pass
+    dtype = t_data.dtype
+    return t_data
+
+def unpack_ramp_data(data):
+    while True:
+        data = to_single_vector(data)
+        dtype = data.dtype
+        if isinstance(dtype, np.dtypes.VoidDType):
+            d = {
+                dtype_name: unpack_ramp_data(data[dtype_name])
+                for dtype_name in data.dtype.fields.keys()
+            }
+            return d
+            pass
+        else:
+            break
+    return data
+
+def numrec_array_to_dict(data):
+    return
+
+
+def load_ramp_data():
+    path = Path(os.environ["HOME"]) / "Devel/github/matlab-middle-layer/machine/ALS//StorageRingOpsData/"
+    filename = path / "Model/alsrampup.mat"
+    filename = path / "Greg/alsrampup.mat"
+    data = loadmat(filename)
+    ramp_data = data["RampTable"]
+
+    d = {
+        dtype_name: unpack_ramp_data(ramp_data[dtype_name])
+        for dtype_name in ramp_data.dtype.fields.keys()
+    }
+    gev_as_coor = d.pop("GeV")
+    d.pop("UpperLattice")
+    d.pop("LowerLattice")
+
+    d2 = {
+        k: xr.DataArray(data=v["Setpoint"], dims="GeV", coords=[gev_as_coor])
+        for k, v in d.items()
+    }
+    r = xr.Dataset(d2)
+    return r
+
+    df = pd.DataFrame(d)
+    return data
+
+
+def load_managers():
     """
     Todo:
         return yellow pages manager
     """
-    if lat is None:
-        lat = als_get_lattice()
-    ao_model = als_ring_ao_data()
-    ramp_data = load_ramp_data(ao_model)
+    # ramp_data = load_ramp_data()
+    pass
 
-    yp = YellowPages(create_yellow_pages_input(ao_model, lat))
+    lat = als_load_lattice(default_filename)
+    ao_model = als_ring_ao_data()
+
+    yp = create_yellow_pages_input(ao_model, lat)
     yp
 
     fwd_lut, inv_lut, process_variable_views = create_liaison_lut(yp, ao_model, lat)
     lm = LiaisonManager(forward_lut=fwd_lut, inverse_lut=inv_lut)
-    ts_lut = create_translator_luts(
-        yp, lm, ao_model, ramp_data, lat, reference_energy=default_energy
-    )
-
+    ts_lut = create_translator_luts(yp, lm, ao_model, lat)
     # Todo: get the brho of the storage ring
-    ts = TranslatorService(lut=ts_lut, brho=calculate_brho(default_energy))
+    ts = TranslatorService(lut=ts_lut, brho=4.5)
     ts
+    yp = YellowPages
     return yp, lm, ts, process_variable_views
+
 
 
 if __name__ == "__main__":
