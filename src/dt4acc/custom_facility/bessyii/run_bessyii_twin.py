@@ -65,14 +65,17 @@ async def main():
         "custom_facility/bessyii/resources/storage_ring/input/bessy2_storage_ring_reflat.json"
     )
     acc = bessyii_pyat_lattice(filename=filename)
-    backend = SimulatorBackend(
+    backend=SimulatorBackend(
         name="BESSYII_on_PyAT",
         acc=PyATAcceleratorSimulator(at_lattice=acc),
     )
 
     _, lm, ts = load_managers()
 
-    command_rewriter = CommandRewriter(liaison_manager=lm, translation_service=ts)
+    command_rewriter=CommandRewriter(
+        liaison_manager=lm,
+        translation_service=ts
+    )
 
     # Todo: review if a dedicated execution engine
     #       View gets an engine to execute

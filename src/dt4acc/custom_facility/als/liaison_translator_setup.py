@@ -3,7 +3,7 @@ import os
 import pprint
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Tuple, Sequence, List
+from typing import Dict, Tuple, Sequence, List, Union
 
 import numpy as np
 import pandas as pd
@@ -12,19 +12,22 @@ from scipy.io import loadmat
 
 from bact_mml_json_importer.data_model.mml_ao import FamilyInfoCollection
 from dt4acc.custom_facility.als.hcm_coefficients import hcm_coefficients
-from dt4acc.custom_facility.als.model import MMLStyleDeviceIdentifier
+from dt4acc.custom_facility.als.model import MMLStyleDeviceIdentifier, Monitor, Setpoint
 from dt4acc.custom_facility.als.read_lattice import als_load_lattice, default_filename
 from dt4acc.custom_facility.als.readin_ao import als_ring_ao_data
 from dt4acc.custom_facility.als.vcm_coefficients import vcm_coefficients
 from dt4acc_lib.bl.liaison_manager import LiaisonManager
 from dt4acc_lib.bl.translator_service import TranslatorService
+from dt4acc_lib.bl.yellow_pages import YellowPages
 from dt4acc_lib.interfaces.utils.liaison_manager import LiaisonManagerBase
 from dt4acc_lib.interfaces.utils.yellow_pages import YellowPagesBase
+from dt4acc_lib.model.utils.command import ReadCommand
 from dt4acc_lib.model.utils.identifiers import DevicePropertyID, LatticeElementPropertyID, ConversionID
 from dt4acc_lib.model.utils.liaison_manager_lookup_table import LiaisonManagerInverseLookupTable, \
     LiaisonManagerForwardLookupTable, LiaisonManagerForwardLookupElement, LiaisonManagerInverseLookupElement
 from dt4acc_lib.model.utils.translator_manager_lookup_table import TranslatorLookupTable, TranslatorLookupTableElement, \
     PolynomCoefficients
+from interfaces.utils.translator_service import TranslatorServiceBase
 
 
 def uuids_of_at_elements(
@@ -141,29 +144,60 @@ def get_element_uuids_for_device(ao_table, lat, dev_id: MMLStyleDeviceIdentifier
     return uuid
 
 
-def create_liaison_lut(yp: YellowPagesBase, ao: Dict[str, FamilyInfoCollection], lat) -> Tuple[LiaisonManagerForwardLookupTable, LiaisonManagerInverseLookupTable]:
+def create_liaison_lut(
+    yp: YellowPagesBase, ao_table: Dict[str, FamilyInfoCollection], lat
+) -> Tuple[LiaisonManagerForwardLookupTable, LiaisonManagerInverseLookupTable, Sequence[Union[Monitor, Setpoint]]]:
     forward_lut = []
     inverse_lut = []
+    process_variable_views: List[Union[Monitor, Setpoint]] = []
 
     for family_name, property in [
         # just to get started
-        ("QUAD", "main_strength"), ("SEXT", "main_strength"),
+        # Need to take care that process variables occur again!
+        # For quads and sextupoles more than one variable is
+        # in a line
+        # ("QUAD", "main_strength"),
+        # ("SEXT", "main_strength"),
         ("HCM", "x_kick"), ("VCM", "y_kick"),
     ]:
         for corr in yp.get(family_name):
+            # As if you could set current to a magnet
             dev_prop = DevicePropertyID(device_name=corr, property="set_current")
-            element_names = get_element_uuids_for_device(ao_table=ao, lat=lat, dev_id=corr)
+
+            element_names = get_element_uuids_for_device(ao_table=ao_table, lat=lat, dev_id=corr)
             elem_props = [LatticeElementPropertyID(element_name=name, property=property) for name in element_names]
 
-            for elm_prop in elem_props:
-                forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop]))
+            # for elm_prop in elem_props:
+            #    forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop]))
             inverse_lut.append(LiaisonManagerInverseLookupElement(dev_id=dev_prop, lat_ids=elem_props))
+
+            rcmd = ReadCommand(id=corr, property="set_current")
+            sel = ao_table[dev_prop.device_name.family]
+            device_index = sel.get_device_list().index(dev_prop.device_name.mml_device_index())
+
+            mon_pv = sel.Monitor.ChannelNames[device_index].strip()
+            set_pv = sel.Setpoint.ChannelNames[device_index].strip()
+
+            # where it starts to call
+            mon_prop = DevicePropertyID(device_name=mon_pv, property="read_current")
+            setp_prop = DevicePropertyID(device_name=set_pv, property="set_current")
+
+            for elm_prop in elem_props:
+                forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[mon_prop]))
+                # forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[setp_prop]))
+            inverse_lut.append(LiaisonManagerInverseLookupElement(dev_id=mon_prop, lat_ids=elem_props))
+            inverse_lut.append(LiaisonManagerInverseLookupElement(dev_id=setp_prop, lat_ids=elem_props))
+
+            monitor = Monitor(pv_name=mon_pv, rcmd=rcmd, prec=3, record_type="ai")
+            setp = Setpoint(pv_name=set_pv, rcmd=rcmd, prec=3, record_type="ao", reads=[monitor.rcmd])
+            process_variable_views.extend([monitor, setp])
+            pass
 
     # master clock defines frequency of cavity
     for cav in yp.get("RF"):
         dev_prop = DevicePropertyID(device_name=cav, property="frequency")
         dev_prop_mc = DevicePropertyID(device_name="master_clock", property="reference_frequency")
-        element_names = get_element_uuids_for_device(ao_table=ao, lat=lat, dev_id=cav)
+        element_names = get_element_uuids_for_device(ao_table=ao_table, lat=lat, dev_id=cav)
         elem_props = [LatticeElementPropertyID(element_name=name, property="frequency") for name in element_names]
 
         for elm_prop in elem_props:
@@ -174,13 +208,13 @@ def create_liaison_lut(yp: YellowPagesBase, ao: Dict[str, FamilyInfoCollection],
 
 
     fwd = LiaisonManagerForwardLookupTable(forward_lut)
-    bwd = LiaisonManagerInverseLookupTable(inverse_lut)
+    inv = LiaisonManagerInverseLookupTable(inverse_lut)
     fwd.verify()
-    bwd.verify()
-    return fwd, bwd
+    inv.verify()
+    return fwd, inv, process_variable_views
 
 
-def create_translator_luts(yp: YellowPagesBase, lm: LiaisonManagerBase, ao: Dict[str, FamilyInfoCollection], lat) -> TranslatorLookupTable:
+def create_translator_luts(yp: YellowPagesBase, lm: LiaisonManagerBase, ao_table: Dict[str, FamilyInfoCollection], lat) -> TranslatorLookupTable:
     translator_lut: List[TranslatorLookupTableElement] = []
 
 
@@ -213,16 +247,47 @@ def create_translator_luts(yp: YellowPagesBase, lm: LiaisonManagerBase, ao: Dict
         tmp, = d.values()
         tgt, = tmp
         coeffs = hcm_coefficients(src.device_name.mml_device_index())
+
+        sel = ao_table[src.device_name.family]
+        device_index = sel.get_device_list().index(src.device_name.mml_device_index())
+
+        mon_pv = sel.Monitor.ChannelNames[device_index].strip()
+        set_pv = sel.Setpoint.ChannelNames[device_index].strip()
+
+        # where it starts to call
+        mon_prop = DevicePropertyID(device_name=mon_pv, property="read_current")
+        setp_prop = DevicePropertyID(device_name=set_pv, property="set_current")
+
         # Need to check if that is the correct coefficient
         # For now I assume it returns a scale factor for k and B
+        conv = PolynomCoefficients(coeffs=[0.0, coeffs[0]], energy_dependent=True)
         translator_lut.append(
             TranslatorLookupTableElement(
-                conversion_id=ConversionID(tgt,src),
-                conversion_info=PolynomCoefficients(coeffs=[0.0, coeffs[0]], energy_dependent=True),
+                conversion_id=ConversionID(tgt, src),
+                conversion_info=conv,
+            )
+        )
+        # Todo: this should be more automatic
+        translator_lut.append(
+            TranslatorLookupTableElement(
+                conversion_id=ConversionID(tgt, DevicePropertyID(device_name=src.device_name, property="read_current")),
+                conversion_info=conv,
             )
         )
 
+        translator_lut.append(
+            TranslatorLookupTableElement(
+                conversion_id=ConversionID(tgt, mon_prop), conversion_info=conv)
+        )
+        translator_lut.append(
+            TranslatorLookupTableElement(
+                conversion_id=ConversionID(tgt, setp_prop), conversion_info=conv)
+        )
+        pass
+
+
     for dev_name in yp.get("VCM"):
+
         d = lm.objects_for_device(dev_name=dev_name)
         src, = d
         assert src.device_name == dev_name
@@ -231,34 +296,54 @@ def create_translator_luts(yp: YellowPagesBase, lm: LiaisonManagerBase, ao: Dict
 
         coeffs = vcm_coefficients(src.device_name.mml_device_index())
         # Need to check if that is the correct coefficient
+        conv = PolynomCoefficients(coeffs=[0.0, coeffs[0]], energy_dependent=True)
         translator_lut.append(
             TranslatorLookupTableElement(
                 conversion_id=ConversionID(tgt,src),
-                conversion_info=PolynomCoefficients(coeffs=[0.0, coeffs[0]], energy_dependent=True),
+                conversion_info=conv
+            )
+        )
+        translator_lut.append(
+            TranslatorLookupTableElement(
+                conversion_id=ConversionID(tgt,DevicePropertyID(device_name=src.device_name, property="read_current")),
+                conversion_info=conv
             )
         )
 
+        sel = ao_table[src.device_name.family]
+        device_index = sel.get_device_list().index(src.device_name.mml_device_index())
 
+        mon_pv = sel.Monitor.ChannelNames[device_index].strip()
+        set_pv = sel.Setpoint.ChannelNames[device_index].strip()
 
-    for dev_name in yp.get("QUAD"):
-        d = lm.objects_for_device(dev_name=dev_name)
-        src, = d
-        assert src.device_name == dev_name
-        tmp, = d.values()
-        tgt, = tmp
+        # where it starts to call
+        mon_prop = DevicePropertyID(device_name=mon_pv, property="read_current")
+        setp_prop = DevicePropertyID(device_name=set_pv, property="set_current")
 
-    for dev_name in yp.get("SEXT"):
-        d = lm.objects_for_device(dev_name=dev_name)
-        # needs to be implemented
+        translator_lut.append(
+            TranslatorLookupTableElement(
+            conversion_id=ConversionID(tgt, mon_prop), conversion_info=conv)
+        )
+        translator_lut.append(
+            TranslatorLookupTableElement(
+                conversion_id=ConversionID(tgt, setp_prop), conversion_info=conv)
+        )
+        pass
+
+    # for dev_name in yp.get("QUAD"):
+    #     d = lm.objects_for_device(dev_name=dev_name)
+    #     src, = d
+    #     assert src.device_name == dev_name
+    #     tmp, = d.values()
+    #     tgt, = tmp
+    #
+    # for dev_name in yp.get("SEXT"):
+    #    d = lm.objects_for_device(dev_name=dev_name)
+    #     # needs to be implemented
 
     r = TranslatorLookupTable(lut=translator_lut)
     r.verify()
     return r
-
-
-    dev_names = yp.get("HCM")
-    pass
-    # All magnets — primary conversion keyed by (magnet, PC)
 
 
 def to_single_vector(data) -> Sequence[float]:
@@ -326,6 +411,10 @@ def load_ramp_data():
 
 
 def load_managers():
+    """
+    Todo:
+        return yellow pages manager
+    """
     # ramp_data = load_ramp_data()
     pass
 
@@ -335,13 +424,14 @@ def load_managers():
     yp = create_yellow_pages_input(ao_model, lat)
     yp
 
-    fwd_lut, inv_lut = create_liaison_lut(yp, ao_model, lat)
+    fwd_lut, inv_lut, process_variable_views = create_liaison_lut(yp, ao_model, lat)
     lm = LiaisonManager(forward_lut=fwd_lut, inverse_lut=inv_lut)
     ts_lut = create_translator_luts(yp, lm, ao_model, lat)
     # Todo: get the brho of the storage ring
-    ts = TranslatorService(lut=ts_lut, brho=None)
+    ts = TranslatorService(lut=ts_lut, brho=4.5)
     ts
-    return yp, lm, ts
+    yp = YellowPages
+    return yp, lm, ts, process_variable_views
 
 
 

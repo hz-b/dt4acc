@@ -46,4 +46,4 @@ class Monitor(_ProcessVariableView):
 
 class Setpoint(_ProcessVariableView):
     record_type: Literal["ao", "longout"]
-    monitor: Monitor | None
+    reads: Sequence[ReadCommand]

@@ -1,4 +1,5 @@
 import logging
+import math
 from dataclasses import dataclass
 from typing import Dict, Literal, Sequence, Union
 
@@ -10,8 +11,15 @@ from dt4acc.custom_epics.ioc.controller import Controller as EpicsController, di
 from dt4acc.custom_epics.ioc.pv_setup import initialize_orbit_pvs, initialize_twiss_pvs, initialize_tune_pvs
 from dt4acc.custom_facility.als.model import Monitor, Setpoint
 from dt4acc_lib.model.utils.command import ReadCommand, Command, BehaviourOnError
+from dt4acc_lib.model.output.result import ReadTogetherAndTranslated
 
 logger = logging.getLogger("dt4acc")
+
+def unpack_translated_reading_expecting_single_float(pkg: ReadTogetherAndTranslated) -> float:
+    translated, = pkg.data
+    expected_single, = translated.readings
+    val = float(expected_single.payload)
+    return val
 
 
 async def build_ao_record(
@@ -19,10 +27,12 @@ async def build_ao_record(
     model: Setpoint,
     controller: ControllerInterface
 ) -> RecordWrapper:
-    initial_val, = controller.trigger_read([model.rcmd])
+    initial_val = unpack_translated_reading_expecting_single_float(await controller.trigger_read([model.rcmd]))
+
     reads = []
-    if model.monitor is not None:
-        reads = [model.monitor.rcmd]
+
+    if model.rcmd is not None:
+        reads = [model.rcmd]
 
     async def update(val: float):
         return await controller.update(
@@ -45,12 +55,12 @@ async def build_ao_record(
     return rec
 
 
-async def build_ain_record(
+async def build_ai_record(
     builder,
     model: Monitor,
     controller: ControllerInterface
 ):
-    initial_val, = await controller.trigger_read([model.rcmd])
+    initial_val = unpack_translated_reading_expecting_single_float(await controller.trigger_read([model.rcmd]))
     rec = builder.aIn(
         model.pv_name,
         initial_value=initial_val,
@@ -59,7 +69,7 @@ async def build_ain_record(
     return rec
 
 factory = dict(
-    ain=build_ao_record,
+    ai=build_ai_record,
     ao=build_ao_record,
 )
 
@@ -69,23 +79,34 @@ async def initialize_pvs_from_model(
         controller: ControllerInterface,
 ) -> Dict[ReadCommand, RecordWrapper]:
 
-    def instantiate(model):
+    async def instantiate(model):
         f = factory[model.record_type]
-        rec = f(builder, model, controller)
+        rec = await f(builder, model, controller)
         return rec
 
     r = {
-        model.rcmd: instantiate(model)
+        model.rcmd: await instantiate(model)
         for model in models
     }
     return r
 
 
 class ALSEpicsController(EpicsController):
-    async def startup(self, models: Sequence[Union[Monitor, Setpoint]]) -> None:
+    def __init__(
+            self,
+            *,
+            name,
+            builder: RecordWrapper,
+            controller_delegate: ControllerInterface,
+            process_variable_views: Sequence[Union[Setpoint, Monitor]]
+    ):
+        super().__init__(name=name, builder=builder, controller_delegate=controller_delegate)
+        self.process_variable_views = process_variable_views
+
+    async def startup(self) -> None:
         self.builder.SetDeviceName(self.prefix)
 
-        recs = await initialize_pvs_from_model(self.builder, models, controller=self.delegate),
+        recs = await initialize_pvs_from_model(self.builder, self.process_variable_views, controller=self.delegate)
 
         d = {
             **recs,

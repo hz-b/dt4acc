@@ -25,7 +25,7 @@ def main():
         acc=PyATAcceleratorSimulator(at_lattice=lat),
     )
 
-    _, lm, ts = load_managers()
+    _, lm, ts, process_variable_views = load_managers()
     command_rewriter = CommandRewriter(
         liaison_manager=lm,
         translation_service=ts
@@ -46,18 +46,18 @@ def main():
         mexec=mexec,
         view=view,
         default_delayed_reads=[
-            ReadCommand("track", "pos"),
-            ReadCommand("twiss", "parameters"),
-            ReadCommand("tune", "x"),
-            ReadCommand("tune", "y"),
+            # ReadCommand("track", "pos"),
+            # ReadCommand("twiss", "parameters"),
+            # ReadCommand("tune", "x"),
+            # ReadCommand("tune", "y"),
         ]
     )
-    controller = (
-        ALSEpicsController(
+    controller =  ALSEpicsController(
         name = "epics_controller",
         controller_delegate=common_controller,
         builder=builder,
-    ))
+        process_variable_views=process_variable_views
+    )
     dispatcher(controller.startup)
     common_controller.start()
     softioc.interactive_ioc(globals())
