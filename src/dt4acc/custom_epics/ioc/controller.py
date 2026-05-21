@@ -2,9 +2,10 @@ import asyncio
 import itertools
 import os
 import getpass
+import traceback
 from typing import Sequence
 
-from softioc import builder, asyncio_dispatcher
+from softioc import softioc, builder, asyncio_dispatcher
 
 from dt4acc_lib.interfaces.utils.command_execution_engine import CommandExecutionEngine
 from dt4acc_lib.model.output.result import ReadTogether
