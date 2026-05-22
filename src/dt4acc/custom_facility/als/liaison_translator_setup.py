@@ -226,24 +226,21 @@ def create_liaison_lut(
     for family_name, property in [
         ("BPMx", "dx"),
         ("BPMy", "dy"),
-        ]:
+    ]:
         for dev_name in yp.get(family_name):
             # expect only one
             dev_prop = DevicePropertyID(device_name=dev_name, property=property)
-            bpm_name, = get_element_uuids_for_device(
+            (bpm_name,) = get_element_uuids_for_device(
                 ao_table=ao_table, lat=lat, dev_id=dev_name
             )
             sel = ao_table[dev_name.family]
-            device_index = sel.get_device_list().index(
-                dev_name.mml_device_index()
-            )
+            device_index = sel.get_device_list().index(dev_name.mml_device_index())
             mon_pv = sel.Monitor.ChannelNames[device_index].strip()
-            lat_prop = LatticeElementPropertyID(element_name=bpm_name, property=property)
+            lat_prop = LatticeElementPropertyID(
+                element_name=bpm_name, property=property
+            )
             forward_lut.append(
-                LiaisonManagerForwardLookupElement(
-                    lat_id=lat_prop,
-                    dev_ids=[dev_prop]
-                )
+                LiaisonManagerForwardLookupElement(lat_id=lat_prop, dev_ids=[dev_prop])
             )
             inverse_lut.append(
                 LiaisonManagerInverseLookupElement(
@@ -252,7 +249,13 @@ def create_liaison_lut(
                 )
             )
             process_variable_views.append(
-                Monitor(pv_name=mon_pv, rcmd=ReadCommand(id=dev_name, property=property), prec=3, record_type="ai", update="delayed")
+                Monitor(
+                    pv_name=mon_pv,
+                    rcmd=ReadCommand(id=dev_name, property=property),
+                    prec=3,
+                    record_type="ai",
+                    update="delayed",
+                )
             )
             pass
 
@@ -416,11 +419,11 @@ def create_translator_luts(
     # just one for all of them
     conv = PolynomCoefficients(coeffs=[0.0, scale], energy_dependent=False)
     for dev_name in yp.get("BPMx"):
-        element_name, = get_element_uuids_for_device(
+        (element_name,) = get_element_uuids_for_device(
             ao_table=ao_table, lat=lat, dev_id=dev_name
         )
         src = LatticeElementPropertyID(element_name, "dx")
-        dst, = lm.forward(src)
+        (dst,) = lm.forward(src)
 
         translator_lut.append(
             TranslatorLookupTableElement(
@@ -434,11 +437,11 @@ def create_translator_luts(
     # just one for all of them
     conv = PolynomCoefficients(coeffs=[0.0, scale], energy_dependent=False)
     for dev_name in yp.get("BPMy"):
-        element_name, = get_element_uuids_for_device(
+        (element_name,) = get_element_uuids_for_device(
             ao_table=ao_table, lat=lat, dev_id=dev_name
         )
         src = LatticeElementPropertyID(element_name, "dy")
-        dst, = lm.forward(src)
+        (dst,) = lm.forward(src)
 
         translator_lut.append(
             TranslatorLookupTableElement(
