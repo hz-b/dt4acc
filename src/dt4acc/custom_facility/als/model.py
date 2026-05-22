@@ -37,6 +37,13 @@ class _ProcessVariableView(BaseModel):
     rcmd: ReadCommand
     pv_name: str
     prec: int
+    # Most values will be updated immediately
+    # some like BPM or similar only delayewd.
+    # review if it should be handled differently ?
+    # e.g. all BPM declare a read command of ['track', 'pos']
+    # then view dispatches it to them
+    # or converter object does it ...
+    update: Literal["immediate", "delayed"] = "immediate"
 
 
 class Monitor(_ProcessVariableView):

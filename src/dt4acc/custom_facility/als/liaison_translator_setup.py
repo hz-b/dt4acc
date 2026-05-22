@@ -134,13 +134,19 @@ def create_yellow_pages_input(
         "QFA",
         "QDA",
         "BPM",
-        "BPMx",
-        "BPMy",
     ]
     names = {
         fam: extract_family_member_names(lat, ao_table, fam)
         for fam in standard_families
     }
+
+    names["BPMx"] = extract_family_member_names(
+        lat, ao_table, "BPMx", alternative_family_names=["BPM"]
+    )
+    names["BPMy"] = extract_family_member_names(
+        lat, ao_table, "BPMy", alternative_family_names=["BPM"]
+    )
+
     names["BEND"] = extract_family_member_names(
         lat, ao_table, "BEND", alternative_family_names=["BS"]
     )
@@ -213,6 +219,42 @@ def create_liaison_lut(
     forward_lut = []
     inverse_lut = []
     process_variable_views: List[Union[Monitor, Setpoint]] = []
+
+    # BPMs are not directly handled within in translating
+    # mexec engine (yet)
+    # but the view can use this information
+    for family_name, property in [
+        ("BPMx", "dx"),
+        ("BPMy", "dy"),
+        ]:
+        for dev_name in yp.get(family_name):
+            # expect only one
+            dev_prop = DevicePropertyID(device_name=dev_name, property=property)
+            bpm_name, = get_element_uuids_for_device(
+                ao_table=ao_table, lat=lat, dev_id=dev_name
+            )
+            sel = ao_table[dev_name.family]
+            device_index = sel.get_device_list().index(
+                dev_name.mml_device_index()
+            )
+            mon_pv = sel.Monitor.ChannelNames[device_index].strip()
+            lat_prop = LatticeElementPropertyID(element_name=bpm_name, property=property)
+            forward_lut.append(
+                LiaisonManagerForwardLookupElement(
+                    lat_id=lat_prop,
+                    dev_ids=[dev_prop]
+                )
+            )
+            inverse_lut.append(
+                LiaisonManagerInverseLookupElement(
+                    dev_id=dev_prop,
+                    lat_ids=[lat_prop],
+                )
+            )
+            process_variable_views.append(
+                Monitor(pv_name=mon_pv, rcmd=ReadCommand(id=dev_name, property=property), prec=3, record_type="ai", update="delayed")
+            )
+            pass
 
     for family_name, property in [
         # just to get started
@@ -368,6 +410,42 @@ def create_translator_luts(
             ),
         )
     )
+
+    scale = ao_table["BPMx"].Monitor.Physics2HWParams
+    assert isinstance(scale, float)
+    # just one for all of them
+    conv = PolynomCoefficients(coeffs=[0.0, scale], energy_dependent=False)
+    for dev_name in yp.get("BPMx"):
+        element_name, = get_element_uuids_for_device(
+            ao_table=ao_table, lat=lat, dev_id=dev_name
+        )
+        src = LatticeElementPropertyID(element_name, "dx")
+        dst, = lm.forward(src)
+
+        translator_lut.append(
+            TranslatorLookupTableElement(
+                conversion_id=ConversionID(src, dst),
+                conversion_info=conv,
+            )
+        )
+
+    scale = ao_table["BPMy"].Monitor.Physics2HWParams
+    assert isinstance(scale, float)
+    # just one for all of them
+    conv = PolynomCoefficients(coeffs=[0.0, scale], energy_dependent=False)
+    for dev_name in yp.get("BPMy"):
+        element_name, = get_element_uuids_for_device(
+            ao_table=ao_table, lat=lat, dev_id=dev_name
+        )
+        src = LatticeElementPropertyID(element_name, "dy")
+        dst, = lm.forward(src)
+
+        translator_lut.append(
+            TranslatorLookupTableElement(
+                conversion_id=ConversionID(src, dst),
+                conversion_info=conv,
+            )
+        )
 
     for dev_name in yp.get("HCM"):
         d = lm.objects_for_device(dev_name=dev_name)
