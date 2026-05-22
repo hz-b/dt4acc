@@ -1,10 +1,10 @@
-import math
 from typing import Optional, Dict
 
 from softioc import pythonSoftIoc
 
 from dt4acc.core.interfaces.view_interface import ViewInterface
 from dt4acc.core.utils.logger import get_logger
+from dt4acc_lib.model.output.result import TranslatedReading
 from .orbit_pva import OrbitTwinServer
 from dt4acc_lib.model.utils.command import ReadCommand
 
