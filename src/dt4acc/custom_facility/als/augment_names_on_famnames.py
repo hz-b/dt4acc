@@ -5,8 +5,8 @@ from typing import Tuple
 
 
 class SectorRegistry:
-    """Trace of the current sector
-    """
+    """Trace of the current sector"""
+
     def __init__(self):
         self._sectors = []
 

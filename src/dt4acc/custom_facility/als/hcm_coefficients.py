@@ -18,6 +18,8 @@ def hcm_coefficients(device_index: Sequence[int]) -> Sequence[float]:
     elif device_index[1] == 10:
         return 1.0753 * 0.2e-4, 0.2030
     else:
-        raise ValueError(f"Unknown device {device_index} (checking only {device_index[1]}")
+        raise ValueError(
+            f"Unknown device {device_index} (checking only {device_index[1]}"
+        )
 
     assert 0, "Should not reach here"

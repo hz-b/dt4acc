@@ -7,7 +7,7 @@ from softioc import builder, softioc
 from dt4acc.core.bl.controller import Controller
 from dt4acc.core.bl.translating_command_execution_engine import TranslatingCommandExecutionEngine
 from dt4acc.custom_epics.ioc.view import View
-from dt4acc.custom_epics.ioc.controller import Controller as EpicsController, dispatcher
+from dt4acc.custom_epics.ioc.controller import dispatcher
 from dt4acc.custom_facility.als.controller import ALSEpicsController
 from dt4acc.custom_facility.als.liaison_translator_setup import load_managers
 from dt4acc.custom_facility.als.read_lattice import als_load_lattice, default_filename
@@ -46,8 +46,8 @@ def main():
         mexec=mexec,
         view=view,
         default_delayed_reads=[
-            # ReadCommand("track", "pos"),
-            # ReadCommand("twiss", "parameters"),
+            ReadCommand("track", "pos"),
+            ReadCommand("twiss", "parameters"),
             # ReadCommand("tune", "x"),
             # ReadCommand("tune", "y"),
         ]

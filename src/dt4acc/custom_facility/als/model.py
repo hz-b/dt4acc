@@ -14,8 +14,7 @@ class MMLStyleDeviceIdentifier:
     child: int
 
     def mml_device_index(self):
-        """matching how a device reference is stored in ao
-        """
+        """matching how a device reference is stored in ao"""
         return (self.sector, self.child)
 
 
@@ -34,7 +33,6 @@ class CoefficientsForDevices:
     coefficients: PolynomCoefficients = None
 
 
-
 class _ProcessVariableView(BaseModel):
     rcmd: ReadCommand
     pv_name: str
@@ -43,6 +41,7 @@ class _ProcessVariableView(BaseModel):
 
 class Monitor(_ProcessVariableView):
     record_type: Literal["ai", "longin"]
+
 
 class Setpoint(_ProcessVariableView):
     record_type: Literal["ao", "longout"]
