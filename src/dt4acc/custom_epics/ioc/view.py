@@ -66,23 +66,6 @@ class View(ViewInterface):
             return True
         return False
 
-    def update_survey(self, var: ReadCommand, pkg):
-        assert var.id == "survey"
-        (single_reading,) = pkg.readings
-        data = single_reading.payload
-
-        rec_s = self.process_variables.get(ReadCommand(id="survey", property="s"))
-        assert rec_s
-        rec_s.set([datum.s for datum in single_reading.payload])
-
-        rec_name = self.process_variables.get(ReadCommand(id="survey", property="names"))
-        assert rec_name
-        rec_name.set([datum.name for datum in single_reading.payload])
-
-        rec_uid = self.process_variables.get(ReadCommand(id="survey", property="uids"))
-        assert rec_uid
-        rec_uid.set([datum.uid for datum in single_reading.payload])
-
     def update_track(self, var: ReadCommand, pkg):
         assert var.id == "track", f"Only prepared to process 'track' but got {var}"
         (single_reading,) = pkg.readings
