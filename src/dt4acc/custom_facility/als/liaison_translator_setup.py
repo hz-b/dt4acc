@@ -1,20 +1,16 @@
 import itertools
-import os
-import pprint
 from collections import defaultdict
-from pathlib import Path
 from typing import Dict, Tuple, Sequence, List, Union
 
 import numpy as np
 import pandas as pd
 import xarray as xr
-from scipy.io import loadmat
 
 from bact_mml_json_importer.data_model.mml_ao import FamilyInfoCollection
 from dt4acc.custom_facility.als.hcm_coefficients import hcm_coefficients
 from dt4acc.custom_facility.als.model import MMLStyleDeviceIdentifier, Monitor, Setpoint
 from dt4acc.custom_facility.als.read_lattice import als_load_lattice, default_filename
-from dt4acc.custom_facility.als.readin_ao import als_ring_ao_data
+from dt4acc.custom_facility.als.readin_ao import als_ring_ao_data, load_ramp_data
 from dt4acc.custom_facility.als.vcm_coefficients import vcm_coefficients
 from dt4acc_lib.bl.liaison_manager import LiaisonManager
 from dt4acc_lib.bl.translator_service import TranslatorService
@@ -39,7 +35,6 @@ from dt4acc_lib.model.utils.translator_manager_lookup_table import (
     PolynomCoefficients,
     IdentityMapper,
 )
-from interfaces.utils.translator_service import TranslatorServiceBase
 
 
 def uuids_of_at_elements(
@@ -589,85 +584,17 @@ def create_translator_luts(
     return r
 
 
-def to_single_vector(data) -> Sequence[float]:
-    t_data = data
-    # Go down as long as the contained element
-    # still contains only one element
-    while True:
-        try:
-            l = len(t_data)
-        except TypeError:
-            return t_data
-
-        if len(t_data) == 1:
-            (t_data,) = t_data
-        else:
-            break
-        dtype = t_data.dtype
-        pass
-    dtype = t_data.dtype
-    return t_data
-
-
-def unpack_ramp_data(data):
-    while True:
-        data = to_single_vector(data)
-        dtype = data.dtype
-        if isinstance(dtype, np.dtypes.VoidDType):
-            d = {
-                dtype_name: unpack_ramp_data(data[dtype_name])
-                for dtype_name in data.dtype.fields.keys()
-            }
-            return d
-            pass
-        else:
-            break
-    return data
-
-
-def numrec_array_to_dict(data):
-    return
-
-
-def load_ramp_data():
-    path = (
-        Path(os.environ["HOME"])
-        / "Devel/github/matlab-middle-layer/machine/ALS//StorageRingOpsData/"
-    )
-    filename = path / "Model/alsrampup.mat"
-    filename = path / "Greg/alsrampup.mat"
-    data = loadmat(filename)
-    ramp_data = data["RampTable"]
-
-    d = {
-        dtype_name: unpack_ramp_data(ramp_data[dtype_name])
-        for dtype_name in ramp_data.dtype.fields.keys()
-    }
-    gev_as_coor = d.pop("GeV")
-    d.pop("UpperLattice")
-    d.pop("LowerLattice")
-
-    d2 = {
-        k: xr.DataArray(data=v["Setpoint"], dims="GeV", coords=[gev_as_coor])
-        for k, v in d.items()
-    }
-    r = xr.Dataset(d2)
-    return r
-
-    df = pd.DataFrame(d)
-    return data
-
-
 def load_managers():
     """
     Todo:
         return yellow pages manager
     """
-    # ramp_data = load_ramp_data()
+    loaded_ramp_data = load_ramp_data()
     pass
 
     lat = als_load_lattice(default_filename)
     ao_model = als_ring_ao_data()
+
 
     yp = create_yellow_pages_input(ao_model, lat)
     yp
