@@ -231,11 +231,13 @@ def create_liaison_lut(
     # Here one than more quadrupole or pv maps to one magnet
     # so collect them first before building the elements
     inv_lut_tmp = defaultdict(list)
+    pv_views = defaultdict(list)
     for family_name, property in [
         ("QUAD", "main_strength"),
         ("SEXT", "main_strength"),
-        ]:
+    ]:
         for dev_name in yp.get(family_name):
+            # Todo: rework this loop and use ao or yp as leading reference
             # expect only one for forward but more than one for backward
             dev_prop = DevicePropertyID(device_name=dev_name, property=property)
             element_names = get_element_uuids_for_device(
@@ -250,12 +252,14 @@ def create_liaison_lut(
             #    forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop]))
             inv_lut_tmp[dev_prop].append(elem_props)
 
-            rcmd = ReadCommand(id=dev_name, property="set_current")
             sel = ao_table[dev_prop.device_name.family]
-            device_index = sel.get_device_index(*dev_prop.device_name.mml_device_index())
+            device_index = sel.get_device_index(
+                *dev_prop.device_name.mml_device_index()
+            )
 
             mon_pv = sel.Monitor.ChannelNames[device_index].strip()
             set_pv = sel.Setpoint.ChannelNames[device_index].strip()
+            pv_views[set_pv].append(mon_pv)
 
             # where it starts to call
             mon_prop = DevicePropertyID(device_name=mon_pv, property="read_current")
@@ -271,28 +275,45 @@ def create_liaison_lut(
             inv_lut_tmp[mon_prop].append(elem_props)
             inv_lut_tmp[setp_prop].append(elem_props)
 
-            monitor = Monitor(pv_name=mon_pv, rcmd=rcmd, prec=3, record_type="ai")
-            setp = Setpoint(
-                pv_name=set_pv,
-                rcmd=rcmd,
-                prec=3,
-                record_type="ao",
-                reads=[monitor.rcmd],
-            )
-            process_variable_views.extend([monitor, setp])
-
-    # now work on the inv_lut_tmp and stretch it out
     tmp = [
         LiaisonManagerInverseLookupElement(
-            dev_id=dev_id,
-            lat_ids=list(itertools.chain.from_iterable(lat_ids))
+            dev_id=dev_id, lat_ids=list(itertools.chain.from_iterable(lat_ids))
         )
         for dev_id, lat_ids in inv_lut_tmp.items()
     ]
     inverse_lut.extend(tmp)
-    del tmp
-    del inv_lut_tmp
+    del tmp, inv_lut_tmp
 
+    # deduce power converters from epics variables ....
+    def reduce_mon_pvs(mon_pvs: Sequence[str]) -> str:
+        if len(mon_pvs) > 1:
+            tmp = list(set(mon_pvs))
+            assert len(tmp) == 1
+            mon_pvs = tmp
+        (r,) = mon_pvs
+        return r
+
+    pv_views = {set_pv: reduce_mon_pvs(mon_pvs) for set_pv, mon_pvs in pv_views.items()}
+    for set_pv, mon_pv in pv_views.items():
+        # Todo: add flags if more than one value is added here
+        monitor = Monitor(
+            pv_name=mon_pv,
+            rcmd=ReadCommand(mon_pv, "read_current"),
+            prec=3,
+            record_type="ai",
+            returned_data="average",
+        )
+        rcmd = ReadCommand(set_pv, "set_current")
+        setp = Setpoint(
+            pv_name=set_pv,
+            rcmd=rcmd,
+            prec=3,
+            record_type="ao",
+            reads=[monitor.rcmd],
+            returned_data="average",
+        )
+        process_variable_views.extend([monitor, setp])
+    del pv_views
 
     # BPMs are not directly handled within in translating
     # mexec engine (yet)
@@ -361,7 +382,9 @@ def create_liaison_lut(
 
             rcmd = ReadCommand(id=corr, property="set_current")
             sel = ao_table[dev_prop.device_name.family]
-            device_index = sel.get_device_index(*dev_prop.device_name.mml_device_index())
+            device_index = sel.get_device_index(
+                *dev_prop.device_name.mml_device_index()
+            )
 
             mon_pv = sel.Monitor.ChannelNames[device_index].strip()
             set_pv = sel.Setpoint.ChannelNames[device_index].strip()
@@ -489,52 +512,86 @@ def create_translator_luts(
     )
     del d, src, tgt, tmp, dev_name
 
-    # now to the energy dependent part: main magnets
-    for family_name in "QF", "QD", "SF", "SD", "SHF", "SHD":
+    for family_name in "SHF", "SHD":
         ao_view = ao_table[family_name]
-        try:
-            t_ramp_data = ramp_data[family_name]
-        except KeyError:
-            logger.info(f"{family_name} has no ramp data, thus not adding translation for this family")
-            continue
-        for dev_name in yp.get(family_name):
-            # Todo: change to this interface as soon as it is available
-            # dev_idx = ao_table[family_name].get_device_index(sector=dev_name.sector, child=dev_name.child)
-            dev_idx = ao_view.DeviceList.index((dev_name.sector, dev_name.child))
+        # Todo: need to convert these ... post poned
+
+    # now to the energy dependent part: main magnets
+    for family_name in "QF", "QFA", "QD", "QDA", "SF", "SD":
+        ao_view = ao_table[family_name]
+        t_ramp_data = ramp_data[family_name]
+
+        scale_by_energy = [
+            CurvePoint(float(indep), float(dep))
+            for indep, dep in zip(t_ramp_data.reference_energy, t_ramp_data.setpoint)
+        ]
+
+        # todo: need a better name for this device index
+        for device_index in ao_view.get_device_list():
+            dev_idx = ao_view.get_device_index(*device_index)
             range = ao_view.Setpoint.Range[dev_idx]
             assert ao_view.Setpoint.HW2PhysicsParams is None
 
-            range = t_ramp_data.range.sel(sector=dev_name.sector, child=dev_name.child)
+            sector, child = device_index
+            range = t_ramp_data.range.sel(sector=sector, child=child)
 
-            d = lm.objects_for_device(dev_name=dev_name)
+            setp_pv = ao_view.Setpoint.ChannelNames[dev_idx].strip()
+            mon_pv = ao_view.Setpoint.ChannelNames[dev_idx].strip()
+
+            d = lm.objects_for_device(dev_name=setp_pv)
             (src,) = d
-            assert src.device_name == dev_name
+            (targets,) = d.values()
+            assert src.device_name == setp_pv
 
             # Need to understand why I get that many ...
-            targets, = d.values()
-
             for tgt in targets:
-                # Need to understand why its a lost
                 conv = MultiplyerScaledByEnergy(
                     reference_multiplyer=float(
-                        t_ramp_data.physics.sel(sector=dev_name.sector, child=dev_name.child)
+                        t_ramp_data.physics.sel(sector=sector, child=child)
                     ),
                     reference_energy=reference_energy,
                     range=Range(min=float(range[0]), max=float(range[1])),
-                    scale_by_energy=[
-                        CurvePoint(float(indep), float(dep))
-                        for indep, dep in zip(
-                            t_ramp_data.reference_energy, t_ramp_data.setpoint
-                        )
-                    ],
+                    scale_by_energy=scale_by_energy,
                 )
 
+                # For the magnet to current ... if needed
                 translator_lut.append(
                     TranslatorLookupTableElement(
                         conversion_id=ConversionID(tgt, src),
                         conversion_info=conv,
                     )
                 )
+                # For the setpoint
+                translator_lut.append(
+                    TranslatorLookupTableElement(
+                        conversion_id=ConversionID(
+                            tgt,
+                            DevicePropertyID(
+                                device_name=ao_view.Setpoint.ChannelNames[
+                                    dev_idx
+                                ].strip(),
+                                property="set_current",
+                            ),
+                        ),
+                        conversion_info=conv,
+                    )
+                )
+                # For the readback
+                translator_lut.append(
+                    TranslatorLookupTableElement(
+                        conversion_id=ConversionID(
+                            tgt,
+                            DevicePropertyID(
+                                device_name=ao_view.Monitor.ChannelNames[
+                                    dev_idx
+                                ].strip(),
+                                property="read_current",
+                            ),
+                        ),
+                        conversion_info=conv,
+                    )
+                )
+                pass
 
     scale = ao_table["BPMx"].Monitor.Physics2HWParams
     assert isinstance(scale, float)

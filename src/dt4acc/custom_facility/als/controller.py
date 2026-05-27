@@ -3,6 +3,7 @@ import math
 from dataclasses import dataclass
 from typing import Dict, Literal, Sequence, Union
 
+import numpy as np
 from softioc import softioc
 from softioc.pythonSoftIoc import RecordWrapper
 
@@ -30,11 +31,42 @@ def unpack_translated_reading_expecting_single_float(
     return val
 
 
+def unpack_translated_reading_calculate_average(
+    pkg: ReadTogetherAndTranslated,
+) -> float:
+    if len(pkg.data) == 1:
+        # Todo: consider if this options should be here
+        return unpack_translated_reading_expecting_single_float(pkg)
+
+    values = []
+    for translated in pkg.data:
+        # How
+        (expected_single,) = translated.readings
+        val = float(expected_single.payload)
+        values.append(val)
+
+    val = np.mean(values)
+    return val
+
+
+def handle_returned_data(
+    pkg: ReadTogetherAndTranslated, returned_data_type: str
+) -> float:
+    if returned_data_type == "single":
+        return unpack_translated_reading_expecting_single_float(pkg)
+    elif returned_data_type == "average":
+        return unpack_translated_reading_calculate_average(pkg)
+    else:
+        raise AssertionError(
+            f"Not prepared to handle returned_data {returned_data_type}"
+        )
+
+
 async def build_ao_record(
     builder, model: Setpoint, controller: ControllerInterface
 ) -> RecordWrapper:
-    initial_val = unpack_translated_reading_expecting_single_float(
-        await controller.trigger_read([model.rcmd])
+    initial_val = handle_returned_data(
+        await controller.trigger_read([model.rcmd]), model.returned_data
     )
 
     reads = []
@@ -64,8 +96,8 @@ async def build_ai_record(builder, model: Monitor, controller: ControllerInterfa
     if model.update == "delayed":
         initial_val = math.nan
     else:
-        initial_val = unpack_translated_reading_expecting_single_float(
-            await controller.trigger_read([model.rcmd])
+        initial_val = handle_returned_data(
+            await controller.trigger_read([model.rcmd]), model.returned_data
         )
     rec = builder.aIn(
         model.pv_name,
@@ -86,23 +118,42 @@ async def initialize_pvs_from_model(
     models: Sequence[Union[Setpoint, Monitor]],
     controller: ControllerInterface,
 ) -> Dict[ReadCommand, RecordWrapper]:
+    """initalise pvs based on their Setpoint or Monitor model
+
+    Ignore pvs that can not be instantiated
+
+    Todo:
+        is that a good idea ?
+    """
+
     async def instantiate(model):
         f = factory[model.record_type]
-        rec = await f(builder, model, controller)
+        try:
+            rec = await f(builder, model, controller)
+        except KeyError as ke:
+            logger.warning("Could not instantiate %s due to key error %s", model, ke)
+            rec = None
         return rec
 
     r = {model.rcmd: await instantiate(model) for model in models}
+    r = {rcmd: rec for rcmd, rec in r.items() if rec is not None}
     return r
 
 
 class ALSEpicsController(EpicsController):
+    """
+    Todo:
+        refactor EPICSController to include the developments needed
+        here
+    """
+
     def __init__(
         self,
         *,
         name,
         builder: RecordWrapper,
         controller_delegate: ControllerInterface,
-        process_variable_views: Sequence[Union[Setpoint, Monitor]]
+        process_variable_views: Sequence[Union[Setpoint, Monitor]],
     ):
         super().__init__(
             name=name, builder=builder, controller_delegate=controller_delegate
@@ -129,3 +180,6 @@ class ALSEpicsController(EpicsController):
 
         self.builder.LoadDatabase()
         softioc.iocInit(dispatcher)
+
+
+__all__ = ["ALSEpicsController"]

@@ -45,6 +45,11 @@ class _ProcessVariableView(BaseModel):
     # or converter object does it ...
     update: Literal["immediate", "delayed"] = "immediate"
 
+    # what data will be returned and how to process when more
+    # than value is returned
+    # todo: how to name that?
+    returned_data: Literal["single", "average"] = "single"
+
 
 class Monitor(_ProcessVariableView):
     record_type: Literal["ai", "longin"]
