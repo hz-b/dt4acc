@@ -38,13 +38,14 @@ from dt4acc_lib.model.utils.identifiers import (
     ConversionID,
     DevicePropertyID,
     LatticeElementPropertyID,
-    CurvePoint,
 )
+
 
 from dt4acc.config.data.querries import get_magnets, get_magnets_per_power_converters
 from dt4acc.custom_facility.model.config.elementmodel import MagnetElementSetup
 from dt4acc.custom_facility.maxiv.maxiv_r1_yellow_pages import YellowPages, maxiv_r1_yellow_pages
 from dt4acc.config.data.constants import ring_parameters
+from dt4acc_lib.model.utils.translator_manager_lookup_table import CurvePoint
 
 
 class TranslatorService:
