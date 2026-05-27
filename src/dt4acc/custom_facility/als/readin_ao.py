@@ -46,6 +46,42 @@ def create_data_array(
     return r
 
 
+def create_ranges(*, family_name: str, upper_limit, lower_limit, field_name, ao_table) -> xr.DataArray:
+    """
+    Todo:
+        need to simplify that returned data!
+    """
+    sel_ao = ao_table[family_name]
+    # field_name can be used in a double manner only for field_name "Setpoint" or "Monitor"
+
+    sel_up = upper_limit[field_name][family_name][field_name]
+    sel_low = lower_limit[field_name][family_name][field_name]
+
+    dev_list = ao_table[family_name].get_device_list()
+    assert (sel_low["DeviceList"] == dev_list).all()
+    assert (sel_up["DeviceList"] == dev_list).all()
+
+    xr.DataArray(
+        data=[sel_up["Data"], sel_low["Data"]],
+        dims=["range", "device_list"],
+        coords={
+            "range": ["upper", "lower"],
+            "sector": ("device_list", [c[0] for c in dev_list]),
+            "child": ("device_list", [c[0] for c in dev_list]),
+        },
+    )
+    r = xr.DataArray(
+        data=[sel_up["Data"],sel_low["Data"]],
+        dims=["range", "device_list"],
+        coords={
+            "range": ["upper", "lower"],
+            "sector": ("device_list", [c[0] for c in dev_list]),
+            "child": ("device_list", [c[1] for c in dev_list]),
+        },
+    )
+    return r
+
+
 def convert(obj):
     if isinstance(obj, np.ndarray):
         return obj.tolist()
@@ -63,10 +99,10 @@ def load_ramp_data(ao_model: Dict[str, FamilyInfoCollection]) -> Dict[str, xr.Da
     )
     # filename = path / "Greg/alsrampup.mat"
 
-    data = loadmat(path / "Model" /"alsrampup.mat", simplify_cells=True)
+    data = loadmat(path / "Model" /"alsrampdown.mat", simplify_cells=True)
     ramp_data = data["RampTable"].copy()
-    lower_lattice = ramp_data.pop("UpperLattice")
-    upper_lattice = ramp_data.pop("LowerLattice")
+    lower_limit = ramp_data.pop("UpperLattice")
+    upper_limit = ramp_data.pop("LowerLattice")
 
     energies = ramp_data.pop("GeV")
 
@@ -79,7 +115,22 @@ def load_ramp_data(ao_model: Dict[str, FamilyInfoCollection]) -> Dict[str, xr.Da
         for family_name, t_data in ramp_data.items()
     }
 
-    return d
+    ranges = {
+        family_name: create_ranges(family_name=family_name, field_name="Setpoint", upper_limit=upper_limit, lower_limit=lower_limit, ao_table=ao_model)
+        for family_name in ramp_data.keys()
+    }
+
+    def add_ranges(ds: xr.Dataset, ranges: xr.DataArray) -> xr.Dataset:
+        nds = ds.copy()
+        nds["range"] = ranges
+        return nds
+
+    d2 = {
+        family_name: add_ranges(ds, ranges[family_name])
+        for family_name, ds in d.items()
+    }
+
+    return d2
 
 
 def als_ring_ao_data():

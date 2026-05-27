@@ -13,6 +13,7 @@ from dt4acc.custom_facility.als.augment_names_on_famnames import (
 )
 from lat2db.tools.factories import pyat as pyatf
 
+default_energy = 1.89086196873342e9
 
 def factory(d: dict, energy: float):
     factory_dict = pyatf.factory_dict_default.copy()
@@ -60,7 +61,7 @@ default_filename = (
 )
 
 
-def als_load_lattice(filename: str, energy: float = 1.89086196873342e9):
+def als_load_lattice(filename: str, energy: float = default_energy):
     with open(filename, "rt") as fp:
         sequence_data = json.load(fp)
 
@@ -81,7 +82,8 @@ def main():
     #        / "dt4acc_soleil_twin_data"
     #         / "SOLEIL_II_V3631_sym1_V001_database.m"
     # )
-    als_load_lattice(default_filename)
+    r = als_load_lattice(default_filename)
+    pass
 
 
 if __name__ == "__main__":

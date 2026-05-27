@@ -1,4 +1,5 @@
 import itertools
+import logging
 from collections import defaultdict
 from typing import Dict, Tuple, Sequence, List, Union
 
@@ -7,14 +8,20 @@ import pandas as pd
 import xarray as xr
 
 from bact_mml_json_importer.data_model.mml_ao import FamilyInfoCollection
+
 from dt4acc.custom_facility.als.hcm_coefficients import hcm_coefficients
 from dt4acc.custom_facility.als.model import MMLStyleDeviceIdentifier, Monitor, Setpoint
-from dt4acc.custom_facility.als.read_lattice import als_load_lattice, default_filename
+from dt4acc.custom_facility.als.read_lattice import (
+    als_load_lattice,
+    default_filename,
+    default_energy,
+)
 from dt4acc.custom_facility.als.readin_ao import als_ring_ao_data, load_ramp_data
 from dt4acc.custom_facility.als.vcm_coefficients import vcm_coefficients
 from dt4acc_lib.bl.liaison_manager import LiaisonManager
 from dt4acc_lib.bl.translator_service import TranslatorService
 from dt4acc_lib.bl.yellow_pages import YellowPages
+from dt4acc_lib.bl.unit_conversion import calculate_brho
 from dt4acc_lib.interfaces.utils.liaison_manager import LiaisonManagerBase
 from dt4acc_lib.interfaces.utils.yellow_pages import YellowPagesBase
 from dt4acc_lib.model.utils.command import ReadCommand
@@ -34,7 +41,12 @@ from dt4acc_lib.model.utils.translator_manager_lookup_table import (
     TranslatorLookupTableElement,
     PolynomCoefficients,
     IdentityMapper,
+    MultiplyerScaledByEnergy,
+    Range,
+    CurvePoint,
 )
+
+logger = logging.getLogger("dt4acc")
 
 
 def uuids_of_at_elements(
@@ -124,6 +136,7 @@ def create_yellow_pages_input(
         "QF",
         "QD",
         "SF",
+        "SD",
         "SHF",
         "SHD",
         "QFA",
@@ -197,7 +210,7 @@ def get_element_uuids_for_device(
     ao_table, lat, dev_id: MMLStyleDeviceIdentifier
 ) -> Sequence[str]:
     sel = ao_table[dev_id.family]
-    device_index = sel.get_device_list().index(dev_id.mml_device_index())
+    device_index = sel.get_device_index(*dev_id.mml_device_index())
     lattice_element_indices = np.asarray(sel.AT.get_element_indices()[device_index])
     assert (lattice_element_indices > 1).all()
     uuid = [elem.UUID for elem in lat[lattice_element_indices - 1]]
@@ -215,6 +228,72 @@ def create_liaison_lut(
     inverse_lut = []
     process_variable_views: List[Union[Monitor, Setpoint]] = []
 
+    # Here one than more quadrupole or pv maps to one magnet
+    # so collect them first before building the elements
+    inv_lut_tmp = defaultdict(list)
+    for family_name, property in [
+        ("QUAD", "main_strength"),
+        ("SEXT", "main_strength"),
+        ]:
+        for dev_name in yp.get(family_name):
+            # expect only one for forward but more than one for backward
+            dev_prop = DevicePropertyID(device_name=dev_name, property=property)
+            element_names = get_element_uuids_for_device(
+                ao_table=ao_table, lat=lat, dev_id=dev_name
+            )
+            elem_props = [
+                LatticeElementPropertyID(element_name=name, property=property)
+                for name in element_names
+            ]
+
+            # for elm_prop in elem_props:
+            #    forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop]))
+            inv_lut_tmp[dev_prop].append(elem_props)
+
+            rcmd = ReadCommand(id=dev_name, property="set_current")
+            sel = ao_table[dev_prop.device_name.family]
+            device_index = sel.get_device_index(*dev_prop.device_name.mml_device_index())
+
+            mon_pv = sel.Monitor.ChannelNames[device_index].strip()
+            set_pv = sel.Setpoint.ChannelNames[device_index].strip()
+
+            # where it starts to call
+            mon_prop = DevicePropertyID(device_name=mon_pv, property="read_current")
+            setp_prop = DevicePropertyID(device_name=set_pv, property="set_current")
+
+            for elm_prop in elem_props:
+                forward_lut.append(
+                    LiaisonManagerForwardLookupElement(
+                        lat_id=elm_prop, dev_ids=[mon_prop]
+                    )
+                )
+                # forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[setp_prop]))
+            inv_lut_tmp[mon_prop].append(elem_props)
+            inv_lut_tmp[setp_prop].append(elem_props)
+
+            monitor = Monitor(pv_name=mon_pv, rcmd=rcmd, prec=3, record_type="ai")
+            setp = Setpoint(
+                pv_name=set_pv,
+                rcmd=rcmd,
+                prec=3,
+                record_type="ao",
+                reads=[monitor.rcmd],
+            )
+            process_variable_views.extend([monitor, setp])
+
+    # now work on the inv_lut_tmp and stretch it out
+    tmp = [
+        LiaisonManagerInverseLookupElement(
+            dev_id=dev_id,
+            lat_ids=list(itertools.chain.from_iterable(lat_ids))
+        )
+        for dev_id, lat_ids in inv_lut_tmp.items()
+    ]
+    inverse_lut.extend(tmp)
+    del tmp
+    del inv_lut_tmp
+
+
     # BPMs are not directly handled within in translating
     # mexec engine (yet)
     # but the view can use this information
@@ -229,7 +308,7 @@ def create_liaison_lut(
                 ao_table=ao_table, lat=lat, dev_id=dev_name
             )
             sel = ao_table[dev_name.family]
-            device_index = sel.get_device_list().index(dev_name.mml_device_index())
+            device_index = sel.get_device_index(*dev_name.mml_device_index())
             mon_pv = sel.Monitor.ChannelNames[device_index].strip()
             lat_prop = LatticeElementPropertyID(
                 element_name=bpm_name, property=property
@@ -259,8 +338,6 @@ def create_liaison_lut(
         # Need to take care that process variables occur again!
         # For quads and sextupoles more than one variable is
         # in a line
-        # ("QUAD", "main_strength"),
-        # ("SEXT", "main_strength"),
         ("HCM", "x_kick"),
         ("VCM", "y_kick"),
     ]:
@@ -284,9 +361,7 @@ def create_liaison_lut(
 
             rcmd = ReadCommand(id=corr, property="set_current")
             sel = ao_table[dev_prop.device_name.family]
-            device_index = sel.get_device_list().index(
-                dev_prop.device_name.mml_device_index()
-            )
+            device_index = sel.get_device_index(*dev_prop.device_name.mml_device_index())
 
             mon_pv = sel.Monitor.ChannelNames[device_index].strip()
             set_pv = sel.Setpoint.ChannelNames[device_index].strip()
@@ -375,6 +450,8 @@ def create_liaison_lut(
     inv = LiaisonManagerInverseLookupTable(inverse_lut)
     fwd.verify()
     inv.verify()
+    # what's the better way: this would be explicit
+    assert not inv.non_unique_entries()
     return fwd, inv, process_variable_views
 
 
@@ -382,7 +459,9 @@ def create_translator_luts(
     yp: YellowPagesBase,
     lm: LiaisonManagerBase,
     ao_table: Dict[str, FamilyInfoCollection],
+    ramp_data: Dict[str, xr.Dataset],
     lat,
+    reference_energy,
 ) -> TranslatorLookupTable:
     translator_lut: List[TranslatorLookupTableElement] = []
 
@@ -408,6 +487,54 @@ def create_translator_luts(
             ),
         )
     )
+    del d, src, tgt, tmp, dev_name
+
+    # now to the energy dependent part: main magnets
+    for family_name in "QF", "QD", "SF", "SD", "SHF", "SHD":
+        ao_view = ao_table[family_name]
+        try:
+            t_ramp_data = ramp_data[family_name]
+        except KeyError:
+            logger.info(f"{family_name} has no ramp data, thus not adding translation for this family")
+            continue
+        for dev_name in yp.get(family_name):
+            # Todo: change to this interface as soon as it is available
+            # dev_idx = ao_table[family_name].get_device_index(sector=dev_name.sector, child=dev_name.child)
+            dev_idx = ao_view.DeviceList.index((dev_name.sector, dev_name.child))
+            range = ao_view.Setpoint.Range[dev_idx]
+            assert ao_view.Setpoint.HW2PhysicsParams is None
+
+            range = t_ramp_data.range.sel(sector=dev_name.sector, child=dev_name.child)
+
+            d = lm.objects_for_device(dev_name=dev_name)
+            (src,) = d
+            assert src.device_name == dev_name
+
+            # Need to understand why I get that many ...
+            targets, = d.values()
+
+            for tgt in targets:
+                # Need to understand why its a lost
+                conv = MultiplyerScaledByEnergy(
+                    reference_multiplyer=float(
+                        t_ramp_data.physics.sel(sector=dev_name.sector, child=dev_name.child)
+                    ),
+                    reference_energy=reference_energy,
+                    range=Range(min=float(range[0]), max=float(range[1])),
+                    scale_by_energy=[
+                        CurvePoint(float(indep), float(dep))
+                        for indep, dep in zip(
+                            t_ramp_data.reference_energy, t_ramp_data.setpoint
+                        )
+                    ],
+                )
+
+                translator_lut.append(
+                    TranslatorLookupTableElement(
+                        conversion_id=ConversionID(tgt, src),
+                        conversion_info=conv,
+                    )
+                )
 
     scale = ao_table["BPMx"].Monitor.Physics2HWParams
     assert isinstance(scale, float)
@@ -454,7 +581,7 @@ def create_translator_luts(
         coeffs = hcm_coefficients(src.device_name.mml_device_index())
 
         sel = ao_table[src.device_name.family]
-        device_index = sel.get_device_list().index(src.device_name.mml_device_index())
+        device_index = sel.get_device_index(*src.device_name.mml_device_index())
 
         mon_pv = sel.Monitor.ChannelNames[device_index].strip()
         set_pv = sel.Setpoint.ChannelNames[device_index].strip()
@@ -526,7 +653,7 @@ def create_translator_luts(
         )
 
         sel = ao_table[src.device_name.family]
-        device_index = sel.get_device_list().index(src.device_name.mml_device_index())
+        device_index = sel.get_device_index(*src.device_name.mml_device_index())
 
         mon_pv = sel.Monitor.ChannelNames[device_index].strip()
         set_pv = sel.Setpoint.ChannelNames[device_index].strip()
@@ -589,19 +716,21 @@ def load_managers():
     Todo:
         return yellow pages manager
     """
-    loaded_ramp_data = load_ramp_data()
     pass
 
     lat = als_load_lattice(default_filename)
     ao_model = als_ring_ao_data()
-
+    ramp_data = load_ramp_data(ao_model)
 
     yp = create_yellow_pages_input(ao_model, lat)
     yp
 
     fwd_lut, inv_lut, process_variable_views = create_liaison_lut(yp, ao_model, lat)
     lm = LiaisonManager(forward_lut=fwd_lut, inverse_lut=inv_lut)
-    ts_lut = create_translator_luts(yp, lm, ao_model, lat)
+    ts_lut = create_translator_luts(
+        yp, lm, ao_model, ramp_data, lat, reference_energy=default_energy
+    )
+
     # Todo: get the brho of the storage ring
     ts = TranslatorService(lut=ts_lut, brho=4.5)
     ts
