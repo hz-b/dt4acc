@@ -171,11 +171,11 @@ def convert_read_commands(
         assert (
             backend_view == "design"
         ), "expected to need to convert from device to design"
+        #: Todo check if that is correctly implemented
         tmp = [cmd_rewriter.inverse_read_command(r) for r in command]
         return tmp
 
     raise AssertionError("Did not expect to end up here!")
-
 
 def convert_set_commands(
     *,
