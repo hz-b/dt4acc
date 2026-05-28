@@ -1,10 +1,20 @@
 from dataclasses import dataclass
-from typing import Sequence, Tuple, Literal
+from typing import Sequence, Tuple, Literal, Annotated
 
-from pydantic import BaseModel
+from pydantic import BaseModel, StringConstraints
 
 from dt4acc_lib.model.utils.translator_manager_lookup_table import PolynomCoefficients
 from dt4acc_lib.model.utils.command import ReadCommand
+
+
+EpicsPVCompatibleString = Annotated[
+    str,
+    StringConstraints(
+        pattern=r"^[A-Za-z0-9_\-:+\[\]<>.;]+$",
+        min_length=1,
+        max_length=60,
+    ),
+]
 
 
 @dataclass(frozen=True)
@@ -35,7 +45,7 @@ class CoefficientsForDevices:
 
 class _ProcessVariableView(BaseModel):
     rcmd: ReadCommand
-    pv_name: str
+    pv_name: EpicsPVCompatibleString
     prec: int
     # Most values will be updated immediately
     # some like BPM or similar only delayewd.
