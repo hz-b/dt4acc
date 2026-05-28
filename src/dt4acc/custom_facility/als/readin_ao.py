@@ -5,6 +5,7 @@ from typing import Dict, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
+import scipy.io.matlab
 import xarray as xr
 from scipy.io import loadmat
 
@@ -83,23 +84,38 @@ def create_ranges(*, family_name: str, upper_limit, lower_limit, field_name, ao_
 
 
 def convert(obj):
-    if isinstance(obj, np.ndarray):
+    if isinstance(obj, scipy.io.matlab.MatlabFunction):
+        return convert(obj.tolist())
+    elif isinstance(obj, scipy.io.matlab.mat_struct):
+        r = {name: convert(getattr(obj, name)) for name in obj._fieldnames}
+        return r
+    elif isinstance(obj, np.ndarray):
         return obj.tolist()
     elif isinstance(obj, dict):
         return {k: convert(v) for k, v in obj.items()}
     elif isinstance(obj, list):
         return [convert(v) for v in obj]
+    elif isinstance(obj, (str, int, float)):
+        # for debugging remove this branch for production
+        return obj
     else:
         return obj
 
-def load_ramp_data(ao_model: Dict[str, FamilyInfoCollection]) -> Dict[str, xr.Dataset]:
-    path = (
+default_data_dir = (
         Path(os.environ["HOME"])
         / "Devel/github/matlab-middle-layer/machine/ALS//StorageRingOpsData/"
     )
+
+def load_loco_data(ao_model: Dict[str, FamilyInfoCollection])-> Dict[str, xr.Dataset]:
+    data = loadmat(default_data_dir / "PseudoSingleBunch" / "LOCO_Production.mat", simplify_cells=True)
+    data
+
+
+def load_ramp_data(ao_model: Dict[str, FamilyInfoCollection]) -> Dict[str, xr.Dataset]:
     # filename = path / "Greg/alsrampup.mat"
 
-    data = loadmat(path / "PseudoSingleBunch" / "alsrampup.mat", simplify_cells=True)
+
+    data = loadmat(default_data_dir / "PseudoSingleBunch" / "alsrampup.mat", simplify_cells=True)
     # data = loadmat(path / "Model" /"alsrampdown.mat", simplify_cells=True)
     # data = loadmat(path / "Model" /"alsrampup.mat", simplify_cells=True)
     ramp_data = data["RampTable"].copy()
@@ -136,21 +152,33 @@ def load_ramp_data(ao_model: Dict[str, FamilyInfoCollection]) -> Dict[str, xr.Da
 
 
 def als_ring_ao_data():
-    filename = (
+    t_dir =    filename = (
         Path(os.environ.get("HOME"))
         / "Documents"
         / "dt4acc_als_data"
-        / "MML_ao_SR_250410_raw.json"
     )
+
+
+    filename = t_dir / "ao_as_loaded_from_mml.mat"
+    data_from_mat = loadmat(filename, simplify_cells=True)
+    tmp = convert(data_from_mat["AO"])
+    model = load(tmp)
+    return model
+    pass
+
+    # as received by Thorsten
+    filename = t_dir / "MML_ao_SR_250410_raw.json"
     with open(filename, "r") as fp:
         data = json.load(fp)
 
     model = load(data["ao"])
+
     return model
 
 
 def main():
     ao_model = als_ring_ao_data()
+    loco_data = load_loco_data(ao_model)
     ramp_data = load_ramp_data(ao_model)
     pass
 
