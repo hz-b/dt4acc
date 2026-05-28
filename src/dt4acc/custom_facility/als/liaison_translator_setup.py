@@ -252,7 +252,7 @@ def create_liaison_lut(
         for dev_name in yp.get(family_name):
             # Todo: rework this loop and use ao or yp as leading reference
             # expect only one for forward but more than one for backward
-            dev_prop = DevicePropertyID(device_name=dev_name, property=property)
+            dev_prop_set = DevicePropertyID(device_name=dev_name, property=property)
             element_names = get_element_uuids_for_device(
                 ao_table=ao_table, lat=lat, dev_id=dev_name
             )
@@ -262,12 +262,12 @@ def create_liaison_lut(
             ]
 
             # for elm_prop in elem_props:
-            #    forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop]))
-            inv_lut_tmp[dev_prop].append(elem_props)
+            #    forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop_set]))
+            inv_lut_tmp[dev_prop_set].append(elem_props)
 
-            sel = ao_table[dev_prop.device_name.family]
+            sel = ao_table[dev_prop_set.device_name.family]
             device_index = sel.get_device_index(
-                *dev_prop.device_name.mml_device_index()
+                *dev_prop_set.device_name.mml_device_index()
             )
 
             mon_pv = sel.Monitor.ChannelNames[device_index].strip()
@@ -337,7 +337,7 @@ def create_liaison_lut(
     ]:
         for dev_name in yp.get(family_name):
             # expect only one
-            dev_prop = DevicePropertyID(device_name=dev_name, property=property)
+            dev_prop_set = DevicePropertyID(device_name=dev_name, property=property)
             (bpm_name,) = get_element_uuids_for_device(
                 ao_table=ao_table, lat=lat, dev_id=dev_name
             )
@@ -348,11 +348,11 @@ def create_liaison_lut(
                 element_name=bpm_name, property=property
             )
             forward_lut.append(
-                LiaisonManagerForwardLookupElement(lat_id=lat_prop, dev_ids=[dev_prop])
+                LiaisonManagerForwardLookupElement(lat_id=lat_prop, dev_ids=[dev_prop_set])
             )
             inverse_lut.append(
                 LiaisonManagerInverseLookupElement(
-                    dev_id=dev_prop,
+                    dev_id=dev_prop_set,
                     lat_ids=[lat_prop],
                 )
             )
@@ -380,7 +380,6 @@ def create_liaison_lut(
     ]:
         for corr in yp.get(family_name):
             # As if you could set current to a magnet
-            dev_prop = DevicePropertyID(device_name=corr, property="set_current")
 
             element_names = get_element_uuids_for_device(
                 ao_table=ao_table, lat=lat, dev_id=corr
@@ -390,16 +389,19 @@ def create_liaison_lut(
                 for name in element_names
             ]
 
-            # for elm_prop in elem_props:
-            #    forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop]))
-            inverse_lut.append(
-                LiaisonManagerInverseLookupElement(dev_id=dev_prop, lat_ids=elem_props)
-            )
+            dev_prop_set = DevicePropertyID(device_name=corr, property="set_current")
+            dev_prop_read = DevicePropertyID(device_name=corr, property="read_current")
 
-            rcmd = ReadCommand(id=corr, property="set_current")
-            sel = ao_table[dev_prop.device_name.family]
+            # for elm_prop in elem_props:
+            #    forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop_set]))
+            inverse_lut.extend([
+                LiaisonManagerInverseLookupElement(dev_id=dev_prop_set, lat_ids=elem_props),
+                LiaisonManagerInverseLookupElement(dev_id=dev_prop_read, lat_ids=elem_props)
+            ])
+
+            sel = ao_table[dev_prop_set.device_name.family]
             device_index = sel.get_device_index(
-                *dev_prop.device_name.mml_device_index()
+                *dev_prop_set.device_name.mml_device_index()
             )
 
             mon_pv = sel.Monitor.ChannelNames[device_index].strip()
@@ -423,10 +425,10 @@ def create_liaison_lut(
                 LiaisonManagerInverseLookupElement(dev_id=setp_prop, lat_ids=elem_props)
             )
 
-            monitor = Monitor(pv_name=mon_pv, rcmd=rcmd, prec=3, record_type="ai")
+            monitor = Monitor(pv_name=mon_pv, rcmd=ReadCommand(id=corr, property="read_current"), prec=3, record_type="ai")
             setp = Setpoint(
                 pv_name=set_pv,
-                rcmd=rcmd,
+                rcmd=ReadCommand(id=corr, property="set_current"),
                 prec=3,
                 record_type="ao",
                 reads=[monitor.rcmd],
@@ -436,7 +438,7 @@ def create_liaison_lut(
 
     # master clock defines frequency of cavity
     for cav in yp.get("RF"):
-        dev_prop = DevicePropertyID(device_name=cav, property="frequency")
+        dev_prop_set = DevicePropertyID(device_name=cav, property="frequency")
         dev_prop_mc = DevicePropertyID(
             device_name="master_clock", property="reference_frequency"
         )
@@ -449,13 +451,13 @@ def create_liaison_lut(
         ]
 
         for elm_prop in elem_props:
-            # forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop]))
+            # forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop_set]))
             forward_lut.append(
                 LiaisonManagerForwardLookupElement(
                     lat_id=elm_prop, dev_ids=[dev_prop_mc]
                 )
             )
-        # inverse_lut.append(LiaisonManagerInverseLookupElement(dev_id=dev_prop, lat_ids=elem_props))
+        # inverse_lut.append(LiaisonManagerInverseLookupElement(dev_id=dev_prop_set, lat_ids=elem_props))
         inverse_lut.append(
             LiaisonManagerInverseLookupElement(dev_id=dev_prop_mc, lat_ids=elem_props)
         )
@@ -644,57 +646,56 @@ def create_translator_luts(
     ]:
         for dev_name in yp.get(family_name):
             d = lm.objects_for_device(dev_name=dev_name)
-            (src,) = d
-            assert src.device_name == dev_name
-            (tmp,) = d.values()
-            (tgt,) = tmp
-            coeffs = coeff_retrieval(src.device_name.mml_device_index())
+            for src, targets in d.items():
+                assert src.device_name == dev_name
+                (tgt,) = targets
+                coeffs = coeff_retrieval(src.device_name.mml_device_index())
 
-            sel = ao_table[src.device_name.family]
-            device_index = sel.get_device_index(*src.device_name.mml_device_index())
+                sel = ao_table[src.device_name.family]
+                device_index = sel.get_device_index(*src.device_name.mml_device_index())
 
-            mon_pv = sel.Monitor.ChannelNames[device_index].strip()
-            set_pv = sel.Setpoint.ChannelNames[device_index].strip()
+                mon_pv = sel.Monitor.ChannelNames[device_index].strip()
+                set_pv = sel.Setpoint.ChannelNames[device_index].strip()
 
-            # where it starts to call
-            mon_prop = DevicePropertyID(device_name=mon_pv, property="read_current")
-            setp_prop = DevicePropertyID(device_name=set_pv, property="set_current")
+                # where it starts to call
+                mon_prop = DevicePropertyID(device_name=mon_pv, property="read_current")
+                setp_prop = DevicePropertyID(device_name=set_pv, property="set_current")
 
-            # Need to check if that is the correct coefficient
-            # For now I assume it returns a scale factor for k and B
-            # these are for hardware to physics
-            assert not math.isclose(coeffs[0], 0.0, abs_tol=1e-12)
-            conv = PolynomCoefficients(coeffs=[0.0, 1./coeffs[0]], energy_dependent=True)
-            translator_lut.append(
-                TranslatorLookupTableElement(
-                    conversion_id=ConversionID(tgt, src),
-                    conversion_info=conv,
+                # Need to check if that is the correct coefficient
+                # For now I assume it returns a scale factor for k and B
+                # these are for hardware to physics
+                assert not math.isclose(coeffs[0], 0.0, abs_tol=1e-12)
+                conv = PolynomCoefficients(coeffs=[0.0, 1./coeffs[0]], energy_dependent=True)
+                translator_lut.append(
+                    TranslatorLookupTableElement(
+                        conversion_id=ConversionID(tgt, src),
+                        conversion_info=conv,
+                    )
                 )
-            )
-            # Todo: this should be more automatic
-            translator_lut.append(
-                TranslatorLookupTableElement(
-                    conversion_id=ConversionID(
-                        tgt,
-                        DevicePropertyID(
-                            device_name=src.device_name, property="read_current"
+                # Todo: this should be more automatic
+                translator_lut.append(
+                    TranslatorLookupTableElement(
+                        conversion_id=ConversionID(
+                            tgt,
+                            DevicePropertyID(
+                                device_name=src.device_name, property="read_current"
+                            ),
                         ),
-                    ),
-                    conversion_info=conv,
+                        conversion_info=conv,
+                    )
                 )
-            )
 
-            translator_lut.append(
-                TranslatorLookupTableElement(
-                    conversion_id=ConversionID(tgt, mon_prop), conversion_info=conv
+                translator_lut.append(
+                    TranslatorLookupTableElement(
+                        conversion_id=ConversionID(tgt, mon_prop), conversion_info=conv
+                    )
                 )
-            )
-            translator_lut.append(
-                TranslatorLookupTableElement(
-                    conversion_id=ConversionID(tgt, setp_prop), conversion_info=conv
+                translator_lut.append(
+                    TranslatorLookupTableElement(
+                        conversion_id=ConversionID(tgt, setp_prop), conversion_info=conv
+                    )
                 )
-            )
-        pass
+                pass
 
 
     translator_lut.extend(
