@@ -1,5 +1,6 @@
 import itertools
 import logging
+import math
 from collections import defaultdict
 from typing import Dict, Tuple, Sequence, List, Union
 
@@ -92,8 +93,13 @@ def extract_family_member_names(
     alternative_family_names: Sequence[str] = None,
 ) -> Sequence[str]:
     alternative_family_names = alternative_family_names or []
-    indices = ao_table[family_name].AT.get_element_indices()
-    dev_list = ao_table[family_name].get_device_list()
+
+    ao_view =  ao_table[family_name]
+    if ao_view.AT is None:
+        logger.warning(f"No AT info given for {family_name}, thus not building yp field")
+        return
+    indices = ao_view.AT.get_element_indices()
+    dev_list = ao_view.get_device_list()
 
     assert len(indices) == len(
         dev_list
@@ -137,6 +143,7 @@ def create_yellow_pages_input(
         "QD",
         "SF",
         "SD",
+        # This does not contain AT indices ....
         "SHF",
         "SHD",
         "QFA",
@@ -146,6 +153,11 @@ def create_yellow_pages_input(
     names = {
         fam: extract_family_member_names(lat, ao_table, fam)
         for fam in standard_families
+    }
+
+    # extract can return None
+    names = {
+        fam: names for fam, names in names.items() if names is not None
     }
 
     names["BPMx"] = extract_family_member_names(
@@ -166,9 +178,9 @@ def create_yellow_pages_input(
     )
 
     # what are these ?
-    names["BSC"] = extract_family_member_names(
-        lat, ao_table, "BSC", alternative_family_names=["BS"]
-    )
+    # names["BSC"] = extract_family_member_names(
+    #     lat, ao_table, "BSC", alternative_family_names=["BS"]
+    # )
     names["SQSF"] = extract_family_member_names(
         lat, ao_table, "SQSF", alternative_family_names=["SFF"]
     )
@@ -595,41 +607,33 @@ def create_translator_luts(
                 )
                 pass
 
-    scale = ao_table["BPMx"].Monitor.Physics2HWParams
-    assert isinstance(scale, float)
-    # just one for all of them
-    conv = PolynomCoefficients(coeffs=[0.0, scale], energy_dependent=False)
-    for dev_name in yp.get("BPMx"):
-        (element_name,) = get_element_uuids_for_device(
-            ao_table=ao_table, lat=lat, dev_id=dev_name
-        )
-        src = LatticeElementPropertyID(element_name, "dx")
-        (dst,) = lm.forward(src)
+    for family_name, property in [
+        ("BPMx", "dx"),
+        ("BPMy", "dy"),
+    ]:
+        ao_view = ao_table[family_name]
+        scale = ao_view.Monitor.Physics2HWParams
+        assert isinstance(scale, float)
+        assert math.isclose(scale, 1. / ao_view.Monitor.HW2PhysicsParams)
 
-        translator_lut.append(
-            TranslatorLookupTableElement(
-                conversion_id=ConversionID(src, dst),
-                conversion_info=conv,
+        for dev_name in yp.get(family_name):
+            (element_name,) = get_element_uuids_for_device(
+                ao_table=ao_table, lat=lat, dev_id=dev_name
             )
-        )
+            src = LatticeElementPropertyID(element_name, property)
+            (dst,) = lm.forward(src)
 
-    scale = ao_table["BPMy"].Monitor.Physics2HWParams
-    assert isinstance(scale, float)
-    # just one for all of them
-    conv = PolynomCoefficients(coeffs=[0.0, scale], energy_dependent=False)
-    for dev_name in yp.get("BPMy"):
-        (element_name,) = get_element_uuids_for_device(
-            ao_table=ao_table, lat=lat, dev_id=dev_name
-        )
-        src = LatticeElementPropertyID(element_name, "dy")
-        (dst,) = lm.forward(src)
+            offset = ao_view.Offset[ao_view.get_device_index(*dev_name.mml_device_index())]
+            conv = PolynomCoefficients(coeffs=[offset, scale], energy_dependent=False)
+            pass
 
-        translator_lut.append(
-            TranslatorLookupTableElement(
-                conversion_id=ConversionID(src, dst),
-                conversion_info=conv,
+            translator_lut.append(
+                TranslatorLookupTableElement(
+                    conversion_id=ConversionID(src, dst),
+                    conversion_info=conv,
+                )
             )
-        )
+
 
     for dev_name in yp.get("HCM"):
         d = lm.objects_for_device(dev_name=dev_name)
