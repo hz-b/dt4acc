@@ -74,6 +74,11 @@ async def build_ao_record(
     if model.rcmd is not None:
         reads = [model.rcmd]
 
+    # don't forget the ones that should be updated
+    # when this changes: e.g. read backs from power converters
+    reads = reads + model.reads
+    pass
+
     async def update(val: float):
         return await controller.update(
             cmd=Command(
