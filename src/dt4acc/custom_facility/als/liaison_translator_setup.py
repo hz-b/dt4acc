@@ -6,6 +6,7 @@ from typing import Dict, Tuple, Sequence, List, Union
 
 import numpy as np
 import pandas as pd
+import pydantic
 import xarray as xr
 
 from bact_mml_json_importer.data_model.mml_ao import FamilyInfoCollection
@@ -355,15 +356,18 @@ def create_liaison_lut(
                     lat_ids=[lat_prop],
                 )
             )
-            process_variable_views.append(
-                Monitor(
+            try:
+                mon = Monitor(
                     pv_name=mon_pv,
                     rcmd=ReadCommand(id=dev_name, property=property),
                     prec=3,
                     record_type="ai",
                     update="delayed",
                 )
-            )
+            except pydantic.ValidationError as ex:
+                logger.error(f"Failed to add monitor for {dev_name}: {ex}")
+                continue
+            process_variable_views.append(mon)
             pass
 
     for family_name, property in [
@@ -634,108 +638,64 @@ def create_translator_luts(
                 )
             )
 
+    for family_name, coeff_retrieval in [
+        ("HCM", hcm_coefficients),
+        ("VCM", vcm_coefficients),
+    ]:
+        for dev_name in yp.get(family_name):
+            d = lm.objects_for_device(dev_name=dev_name)
+            (src,) = d
+            assert src.device_name == dev_name
+            (tmp,) = d.values()
+            (tgt,) = tmp
+            coeffs = coeff_retrieval(src.device_name.mml_device_index())
 
-    for dev_name in yp.get("HCM"):
-        d = lm.objects_for_device(dev_name=dev_name)
-        (src,) = d
-        assert src.device_name == dev_name
-        (tmp,) = d.values()
-        (tgt,) = tmp
-        coeffs = hcm_coefficients(src.device_name.mml_device_index())
+            sel = ao_table[src.device_name.family]
+            device_index = sel.get_device_index(*src.device_name.mml_device_index())
 
-        sel = ao_table[src.device_name.family]
-        device_index = sel.get_device_index(*src.device_name.mml_device_index())
+            mon_pv = sel.Monitor.ChannelNames[device_index].strip()
+            set_pv = sel.Setpoint.ChannelNames[device_index].strip()
 
-        mon_pv = sel.Monitor.ChannelNames[device_index].strip()
-        set_pv = sel.Setpoint.ChannelNames[device_index].strip()
+            # where it starts to call
+            mon_prop = DevicePropertyID(device_name=mon_pv, property="read_current")
+            setp_prop = DevicePropertyID(device_name=set_pv, property="set_current")
 
-        # where it starts to call
-        mon_prop = DevicePropertyID(device_name=mon_pv, property="read_current")
-        setp_prop = DevicePropertyID(device_name=set_pv, property="set_current")
-
-        # Need to check if that is the correct coefficient
-        # For now I assume it returns a scale factor for k and B
-        conv = PolynomCoefficients(coeffs=[0.0, coeffs[0]], energy_dependent=True)
-        translator_lut.append(
-            TranslatorLookupTableElement(
-                conversion_id=ConversionID(tgt, src),
-                conversion_info=conv,
+            # Need to check if that is the correct coefficient
+            # For now I assume it returns a scale factor for k and B
+            # these are for hardware to physics
+            assert not math.isclose(coeffs[0], 0.0, abs_tol=1e-12)
+            conv = PolynomCoefficients(coeffs=[0.0, 1./coeffs[0]], energy_dependent=True)
+            translator_lut.append(
+                TranslatorLookupTableElement(
+                    conversion_id=ConversionID(tgt, src),
+                    conversion_info=conv,
+                )
             )
-        )
-        # Todo: this should be more automatic
-        translator_lut.append(
-            TranslatorLookupTableElement(
-                conversion_id=ConversionID(
-                    tgt,
-                    DevicePropertyID(
-                        device_name=src.device_name, property="read_current"
+            # Todo: this should be more automatic
+            translator_lut.append(
+                TranslatorLookupTableElement(
+                    conversion_id=ConversionID(
+                        tgt,
+                        DevicePropertyID(
+                            device_name=src.device_name, property="read_current"
+                        ),
                     ),
-                ),
-                conversion_info=conv,
+                    conversion_info=conv,
+                )
             )
-        )
 
-        translator_lut.append(
-            TranslatorLookupTableElement(
-                conversion_id=ConversionID(tgt, mon_prop), conversion_info=conv
+            translator_lut.append(
+                TranslatorLookupTableElement(
+                    conversion_id=ConversionID(tgt, mon_prop), conversion_info=conv
+                )
             )
-        )
-        translator_lut.append(
-            TranslatorLookupTableElement(
-                conversion_id=ConversionID(tgt, setp_prop), conversion_info=conv
+            translator_lut.append(
+                TranslatorLookupTableElement(
+                    conversion_id=ConversionID(tgt, setp_prop), conversion_info=conv
+                )
             )
-        )
         pass
 
-    for dev_name in yp.get("VCM"):
-
-        d = lm.objects_for_device(dev_name=dev_name)
-        (src,) = d
-        assert src.device_name == dev_name
-        (tmp,) = d.values()
-        (tgt,) = tmp
-
-        coeffs = vcm_coefficients(src.device_name.mml_device_index())
-        # Need to check if that is the correct coefficient
-        conv = PolynomCoefficients(coeffs=[0.0, coeffs[0]], energy_dependent=True)
-        translator_lut.append(
-            TranslatorLookupTableElement(
-                conversion_id=ConversionID(tgt, src), conversion_info=conv
-            )
-        )
-        translator_lut.append(
-            TranslatorLookupTableElement(
-                conversion_id=ConversionID(
-                    tgt,
-                    DevicePropertyID(
-                        device_name=src.device_name, property="read_current"
-                    ),
-                ),
-                conversion_info=conv,
-            )
-        )
-
-        sel = ao_table[src.device_name.family]
-        device_index = sel.get_device_index(*src.device_name.mml_device_index())
-
-        mon_pv = sel.Monitor.ChannelNames[device_index].strip()
-        set_pv = sel.Setpoint.ChannelNames[device_index].strip()
-
-        # where it starts to call
-        mon_prop = DevicePropertyID(device_name=mon_pv, property="read_current")
-        setp_prop = DevicePropertyID(device_name=set_pv, property="set_current")
-
-        translator_lut.append(
-            TranslatorLookupTableElement(
-                conversion_id=ConversionID(tgt, mon_prop), conversion_info=conv
-            )
-        )
-        translator_lut.append(
-            TranslatorLookupTableElement(
-                conversion_id=ConversionID(tgt, setp_prop), conversion_info=conv
-            )
-        )
-        pass
 
     translator_lut.extend(
         [
@@ -757,17 +717,6 @@ def create_translator_luts(
             ),
         ]
     )
-
-    # for dev_name in yp.get("QUAD"):
-    #     d = lm.objects_for_device(dev_name=dev_name)
-    #     src, = d
-    #     assert src.device_name == dev_name
-    #     tmp, = d.values()
-    #     tgt, = tmp
-    #
-    # for dev_name in yp.get("SEXT"):
-    #    d = lm.objects_for_device(dev_name=dev_name)
-    #     # needs to be implemented
 
     r = TranslatorLookupTable(lut=translator_lut)
     r.verify()

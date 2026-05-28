@@ -24,7 +24,7 @@ data_dir = Path(__file__).parent / "data" / "reference_curves"
 
 # Optional: keep this if you want to assert specific families should exist.
 # If you do not want that behaviour, leave it as None.
-expected_families =  ["QF", "QD", "QFA",  "QDA"]
+expected_families =  ["HCM", "VCM", "QF", "QD", "QFA",  "QDA"]
 
 
 def _family_file(family_name: str) -> Path:
@@ -93,4 +93,4 @@ def test_amp2k_matches_matlab_reference(reference_data: ReferenceCurvesForFamily
                 # assert actual == pytest.approx(point.dep, rel=1e-12, abs=1e-12)
             except:
                 logger.error(f"Test failed for {reference_curve.device_id} {reference_curve.channel_name} {reference_curve.pv_name}")
-
+                raise
