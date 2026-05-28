@@ -99,7 +99,9 @@ def load_ramp_data(ao_model: Dict[str, FamilyInfoCollection]) -> Dict[str, xr.Da
     )
     # filename = path / "Greg/alsrampup.mat"
 
-    data = loadmat(path / "Model" /"alsrampdown.mat", simplify_cells=True)
+    data = loadmat(path / "PseudoSingleBunch" / "alsrampup.mat", simplify_cells=True)
+    # data = loadmat(path / "Model" /"alsrampdown.mat", simplify_cells=True)
+    # data = loadmat(path / "Model" /"alsrampup.mat", simplify_cells=True)
     ramp_data = data["RampTable"].copy()
     lower_limit = ramp_data.pop("UpperLattice")
     upper_limit = ramp_data.pop("LowerLattice")

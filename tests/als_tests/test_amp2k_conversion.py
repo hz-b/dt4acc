@@ -1,4 +1,11 @@
-# tests/test_reference_curves_against_matlab.py
+"""
+
+Check that the managers are built for the same configuration
+that the data have been exported for
+
+Todo:
+    add the mode to the data
+"""
 from __future__ import annotations
 
 import logging
@@ -17,7 +24,7 @@ data_dir = Path(__file__).parent / "data" / "reference_curves"
 
 # Optional: keep this if you want to assert specific families should exist.
 # If you do not want that behaviour, leave it as None.
-expected_families =  ["QF", "QD", "QFA"] # "QDA"]
+expected_families =  ["QF", "QD", "QFA",  "QDA"]
 
 
 def _family_file(family_name: str) -> Path:
@@ -83,8 +90,8 @@ def test_amp2k_matches_matlab_reference(reference_data: ReferenceCurvesForFamily
             actual = to.inverse(point.indep)
             pass
             try:
-                assert actual == pytest.approx(point.dep, rel=1e-1, abs=1e-11)
+                # assert actual == pytest.approx(point.dep, rel=1e-1, abs=1e-11)
+                assert actual == pytest.approx(point.dep, rel=1e-12, abs=1e-12)
             except:
                 logger.error(f"Test failed for {reference_curve.device_id} {reference_curve.channel_name} {reference_curve.pv_name}")
-            # assert actual == pytest.approx(point.dep, rel=1e-12, abs=1e-12)
 
