@@ -25,7 +25,7 @@ class BESSYIIEpicsController(EpicsController):
                 **await initialize_power_converter_pvs(
                     self.builder, self.prefix, controller=self
                 ),
-                **initialize_machine_info_pvs(self.builder),
+                **initialize_machine_info_pvs(self.builder, n_ref_buckets=400),
                 **initialize_orbit_object_pvs(self.builder),
                 **initialize_orbit_pvs(self.builder),
                 **initialize_twiss_pvs(self.builder),
