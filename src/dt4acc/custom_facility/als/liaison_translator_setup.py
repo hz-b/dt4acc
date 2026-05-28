@@ -522,7 +522,9 @@ def create_translator_luts(
         t_ramp_data = ramp_data[family_name]
 
         scale_by_energy = [
-            CurvePoint(float(indep), float(dep))
+            # exported data in GeV
+            # dt4acc uses SI units with eV extension
+            CurvePoint(float(indep) * 1e9, float(dep))
             for indep, dep in zip(t_ramp_data.reference_energy, t_ramp_data.setpoint)
         ]
 
@@ -789,7 +791,7 @@ def load_managers():
     )
 
     # Todo: get the brho of the storage ring
-    ts = TranslatorService(lut=ts_lut, brho=4.5)
+    ts = TranslatorService(lut=ts_lut, brho=calculate_brho(default_energy))
     ts
     yp = YellowPages
     return yp, lm, ts, process_variable_views
