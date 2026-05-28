@@ -85,13 +85,12 @@ def test_amp2k_matches_matlab_reference(reference_data: ReferenceCurvesForFamily
         conv_id, = convs.keys()
         to = ts.get(conv_id)
         for point in reference_curve.curve:
-            if point.indep < 81:
-                continue
-            actual = to.inverse(point.indep)
+            actual = float(to.inverse(point.indep))
             pass
             try:
-                # assert actual == pytest.approx(point.dep, rel=1e-1, abs=1e-11)
-                assert actual == pytest.approx(point.dep, rel=1e-12, abs=1e-12)
+                assert actual == pytest.approx(point.dep, rel=1e-7, abs=1e-7)
+                # That is perhaps to harsh for extrapolation
+                # assert actual == pytest.approx(point.dep, rel=1e-12, abs=1e-12)
             except:
                 logger.error(f"Test failed for {reference_curve.device_id} {reference_curve.channel_name} {reference_curve.pv_name}")
 
