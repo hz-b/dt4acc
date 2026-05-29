@@ -68,15 +68,17 @@ async def build_ao_record(
     initial_val = handle_returned_data(
         await controller.trigger_read([model.rcmd]), model.returned_data
     )
-
-    reads = []
-
-    if model.rcmd is not None:
-        reads = [model.rcmd]
-
     # don't forget the ones that should be updated
     # when this changes: e.g. read backs from power converters
-    reads = reads + model.reads
+    # but be aware: don't call the rcmd that is used as basis
+    # to build the Command passed to update
+    #
+    # This command will then be received by view: the value will
+    # be updated and everything starts all over again
+    #
+    # So only use the extra ones
+    reads = model.reads or []
+    assert  model.rcmd not in reads
 
     async def update(val: float):
         return await controller.update(
@@ -185,6 +187,7 @@ class ALSEpicsController(EpicsController):
         self.builder.LoadDatabase()
         softioc.iocInit(dispatcher)
 
+    async def trigger_read_all_values(self):
         # collect once all readings form all views
         # trigger update and then be finished
         # Read all in once at start up
