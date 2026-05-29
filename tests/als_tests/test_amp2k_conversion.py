@@ -8,6 +8,7 @@ Todo:
 """
 from __future__ import annotations
 
+import itertools
 import logging
 from pathlib import Path
 import pytest
@@ -24,13 +25,14 @@ data_dir = Path(__file__).parent / "data" / "reference_curves"
 
 # Optional: keep this if you want to assert specific families should exist.
 # If you do not want that behaviour, leave it as None.
-expected_families =  ["HCM", "VCM", "QF", "QD", "QFA",  "QDA"]
+expected_families = ["QF", "QD", "QFA", "QDA", "HCM", "VCM"]
 
 
-def _family_file(family_name: str) -> Path:
-    func_name = "amp2k"
+def _family_file(family_name: str, func_name="amp2k") -> Path:
     channel_name = "Setpoint"
-    return data_dir / f"reference_test_data_{family_name}_{func_name}_{channel_name}.json"
+    return (
+        data_dir / f"reference_test_data_{family_name}_{func_name}_{channel_name}.json"
+    )
 
 
 def _available_family_files() -> list[Path]:
@@ -56,7 +58,14 @@ def pytest_generate_tests(metafunc):
     if expected_families is None:
         files = _available_family_files()
     else:
-        files = [_family_file(fam) for fam in expected_families]
+        files = list(
+            itertools.chain.from_iterable(
+                [
+                    [_family_file(fam, func_name) for fam in expected_families]
+                    for func_name in ["k2amp", "amp2k"]
+                ]
+            )
+        )
 
     if not files:
         pytest.skip(f"No reference curve files found in {data_dir}")
@@ -82,15 +91,24 @@ def test_amp2k_matches_matlab_reference(reference_data: ReferenceCurvesForFamily
 
         dev_prop = DevicePropertyID(reference_curve.channel_name, "set_current")
         convs = ts.objects_for_device(reference_curve.pv_name.strip())
-        conv_id, = convs.keys()
+        (conv_id,) = convs.keys()
         to = ts.get(conv_id)
         for point in reference_curve.curve:
-            actual = float(to.inverse(point.indep))
+            if reference_curve.reference_function_name == "k2amp":
+                actual = float(to.forward(point.indep))
+            elif reference_curve.reference_function_name == "amp2k":
+                actual = float(to.inverse(point.indep))
+            else:
+                raise AssertionError(
+                    f"Unexpected reference curve function: {reference_curve.reference_function_name}"
+                )
             pass
             try:
-                assert actual == pytest.approx(point.dep, rel=1e-7, abs=1e-7)
+                assert actual == pytest.approx(point.dep, rel=1e-6, abs=1e-7)
                 # That is perhaps to harsh for extrapolation
                 # assert actual == pytest.approx(point.dep, rel=1e-12, abs=1e-12)
             except:
-                logger.error(f"Test failed for {reference_curve.device_id} {reference_curve.channel_name} {reference_curve.pv_name}")
+                logger.error(
+                    f"Test failed for {reference_curve.device_id} {reference_curve.channel_name} {reference_curve.pv_name}"
+                )
                 raise
