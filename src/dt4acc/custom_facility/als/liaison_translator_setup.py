@@ -5,7 +5,6 @@ from collections import defaultdict
 from typing import Dict, Tuple, Sequence, List, Union
 
 import numpy as np
-import pandas as pd
 import pydantic
 import xarray as xr
 
