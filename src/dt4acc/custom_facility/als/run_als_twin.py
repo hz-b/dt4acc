@@ -1,3 +1,6 @@
+import logging
+logging.basicConfig(level=logging.WARNING)
+
 import getpass
 import os
 
@@ -8,17 +11,16 @@ from dt4acc.core.bl.translating_command_execution_engine import TranslatingComma
 from dt4acc.custom_epics.ioc.controller import dispatcher
 from dt4acc.custom_facility.als.controller import ALSEpicsController
 from dt4acc.custom_facility.als.liaison_translator_setup import load_managers
-from dt4acc.custom_facility.als.read_lattice import als_load_lattice, default_filename
+from dt4acc.custom_facility.als.read_lattice import als_get_lattice, default_filename
 from dt4acc.custom_facility.als.view import ALSView
 from dt4acc_lib.model.utils.command import ReadCommand
 from dt4acc_lib.pyat_simulator.simulator_backend import SimulatorBackend
 from dt4acc_lib.bl.command_rewritter import CommandRewriter
 from dt4acc_lib.pyat_simulator.accelerator_simulator_proxy_factory import PyATAcceleratorSimulator
 
-
 def main():
 
-    lat = als_load_lattice(default_filename)
+    lat = als_get_lattice(default_filename)
     backend=SimulatorBackend(
         name="ALS_on_PyAT",
         acc=PyATAcceleratorSimulator(at_lattice=lat),
@@ -58,6 +60,7 @@ def main():
         process_variable_views=process_variable_views
     )
     dispatcher(controller.startup)
+    # dispatcher(controller.trigger_read_all_values)
     common_controller.start()
     softioc.interactive_ioc(globals())
 

@@ -1,3 +1,4 @@
+import functools
 import json
 import os
 
@@ -74,15 +75,19 @@ def als_load_lattice(filename: str, energy: float = default_energy):
     return r
 
 
-def main():
+@functools.lru_cache(maxsize=None)
+def als_get_lattice(filename: str, energy: float = default_energy):
+    return als_load_lattice(filename, energy)
 
+
+def main():
     # filename = (
     #        Path(os.environ.get("HOME"))
     #         / "Documents"
     #        / "dt4acc_soleil_twin_data"
     #         / "SOLEIL_II_V3631_sym1_V001_database.m"
     # )
-    r = als_load_lattice(default_filename)
+    r = als_get_lattice(default_filename)
     pass
 
 

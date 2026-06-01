@@ -13,7 +13,7 @@ from bact_mml_json_importer.data_model.mml_ao import FamilyInfoCollection
 from dt4acc.custom_facility.als.hcm_coefficients import hcm_coefficients
 from dt4acc.custom_facility.als.model import MMLStyleDeviceIdentifier, Monitor, Setpoint
 from dt4acc.custom_facility.als.read_lattice import (
-    als_load_lattice,
+    als_get_lattice,
     default_filename,
     default_energy,
 )
@@ -723,14 +723,13 @@ def create_translator_luts(
     return r
 
 
-def load_managers():
+def load_managers(lat = None):
     """
     Todo:
         return yellow pages manager
     """
-    pass
-
-    lat = als_load_lattice(default_filename)
+    if lat is None:
+        lat = als_get_lattice(default_filename)
     ao_model = als_ring_ao_data()
     ramp_data = load_ramp_data(ao_model)
 
