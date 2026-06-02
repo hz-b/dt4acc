@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import math
 from dataclasses import dataclass
@@ -14,6 +15,7 @@ from dt4acc.custom_epics.ioc.pv_setup import (
     initialize_orbit_pvs,
     initialize_twiss_pvs,
     initialize_tune_pvs,
+    initialize_machine_info_pvs,
 )
 from dt4acc.custom_facility.als.model import Monitor, Setpoint
 from dt4acc_lib.model.utils.command import ReadCommand, Command, BehaviourOnError
@@ -78,7 +80,7 @@ async def build_ao_record(
     #
     # So only use the extra ones
     reads = model.reads or []
-    assert  model.rcmd not in reads
+    assert model.rcmd not in reads
 
     async def update(val: float):
         return await controller.update(
@@ -176,6 +178,7 @@ class ALSEpicsController(EpicsController):
         d = {
             **recs,
             **await initialize_master_clock_pvs(self.builder, self.delegate),
+            **initialize_machine_info_pvs(self.builder, n_ref_buckets=328),
             **initialize_orbit_pvs(self.builder),
             **initialize_twiss_pvs(self.builder),
             **initialize_tune_pvs(self.builder),
@@ -187,23 +190,57 @@ class ALSEpicsController(EpicsController):
         self.builder.LoadDatabase()
         softioc.iocInit(dispatcher)
 
+    async def trigger_default_reads(self):
+        """
+        Todo:
+            make method of default controller
+        """
+        for i in range(50):
+            # Wait for variables to get on line
+            # this check should not be here but on startup
+            rcmd = self.delegate.view.process_variables.get(
+                ReadCommand(id="beam", property="x")
+            )
+            if rcmd:
+                break
+            await asyncio.sleep(0.2)
+        else:
+            logger.error("Test of startup of variables failed!")
+
+        default_reads = self.delegate.default_delayed_reads
+        r = await self.trigger_read(default_reads)
+
+        for rcmd, pkg in zip(default_reads, r.data):
+            await self.delegate.view.dispatch(rcmd, pkg)
+
     async def trigger_read_all_values(self):
+        """
+        Todo:
+            make method of default controller
+        """
         # collect once all readings form all views
         # trigger update and then be finished
         # Read all in once at start up
         reads = list(self.delegate.view.process_variables)
+
         async def read_one_by_one(rcmd):
             # so that we can log the ones that fail
             try:
                 r = await self.trigger_read([rcmd])
             except Exception as ex:
-                logger.error(f"{self.__class__.__name__} {self.name} failed to retrieve data for {rcmd}")
+                logger.error(
+                    f"{self.__class__.__name__} {self.name} failed to retrieve data for {rcmd}"
+                )
                 # can be still useful to report in one batch
                 return rcmd, None
             return rcmd, r
 
         read_result = [await read_one_by_one(rcmd) for rcmd in reads]
-        read_result = [(rcmd, translated) for rcmd, translated in read_result if translated is not None]
+        read_result = [
+            (rcmd, translated)
+            for rcmd, translated in read_result
+            if translated is not None
+        ]
         # Need to combine translated...
         for rcmd, translated in read_result:
             for data in translated.data:

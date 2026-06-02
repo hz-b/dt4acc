@@ -21,8 +21,9 @@ from dt4acc.custom_facility.als.readin_ao import als_ring_ao_data, load_ramp_dat
 from dt4acc.custom_facility.als.vcm_coefficients import vcm_coefficients
 from dt4acc_lib.bl.liaison_manager import LiaisonManager
 from dt4acc_lib.bl.translator_service import TranslatorService
+from dt4acc_lib.bl.tune_translator import TuneConversion
 from dt4acc_lib.bl.yellow_pages import YellowPages
-from dt4acc_lib.bl.unit_conversion import calculate_brho
+from dt4acc_lib.bl.unit_conversion import calculate_brho, LinearUnitConversion
 from dt4acc_lib.interfaces.utils.liaison_manager import LiaisonManagerBase
 from dt4acc_lib.interfaces.utils.yellow_pages import YellowPagesBase
 from dt4acc_lib.model.utils.command import ReadCommand
@@ -46,6 +47,9 @@ from dt4acc_lib.model.utils.translator_manager_lookup_table import (
     NeedsAReference,
     Range,
     CurvePoint,
+)
+from dt4acc_lib.model.utils.translator_manager_lookup_table import (
+    TuneConversionCoefficients,
 )
 
 logger = logging.getLogger("dt4acc")
@@ -95,9 +99,11 @@ def extract_family_member_names(
 ) -> Sequence[str]:
     alternative_family_names = alternative_family_names or []
 
-    ao_view =  ao_table[family_name]
+    ao_view = ao_table[family_name]
     if ao_view.AT is None:
-        logger.warning(f"No AT info given for {family_name}, thus not building yp field")
+        logger.warning(
+            f"No AT info given for {family_name}, thus not building yp field"
+        )
         return
     indices = ao_view.AT.get_element_indices()
     dev_list = ao_view.get_device_list()
@@ -157,9 +163,7 @@ def create_yellow_pages_input(
     }
 
     # extract can return None
-    names = {
-        fam: names for fam, names in names.items() if names is not None
-    }
+    names = {fam: names for fam, names in names.items() if names is not None}
 
     names["BPMx"] = extract_family_member_names(
         lat, ao_table, "BPMx", alternative_family_names=["BPM"]
@@ -265,7 +269,9 @@ def create_liaison_lut(
                 for name in element_names
             ]
             delta_elem_props = [
-                LatticeElementPropertyID(element_name=name, property="delta_" + property)
+                LatticeElementPropertyID(
+                    element_name=name, property="delta_" + property
+                )
                 for name in element_names
             ]
 
@@ -287,8 +293,12 @@ def create_liaison_lut(
             setp_prop = DevicePropertyID(device_name=set_pv, property="set_current")
 
             # for accml lib examples
-            delta_mon_prop = DevicePropertyID(device_name=mon_pv, property="delta_read_current")
-            delta_setp_prop = DevicePropertyID(device_name=set_pv, property="delta_set_current")
+            delta_mon_prop = DevicePropertyID(
+                device_name=mon_pv, property="delta_read_current"
+            )
+            delta_setp_prop = DevicePropertyID(
+                device_name=set_pv, property="delta_set_current"
+            )
 
             for elm_prop in elem_props:
                 forward_lut.append(
@@ -297,12 +307,12 @@ def create_liaison_lut(
                     )
                 )
             for delta_elm_prop in delta_elem_props:
-                    forward_lut.append(
+                forward_lut.append(
                     LiaisonManagerForwardLookupElement(
                         lat_id=delta_elm_prop, dev_ids=[delta_mon_prop]
                     )
                 )
-                # forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[setp_prop]))
+            # forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[setp_prop]))
             inv_lut_tmp[mon_prop].append(elem_props)
             inv_lut_tmp[setp_prop].append(elem_props)
             inv_lut_tmp[delta_mon_prop].append(delta_elem_props)
@@ -368,7 +378,9 @@ def create_liaison_lut(
                 element_name=bpm_name, property=property
             )
             forward_lut.append(
-                LiaisonManagerForwardLookupElement(lat_id=lat_prop, dev_ids=[dev_prop_set])
+                LiaisonManagerForwardLookupElement(
+                    lat_id=lat_prop, dev_ids=[dev_prop_set]
+                )
             )
             inverse_lut.append(
                 LiaisonManagerInverseLookupElement(
@@ -414,10 +426,16 @@ def create_liaison_lut(
 
             # for elm_prop in elem_props:
             #    forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop_set]))
-            inverse_lut.extend([
-                LiaisonManagerInverseLookupElement(dev_id=dev_prop_set, lat_ids=elem_props),
-                LiaisonManagerInverseLookupElement(dev_id=dev_prop_read, lat_ids=elem_props)
-            ])
+            inverse_lut.extend(
+                [
+                    LiaisonManagerInverseLookupElement(
+                        dev_id=dev_prop_set, lat_ids=elem_props
+                    ),
+                    LiaisonManagerInverseLookupElement(
+                        dev_id=dev_prop_read, lat_ids=elem_props
+                    ),
+                ]
+            )
 
             sel = ao_table[dev_prop_set.device_name.family]
             device_index = sel.get_device_index(
@@ -445,7 +463,12 @@ def create_liaison_lut(
                 LiaisonManagerInverseLookupElement(dev_id=setp_prop, lat_ids=elem_props)
             )
 
-            monitor = Monitor(pv_name=mon_pv, rcmd=ReadCommand(id=corr, property="read_current"), prec=3, record_type="ai")
+            monitor = Monitor(
+                pv_name=mon_pv,
+                rcmd=ReadCommand(id=corr, property="read_current"),
+                prec=3,
+                record_type="ai",
+            )
             setp = Setpoint(
                 pv_name=set_pv,
                 rcmd=ReadCommand(id=corr, property="set_current"),
@@ -505,7 +528,26 @@ def create_liaison_lut(
             lat_id=LatticeElementPropertyID(element_name="track", property="pos"),
             dev_ids=[DevicePropertyID(device_name="track", property="pos")],
         ),
+        # for tune correction: a frequency change in tune is translated to
+        #                      current change
+        LiaisonManagerForwardLookupElement(
+            lat_id=LatticeElementPropertyID(
+                element_name="tune", property="transversal"
+            ),
+            dev_ids=[
+                DevicePropertyID(device_name="tune", property="delta_set_current")
+            ],
+        ),
     ]
+
+    inverse_lut.append(
+        LiaisonManagerInverseLookupElement(
+            dev_id=DevicePropertyID(device_name="tune", property="transversal"),
+            lat_ids=[
+                LatticeElementPropertyID(element_name="tune", property="transversal")
+            ],
+        )
+    )
 
     fwd = LiaisonManagerForwardLookupTable(forward_lut)
     inv = LiaisonManagerInverseLookupTable(inverse_lut)
@@ -598,7 +640,8 @@ def create_translator_luts(
                 need_a_ref = NeedsAReference(
                     design_view_read_commnd=ReadCommand(tgt.element_name, tgt.property),
                     device_view_read_command=ReadCommand(src.device_name, src.property),
-                    translation_object=conv)               # For the magnet to current ... if neede
+                    translation_object=conv,
+                )  # For the magnet to current ... if neede
                 translator_lut.append(
                     TranslatorLookupTableElement(
                         conversion_id=ConversionID(tgt, src),
@@ -606,7 +649,7 @@ def create_translator_luts(
                     )
                 )
                 setp_pv = ao_view.Setpoint.ChannelNames[dev_idx].strip()
-                mon_pv =ao_view.Monitor.ChannelNames[dev_idx].strip()
+                mon_pv = ao_view.Monitor.ChannelNames[dev_idx].strip()
 
                 # For the setpoint
                 translator_lut.append(
@@ -614,8 +657,7 @@ def create_translator_luts(
                         conversion_id=ConversionID(
                             tgt,
                             DevicePropertyID(
-                                device_name=setp_pv,
-                                property="set_current"
+                                device_name=setp_pv, property="set_current"
                             ),
                         ),
                         conversion_info=conv,
@@ -626,8 +668,7 @@ def create_translator_luts(
                         conversion_id=ConversionID(
                             d_tgt,
                             DevicePropertyID(
-                                device_name=setp_pv,
-                                property="delta_set_current"
+                                device_name=setp_pv, property="delta_set_current"
                             ),
                         ),
                         conversion_info=need_a_ref,
@@ -638,7 +679,9 @@ def create_translator_luts(
                     TranslatorLookupTableElement(
                         conversion_id=ConversionID(
                             tgt,
-                            DevicePropertyID(device_name=mon_pv, property="read_current"),
+                            DevicePropertyID(
+                                device_name=mon_pv, property="read_current"
+                            ),
                         ),
                         conversion_info=conv,
                     )
@@ -647,7 +690,9 @@ def create_translator_luts(
                     TranslatorLookupTableElement(
                         conversion_id=ConversionID(
                             d_tgt,
-                            DevicePropertyID(device_name=mon_pv, property="delta_read_current"),
+                            DevicePropertyID(
+                                device_name=mon_pv, property="delta_read_current"
+                            ),
                         ),
                         conversion_info=need_a_ref,
                     )
@@ -661,7 +706,7 @@ def create_translator_luts(
         ao_view = ao_table[family_name]
         scale = ao_view.Monitor.Physics2HWParams
         assert isinstance(scale, float)
-        assert math.isclose(scale, 1. / ao_view.Monitor.HW2PhysicsParams)
+        assert math.isclose(scale, 1.0 / ao_view.Monitor.HW2PhysicsParams)
 
         for dev_name in yp.get(family_name):
             (element_name,) = get_element_uuids_for_device(
@@ -670,7 +715,9 @@ def create_translator_luts(
             src = LatticeElementPropertyID(element_name, property)
             (dst,) = lm.forward(src)
 
-            offset = ao_view.Offset[ao_view.get_device_index(*dev_name.mml_device_index())]
+            offset = ao_view.Offset[
+                ao_view.get_device_index(*dev_name.mml_device_index())
+            ]
             conv = PolynomCoefficients(coeffs=[offset, scale], energy_dependent=False)
             pass
 
@@ -706,7 +753,9 @@ def create_translator_luts(
                 # For now I assume it returns a scale factor for k and B
                 # these are for hardware to physics
                 assert not math.isclose(coeffs[0], 0.0, abs_tol=1e-12)
-                conv = PolynomCoefficients(coeffs=[0.0, 1./coeffs[0]], energy_dependent=True)
+                conv = PolynomCoefficients(
+                    coeffs=[0.0, 1.0 / coeffs[0]], energy_dependent=True
+                )
                 translator_lut.append(
                     TranslatorLookupTableElement(
                         conversion_id=ConversionID(tgt, src),
@@ -738,7 +787,6 @@ def create_translator_luts(
                 )
                 pass
 
-
     translator_lut.extend(
         [
             TranslatorLookupTableElement(
@@ -760,12 +808,45 @@ def create_translator_luts(
         ]
     )
 
+    # Todo: fix me!
+    floquet_to_frequency = 500e3 / 328
+    translator_lut.append(
+        TranslatorLookupTableElement(
+            ConversionID(
+                lattice_property_id=LatticeElementPropertyID(
+                    element_name="tune", property="transversal"
+                ),
+                device_property_id=DevicePropertyID(
+                    device_name="tune", property="delta_set_current"
+                ),
+            ),
+            TuneConversionCoefficients(
+                PolynomCoefficients([0e0, floquet_to_frequency], energy_dependent=False)
+            ),
+        )
+    )
+    translator_lut.append(
+        TranslatorLookupTableElement(
+            ConversionID(
+                lattice_property_id=LatticeElementPropertyID(
+                    element_name="tune", property="transversal"
+                ),
+                device_property_id=DevicePropertyID(
+                    device_name="tune", property="transversal"
+                ),
+            ),
+            TuneConversionCoefficients(
+                PolynomCoefficients([0e0, floquet_to_frequency], energy_dependent=False)
+            ),
+        )
+    )
+
     r = TranslatorLookupTable(lut=translator_lut)
     r.verify()
     return r
 
 
-def load_managers(lat = None):
+def load_managers(lat=None):
     """
     Todo:
         return yellow pages manager
