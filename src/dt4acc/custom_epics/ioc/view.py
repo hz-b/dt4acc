@@ -153,6 +153,7 @@ class View(ViewInterface):
             logger.debug(f"Updated Tune for plane {plane}")
             pass
 
+
     def update_twiss(self, var: ReadCommand, pkg):
         """
         Todo:
