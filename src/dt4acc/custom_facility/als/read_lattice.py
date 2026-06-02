@@ -73,6 +73,9 @@ test_filename = (
     / "als_thering_at_compat_tst.json"
 )
 
+_default_filename = test_filename
+
+
 def als_load_lattice(filename: str = None, energy: float = default_energy):
     if filename is None:
         filename = os.environ.get("DT4ACC_ALS_LATTICE_FILE", None)
@@ -86,8 +89,8 @@ def als_load_lattice(filename: str = None, energy: float = default_energy):
     if not Path(filename).exists():
         logger.warning("File not found at {filename}")
 
-    with open(filename, "rt") as fp:
-        sequence_data = json.load(fp)
+    # with open(filename, "rt") as fp:
+    #    sequence_data = json.load(fp)
 
     # with open(test_filename, "wt") as fp:
     #    json.dump(
@@ -99,10 +102,10 @@ def als_load_lattice(filename: str = None, energy: float = default_energy):
     #        fp
     #    )
     #    # sequence_data =
-    # r = at.load_json(test_filename, from_at=True, energy=default_energy)
-    # als_add_uuid_to_lattice_elements(r)
-    seq = als_add_uuid_to_lattice_elements(factory(sequence_data, energy))
-    r = at.Lattice(seq, name="ALS storage ring", energy=energy)
+    r = at.load_json(filename, from_at=True, energy=default_energy)
+    als_add_uuid_to_lattice_elements(r)
+    # seq = als_add_uuid_to_lattice_elements(factory(sequence_data, energy))
+    # r = at.Lattice(seq, name="ALS storage ring", energy=energy)
     r.enable_6d()
     r.cavpts = "CAV*"
     r.set_cavity_phase(cavpts=r.cavpts)
