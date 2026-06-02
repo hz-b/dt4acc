@@ -67,28 +67,31 @@ test_filename = (
     / "dt4acc_als_data"
     / "als_thering_at_compat_tst.json"
 )
+
 def als_load_lattice(filename: str, energy: float = default_energy):
     with open(filename, "rt") as fp:
         sequence_data = json.load(fp)
 
-    with open(test_filename, "wt") as fp:
-        json.dump(
-            dict(
-                atjson=1,
-                elements=sequence_data,
-                energy=default_energy
-            ),
-            fp
-        )
-        # sequence_data =
-
-    r = at.load_json(test_filename, from_at=True, energy=default_energy)
-    als_add_uuid_to_lattice_elements(r)
-    # seq = als_add_uuid_to_lattice_elements(factory(sequence_data, energy))
-    # r = at.Lattice(seq, name="ALS storage ring", energy=energy)
+    # with open(test_filename, "wt") as fp:
+    #    json.dump(
+    #        dict(
+    #            atjson=1,
+    #            elements=sequence_data,
+    #            energy=default_energy
+    #        ),
+    #        fp
+    #    )
+    #    # sequence_data =
+    # r = at.load_json(test_filename, from_at=True, energy=default_energy)
+    # als_add_uuid_to_lattice_elements(r)
+    seq = als_add_uuid_to_lattice_elements(factory(sequence_data, energy))
+    r = at.Lattice(seq, name="ALS storage ring", energy=energy)
     r.enable_6d()
     r.cavpts = "CAV*"
     r.set_cavity_phase(cavpts=r.cavpts)
+
+    # Test that start setup is stable
+    r.get_optics()
     print(f"Read a lattice with {len(r)} elements")
     return r
 

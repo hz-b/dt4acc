@@ -72,6 +72,7 @@ test = [
 
 als = [
     "xarray",
+    "lat2db"
 ]
 [project.scripts]
 dt4acc_bessyii = "dt4acc.custom_facility.bessyii.run_bessyii_twin:main"
