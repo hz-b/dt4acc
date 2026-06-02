@@ -43,6 +43,7 @@ from dt4acc_lib.model.utils.translator_manager_lookup_table import (
     PolynomCoefficients,
     IdentityMapper,
     MultiplyerScaledByEnergy,
+    NeedsAReference,
     Range,
     CurvePoint,
 )
@@ -207,6 +208,9 @@ def create_yellow_pages_input(
         for family_name in members_of:
             yp_dict[str(family_name)].extend(family_members)
 
+    # make them also accessible as neam tune_currection_quadrupoles
+    yp_dict["tune_correction_quadrupoles"] = yp_dict["Tune Corrector"]
+
     # print("names sorted to reference families")
     # pprint.pprint(names, compact=True)
 
@@ -215,7 +219,8 @@ def create_yellow_pages_input(
     # print(f"Total number of elements {np.sum([len(v) for v in names.values()])}")
     # print("Families not exported to yp:", set(tuple(ao_table)).difference(tuple(names)))
 
-    return dict(yp_dict)
+    r = dict(yp_dict)
+    return r
 
 
 def get_element_uuids_for_device(
@@ -259,6 +264,10 @@ def create_liaison_lut(
                 LatticeElementPropertyID(element_name=name, property=property)
                 for name in element_names
             ]
+            delta_elem_props = [
+                LatticeElementPropertyID(element_name=name, property="delta_" + property)
+                for name in element_names
+            ]
 
             # for elm_prop in elem_props:
             #    forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[dev_prop_set]))
@@ -277,15 +286,27 @@ def create_liaison_lut(
             mon_prop = DevicePropertyID(device_name=mon_pv, property="read_current")
             setp_prop = DevicePropertyID(device_name=set_pv, property="set_current")
 
+            # for accml lib examples
+            delta_mon_prop = DevicePropertyID(device_name=mon_pv, property="delta_read_current")
+            delta_setp_prop = DevicePropertyID(device_name=set_pv, property="delta_set_current")
+
             for elm_prop in elem_props:
                 forward_lut.append(
                     LiaisonManagerForwardLookupElement(
                         lat_id=elm_prop, dev_ids=[mon_prop]
                     )
                 )
+            for delta_elm_prop in delta_elem_props:
+                    forward_lut.append(
+                    LiaisonManagerForwardLookupElement(
+                        lat_id=delta_elm_prop, dev_ids=[delta_mon_prop]
+                    )
+                )
                 # forward_lut.append(LiaisonManagerForwardLookupElement(lat_id=elm_prop, dev_ids=[setp_prop]))
             inv_lut_tmp[mon_prop].append(elem_props)
             inv_lut_tmp[setp_prop].append(elem_props)
+            inv_lut_tmp[delta_mon_prop].append(delta_elem_props)
+            inv_lut_tmp[delta_setp_prop].append(delta_elem_props)
 
     tmp = [
         LiaisonManagerInverseLookupElement(
@@ -557,13 +578,14 @@ def create_translator_luts(
             setp_pv = ao_view.Setpoint.ChannelNames[dev_idx].strip()
             mon_pv = ao_view.Setpoint.ChannelNames[dev_idx].strip()
 
-            d = lm.objects_for_device(dev_name=setp_pv)
-            (src,) = d
-            (targets,) = d.values()
-            assert src.device_name == setp_pv
-
+            src = DevicePropertyID(setp_pv, "set_current")
+            delta_src = DevicePropertyID(setp_pv, "delta_set_current")
+            targets = lm.inverse(src)
+            delta_targets = lm.inverse(delta_src)
+            assert targets, delta_targets
+            assert len(targets) == len(delta_targets)
             # Need to understand why I get that many ...
-            for tgt in targets:
+            for tgt, d_tgt in zip(targets, delta_targets):
                 conv = MultiplyerScaledByEnergy(
                     reference_multiplyer=float(
                         t_ramp_data.physics.sel(sector=sector, child=child)
@@ -573,26 +595,42 @@ def create_translator_luts(
                     scale_by_energy=scale_by_energy,
                 )
 
-                # For the magnet to current ... if needed
+                need_a_ref = NeedsAReference(
+                    design_view_read_commnd=ReadCommand(tgt.element_name, tgt.property),
+                    device_view_read_command=ReadCommand(src.device_name, src.property),
+                    translation_object=conv)               # For the magnet to current ... if neede
                 translator_lut.append(
                     TranslatorLookupTableElement(
                         conversion_id=ConversionID(tgt, src),
                         conversion_info=conv,
                     )
                 )
+                setp_pv = ao_view.Setpoint.ChannelNames[dev_idx].strip()
+                mon_pv =ao_view.Monitor.ChannelNames[dev_idx].strip()
+
                 # For the setpoint
                 translator_lut.append(
                     TranslatorLookupTableElement(
                         conversion_id=ConversionID(
                             tgt,
                             DevicePropertyID(
-                                device_name=ao_view.Setpoint.ChannelNames[
-                                    dev_idx
-                                ].strip(),
-                                property="set_current",
+                                device_name=setp_pv,
+                                property="set_current"
                             ),
                         ),
                         conversion_info=conv,
+                    )
+                )
+                translator_lut.append(
+                    TranslatorLookupTableElement(
+                        conversion_id=ConversionID(
+                            d_tgt,
+                            DevicePropertyID(
+                                device_name=setp_pv,
+                                property="delta_set_current"
+                            ),
+                        ),
+                        conversion_info=need_a_ref,
                     )
                 )
                 # For the readback
@@ -600,14 +638,18 @@ def create_translator_luts(
                     TranslatorLookupTableElement(
                         conversion_id=ConversionID(
                             tgt,
-                            DevicePropertyID(
-                                device_name=ao_view.Monitor.ChannelNames[
-                                    dev_idx
-                                ].strip(),
-                                property="read_current",
-                            ),
+                            DevicePropertyID(device_name=mon_pv, property="read_current"),
                         ),
                         conversion_info=conv,
+                    )
+                )
+                translator_lut.append(
+                    TranslatorLookupTableElement(
+                        conversion_id=ConversionID(
+                            d_tgt,
+                            DevicePropertyID(device_name=mon_pv, property="delta_read_current"),
+                        ),
+                        conversion_info=need_a_ref,
                     )
                 )
                 pass
@@ -733,7 +775,7 @@ def load_managers(lat = None):
     ao_model = als_ring_ao_data()
     ramp_data = load_ramp_data(ao_model)
 
-    yp = create_yellow_pages_input(ao_model, lat)
+    yp = YellowPages(create_yellow_pages_input(ao_model, lat))
     yp
 
     fwd_lut, inv_lut, process_variable_views = create_liaison_lut(yp, ao_model, lat)
@@ -745,7 +787,6 @@ def load_managers(lat = None):
     # Todo: get the brho of the storage ring
     ts = TranslatorService(lut=ts_lut, brho=calculate_brho(default_energy))
     ts
-    yp = YellowPages
     return yp, lm, ts, process_variable_views
 
 
