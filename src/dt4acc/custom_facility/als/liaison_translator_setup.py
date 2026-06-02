@@ -852,7 +852,7 @@ def load_managers(lat=None):
         return yellow pages manager
     """
     if lat is None:
-        lat = als_get_lattice(default_filename)
+        lat = als_get_lattice()
     ao_model = als_ring_ao_data()
     ramp_data = load_ramp_data(ao_model)
 

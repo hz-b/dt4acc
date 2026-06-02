@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from pathlib import Path
 from typing import Dict, Sequence, Tuple
@@ -11,6 +12,7 @@ from scipy.io import loadmat
 
 from bact_mml_json_importer.data_model.mml_ao import load, FamilyInfoCollection
 
+logger = logging.getLogger("dt4acc-custom-als")
 
 def create_data_array(
     t_data: Dict[str, Sequence[float]],
@@ -113,9 +115,16 @@ def load_loco_data(ao_model: Dict[str, FamilyInfoCollection])-> Dict[str, xr.Dat
 
 def load_ramp_data(ao_model: Dict[str, FamilyInfoCollection]) -> Dict[str, xr.Dataset]:
     # filename = path / "Greg/alsrampup.mat"
+    filename = os.environ.get("DT4ACC_ALS_RAMP_MAT_FILE", None)
+    if filename is None:
+        default_filename = default_data_dir / "PseudoSingleBunch" / "alsrampup.mat"
+        logger.warning(
+            f"No DT4ACC_ALS_RAMP_MAT_FILE environment variable defined using {default_filename}"
+        )
+        filename = default_filename
 
 
-    data = loadmat(default_data_dir / "PseudoSingleBunch" / "alsrampup.mat", simplify_cells=True)
+    data = loadmat(filename, simplify_cells=True)
     # data = loadmat(path / "Model" /"alsrampdown.mat", simplify_cells=True)
     # data = loadmat(path / "Model" /"alsrampup.mat", simplify_cells=True)
     ramp_data = data["RampTable"].copy()
@@ -158,8 +167,13 @@ def als_ring_ao_data():
         / "dt4acc_als_data"
     )
 
-
-    filename = t_dir / "ao_as_loaded_from_mml.mat"
+    filename = os.environ.get("DT4ACC_ALS_AO_MAT_FILE", None)
+    if filename is None:
+        default_filename = t_dir / "ao_as_loaded_from_mml.mat"
+        logger.warning(
+            f"No DT4ACC_ALS_AO_MAT_FILE environment variable defined using {default_filename}"
+        )
+        filename = default_filename
     data_from_mat = loadmat(filename, simplify_cells=True)
     tmp = convert(data_from_mat["AO"])
     model = load(tmp)

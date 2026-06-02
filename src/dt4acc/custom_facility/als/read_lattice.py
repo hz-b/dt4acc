@@ -13,8 +13,11 @@ from dt4acc.custom_facility.als.augment_names_on_famnames import (
     SectorRegistry,
 )
 from lat2db.tools.factories import pyat as pyatf
+import logging
+logger = logging.getLogger("dt4acc-custom-als")
 
 default_energy = 1.89086196873342e9
+
 
 def factory(d: dict, energy: float):
     factory_dict = pyatf.factory_dict_default.copy()
@@ -54,12 +57,14 @@ def als_add_uuid_to_lattice_elements(elements: Sequence) -> Sequence:
     return [add_uuid(elem) for elem in elements]
 
 
-default_filename = (
+_default_filename = (
     Path(os.environ.get("HOME"))
     / "Documents"
     / "dt4acc_als_data"
     / "als_thering_tst.json"
 )
+
+default_filename = None
 
 test_filename = (
     Path(os.environ.get("HOME"))
@@ -68,7 +73,19 @@ test_filename = (
     / "als_thering_at_compat_tst.json"
 )
 
-def als_load_lattice(filename: str, energy: float = default_energy):
+def als_load_lattice(filename: str = None, energy: float = default_energy):
+    if filename is None:
+        filename = os.environ.get("DT4ACC_ALS_LATTICE_FILE", None)
+        if filename is None:
+            logger.warning(
+                f"No DT4ACC_ALS_LATTICE_FILE environment variable defined using {default_filename}"
+            )
+            filename = _default_filename
+
+    logger.info(f"als_load_lattice: Using filename  {filename}")
+    if not Path(filename).exists():
+        logger.warning("File not found at {filename}")
+
     with open(filename, "rt") as fp:
         sequence_data = json.load(fp)
 
@@ -97,7 +114,7 @@ def als_load_lattice(filename: str, energy: float = default_energy):
 
 
 @functools.lru_cache(maxsize=None)
-def als_get_lattice(filename: str, energy: float = default_energy):
+def als_get_lattice(filename: str =  None, energy: float = default_energy):
     return als_load_lattice(filename, energy)
 
 
