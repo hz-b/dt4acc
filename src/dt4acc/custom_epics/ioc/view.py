@@ -32,7 +32,7 @@ class View(ViewInterface):
         self.process_variables.update(variables)
 
     async def push_invalid(self) -> None:
-        raise NotImplementedError("push_invalid needs to be implemented or epics view")
+        raise NotImplementedError("push_invalid needs to be implemented for epics view")
 
     async def dispatch(self, var: ReadCommand, pkg):
         """Update the value of a process variable.
@@ -51,10 +51,11 @@ class View(ViewInterface):
 
     def update_special_values(self, var: ReadCommand, value) -> bool:
         if var.id == "tune":
-            self.update_tune(var, value)
+            logger.warning("Tune not handled explicitly any more, but as part of twiss")
             return True
         elif var.id == "twiss":
             self.update_twiss(var, value)
+            self.update_tune(var, value)
             return True
         elif var.id == "track":
             self.update_track(var, value)
@@ -69,7 +70,8 @@ class View(ViewInterface):
         if var.property == "pos":
             x_vals = [pos.x for pos in value.track]
             y_vals = [pos.y for pos in value.track]
-            names = [pos.name for pos in value.track]
+            names = [pos.fam_name for pos in value.track]
+            uids = [pos.uid for pos in value.track]
 
             rw_x = self.process_variables.get(ReadCommand(id="beam", property="x"))
             rw_y = self.process_variables.get(ReadCommand(id="beam", property="y"))
@@ -78,11 +80,21 @@ class View(ViewInterface):
             rw_x.set(x_vals)
             rw_y.set(y_vals)
 
-            rw_names = self.process_variables.get(ReadCommand(id="beam", property="name"))
+            rw_names = self.process_variables.get(
+                ReadCommand(id="beam", property="names")
+            )
             if rw_names is not None:
                 rw_names.set(names)
 
-            rw_found = self.process_variables.get(ReadCommand(id="beam", property="found"))
+            rw_uids = self.process_variables.get(
+                ReadCommand(id="beam", property="uids")
+            )
+            if rw_uids is not None:
+                rw_uids.set(uids)
+
+            rw_found = self.process_variables.get(
+                ReadCommand(id="beam", property="found")
+            )
             if rw_found is not None:
                 rw_found.set(True)
 
@@ -96,11 +108,46 @@ class View(ViewInterface):
             raise AssertionError(f"Don't know track property {var.property}")
 
     def update_tune(self, var: ReadCommand, pkg):
-        assert var.id == "tune", f"Only prepared to process 'tune' but got {var}"
-        logger.warning("Tune view needs to be implemented")
-        return
+        assert (
+            var.id == "twiss"
+        ), f"Only prepared to extract tune from 'twiss' but got {var}"
+        (single_reading,) = pkg.readings
+        value = single_reading.payload
+        for plane in ("x", "y"):
+            twiss_data_of_last_element = getattr(value.twiss[-1], plane)
+            # Hard coded dependency for AT: returns phase advance times 2pi
+            flq = twiss_data_of_last_element.nu / (2 * math.pi)
+            rec = self.process_variables[
+                ReadCommand(id="tune", property=f"flq_{plane}")
+            ]
+            rec.set(flq)
+
+            mc_rec = self.process_variables.get(ReadCommand("master_clock", "freq"))
+            # Todo: need to read the correct values e.g. from a variable
+            n_buckets_rec = self.process_variables.get(ReadCommand("ring", "n_rf_buckets"))
+            assert n_buckets_rec is not None
+            n_buckets = n_buckets_rec.get()
+            # todo: is this calculation in bact_math_utils ...
+            #       then copy it together with tests
+            #       further watch out ...
+            #       some can do the whole integer fraction
+            flq_frac = flq % 1.0
+            rev_freq = mc_rec.get() / n_buckets
+            tune_freq = flq_frac * rev_freq
+            # Todo: need to readress where the scale should go
+            #       perhaps tune should be handled over virtual devices
+            tune_freq = tune_freq / 1000.0
+            rec = self.process_variables[ReadCommand(id="tune", property=f"{plane}")]
+            rec.set(tune_freq)
+            logger.debug(f"Updated Tune for plane {plane}")
+            pass
+
 
     def update_twiss(self, var: ReadCommand, pkg):
+        """
+        Todo:
+            export uids too
+        """
         assert var.id == "twiss", f"Only prepared to process 'twiss' but got {var}"
 
         (single_reading,) = pkg.readings
@@ -115,4 +162,8 @@ class View(ViewInterface):
 
         rw_names = self.process_variables.get(ReadCommand("twiss", "names"))
         assert rw_names is not None
-        rw_names.set([pos.name for pos in value.twiss])
+        rw_names.set([pos.fam_name for pos in value.twiss])
+
+        rw_names = self.process_variables.get(ReadCommand("twiss", "uids"))
+        assert rw_names is not None
+        rw_names.set([pos.uid for pos in value.twiss])
