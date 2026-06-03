@@ -200,8 +200,11 @@ def initialize_orbit_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
         ReadCommand(id="beam", property="x0"): builder.WaveformIn(
             f"beam:orbit:x0", initial_value=[0.0], length=config.n_elements
         ),
-        ReadCommand(id="beam", property="name"): builder.WaveformIn(
+        ReadCommand(id="beam", property="names"): builder.WaveformIn(
             f"beam:orbit:names", initial_value=[""], length=config.n_elements
+        ),
+        ReadCommand(id="beam", property="uids"): builder.WaveformIn(
+            f"beam:orbit:uids", initial_value=[""], length=config.n_elements
         ),
         ReadCommand(id="beam", property="found"): builder.boolIn(
             f"beam:orbit:found", initial_value=False
@@ -248,15 +251,20 @@ def initialize_twiss_pvs(builder):
     d[ReadCommand("twiss", "names")] = builder.WaveformIn(
         f"beam:twiss:names", initial_value=[""], length=config.n_elements
     )
+    d[ReadCommand("twiss", "uids")] = builder.WaveformIn(
+        f"beam:twiss:uids", initial_value=[""], length=config.n_elements
+    )
     return d
 
 
-def initialize_machine_info_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
+def initialize_machine_info_pvs(builder, *, n_ref_buckets) -> Dict[ReadCommand, RecordWrapper]:
     """configuration of the machine: e.g. number of bunches"""
 
     return {
         ReadCommand(id="ring", property="n_rf_buckets"): builder.longIn(
-            f"beam:machine:info:n_rf_buckets", initial_value=400
+            # Todo: make this configureable ... this is 328 for ALS
+            #       this data is accessible from AT
+            f"beam:machine:info:n_rf_buckets", initial_value=n_ref_buckets
         ),
         ReadCommand(id="ring", property="rev_freq"): builder.aIn(
             f"beam:rev_freq", initial_value=0.0, EGU="kHz"

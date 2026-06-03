@@ -16,9 +16,12 @@ from dt4acc.core.bl.translating_command_execution_engine import TranslatingComma
 from dt4acc.custom_epics.ioc.orbit_pva import OrbitTwinServer
 from dt4acc.custom_epics.ioc.controller import Controller as EpicsController, dispatcher
 from dt4acc.custom_epics.ioc.view import View
+from dt4acc.custom_facility.bessyii.epics_bessyii_controller import BESSYIIEpicsController
 from dt4acc.custom_facility.bessyii.liasion_translator_setup import load_managers
-from dt4acc.custom_facility.bessyii.pyat_accelerator_simulator import BESSYIIPyAtAcceleratorSimulator
-
+# from dt4acc.custom_facility.bessyii.pyat_accelerator_simulator import BESSYIIPyAtAcceleratorSimulator
+from dt4acc_lib.pyat_simulator.accelerator_simulator_proxy_factory import (
+    PyATAcceleratorSimulator,
+)
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -44,7 +47,7 @@ def main():
     acc = bessyii_pyat_lattice(filename=filename)
     backend=SimulatorBackend(
         name="BESSYII_on_PyAT",
-        acc=BESSYIIPyAtAcceleratorSimulator(at_lattice=acc, proxy_factory=ElementProxyFactory()),
+        acc=PyATAcceleratorSimulator(at_lattice=acc),
     )
 
     _, lm, ts = load_managers()
@@ -78,7 +81,7 @@ def main():
             ReadCommand("tune", "y"),
         ]
     )
-    controller = EpicsController(
+    controller = BESSYIIEpicsController(
         name = "epics_controller",
         controller_delegate=common_controller,
         builder=builder,
@@ -86,7 +89,6 @@ def main():
     dispatcher(controller.startup)
     common_controller.start()
     softioc.interactive_ioc(globals())
-
 
 
 def bessyii_pyat_lattice_from_dics(seq, energy: float = 1.7185e9):
