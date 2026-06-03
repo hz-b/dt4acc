@@ -326,7 +326,7 @@ async def initialize_master_clock_pvs(
 
 
 def initialize_other_pvs(builder, prefix) -> Dict[ReadCommand, RecordWrapper]:
-    """Initializes miscellaneous PVs (dummy values).
+    """Initialises miscellaneous PVs (dummy values).
 
     Args:
         builder: The SoftIOC PV builder instance.

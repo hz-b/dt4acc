@@ -1,3 +1,4 @@
+import math
 from typing import Optional, Dict
 
 from softioc import pythonSoftIoc
@@ -167,3 +168,15 @@ class View(ViewInterface):
         rw_names = self.process_variables.get(ReadCommand("twiss", "uids"))
         assert rw_names is not None
         rw_names.set([pos.uid for pos in value.twiss])
+
+        if self.orbit_server is not None:
+            try:
+                self.orbit_server.push_model_data(
+                    bpm_names=[pos.fam_name for pos in value.twiss],
+                    beta_hor=[pos.x.beta for pos in value.twiss],
+                    beta_vert=[pos.y.beta for pos in value.twiss],
+                    phase_advance_hor=[pos.x.nu / 2 * math.pi for pos in value.twiss],
+                    phase_advance_vert=[pos.y.nu / 2 * math.pi for pos in value.twiss],
+                )
+            except Exception as exc:
+                logger.error("OrbitTwinServer.push failed: %s", exc)

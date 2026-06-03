@@ -18,7 +18,6 @@ from dt4acc.custom_epics.ioc.controller import Controller as EpicsController, di
 from dt4acc.custom_epics.ioc.view import View
 from dt4acc.custom_facility.bessyii.epics_bessyii_controller import BESSYIIEpicsController
 from dt4acc.custom_facility.bessyii.liasion_translator_setup import load_managers
-# from dt4acc.custom_facility.bessyii.pyat_accelerator_simulator import BESSYIIPyAtAcceleratorSimulator
 from dt4acc_lib.pyat_simulator.accelerator_simulator_proxy_factory import (
     PyATAcceleratorSimulator,
 )
@@ -66,8 +65,13 @@ def main():
         expected_view_for_output="device",
         num_readings=1,
     )
-    prefix = os.environ.get("DT4ACC_PREFIX", getpass.getuser())
-    orbit_server = OrbitTwinServer(prefix + ":ORBITCC:rdBpm")
+
+    prefix = os.environ.get("DT4ACC_PREFIX", getpass.getuser() + ":")
+    orbit_server = OrbitTwinServer(
+        prefix + "ORBITCC:rdBpm",
+        prefix + "ORBITCC:rdModel",
+    )
+
     orbit_server.start()
     view = View(orbit_server=orbit_server)
     common_controller = Controller(
