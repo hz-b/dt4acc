@@ -22,7 +22,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "dt4acc-lib>=0.4",
+    "dt4acc-lib>=0.4.1",
     # for BESSY II
     # actually required by custom bessyii
     # currently bessyii load managers used by
