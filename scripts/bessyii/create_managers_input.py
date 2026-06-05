@@ -140,7 +140,9 @@ def build_liaison_manager_lut(
         for entry in magnet_info:
             if entry.elem_id in names_in_family:
                 dev_name = str(pc_magnet_is_connected_to[entry.elem_id])
-                lat_p = LatticeElementPropertyID(element_name=str(entry.elem_id), property=lattice_property)
+                assert entry.elem_id.startswith(co_wound_prefix)
+                host_sextupole = entry.elem_id[1:]
+                lat_p = LatticeElementPropertyID(element_name=str(host_sextupole), property=lattice_property)
                 pc_dev_p = DevicePropertyID(device_name=dev_name, property="set_current")
                 mag_dev_p = DevicePropertyID(device_name=str(entry.dev_id), property="main_strength")
                 fwd_d[lat_p].append(pc_dev_p)
@@ -220,6 +222,10 @@ def build_liaison_manager_lut(
         LiaisonManagerInverseLookupElement(
             dev_id=DevicePropertyID(device_name="track", property="pos"),
             lat_ids=[LatticeElementPropertyID(element_name="track", property="pos")]
+        ),
+        LiaisonManagerInverseLookupElement(
+            dev_id=DevicePropertyID(device_name="survey", property="s"),
+            lat_ids=[LatticeElementPropertyID(element_name="survey", property="s")]
         )
     ]
     lut_fwd += [
@@ -230,8 +236,13 @@ def build_liaison_manager_lut(
         LiaisonManagerForwardLookupElement(
             lat_id=LatticeElementPropertyID(element_name="track", property="pos"),
             dev_ids=[DevicePropertyID(device_name="track", property="pos")]
+        ),
+        LiaisonManagerForwardLookupElement(
+            lat_id=LatticeElementPropertyID(element_name="survey", property="s"),
+            dev_ids=[DevicePropertyID(device_name="survey", property="s")]
         )
     ]
+
 
     return lut_fwd, lut_inv
 
@@ -277,6 +288,9 @@ def build_translator_manager_lut(
             continue
         lat_ps = lm_inv.get(dev_p)
         for lat_p in lat_ps:
+            if mag_info_lut.get(lat_p.element_name, None) is None:
+                logger.warning("No magnet info for %s", lat_p.element_name)
+                continue
             conv = mag_info_lut[lat_p.element_name].conversion
             assert conv.conversion_type == "linear"
             lut.append(
@@ -375,6 +389,13 @@ def build_translator_manager_lut(
             ConversionID(LatticeElementPropertyID(element_name="track", property="pos"),
                          DevicePropertyID(device_name="track", property="pos"),
                          ),
+            IdentityMapper()
+        ),
+        TranslatorLookupTableElement(
+            ConversionID(
+                LatticeElementPropertyID(element_name="survey", property="s"),
+                DevicePropertyID(device_name="survey", property="s"),
+            ),
             IdentityMapper()
         ),
     ])
