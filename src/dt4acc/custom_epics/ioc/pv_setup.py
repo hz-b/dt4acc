@@ -257,6 +257,20 @@ def initialize_twiss_pvs(builder):
     return d
 
 
+def initialize_survey_info_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
+    return {
+        ReadCommand(id="survey", property="s"): builder.WaveformIn(
+            f"survey:s", initial_value=[0.0], EGU="m", length=config.n_elements
+        ),
+        ReadCommand(id="survey", property="name"): builder.WaveformIn(
+            f"survey:name", initial_value=[""], length=config.n_elements
+        ),
+        ReadCommand(id="survey", property="uid"): builder.WaveformIn(
+            f"survey:uid", initial_value=[""], length=config.n_elements
+        )
+    }
+
+
 def initialize_machine_info_pvs(builder, *, n_ref_buckets) -> Dict[ReadCommand, RecordWrapper]:
     """configuration of the machine: e.g. number of bunches"""
 
