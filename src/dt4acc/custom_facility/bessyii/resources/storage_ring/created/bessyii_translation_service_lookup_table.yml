@@ -1,5 +1,5 @@
 # 
-# BESSY II Translation service table: 2026-04-09 14:21:58.167065
+# BESSY II Translation service table: 2026-06-05 15:00:23.315337
 # WARNING: automatically generated data
 #          please check when it is updated if you edit it by hand!
 lut:
@@ -4871,7 +4871,7 @@ lut:
       element_name: S4M2D1R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -4881,27 +4881,7 @@ lut:
       element_name: S4M2D1R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PT1R
-      property: set_current
-    lattice_property_id:
-      element_name: S1MT1R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PT1R
-      property: rdbk_current
-    lattice_property_id:
-      element_name: S1MT1R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -4911,7 +4891,7 @@ lut:
       element_name: S4M1T1R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -4921,7 +4901,7 @@ lut:
       element_name: S4M1T1R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -4931,7 +4911,7 @@ lut:
       element_name: S4M2T1R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -4941,27 +4921,7 @@ lut:
       element_name: S4M2T1R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PD2R
-      property: set_current
-    lattice_property_id:
-      element_name: S1MD2R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PD2R
-      property: rdbk_current
-    lattice_property_id:
-      element_name: S1MD2R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -4971,7 +4931,7 @@ lut:
       element_name: S4M1D2R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -4981,7 +4941,7 @@ lut:
       element_name: S4M1D2R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -4991,7 +4951,7 @@ lut:
       element_name: S4M2D2R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5001,27 +4961,7 @@ lut:
       element_name: S4M2D2R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PT2R
-      property: set_current
-    lattice_property_id:
-      element_name: S1MT2R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PT2R
-      property: rdbk_current
-    lattice_property_id:
-      element_name: S1MT2R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5031,7 +4971,7 @@ lut:
       element_name: S4M1T2R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5041,7 +4981,7 @@ lut:
       element_name: S4M1T2R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5051,7 +4991,7 @@ lut:
       element_name: S4M2T2R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5061,27 +5001,7 @@ lut:
       element_name: S4M2T2R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PD3R
-      property: set_current
-    lattice_property_id:
-      element_name: S1MD3R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PD3R
-      property: rdbk_current
-    lattice_property_id:
-      element_name: S1MD3R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5091,7 +5011,7 @@ lut:
       element_name: S4M1D3R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5101,7 +5021,7 @@ lut:
       element_name: S4M1D3R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5111,7 +5031,7 @@ lut:
       element_name: S4M2D3R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5121,27 +5041,7 @@ lut:
       element_name: S4M2D3R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PT3R
-      property: set_current
-    lattice_property_id:
-      element_name: S1MT3R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PT3R
-      property: rdbk_current
-    lattice_property_id:
-      element_name: S1MT3R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5151,7 +5051,7 @@ lut:
       element_name: S4M1T3R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5161,7 +5061,7 @@ lut:
       element_name: S4M1T3R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5171,7 +5071,7 @@ lut:
       element_name: S4M2T3R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5181,27 +5081,7 @@ lut:
       element_name: S4M2T3R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PD4R
-      property: set_current
-    lattice_property_id:
-      element_name: S1MD4R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PD4R
-      property: rdbk_current
-    lattice_property_id:
-      element_name: S1MD4R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5211,7 +5091,7 @@ lut:
       element_name: S4M1D4R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5221,7 +5101,7 @@ lut:
       element_name: S4M1D4R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5231,7 +5111,7 @@ lut:
       element_name: S4M2D4R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5241,27 +5121,7 @@ lut:
       element_name: S4M2D4R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PT4R
-      property: set_current
-    lattice_property_id:
-      element_name: S1MT4R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PT4R
-      property: rdbk_current
-    lattice_property_id:
-      element_name: S1MT4R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5271,7 +5131,7 @@ lut:
       element_name: S4M1T4R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5281,7 +5141,7 @@ lut:
       element_name: S4M1T4R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5291,7 +5151,7 @@ lut:
       element_name: S4M2T4R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5301,27 +5161,7 @@ lut:
       element_name: S4M2T4R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PD5R
-      property: set_current
-    lattice_property_id:
-      element_name: S1MD5R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PD5R
-      property: rdbk_current
-    lattice_property_id:
-      element_name: S1MD5R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5331,7 +5171,7 @@ lut:
       element_name: S4M1D5R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5341,7 +5181,7 @@ lut:
       element_name: S4M1D5R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5351,7 +5191,7 @@ lut:
       element_name: S4M2D5R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5361,27 +5201,7 @@ lut:
       element_name: S4M2D5R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PT5R
-      property: set_current
-    lattice_property_id:
-      element_name: S1MT5R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PT5R
-      property: rdbk_current
-    lattice_property_id:
-      element_name: S1MT5R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5391,7 +5211,7 @@ lut:
       element_name: S4M1T5R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5401,7 +5221,7 @@ lut:
       element_name: S4M1T5R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5411,7 +5231,7 @@ lut:
       element_name: S4M2T5R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5421,27 +5241,7 @@ lut:
       element_name: S4M2T5R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PD6R
-      property: set_current
-    lattice_property_id:
-      element_name: S1MD6R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PD6R
-      property: rdbk_current
-    lattice_property_id:
-      element_name: S1MD6R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5451,7 +5251,7 @@ lut:
       element_name: S4M1D6R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5461,7 +5261,7 @@ lut:
       element_name: S4M1D6R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5471,7 +5271,7 @@ lut:
       element_name: S4M2D6R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5481,27 +5281,7 @@ lut:
       element_name: S4M2D6R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PT6R
-      property: set_current
-    lattice_property_id:
-      element_name: S1MT6R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PT6R
-      property: rdbk_current
-    lattice_property_id:
-      element_name: S1MT6R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5511,7 +5291,7 @@ lut:
       element_name: S4M1T6R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5521,7 +5301,7 @@ lut:
       element_name: S4M1T6R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5531,7 +5311,7 @@ lut:
       element_name: S4M2T6R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5541,27 +5321,7 @@ lut:
       element_name: S4M2T6R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PD7R
-      property: set_current
-    lattice_property_id:
-      element_name: S1MD7R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PD7R
-      property: rdbk_current
-    lattice_property_id:
-      element_name: S1MD7R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5571,7 +5331,7 @@ lut:
       element_name: S4M1D7R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5581,7 +5341,7 @@ lut:
       element_name: S4M1D7R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5591,7 +5351,7 @@ lut:
       element_name: S4M2D7R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5601,27 +5361,7 @@ lut:
       element_name: S4M2D7R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PT7R
-      property: set_current
-    lattice_property_id:
-      element_name: S1MT7R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PT7R
-      property: rdbk_current
-    lattice_property_id:
-      element_name: S1MT7R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5631,7 +5371,7 @@ lut:
       element_name: S4M1T7R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5641,7 +5381,7 @@ lut:
       element_name: S4M1T7R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5651,7 +5391,7 @@ lut:
       element_name: S4M2T7R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5661,27 +5401,7 @@ lut:
       element_name: S4M2T7R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PD8R
-      property: set_current
-    lattice_property_id:
-      element_name: S1MD8R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PD8R
-      property: rdbk_current
-    lattice_property_id:
-      element_name: S1MD8R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5691,7 +5411,7 @@ lut:
       element_name: S4M1D8R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5701,7 +5421,7 @@ lut:
       element_name: S4M1D8R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5711,7 +5431,7 @@ lut:
       element_name: S4M2D8R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5721,27 +5441,7 @@ lut:
       element_name: S4M2D8R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PT8R
-      property: set_current
-    lattice_property_id:
-      element_name: S1MT8R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PT8R
-      property: rdbk_current
-    lattice_property_id:
-      element_name: S1MT8R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5751,7 +5451,7 @@ lut:
       element_name: S4M1T8R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5761,7 +5461,7 @@ lut:
       element_name: S4M1T8R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5771,7 +5471,7 @@ lut:
       element_name: S4M2T8R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5781,27 +5481,7 @@ lut:
       element_name: S4M2T8R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PD1R
-      property: set_current
-    lattice_property_id:
-      element_name: S1MD1R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
-    energy_dependent: true
-- conversion_id:
-    device_property_id:
-      device_name: HS1PD1R
-      property: rdbk_current
-    lattice_property_id:
-      element_name: S1MD1R
-      property: x_kick
-  conversion_info:
-    coeffs: [0.0, -0.00553438]
+    coeffs: [0.0, 1.56116875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5811,7 +5491,7 @@ lut:
       element_name: S4M1D1R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5821,7 +5501,7 @@ lut:
       element_name: S4M1D1R
       property: x_kick
   conversion_info:
-    coeffs: [0.0, -0.0044502]
+    coeffs: [0.0, 1.58346875]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5831,7 +5511,7 @@ lut:
       element_name: S3M2D1R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5841,7 +5521,7 @@ lut:
       element_name: S3M2D1R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5851,7 +5531,7 @@ lut:
       element_name: S2M2D1R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5861,7 +5541,7 @@ lut:
       element_name: S2M2D1R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5871,7 +5551,7 @@ lut:
       element_name: S2M1T1R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5881,7 +5561,7 @@ lut:
       element_name: S2M1T1R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5891,7 +5571,7 @@ lut:
       element_name: S3M1T1R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5901,7 +5581,7 @@ lut:
       element_name: S3M1T1R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5911,7 +5591,7 @@ lut:
       element_name: S3M2T1R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5921,7 +5601,7 @@ lut:
       element_name: S3M2T1R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5931,7 +5611,7 @@ lut:
       element_name: S2M2T1R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5941,7 +5621,7 @@ lut:
       element_name: S2M2T1R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5951,7 +5631,7 @@ lut:
       element_name: S2M1D2R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5961,7 +5641,7 @@ lut:
       element_name: S2M1D2R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5971,7 +5651,7 @@ lut:
       element_name: S3M1D2R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5981,7 +5661,7 @@ lut:
       element_name: S3M1D2R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -5991,7 +5671,7 @@ lut:
       element_name: S3M2D2R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6001,7 +5681,7 @@ lut:
       element_name: S3M2D2R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6011,7 +5691,7 @@ lut:
       element_name: S2M2D2R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6021,7 +5701,7 @@ lut:
       element_name: S2M2D2R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6031,7 +5711,7 @@ lut:
       element_name: S2M1T2R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6041,7 +5721,7 @@ lut:
       element_name: S2M1T2R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6051,7 +5731,7 @@ lut:
       element_name: S3M1T2R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6061,7 +5741,7 @@ lut:
       element_name: S3M1T2R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6071,7 +5751,7 @@ lut:
       element_name: S3M2T2R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6081,7 +5761,7 @@ lut:
       element_name: S3M2T2R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6091,7 +5771,7 @@ lut:
       element_name: S2M2T2R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6101,7 +5781,7 @@ lut:
       element_name: S2M2T2R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6111,7 +5791,7 @@ lut:
       element_name: S2M1D3R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6121,7 +5801,7 @@ lut:
       element_name: S2M1D3R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6131,7 +5811,7 @@ lut:
       element_name: S3M1D3R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6141,7 +5821,7 @@ lut:
       element_name: S3M1D3R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6151,7 +5831,7 @@ lut:
       element_name: S3M2D3R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6161,7 +5841,7 @@ lut:
       element_name: S3M2D3R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6171,7 +5851,7 @@ lut:
       element_name: S2M2D3R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6181,7 +5861,7 @@ lut:
       element_name: S2M2D3R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6191,7 +5871,7 @@ lut:
       element_name: S2M1T3R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6201,7 +5881,7 @@ lut:
       element_name: S2M1T3R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6211,7 +5891,7 @@ lut:
       element_name: S3M1T3R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6221,7 +5901,7 @@ lut:
       element_name: S3M1T3R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6231,7 +5911,7 @@ lut:
       element_name: S3M2T3R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6241,7 +5921,7 @@ lut:
       element_name: S3M2T3R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6251,7 +5931,7 @@ lut:
       element_name: S2M2T3R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6261,7 +5941,7 @@ lut:
       element_name: S2M2T3R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6271,7 +5951,7 @@ lut:
       element_name: S2M1D4R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6281,7 +5961,7 @@ lut:
       element_name: S2M1D4R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6291,7 +5971,7 @@ lut:
       element_name: S3M1D4R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6301,7 +5981,7 @@ lut:
       element_name: S3M1D4R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6311,7 +5991,7 @@ lut:
       element_name: S3M2D4R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6321,7 +6001,7 @@ lut:
       element_name: S3M2D4R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6331,7 +6011,7 @@ lut:
       element_name: S2M2D4R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6341,7 +6021,7 @@ lut:
       element_name: S2M2D4R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6351,7 +6031,7 @@ lut:
       element_name: S2M1T4R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6361,7 +6041,7 @@ lut:
       element_name: S2M1T4R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6371,7 +6051,7 @@ lut:
       element_name: S3M1T4R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6381,7 +6061,7 @@ lut:
       element_name: S3M1T4R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6391,7 +6071,7 @@ lut:
       element_name: S3M2T4R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6401,7 +6081,7 @@ lut:
       element_name: S3M2T4R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6411,7 +6091,7 @@ lut:
       element_name: S2M2T4R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6421,7 +6101,7 @@ lut:
       element_name: S2M2T4R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6431,7 +6111,7 @@ lut:
       element_name: S2M1D5R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6441,7 +6121,7 @@ lut:
       element_name: S2M1D5R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6451,7 +6131,7 @@ lut:
       element_name: S3M1D5R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6461,7 +6141,7 @@ lut:
       element_name: S3M1D5R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6471,7 +6151,7 @@ lut:
       element_name: S3M2D5R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6481,7 +6161,7 @@ lut:
       element_name: S3M2D5R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6491,7 +6171,7 @@ lut:
       element_name: S2M2D5R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6501,7 +6181,7 @@ lut:
       element_name: S2M2D5R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6511,7 +6191,7 @@ lut:
       element_name: S2M1T5R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6521,7 +6201,7 @@ lut:
       element_name: S2M1T5R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6531,7 +6211,7 @@ lut:
       element_name: S3M1T5R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6541,7 +6221,7 @@ lut:
       element_name: S3M1T5R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6551,7 +6231,7 @@ lut:
       element_name: S3M2T5R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6561,7 +6241,7 @@ lut:
       element_name: S3M2T5R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6571,7 +6251,7 @@ lut:
       element_name: S2M2T5R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6581,7 +6261,7 @@ lut:
       element_name: S2M2T5R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6591,7 +6271,7 @@ lut:
       element_name: S2M1D6R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6601,7 +6281,7 @@ lut:
       element_name: S2M1D6R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6611,7 +6291,7 @@ lut:
       element_name: S3M1D6R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6621,7 +6301,7 @@ lut:
       element_name: S3M1D6R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6631,7 +6311,7 @@ lut:
       element_name: S3M2D6R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6641,7 +6321,7 @@ lut:
       element_name: S3M2D6R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6651,7 +6331,7 @@ lut:
       element_name: S2M2D6R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6661,7 +6341,7 @@ lut:
       element_name: S2M2D6R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6671,7 +6351,7 @@ lut:
       element_name: S2M1T6R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6681,7 +6361,7 @@ lut:
       element_name: S2M1T6R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6691,7 +6371,7 @@ lut:
       element_name: S3M1T6R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6701,7 +6381,7 @@ lut:
       element_name: S3M1T6R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6711,7 +6391,7 @@ lut:
       element_name: S3M2T6R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6721,7 +6401,7 @@ lut:
       element_name: S3M2T6R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6731,7 +6411,7 @@ lut:
       element_name: S2M2T6R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6741,7 +6421,7 @@ lut:
       element_name: S2M2T6R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6751,7 +6431,7 @@ lut:
       element_name: S2M1D7R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6761,7 +6441,7 @@ lut:
       element_name: S2M1D7R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6771,7 +6451,7 @@ lut:
       element_name: S3M1D7R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6781,7 +6461,7 @@ lut:
       element_name: S3M1D7R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6791,7 +6471,7 @@ lut:
       element_name: S3M2D7R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6801,7 +6481,7 @@ lut:
       element_name: S3M2D7R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6811,7 +6491,7 @@ lut:
       element_name: S2M2D7R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6821,7 +6501,7 @@ lut:
       element_name: S2M2D7R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6831,7 +6511,7 @@ lut:
       element_name: S2M1T7R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6841,7 +6521,7 @@ lut:
       element_name: S2M1T7R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6851,7 +6531,7 @@ lut:
       element_name: S3M1T7R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6861,7 +6541,7 @@ lut:
       element_name: S3M1T7R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6871,7 +6551,7 @@ lut:
       element_name: S3M2T7R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6881,7 +6561,7 @@ lut:
       element_name: S3M2T7R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6891,7 +6571,7 @@ lut:
       element_name: S2M2T7R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6901,7 +6581,7 @@ lut:
       element_name: S2M2T7R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6911,7 +6591,7 @@ lut:
       element_name: S2M1D8R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6921,7 +6601,7 @@ lut:
       element_name: S2M1D8R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6931,7 +6611,7 @@ lut:
       element_name: S3M1D8R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6941,7 +6621,7 @@ lut:
       element_name: S3M1D8R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6951,7 +6631,7 @@ lut:
       element_name: S3M2D8R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6961,7 +6641,7 @@ lut:
       element_name: S3M2D8R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6971,7 +6651,7 @@ lut:
       element_name: S2M2D8R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6981,7 +6661,7 @@ lut:
       element_name: S2M2D8R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -6991,7 +6671,7 @@ lut:
       element_name: S2M1T8R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -7001,7 +6681,7 @@ lut:
       element_name: S2M1T8R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -7011,7 +6691,7 @@ lut:
       element_name: S3M1T8R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -7021,7 +6701,7 @@ lut:
       element_name: S3M1T8R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -7031,7 +6711,7 @@ lut:
       element_name: S3M2T8R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -7041,7 +6721,7 @@ lut:
       element_name: S3M2T8R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56403125]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -7051,7 +6731,7 @@ lut:
       element_name: S2M2T8R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -7061,7 +6741,7 @@ lut:
       element_name: S2M2T8R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -7071,7 +6751,7 @@ lut:
       element_name: S2M1D1R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -7081,7 +6761,7 @@ lut:
       element_name: S2M1D1R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.56905625]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -7091,7 +6771,7 @@ lut:
       element_name: S3M1D1R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -7101,7 +6781,7 @@ lut:
       element_name: S3M1D1R
       property: y_kick
   conversion_info:
-    coeffs: [0.0, 0.00297607]
+    coeffs: [0.0, -1.572825]
     energy_dependent: true
 - conversion_id:
     device_property_id:
@@ -17935,5 +17615,13 @@ lut:
     lattice_property_id:
       element_name: track
       property: pos
+  conversion_info: {}
+- conversion_id:
+    device_property_id:
+      device_name: survey
+      property: s
+    lattice_property_id:
+      element_name: survey
+      property: s
   conversion_info: {}
 # EOF

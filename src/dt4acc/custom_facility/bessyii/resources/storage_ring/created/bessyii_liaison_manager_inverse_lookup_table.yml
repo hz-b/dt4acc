@@ -1,5 +1,5 @@
 # 
-# BESSY II Liaison manager inverse table: 2026-04-09 14:21:58.167065
+# BESSY II Liaison manager inverse table: 2026-06-05 15:00:23.315337
 # WARNING: automatically generated data
 #          please check when it is updated if you edit it by hand!
 lut:
@@ -6447,4 +6447,8 @@ lut:
     device_name: track
     property: pos
   lat_ids: [{element_name: track, property: pos}]
+- dev_id:
+    device_name: survey
+    property: s
+  lat_ids: [{element_name: survey, property: s}]
 # EOF
