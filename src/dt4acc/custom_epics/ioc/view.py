@@ -61,7 +61,27 @@ class View(ViewInterface):
         elif var.id == "track":
             self.update_track(var, value)
             return True
+        elif var.id == "survey":
+            self.update_survey(var, value)
+            return True
         return False
+
+    def update_survey(self, var: ReadCommand, pkg):
+        assert var.id == "survey"
+        (single_reading,) = pkg.readings
+        data = single_reading.payload
+
+        rec_s = self.process_variables.get(ReadCommand(id="survey", property="s"))
+        assert rec_s
+        rec_s.set([datum.s for datum in single_reading.payload])
+
+        rec_name = self.process_variables.get(ReadCommand(id="survey", property="name"))
+        assert rec_name
+        rec_name.set([datum.name for datum in single_reading.payload])
+
+        rec_uid = self.process_variables.get(ReadCommand(id="survey", property="uid"))
+        assert rec_uid
+        rec_uid.set([datum.uid for datum in single_reading.payload])
 
     def update_track(self, var: ReadCommand, pkg):
         assert var.id == "track", f"Only prepared to process 'track' but got {var}"
@@ -170,6 +190,8 @@ class View(ViewInterface):
         rw_names.set([pos.uid for pos in value.twiss])
 
         if self.orbit_server is not None:
+            rec_s = self.process_variables.get(ReadCommand("survey", "s"))
+            s_pos = rec_s.get()
             try:
                 self.orbit_server.push_model_data(
                     bpm_names=[pos.fam_name for pos in value.twiss],
@@ -177,6 +199,7 @@ class View(ViewInterface):
                     beta_vert=[pos.y.beta for pos in value.twiss],
                     phase_advance_hor=[pos.x.nu / 2 * math.pi for pos in value.twiss],
                     phase_advance_vert=[pos.y.nu / 2 * math.pi for pos in value.twiss],
+                    s_pos=s_pos
                 )
             except Exception as exc:
                 logger.error("OrbitTwinServer.push failed: %s", exc)

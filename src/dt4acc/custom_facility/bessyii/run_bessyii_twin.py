@@ -83,7 +83,8 @@ def main():
             ReadCommand("twiss", "parameters"),
             ReadCommand("tune", "x"),
             ReadCommand("tune", "y"),
-        ]
+        ],
+        startup_reads=[ReadCommand("survey", "s")]
     )
     controller = BESSYIIEpicsController(
         name = "epics_controller",
@@ -92,6 +93,7 @@ def main():
     )
     dispatcher(controller.startup)
     common_controller.start()
+    dispatcher(common_controller.queue_startup_readings)
     softioc.interactive_ioc(globals())
 
 
