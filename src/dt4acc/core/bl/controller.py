@@ -20,11 +20,13 @@ class Controller(ControllerInterface):
         mexec: CommandExecutionEngine,
         view: ViewInterface,
         default_delayed_reads: Sequence[ReadCommand],
+        startup_reads: Sequence[ReadCommand],
     ):
         self.name = name
         self.mexec = mexec
         self.view = view
         self.default_delayed_reads = default_delayed_reads
+        self.startup_reads = startup_reads
         self.cmd_queue: asyncio.Queue = None
         self.pending_task = None
         self.task_counter = itertools.count()
@@ -58,6 +60,8 @@ class Controller(ControllerInterface):
     def start(self) -> None:
         """Start the delayed execution loop on the shared event loop."""
         assert self.pending_task is None, f"{self.__class__.__name__}.start() called twice"
+        # Todo: should one assign some value to pending task (like true ?)
+        #       just to minimise the time for race conditions
 
         from dt4acc.core.bl.shared_event_loop import get_shared_event_loop
         shared_loop = get_shared_event_loop()
@@ -70,7 +74,9 @@ class Controller(ControllerInterface):
         asyncio.run_coroutine_threadsafe(_create_queue_and_start(), shared_loop).result(timeout=5)
 
         fut = asyncio.run_coroutine_threadsafe(self._queue_loop(), shared_loop)
-        self._pending_task = fut
+        # Todo: should this not assign to pending_task?
+        #       compare to check at start
+        self.pending_task = fut
         logger.info("%s delayed execution task started on shared loop", self.name)
 
     async def update(
@@ -103,6 +109,12 @@ class Controller(ControllerInterface):
         """Direct read from the backend — used for initial value peek at startup."""
         return await self.mexec.trigger_read(reads)
 
+    async def queue_startup_readings(self) -> None:
+        if not self.startup_reads:
+            logger.info("No readings for startup were specified")
+            return
+        await self._enqueue(self.startup_reads)
+
     async def reread_default_readings(self) -> None:
         # Better fail if no default readings are available
         # most probably the whole system will not work as the
@@ -122,7 +134,8 @@ class Controller(ControllerInterface):
 
     async def _enqueue(self, reads: Sequence[ReadCommand]) -> None:
         if self.cmd_queue is None:
-            logger.warning("%s: queue not yet started — delayed reads dropped", self.name)
+            logger.warning(
+                "%s: queue not yet started — delayed reads %s dropped", self.name, reads)
             return
         try:
             await asyncio.wait_for(
