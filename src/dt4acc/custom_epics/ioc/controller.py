@@ -65,8 +65,16 @@ class Controller(ControllerInterface):
         """
         raise NotImplementedError("Need to implement this method for your machine")
 
-    async def update(self, *, cmd: Command, reads: Sequence[ReadCommand], delayed_reads: Sequence[ReadCommand]):
-        return await self.delegate.update(cmd=cmd, reads=reads, delayed_reads=delayed_reads)
+    async def update(
+        self,
+        *,
+        cmd: Command,
+        reads: Sequence[ReadCommand],
+        delayed_reads: Sequence[ReadCommand]
+    ):
+        return await self.delegate.update(
+            cmd=cmd, reads=reads, delayed_reads=delayed_reads
+        )
 
     async def trigger_read(self, reads: Sequence[ReadCommand]) -> ReadTogether:
         return await self.delegate.trigger_read(reads=reads)

@@ -24,10 +24,10 @@ beam_physics_info_type = Type(
                 None,
                 [
                     # fmt:off
-                    ( "BPM"            ,  "as" ),
-                    ( "SPos"           ,  "ad" ),
-                    ( "BetaHor"        ,  "ad" ),
-                    ( "BetaVer"        ,  "ad" ),
+                    ( "BPM"             , "as" ),
+                    ( "SPos"            , "ad" ),
+                    ( "BetaHor"         , "ad" ),
+                    ( "BetaVer"         , "ad" ),
                     ( "PhaseAdvanceHor" , "ad" ),
                     ( "PhaseAdvanceVer" , "ad" ),
                     # fmt:on
@@ -111,20 +111,22 @@ orbit_type = Type(
 
 initial_data = {
     "value": {
-        "A": [],
-        "B": [],
-        "BPM": [],
-        "C": [],
-        "D": [],
-        "X": [],
-        "Y": [],
+        # fmt:off
+        "A"  : [] ,
+        "B"  : [] ,
+        "BPM": [] ,
+        "C"  : [] ,
+        "D"  : [] ,
+        "X"  : [] ,
+        "Y"  : [] ,
+        # fmt:on
     },
 }
 
 initial_beam_physics_data = dict(
     value=dict(
         BPM=[],
-        SPos=[] ,
+        SPos=[],
         BetaHor=[],
         BetaVer=[],
         PhaseAdvanceHor=[],
@@ -184,7 +186,7 @@ class OrbitTwinServer:
         beta_vert: Sequence[float],
         phase_advance_hor: Sequence[float],
         phase_advance_vert: Sequence[float],
-        s_pos: Sequence[float] | None = None
+        s_pos: Sequence[float] | None = None,
     ):
         now = time.time()
         if s_pos is None:

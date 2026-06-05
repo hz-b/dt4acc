@@ -267,18 +267,21 @@ def initialize_survey_info_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
         ),
         ReadCommand(id="survey", property="uid"): builder.WaveformIn(
             f"survey:uid", initial_value=[""], length=config.n_elements
-        )
+        ),
     }
 
 
-def initialize_machine_info_pvs(builder, *, n_ref_buckets) -> Dict[ReadCommand, RecordWrapper]:
+def initialize_machine_info_pvs(
+    builder, *, n_ref_buckets
+) -> Dict[ReadCommand, RecordWrapper]:
     """configuration of the machine: e.g. number of bunches"""
 
     return {
         ReadCommand(id="ring", property="n_rf_buckets"): builder.longIn(
             # Todo: make this configureable ... this is 328 for ALS
             #       this data is accessible from AT
-            f"beam:machine:info:n_rf_buckets", initial_value=n_ref_buckets
+            f"beam:machine:info:n_rf_buckets",
+            initial_value=n_ref_buckets,
         ),
         ReadCommand(id="ring", property="rev_freq"): builder.aIn(
             f"beam:rev_freq", initial_value=0.0, EGU="kHz"
