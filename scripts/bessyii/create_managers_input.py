@@ -151,6 +151,8 @@ def build_liaison_manager_lut(
 
                 # Readback current only needs to go one way
                 inv_d[DevicePropertyID(device_name=dev_name, property="rdbk_current")].append(lat_p)
+                # Todo: rework on this naming
+                inv_d[DevicePropertyID(device_name=entry.dev_id, property="main_strength_rdbk")].append(lat_p)
 
     lut_fwd += [LiaisonManagerForwardLookupElement(lat_id=k, dev_ids=v) for k,v in fwd_d.items()]
     lut_inv += [LiaisonManagerInverseLookupElement(dev_id=k, lat_ids=v) for k,v in inv_d.items()]
