@@ -5,7 +5,6 @@ from softioc import pythonSoftIoc
 
 from dt4acc.core.interfaces.view_interface import ViewInterface
 from dt4acc.core.utils.logger import get_logger
-from dt4acc_lib.model.output.result import TranslatedReading
 from .orbit_pva import OrbitTwinServer
 from dt4acc_lib.model.utils.command import ReadCommand
 
@@ -162,7 +161,6 @@ class View(ViewInterface):
             rec.set(tune_freq)
             logger.debug(f"Updated Tune for plane {plane}")
             pass
-
 
     def update_twiss(self, var: ReadCommand, pkg):
         """
