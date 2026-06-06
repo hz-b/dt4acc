@@ -4,6 +4,8 @@ import getpass
 import json
 import logging
 import os
+from typing import Dict, Any
+
 import at
 from importlib import resources
 
@@ -36,6 +38,9 @@ from dt4acc.custom_epics.ioc.orbit_pva import OrbitTwinServer
 from dt4acc.custom_epics.ioc.controller import dispatcher
 from dt4acc.custom_epics.ioc.view import View
 from dt4acc.custom_facility.bessyii.liasion_translator_setup import load_managers
+from dt4acc_lib.pyat_simulator.accelerator_simulator_proxy_factory import (
+    PyATAcceleratorSimulator,
+)
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -81,7 +86,7 @@ async def main():
         num_readings=1,
     )
 
-    prefix = os.environ.get("DT4ACC_PREFIX", getpass.getuser() + ":")
+    prefix = os.environ.get("DT4ACC_PREFIX", getpass.getuser())
     orbit_server = OrbitTwinServer(
         prefix + "ORBITCC:rdBpm",
         prefix + "ORBITCC:rdModel",
@@ -98,12 +103,14 @@ async def main():
             ReadCommand("track", "pos"),
             ReadCommand("twiss", "parameters"),
         ],
-        startup_reads=[ReadCommand("survey", "s")]
     )
-    controller.set_discard_updates(True)
     controller.start()
     if prefix:
         builder.SetDeviceName(prefix)
+
+    view.update_process_variables(
+        await initialise_pvs(builder=builder, controller=controller)
+    )
     # Extra reads at startup
     await read_and_dispatch(
         controller=controller,
