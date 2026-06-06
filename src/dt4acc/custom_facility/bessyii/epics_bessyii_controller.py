@@ -24,26 +24,4 @@ logger = logging.getLogger("dt4acc")
 
 
 class BESSYIIEpicsController(EpicsController):
-    async def startup(self):
-        self.builder.SetDeviceName(self.prefix)
-
-        self.delegate.view.update_process_variables(
-            {
-                **await initialize_master_clock_pvs(self.builder, controller=self),
-                **await initialize_cavity_pvs(self.builder, controller=self),
-                **await initialize_power_converter_pvs(
-                    self.builder, self.prefix, controller=self
-                ),
-                **initialize_machine_info_pvs(self.builder, n_ref_buckets=400),
-                **initialize_survey_info_pvs(self.builder),
-                **initialize_orbit_object_pvs(self.builder),
-                **initialize_orbit_pvs(self.builder),
-                **initialize_twiss_pvs(self.builder),
-                **initialize_tune_pvs(self.builder),
-                **initialize_other_pvs(self.builder, self.prefix),
-            }
-        )
-        logger.warning("All PVs set up")
-
-        self.builder.LoadDatabase()
-        softioc.iocInit(dispatcher)
+    pass
