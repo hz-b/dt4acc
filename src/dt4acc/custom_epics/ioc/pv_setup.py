@@ -1,3 +1,4 @@
+import math
 from typing import Dict
 
 from softioc.pythonSoftIoc import RecordWrapper
@@ -111,7 +112,7 @@ async def initialize_magnet_pvs(
 
 
 async def initialize_power_converter_pvs(
-    builder, prefix: str, controller: ControllerInterface
+    builder, controller: ControllerInterface
 ):
     """
     Initializes power converter PVs and associated magnets.
@@ -122,12 +123,12 @@ async def initialize_power_converter_pvs(
     """
     d = dict()
     for pc_name in get_unique_power_converters():
-        d.update(await add_pc_pvs(builder, pc_name, prefix, controller))
+        d.update(await add_pc_pvs(builder, pc_name, controller))
     return d
 
 
 async def add_pc_pvs(
-    builder, pc_name: str, prefix: str, controller: ControllerInterface
+    builder, pc_name: str, controller: ControllerInterface
 ) -> Dict[str, RecordWrapper]:
     """
     Adds PVs for a specific power converter and its associated magnets.
@@ -342,7 +343,7 @@ async def initialize_master_clock_pvs(
     return d
 
 
-def initialize_other_pvs(builder, prefix) -> Dict[ReadCommand, RecordWrapper]:
+def initialize_other_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
     """Initialises miscellaneous PVs (dummy values).
 
     Args:
