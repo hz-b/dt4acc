@@ -20,15 +20,14 @@ class Controller(ControllerInterface):
         mexec: CommandExecutionEngine,
         view: ViewInterface,
         default_delayed_reads: Sequence[ReadCommand],
-        startup_reads: Sequence[ReadCommand],
     ):
         self.name = name
         self.mexec = mexec
         self.view = view
         self.default_delayed_reads = default_delayed_reads
-        self.startup_reads = startup_reads
         self.cmd_queue: asyncio.Queue = None
         self.pending_task = None
+        self._discard_updates = False
         self.task_counter = itertools.count()
 
     def __repr__(self):
@@ -79,6 +78,11 @@ class Controller(ControllerInterface):
         self.pending_task = fut
         logger.info("%s delayed execution task started on shared loop", self.name)
 
+    def set_discard_updates(self, flag: bool):
+        """Enable it before values are set to the view's set value
+        """
+        self._discard_updates = bool(flag)
+
     async def update(
         self,
         *,
@@ -92,6 +96,15 @@ class Controller(ControllerInterface):
 
         Called from Tango device write handlers via _async().
         """
+        if self._discard_updates:
+            logger.info(
+                "%s:%s discarding update command %s",
+                self.__class__.__name__,
+                self.name,
+                cmd
+            )
+            return
+
         # 1. Mutate the backend lattice
         await self.mexec.set([cmd])
 
@@ -108,12 +121,6 @@ class Controller(ControllerInterface):
     async def trigger_read(self, reads: Sequence[ReadCommand]) -> ReadTogetherAndTranslated:
         """Direct read from the backend — used for initial value peek at startup."""
         return await self.mexec.trigger_read(reads)
-
-    async def queue_startup_readings(self) -> None:
-        if not self.startup_reads:
-            logger.info("No readings for startup were specified")
-            return
-        await self._enqueue(self.startup_reads)
 
     async def reread_default_readings(self) -> None:
         # Better fail if no default readings are available
@@ -132,18 +139,20 @@ class Controller(ControllerInterface):
         except Exception as exc:
             logger.error("%s: failed to push invalid state: %s", self.name, exc)
 
-    async def _enqueue(self, reads: Sequence[ReadCommand]) -> None:
+    async def _enqueue(self, reads: Sequence[ReadCommand]) -> bool:
         if self.cmd_queue is None:
             logger.warning(
                 "%s: queue not yet started — delayed reads %s dropped", self.name, reads)
-            return
+            return False
         try:
             await asyncio.wait_for(
                 asyncio.gather(*[self.cmd_queue.put(r) for r in reads]),
                 timeout=0.1,
             )
+            return True
         except asyncio.TimeoutError:
             logger.warning("%s: queue put timed out — delayed reads dropped", self.name)
+            return False
 
     async def _queue_loop(self) -> None:
         for step in itertools.count():
@@ -197,3 +206,34 @@ async def consume(queue: asyncio.Queue, delay: float) -> Sequence[ReadCommand]:
         rcmds.append(rcmd)
         queue.task_done()
     return rcmds
+
+
+async def read_and_dispatch(
+        controller: ControllerInterface,
+        view: ViewInterface,
+        rcmds: Sequence[ReadCommand]
+):
+    read_result = [await read_one_by_one(controller, rcmd) for rcmd in rcmds]
+    read_result = [
+        (rcmd, translated)
+        for rcmd, translated in read_result
+        if translated is not None
+    ]
+    # Need to combine translated...
+    for rcmd, translated in read_result:
+        for data in translated.data:
+            await view.dispatch(rcmd, data)
+        logger.debug(f"Controller/View: successful startup at {rcmd}")
+
+
+async def read_one_by_one(controller: ControllerInterface, rcmd: ReadCommand):
+    # so that we can log the ones that fail
+    try:
+        r = await controller.trigger_read([rcmd])
+    except Exception as ex:
+        logger.warning(
+            f"{controller} failed to retrieve data for {rcmd}"
+        )
+        # can be still useful to report in one batch
+        return rcmd, None
+    return rcmd, r
