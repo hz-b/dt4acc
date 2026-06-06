@@ -27,7 +27,6 @@ class Controller(ControllerInterface):
         self.default_delayed_reads = default_delayed_reads
         self.cmd_queue: asyncio.Queue = None
         self.pending_task = None
-        self._discard_updates = False
         self.task_counter = itertools.count()
 
     def __repr__(self):
@@ -58,11 +57,14 @@ class Controller(ControllerInterface):
 
     def start(self) -> None:
         """Start the delayed execution loop on the shared event loop."""
-        assert self.pending_task is None, f"{self.__class__.__name__}.start() called twice"
+        assert (
+            self.pending_task is None
+        ), f"{self.__class__.__name__}.start() called twice"
         # Todo: should one assign some value to pending task (like true ?)
         #       just to minimise the time for race conditions
 
         from dt4acc.core.bl.shared_event_loop import get_shared_event_loop
+
         shared_loop = get_shared_event_loop()
 
         # Always use the shared loop — it's the one we control and is
@@ -70,18 +72,15 @@ class Controller(ControllerInterface):
         async def _create_queue_and_start():
             self.cmd_queue = asyncio.Queue()
 
-        asyncio.run_coroutine_threadsafe(_create_queue_and_start(), shared_loop).result(timeout=5)
+        asyncio.run_coroutine_threadsafe(_create_queue_and_start(), shared_loop).result(
+            timeout=5
+        )
 
         fut = asyncio.run_coroutine_threadsafe(self._queue_loop(), shared_loop)
         # Todo: should this not assign to pending_task?
         #       compare to check at start
         self.pending_task = fut
         logger.info("%s delayed execution task started on shared loop", self.name)
-
-    def set_discard_updates(self, flag: bool):
-        """Enable it before values are set to the view's set value
-        """
-        self._discard_updates = bool(flag)
 
     async def update(
         self,
@@ -96,15 +95,6 @@ class Controller(ControllerInterface):
 
         Called from Tango device write handlers via _async().
         """
-        if self._discard_updates:
-            logger.info(
-                "%s:%s discarding update command %s",
-                self.__class__.__name__,
-                self.name,
-                cmd
-            )
-            return
-
         # 1. Mutate the backend lattice
         await self.mexec.set([cmd])
 
@@ -118,7 +108,9 @@ class Controller(ControllerInterface):
         all_delayed = list(self.default_delayed_reads) + list(delayed_reads)
         await self._enqueue(all_delayed)
 
-    async def trigger_read(self, reads: Sequence[ReadCommand]) -> ReadTogetherAndTranslated:
+    async def trigger_read(
+        self, reads: Sequence[ReadCommand]
+    ) -> ReadTogetherAndTranslated:
         """Direct read from the backend — used for initial value peek at startup."""
         return await self.mexec.trigger_read(reads)
 
@@ -139,20 +131,19 @@ class Controller(ControllerInterface):
         except Exception as exc:
             logger.error("%s: failed to push invalid state: %s", self.name, exc)
 
-    async def _enqueue(self, reads: Sequence[ReadCommand]) -> bool:
+    async def _enqueue(self, reads: Sequence[ReadCommand]) -> None:
         if self.cmd_queue is None:
             logger.warning(
-                "%s: queue not yet started — delayed reads %s dropped", self.name, reads)
-            return False
+                "%s: queue not yet started — delayed reads %s dropped", self.name, reads
+            )
+            return
         try:
             await asyncio.wait_for(
                 asyncio.gather(*[self.cmd_queue.put(r) for r in reads]),
                 timeout=0.1,
             )
-            return True
         except asyncio.TimeoutError:
             logger.warning("%s: queue put timed out — delayed reads dropped", self.name)
-            return False
 
     async def _queue_loop(self) -> None:
         for step in itertools.count():
@@ -174,12 +165,14 @@ class Controller(ControllerInterface):
             traceback.print_exc()
             # Push NaN to all virtual devices so clients know data is invalid
             await self._push_invalid()
-            return   # never kill the loop
+            return  # never kill the loop
 
         if len(read_result.data) != len(t_rcmds):
             logger.error(
                 "%s: sent %d read commands, got %d results — skipping",
-                self.name, len(t_rcmds), len(read_result.data),
+                self.name,
+                len(t_rcmds),
+                len(read_result.data),
             )
             await self._push_invalid()
             return
@@ -209,15 +202,11 @@ async def consume(queue: asyncio.Queue, delay: float) -> Sequence[ReadCommand]:
 
 
 async def read_and_dispatch(
-        controller: ControllerInterface,
-        view: ViewInterface,
-        rcmds: Sequence[ReadCommand]
+    controller: ControllerInterface, view: ViewInterface, rcmds: Sequence[ReadCommand]
 ):
     read_result = [await read_one_by_one(controller, rcmd) for rcmd in rcmds]
     read_result = [
-        (rcmd, translated)
-        for rcmd, translated in read_result
-        if translated is not None
+        (rcmd, translated) for rcmd, translated in read_result if translated is not None
     ]
     # Need to combine translated...
     for rcmd, translated in read_result:
@@ -231,9 +220,10 @@ async def read_one_by_one(controller: ControllerInterface, rcmd: ReadCommand):
     try:
         r = await controller.trigger_read([rcmd])
     except Exception as ex:
-        logger.warning(
-            f"{controller} failed to retrieve data for {rcmd}"
-        )
+        logger.warning(f"{controller} failed to retrieve data for {rcmd}")
         # can be still useful to report in one batch
         return rcmd, None
     return rcmd, r
+
+
+__all__ = ["Controller", "read_and_dispatch", "read_one_by_one"]
