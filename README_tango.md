@@ -237,7 +237,7 @@ src/dt4acc/
         ├── tango_controller.py           ← backend update + queue loop
         └── devices/
             ├── base_magnet_device.py
-            ├── quad_sext_oct_device.py
+            ├── multipole_device.py
             ├── steerer_device.py
             ├── skew_quad_device.py
             ├── cavity_device.py

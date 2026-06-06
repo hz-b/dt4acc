@@ -4,7 +4,8 @@ from typing import Sequence
 
 @dataclass
 class CalculatedPosition:
-    name: str
+    fam_name: str
+    uid: str
     x: float
     y: float
 
