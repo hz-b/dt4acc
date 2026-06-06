@@ -1,11 +1,14 @@
 """
-quad_sext_oct_device.py
-========================
-Tango device for Quadrupoles, Sextupoles, and Octupoles.
+multipole_device.py
+====================
+Tango device for Quadrupoles, Sextupoles, Octupoles and Multipoles.
 Exposes: magnetic_strength (READ_WRITE) + magnetic_strength_readback (READ).
+
+The `lattice_property` DB property stores the correct AT property name
+per subtype (B2/B3/B4 for MAX IV, main_strength for SOLEIL design view).
 """
 
-from tango.server import attribute, command
+from tango.server import attribute, command, device_property
 from tango import DevState, AttrWriteType
 
 from dt4acc.custom_tango.ioc.devices.base_magnet_device import BaseMagnetDevice
@@ -16,9 +19,14 @@ logger = get_logger()
 
 class MultipoleDevice(BaseMagnetDevice):
     """
-    Tango device for Quadrupoles, Sextupoles, and Octupoles.
-    Only exposes magnetic_strength and its readback.
+    Tango device for Quadrupoles, Sextupoles, Octupoles and Multipoles.
+    Exposes magnetic_strength and its readback.
     """
+
+    # AT property name — set at registration time by tango_device_setup.py.
+    # Quad→"B2", Sext→"B3", Oct→"B4" for device-view (MAX IV).
+    # Defaults to "main_strength" for design-view facilities (SOLEIL).
+    lattice_property = device_property(dtype=str, default_value="main_strength")
 
     def init_device(self):
         super().init_device()
@@ -32,7 +40,7 @@ class MultipoleDevice(BaseMagnetDevice):
     def magnetic_strength(self) -> float:
         try:
             from dt4acc.custom_tango.ioc.single_server import peek_from_lattice
-            val = peek_from_lattice(self.lattice_id, "main_strength")
+            val = peek_from_lattice(self.lattice_id, self.lattice_property)
             if val != 0.0:
                 self._magnetic_strength = val
                 self._magnetic_strength_readback = val
@@ -44,7 +52,7 @@ class MultipoleDevice(BaseMagnetDevice):
     def magnetic_strength(self, value: float) -> None:
         value = float(value)
         self._magnetic_strength = value
-        self._send("main_strength", value)
+        self._send(self.lattice_property, value)
         self._magnetic_strength_readback = value
 
     @attribute(dtype=float, label="Magnetic strength readback", unit="1/m")
@@ -64,8 +72,9 @@ class MultipoleDevice(BaseMagnetDevice):
         try:
             from dt4acc.custom_tango.ioc.single_server import get_nominal_values
             vals = get_nominal_values(self.lattice_id)
-            self._magnetic_strength = vals["main_strength"]
-            self._magnetic_strength_readback = vals["main_strength"]
+            self._magnetic_strength = vals.get(self.lattice_property,
+                                               vals.get("main_strength", 0.0))
+            self._magnetic_strength_readback = self._magnetic_strength
             logger.info("%s: RefreshFromCache done — strength=%.6f",
                         self.magnet_name, self._magnetic_strength)
         except Exception as exc:

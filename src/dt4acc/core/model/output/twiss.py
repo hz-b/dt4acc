@@ -18,7 +18,8 @@ class TwissParameters:
 
 @dataclass
 class TwissAtPosition:
-    name: str
+    fam_name: str
+    uid: str
     x: TwissParameters
     y: TwissParameters
 

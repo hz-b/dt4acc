@@ -3,15 +3,28 @@ liasion_translator_setup.py  —  SOLEIL II liaison & translator
 ==============================================================
 
 Design-view architecture: the magnet Tango device IS the control source.
-There are no power converters — the magnet device writes K/H/x_kick/y_kick
-directly to the AT element. The liaison maps device properties to lattice
-element properties 1:1.
+There are no power converters — the magnet device writes main_strength/kicks
+directly to the AT element via the new property proxy architecture.
+
+Property name conventions (must match ElementPropertyInterface.handles_property()):
+    Quadrupole  → "main_strength"  (MainStrengthForQuadrupole → K / PolynomB[1])
+    Sextupole   → "main_strength"  (MainStrengthForSextupole  → H / PolynomB[2])
+    Octupole    → "B4"             (Multipole(normal, 4)       → PolynomB[3])
+    H-steerer   → "x_kick"        (XKick                      → KickAngle[0])
+    V-steerer   → "y_kick"        (YKick                      → KickAngle[1])
+    SkewQuad    → "A2"             (Multipole(skew, 2)         → PolynomA[1])
+    Cavity      → "frequency"     (Frequency                  → obj.Frequency)
+
+The liaison maps device properties to lattice element properties.
+The proxy (in dt4acc_lib) then knows how to read/write each property on the AT object.
+
+build_managers() always returns (yp, lm, tm) — three values.
 """
 
 import functools
 import logging
-from dataclasses import dataclass
 from abc import ABCMeta, abstractmethod
+from dataclasses import dataclass
 from typing import Dict, Sequence, Mapping, Hashable
 
 from dt4acc_lib.bl.unit_conversion import LinearUnitConversion
@@ -19,6 +32,7 @@ from dt4acc_lib.bl.yellow_pages import YellowPages
 from dt4acc_lib.interfaces.utils.liaison_manager import LiaisonManagerBase
 from dt4acc_lib.interfaces.utils.state_conversion import StateConversion
 from dt4acc_lib.interfaces.utils.translator_service import TranslatorServiceBase
+from dt4acc_lib.interfaces.utils.yellow_pages import YellowPagesBase
 from dt4acc_lib.model.utils.identifiers import (
     LatticeElementPropertyID, DevicePropertyID, ConversionID
 )
@@ -90,12 +104,16 @@ def _remove_id(d: Dict) -> Dict:
     """Strip _id and normalise uuid → uuids for MagnetElementSetup."""
     nd = d.copy()
     nd.pop("_id", None)
-    # SOLEIL JSON has singular "uuid" string; MagnetElementSetup expects "uuids" list
     if "uuid" in nd and "uuids" not in nd:
         nd["uuids"] = [nd.pop("uuid")]
     elif "uuid" in nd:
         nd.pop("uuid")
     return nd
+
+
+def _get_cavity_names() -> list:
+    """Return cavity device names directly from the setup JSON."""
+    return [m["name"] for m in get_magnets() if m.get("type") == "RFCavity"]
 
 
 def magnet_infos_from_db() -> Sequence[MagnetElementSetup]:
@@ -115,31 +133,52 @@ def magnet_infos_from_db() -> Sequence[MagnetElementSetup]:
     return result
 
 
-def element_method(element_name: str, yp: YellowPages) -> str:
+def _lattice_property(element_name: str, yp: YellowPages) -> str:
+    """
+    Return the lattice element property name for a given magnet.
+    These names must match ElementPropertyInterface.handles_property()
+    in the dt4acc_lib property proxy classes.
+
+        Quadrupole  → "main_strength"  (MainStrengthForQuadrupole)
+        Sextupole   → "main_strength"  (MainStrengthForSextupole)
+        Octupole    → "B4"             (Multipole(normal, 4))
+        H-steerer   → "x_kick"        (XKick)
+        V-steerer   → "y_kick"        (YKick)
+        SkewQuad    → "A2"             (Multipole(skew, 2))
+        Cavity      → "frequency"     (Frequency)
+    """
     if element_name in yp.horizontal_steerer_names():
         return "x_kick"
     elif element_name in yp.vertical_steerer_names():
         return "y_kick"
     elif element_name in yp.quadrupole_names():
-        return "K"
-    elif element_name in yp.sextupole_names():
-        return "H"
-    elif element_name in yp.octupole_names():
         return "main_strength"
+    elif element_name in yp.sextupole_names():
+        return "main_strength"
+    elif element_name in yp.octupole_names():
+        # Octupole in AT is a Multipole element — liaison maps to B4
+        # Multipole(normal_skew=NormalSkew.normal, n_multipole=4).handles_property() == "B4"
+        return "B4"
     elif element_name in yp.skew_quad_names():
-        return "skew_quad_strength"
+        # Skew quadrupole corrector (CQLN/CQLT) — liaison maps to A2
+        # Multipole(normal_skew=NormalSkew.skew, n_multipole=2).handles_property() == "A2"
+        return "A2"
     elif element_name in yp.cavity_names():
         return "frequency"
     else:
         raise AssertionError(f"Don't know how to handle {element_name!r}")
 
 
-def extract_host_element_name(element_name: str, yp: YellowPages) -> str:
-    """Steerers live on the sextupole host element. Skew quads use compound uuid."""
+def _host_element_name(element_name: str, yp: YellowPages) -> str:
+    """
+    Return the AT lattice element name (uuid) that the device property
+    maps to. Steerers live on the sextupole host element. Skew quads
+    use a compound uuid ("CQLN:<host_uuid>" or "CQLT:<host_uuid>").
+    All other magnets are their own host.
+    """
     if (element_name in yp.horizontal_steerer_names()
             or element_name in yp.vertical_steerer_names()):
-        host = element_name.rsplit("-", 1)[0]
-        return host
+        return element_name.rsplit("-", 1)[0]
     if element_name in yp.skew_quad_names():
         return yp.skew_quad_host_id(element_name)
     return element_name
@@ -152,97 +191,53 @@ def build_managers():
     """
     Build and return (yp, lm, tm) for the SOLEIL II design-view twin.
 
-    Design-view: no power converters. Magnet devices write K/H/kicks directly.
+    Design-view: no power converters. Magnet devices map device properties
+    directly to lattice element properties via the new property proxy architecture.
     All unit conversions use LinearUnitConversion(slope=1.0, intercept=0.0).
     """
     yp = soleil_yellow_pages()
     infos = magnet_infos_from_db()
-    cavity_names = yp.cavity_names()
+    cavity_names = _get_cavity_names()
 
-    # Sanity check: names must be unique
     magnet_names = [info.name for info in infos]
     if len(set(magnet_names)) != len(infos):
         raise AssertionError("Magnet names are not unique — required for LUT correctness")
 
+    _linear = lambda: LinearUnitConversion(slope=1.0, intercept=0.0)
+
     # ------------------------------------------------------------------
     # Inverse LUT  (DevicePropertyID → LatticeElementPropertyID)
-    # Design view: device_name == magnet name, no PC indirection.
     # ------------------------------------------------------------------
     inverse_lut: dict = {}
 
-    # Horizontal steerers → x_kick on host sextupole
-    inverse_lut.update({
-        DevicePropertyID(device_name=info.name, property="x_kick"): (
-            LatticeElementPropertyID(
-                element_name=extract_host_element_name(info.name, yp=yp),
-                property="x_kick",
-            ),
-        )
-        for info in infos if info.name in yp.horizontal_steerer_names()
-    })
+    # All magnets — device property → lattice element property
+    # The device property name is what the Tango device exposes (e.g. "main_strength")
+    # The lattice property name is what the proxy handles (e.g. "main_strength", "B4", "A2")
+    # Magnet types that have a control interface in SOLEIL design view.
+    # Bends (dipoles) are not directly controlled — skip them.
+    _CONTROLLED_TYPES = {
+        "Quadrupole", "Sextupole", "Octupole", "Steerer",
+        "SkewQuadrupole", "RFCavity"
+    }
 
-    # Vertical steerers → y_kick on host sextupole
-    inverse_lut.update({
-        DevicePropertyID(device_name=info.name, property="y_kick"): (
-            LatticeElementPropertyID(
-                element_name=extract_host_element_name(info.name, yp=yp),
-                property="y_kick",
-            ),
-        )
-        for info in infos if info.name in yp.vertical_steerer_names()
-    })
+    for info in infos:
+        if info.type not in _CONTROLLED_TYPES:
+            continue
+        dev_prop = _lattice_property(info.name, yp)  # device exposes same name as proxy
+        lat_prop = _lattice_property(info.name, yp)  # proxy property name
+        host = _host_element_name(info.name, yp)
+        inverse_lut[
+            DevicePropertyID(device_name=info.name, property=dev_prop)
+        ] = (LatticeElementPropertyID(element_name=host, property=lat_prop),)
 
-    # Quadrupoles → K
-    inverse_lut.update({
-        DevicePropertyID(device_name=info.name, property="K"): (
-            LatticeElementPropertyID(element_name=info.name, property="K"),
-        )
-        for info in infos if info.name in yp.quadrupole_names()
-    })
-
-    # Sextupoles → H
-    inverse_lut.update({
-        DevicePropertyID(device_name=info.name, property="H"): (
-            LatticeElementPropertyID(element_name=info.name, property="H"),
-        )
-        for info in infos if info.name in yp.sextupole_names()
-    })
-
-    # x/y attributes on quads and sextupoles (for orbit correction readback)
-    for axis in ("x", "y"):
-        inverse_lut.update({
-            DevicePropertyID(device_name=info.name, property=axis): (
-                LatticeElementPropertyID(element_name=info.name, property=axis),
-            )
-            for info in infos if info.type in ("Quadrupole", "Sextupole")
-        })
-
-    # Octupoles → main_strength
-    inverse_lut.update({
-        DevicePropertyID(device_name=info.name, property="main_strength"): (
-            LatticeElementPropertyID(element_name=info.name, property="main_strength"),
-        )
-        for info in infos if info.type == "Octupole"
-    })
-
-    # SkewQuadrupoles (CQLN/CQLT) → skew_quad_strength on compound uuid
-    inverse_lut.update({
-        DevicePropertyID(device_name=info.name, property="skew_quad_strength"): (
-            LatticeElementPropertyID(
-                element_name=extract_host_element_name(info.name, yp=yp),
-                property="skew_quad_strength",
-            ),
-        )
-        for info in infos if info.type == "SkewQuadrupole"
-    })
-
-    # Cavities → frequency
-    inverse_lut.update({
-        DevicePropertyID(device_name=name, property="frequency"): (
-            LatticeElementPropertyID(element_name=name, property="frequency"),
-        )
-        for name in cavity_names
-    })
+    # Cavities → frequency and voltage
+    for name in cavity_names:
+        inverse_lut[
+            DevicePropertyID(device_name=name, property="frequency")
+        ] = (LatticeElementPropertyID(element_name=name, property="frequency"),)
+        inverse_lut[
+            DevicePropertyID(device_name=name, property="voltage")
+        ] = (LatticeElementPropertyID(element_name=name, property="voltage"),)
 
     # Master clock → all cavity frequencies
     inverse_lut[
@@ -252,7 +247,7 @@ def build_managers():
         for name in cavity_names
     )
 
-    # Virtual result IDs (tune, twiss, track, orbit, chromaticity) — passthrough
+    # Virtual result IDs — passthrough (tune, twiss, track, orbit, chromaticity)
     for virtual_id, prop in [
         ("twiss",        "parameters"),
         ("tune",         "transversal"),
@@ -268,111 +263,39 @@ def build_managers():
 
     # ------------------------------------------------------------------
     # Translator LUT  (ConversionID → StateConversion)
-    # Design view: slope=1.0, intercept=0.0 for all magnets.
+    # slope=1.0 for all SOLEIL magnets — design view, no current→field conversion.
     # ------------------------------------------------------------------
-    _linear = lambda: LinearUnitConversion(slope=1.0, intercept=0.0)
-
     translator_lut: dict = {}
 
-    # Steerers
+    # All controlled magnets — same set as inverse_lut
     for info in infos:
-        if info.name in yp.horizontal_steerer_names():
-            translator_lut[ConversionID(
-                LatticeElementPropertyID(
-                    element_name=extract_host_element_name(info.name, yp=yp),
-                    property="x_kick",
-                ),
-                DevicePropertyID(device_name=info.name, property="x_kick"),
-            )] = _linear()
-        elif info.name in yp.vertical_steerer_names():
-            translator_lut[ConversionID(
-                LatticeElementPropertyID(
-                    element_name=extract_host_element_name(info.name, yp=yp),
-                    property="y_kick",
-                ),
-                DevicePropertyID(device_name=info.name, property="y_kick"),
-            )] = _linear()
+        if info.type not in _CONTROLLED_TYPES:
+            continue
+        dev_prop = _lattice_property(info.name, yp)
+        lat_prop = _lattice_property(info.name, yp)
+        host = _host_element_name(info.name, yp)
+        translator_lut[ConversionID(
+            LatticeElementPropertyID(element_name=host, property=lat_prop),
+            DevicePropertyID(device_name=info.name, property=dev_prop),
+        )] = _linear()
 
-    # Quadrupoles — K and main_strength
-    translator_lut.update({
-        ConversionID(
-            LatticeElementPropertyID(element_name=info.name, property="K"),
-            DevicePropertyID(device_name=info.name, property="K"),
-        ): _linear()
-        for info in infos if info.name in yp.quadrupole_names()
-    })
-    translator_lut.update({
-        ConversionID(
-            LatticeElementPropertyID(element_name=info.name, property="main_strength"),
-            DevicePropertyID(device_name=info.name, property="K"),
-        ): _linear()
-        for info in infos if info.name in yp.quadrupole_names()
-    })
-
-    # Sextupoles — H and main_strength
-    translator_lut.update({
-        ConversionID(
-            LatticeElementPropertyID(element_name=info.name, property="H"),
-            DevicePropertyID(device_name=info.name, property="H"),
-        ): _linear()
-        for info in infos if info.name in yp.sextupole_names()
-    })
-    translator_lut.update({
-        ConversionID(
-            LatticeElementPropertyID(element_name=info.name, property="main_strength"),
-            DevicePropertyID(device_name=info.name, property="H"),
-        ): _linear()
-        for info in infos if info.name in yp.sextupole_names()
-    })
-
-    # x/y axes on quads and sextupoles
-    for axis in ("x", "y"):
-        translator_lut.update({
-            ConversionID(
-                LatticeElementPropertyID(element_name=info.name, property=axis),
-                DevicePropertyID(device_name=info.name, property=axis),
-            ): _linear()
-            for info in infos if info.type in ("Quadrupole", "Sextupole")
-        })
-
-    # Octupoles — main_strength
-    translator_lut.update({
-        ConversionID(
-            LatticeElementPropertyID(element_name=info.name, property="main_strength"),
-            DevicePropertyID(device_name=info.name, property="main_strength"),
-        ): _linear()
-        for info in infos if info.type == "Octupole"
-    })
-
-    # SkewQuadrupoles
-    translator_lut.update({
-        ConversionID(
-            LatticeElementPropertyID(
-                element_name=extract_host_element_name(info.name, yp=yp),
-                property="skew_quad_strength",
-            ),
-            DevicePropertyID(device_name=info.name, property="skew_quad_strength"),
-        ): _linear()
-        for info in infos if info.type == "SkewQuadrupole"
-    })
-
-    # Cavities — frequency (Hz ↔ Hz, slope=1.0 for SOLEIL)
-    translator_lut.update({
-        ConversionID(
+    # Cavities — Hz ↔ Hz, slope=1.0 for direct frequency write
+    for name in cavity_names:
+        translator_lut[ConversionID(
             LatticeElementPropertyID(element_name=name, property="frequency"),
             DevicePropertyID(device_name=name, property="frequency"),
-        ): _linear()
-        for name in cavity_names
-    })
+        )] = _linear()
+        translator_lut[ConversionID(
+            LatticeElementPropertyID(element_name=name, property="voltage"),
+            DevicePropertyID(device_name=name, property="voltage"),
+        )] = _linear()
 
-    # Master clock
-    translator_lut.update({
-        ConversionID(
+    # Master clock — kHz on master clock device
+    for name in cavity_names:
+        translator_lut[ConversionID(
             LatticeElementPropertyID(element_name=name, property="frequency"),
             DevicePropertyID(device_name="master_clock", property="reference_frequency"),
-        ): LinearUnitConversion(slope=1e-3, intercept=0.0)  # kHz on master clock
-        for name in cavity_names
-    })
+        )] = LinearUnitConversion(slope=1e-3, intercept=0.0)
 
     # Virtual result IDs — passthrough
     for virtual_id, prop in [
@@ -393,8 +316,14 @@ def build_managers():
 
 @functools.lru_cache(maxsize=1)
 def load_managers():
-    """Cached entry point. Registers SOLEIL addon proxies then calls build_managers()."""
-    from dt4acc_lib.pyat_simulator.element_proxies import ADDON_PROXY_REGISTRY, SkewQuadCorrectorProxy
+    """
+    Cached entry point. Registers SOLEIL addon proxies then calls build_managers().
+
+    Note: CQLN/CQLT skew quad correctors still use the ADDON_PROXY_REGISTRY
+    mechanism from element_proxies.py until the new proxy_factory supports
+    compound elements natively.
+    """
+    from dt4acc_lib.pyat_simulator.proxies.addon_registry import ADDON_PROXY_REGISTRY, SkewQuadCorrectorProxy
     # CQLN (Normal)  → PolynomB[1]  corrector_type="normal"
     # CQLT (Tourné)  → PolynomA[1]  corrector_type="skew"
     ADDON_PROXY_REGISTRY["CQLN"] = lambda el, eid, hid: SkewQuadCorrectorProxy(

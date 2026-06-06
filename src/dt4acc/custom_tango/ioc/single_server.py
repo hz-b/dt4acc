@@ -159,13 +159,19 @@ def refresh_cache_from_lattice(sync_proxy, magnet_uuids: list) -> None:
     if not magnet_uuids:
         return
 
-    logger.warning("Refreshing nominal cache for %d magnets...", len(magnet_uuids))
+    # Skip compound IDs (e.g. "CQLN:<uuid>") — skew quad correctors
+    # use "B2"/"A2" not "main_strength"/"x_kick"/"y_kick"
+    simple_uuids = [u for u in magnet_uuids if ":" not in str(u)]
+    if not simple_uuids:
+        return
+
+    logger.warning("Refreshing nominal cache for %d magnets...", len(simple_uuids))
     new_cache = {uuid: {"main_strength": 0.0, "x_kick": 0.0, "y_kick": 0.0}
-                 for uuid in magnet_uuids}
+                 for uuid in simple_uuids}
 
     for prop in ("main_strength", "x_kick", "y_kick"):
         try:
-            ids  = list(magnet_uuids)
+            ids  = list(simple_uuids)
             props = [prop] * len(ids)
             raw = sync_proxy.sync_trigger_read(ids, props)
             for rcmd_id, rcmd_prop, payload in raw:
@@ -186,14 +192,21 @@ def _preload_initial_values(sync_proxy, magnet_uuids: list) -> None:
     """
     Bulk-read main_strength for all magnets in one batch before Tango starts.
     Populates _initial_strength_cache so init_device() needs no RPC calls.
+    Skips compound IDs (e.g. "CQLN:<uuid>") — skew quad correctors use
+    "B2"/"A2" not "main_strength".
     """
     global _initial_strength_cache # noqa: F824
     if not magnet_uuids:
         return
 
-    logger.warning("Pre-loading initial values for %d magnets...", len(magnet_uuids))
+    # Compound IDs have ":" — skip them as they use different property names
+    simple_uuids = [u for u in magnet_uuids if ":" not in str(u)]
+    if not simple_uuids:
+        return
+
+    logger.warning("Pre-loading initial values for %d magnets...", len(simple_uuids))
     try:
-        ids   = list(magnet_uuids)
+        ids   = list(simple_uuids)
         props = ["main_strength"] * len(ids)
         raw = sync_proxy.sync_trigger_read(ids, props)
         for rcmd_id, rcmd_prop, payload in raw:
@@ -252,7 +265,7 @@ def main_loop(server_name: str, instance_name: str, event=None):
     # Bulk pre-load initial values for all magnets in this server/instance.
     # One RPC call for all magnets instead of one per magnet in init_device().
     try:
-        from dt4acc.custom_epics.data.querries import get_magnets_per_power_converters, get_unique_power_converters
+        from dt4acc.config.data.querries import get_magnets_per_power_converters, get_unique_power_converters
         from dt4acc.custom_tango.ioc.server_manager import _connect_to_mexec_service
         sync_proxy, _ = _connect_to_mexec_service()
 

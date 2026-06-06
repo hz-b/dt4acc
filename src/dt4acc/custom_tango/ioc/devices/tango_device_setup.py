@@ -129,24 +129,36 @@ def register_all_devices():
                 else:
                     class_name = _TYPE_TO_CLASS.get(magnet_type, "MultipoleDevice")
 
+                _SUBTYPE_TO_LATTICE_PROP = {
+                    "Quad":     "B2",
+                    "Sext":     "B3",
+                    "SkewSext": "B3",
+                    "Oct":      "B4",
+                }
+                lattice_prop = _SUBTYPE_TO_LATTICE_PROP.get(magnet_subtype, "main_strength")
+
                 db_dev        = DbDevInfo()
                 db_dev._class = class_name
                 db_dev.server = server_str
                 db_dev.name   = magnet_name
-                db.add_device(db_dev)
+                try:
+                    db.add_device(db_dev)
+                except DevFailed as e:
+                    msg = str(e)
+                    if "DB_DuplicateKey" not in msg and "already" not in msg:
+                        raise
 
-                # Store UUID so the device can uniquely identify its AT element
+                # Always set properties — even if device already existed
+                props = {}
                 if magnet_uuid:
-                    try:
-                        db.put_device_property(
-                            magnet_name, {"element_uuid": [magnet_uuid]}
-                        )
-                    except Exception as e:
-                        logger.warning("Could not set uuid property for %s: %s",
-                                       magnet_name, e)
+                    props["element_uuid"] = [magnet_uuid]
+                if pc_name:
+                    props["power_supply"] = [pc_name]
+                props["lattice_property"] = [lattice_prop]
+                db.put_device_property(magnet_name, props)
 
-                logger.info("🧲 Registered magnet %s uuid=%s (server=%s)",
-                            magnet_name, magnet_uuid, server_str)
+                logger.info("🧲 Registered magnet %s uuid=%s lattice_property=%s (server=%s)",
+                            magnet_name, magnet_uuid, lattice_prop, server_str)
             except Exception as e:
                 logger.error("❌ Failed to register magnet %s: %s", magnet_name, e)
 
@@ -172,7 +184,17 @@ def register_all_devices():
                 db_dev._class = "PowerConverterDevice"
                 db_dev.server = server_str
                 db_dev.name   = pc_name
-                db.add_device(db_dev)
+                try:
+                    db.add_device(db_dev)
+                except DevFailed as e:
+                    msg = str(e)
+                    if "DB_DuplicateKey" not in msg and "already" not in msg:
+                        raise
+
+                # Always set properties
+                pc_magnet_names = [m["name"] for m in get_magnets_per_power_converters(pc_name)]
+                if pc_magnet_names:
+                    db.put_device_property(pc_name, {"magnets": pc_magnet_names})
 
                 logger.info("⚡ Registered PC %s (server=%s)", pc_name, server_str)
             except Exception as e:

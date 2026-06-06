@@ -169,13 +169,14 @@ def build_curve_conversion(info: MagnetElementSetup) -> StateConversion:
 # element_method / extract_host_element_name
 # ---------------------------------------------------------------------------
 
-# Subtype → explicit property name for PolynomB index disambiguation
-# Avoids guessing from zero PolynomB values in generic Multipole AT elements
+# Subtype → property name matching Multipole.handles_property() (European convention)
+# Multipole(normal_skew=NormalSkew.normal, n_multipole=N).handles_property() == "BN"
+# All MAX IV multipoles are at.Multipole AT class — proxy disambiguates by property name
 _SUBTYPE_TO_PROPERTY = {
-    "Quad":     "main_strength_k",   # PolynomB[1] = K
-    "Sext":     "main_strength_h",   # PolynomB[2] = H
-    "SkewSext": "main_strength_h",   # PolynomB[2] = H
-    "Bend":     "main_strength_b0",  # PolynomB[0] = dipole
+    "Quad":     "B2",   # Multipole(normal, 2) → PolynomB[1]
+    "Sext":     "B3",   # Multipole(normal, 3) → PolynomB[2]
+    "SkewSext": "B3",   # Multipole(normal, 3) → PolynomB[2]
+    "Bend":     "B1",   # Multipole(normal, 1) → PolynomB[0] (dipole, European index 1)
 }
 
 
@@ -191,7 +192,7 @@ def element_method(info_or_name, yp: YellowPages) -> str:
     elif name in yp.vertical_steerer_names():
         return "y_kick"
     elif name in yp.skew_quad_names():
-        return "skew_quad_strength"
+        return "A2"  # Multipole(skew, 2) → PolynomA[1]
     elif name in yp.multipole_names():
         # Use explicit property name to avoid PolynomB[0] ambiguity
         return _SUBTYPE_TO_PROPERTY.get(subtype, "main_strength")
@@ -224,7 +225,7 @@ def extract_host_element_name(info, yp: YellowPages) -> str:
 
 @functools.lru_cache(maxsize=1)
 def load_managers():
-    from dt4acc_lib.pyat_simulator.element_proxies import (
+    from dt4acc_lib.pyat_simulator.proxies.addon_registry import (
         ADDON_PROXY_REGISTRY,
         SkewQuadCorrectorProxy,
     )
@@ -307,7 +308,7 @@ def build_managers():
             ] = tuple(
                 LatticeElementPropertyID(
                     element_name=yp.skew_quad_host_id(info.name),  # "skew:69" etc.
-                    property="skew_quad_strength",
+                    property="A2",  # Multipole(skew, 2).handles_property()
                 )
                 for info in skew_infos
             )
