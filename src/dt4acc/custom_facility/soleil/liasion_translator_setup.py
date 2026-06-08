@@ -23,22 +23,28 @@ build_managers() always returns (yp, lm, tm) — three values.
 
 import functools
 import logging
-from abc import ABCMeta, abstractmethod
-from dataclasses import dataclass
-from typing import Dict, Sequence, Mapping, Hashable
+from typing import Dict, Sequence
 
-from dt4acc_lib.bl.unit_conversion import LinearUnitConversion
 from dt4acc_lib.bl.yellow_pages import YellowPages
-from dt4acc_lib.interfaces.utils.liaison_manager import LiaisonManagerBase
-from dt4acc_lib.interfaces.utils.state_conversion import StateConversion
-from dt4acc_lib.interfaces.utils.translator_service import TranslatorServiceBase
+from dt4acc_lib.bl.liaison_manager import LiaisonManager
+from dt4acc_lib.bl.translator_service import TranslatorService
 from dt4acc_lib.interfaces.utils.yellow_pages import YellowPagesBase
 from dt4acc_lib.model.utils.identifiers import (
     LatticeElementPropertyID, DevicePropertyID, ConversionID
 )
+from dt4acc_lib.model.utils.liaison_manager_lookup_table import (
+    LiaisonManagerInverseLookupTable,
+    LiaisonManagerInverseLookupElement,
+)
+from dt4acc_lib.model.utils.translator_manager_lookup_table import (
+    TranslatorLookupTable,
+    TranslatorLookupTableElement,
+    PolynomCoefficients,
+    IdentityMapper,
+)
 
-from dt4acc.custom_facility.model.config.elementmodel import MagnetElementSetup
 from dt4acc.config.data.constants import ring_parameters
+from dt4acc.custom_facility.model.config.elementmodel import MagnetElementSetup
 from dt4acc.config.data.querries import get_magnets
 from dt4acc.custom_facility.soleil.soleil_yellow_pages import soleil_yellow_pages
 
@@ -46,55 +52,8 @@ logger = logging.getLogger("dt4acc_lm")
 
 
 # ---------------------------------------------------------------------------
-# LiaisonManager
+# TranslatorService and LiaisonManager both imported from dt4acc_lib
 # ---------------------------------------------------------------------------
-class LiaisonManager(LiaisonManagerBase):
-    def __init__(
-        self,
-        forward_lut: Mapping[LatticeElementPropertyID, Sequence[DevicePropertyID]],
-        inverse_lut: Mapping[DevicePropertyID, Sequence[LatticeElementPropertyID]],
-    ):
-        self.forward_lut = forward_lut
-        self.inverse_lut = inverse_lut
-
-    def forward(self, id_: LatticeElementPropertyID) -> Sequence[DevicePropertyID]:
-        return self.forward_lut[id_]
-
-    def inverse(self, id_: DevicePropertyID) -> Sequence[LatticeElementPropertyID]:
-        try:
-            return self.inverse_lut[id_]
-        except KeyError:
-            logger.error("LiaisonManager id %s not found in lookup table", id_)
-            logger.warning("LiaisonManager: For the device I know %s",
-                           {k: v for k, v in self.inverse_lut.items()
-                            if k.device_name == id_.device_name})
-
-
-# ---------------------------------------------------------------------------
-# TranslatorService
-# ---------------------------------------------------------------------------
-class TranslatorService(TranslatorServiceBase):
-    def __init__(self, lut: Mapping[ConversionID, StateConversion]):
-        self.lut = lut
-
-    def get(self, id_: ConversionID) -> StateConversion:
-        try:
-            return self.lut[id_]
-        except KeyError as ke:
-            logger.error("=== TRANSLATOR LOOKUP FAILURE ===")
-            logger.error("Requested ID: %s", id_)
-            same_device = [k for k in self.lut
-                           if k.device_property_id == id_.device_property_id]
-            logger.error("Keys with SAME DEVICE (%d):", len(same_device))
-            for k in same_device[:10]:
-                logger.error("  %s", k)
-            same_element = [k for k in self.lut
-                            if k.lattice_property_id.element_name
-                            == id_.lattice_property_id.element_name]
-            logger.error("Keys with SAME ELEMENT (%d):", len(same_element))
-            for k in same_element[:10]:
-                logger.error("  %s", k)
-            raise ke
 
 
 # ---------------------------------------------------------------------------
@@ -159,8 +118,12 @@ def _lattice_property(element_name: str, yp: YellowPages) -> str:
         # Octupole in AT is a Multipole element — liaison maps to B4
         # Multipole(normal_skew=NormalSkew.normal, n_multipole=4).handles_property() == "B4"
         return "B4"
-    elif element_name in yp.skew_quad_names():
-        # Skew quadrupole corrector (CQLN/CQLT) — liaison maps to A2
+    elif element_name in yp.quadrupole_corrector_names():
+        # CQLN: normal quadrupole corrector on octupole → PolynomB[1]
+        # Multipole(normal_skew=NormalSkew.normal, n_multipole=2).handles_property() == "B2"
+        return "B2"
+    elif element_name in yp.skew_quadrupole_corrector_names():
+        # CQLT: skew quadrupole corrector on octupole → PolynomA[1]
         # Multipole(normal_skew=NormalSkew.skew, n_multipole=2).handles_property() == "A2"
         return "A2"
     elif element_name in yp.cavity_names():
@@ -169,21 +132,28 @@ def _lattice_property(element_name: str, yp: YellowPages) -> str:
         raise AssertionError(f"Don't know how to handle {element_name!r}")
 
 
-def _host_element_name(element_name: str, yp: YellowPages) -> str:
-    """
-    Return the AT lattice element name (uuid) that the device property
-    maps to. Steerers live on the sextupole host element. Skew quads
-    use a compound uuid ("CQLN:<host_uuid>" or "CQLT:<host_uuid>").
-    All other magnets are their own host.
-    """
+def _build_name_to_uuid(infos) -> dict:
+    """Map Tango device name → uuid for host element lookup."""
+    return {info.name: (info.uuids[0] if info.uuids else info.name) for info in infos}
+
+
+def _host_element_name(element_name: str, yp: YellowPages, name_to_uuid: dict = None) -> str:
     if (element_name in yp.horizontal_steerer_names()
             or element_name in yp.vertical_steerer_names()):
-        return element_name.rsplit("-", 1)[0]
-    if element_name in yp.skew_quad_names():
-        return yp.skew_quad_host_id(element_name)
+        if name_to_uuid:
+            return name_to_uuid.get(element_name, element_name)
+        return element_name
+
+    if element_name in yp.skew_quadrupole_corrector_names():
+        return yp.skew_quadrupole_corrector_host_id(element_name)
+
+    if element_name in yp.quadrupole_corrector_names():
+        return yp.quadrupole_corrector_host_id(element_name)
+
+    if name_to_uuid:
+        return name_to_uuid.get(element_name, element_name)
+
     return element_name
-
-
 # ---------------------------------------------------------------------------
 # build_managers
 # ---------------------------------------------------------------------------
@@ -193,7 +163,7 @@ def build_managers():
 
     Design-view: no power converters. Magnet devices map device properties
     directly to lattice element properties via the new property proxy architecture.
-    All unit conversions use LinearUnitConversion(slope=1.0, intercept=0.0).
+    All unit conversions use PolynomCoefficients(slope=1.0) — no energy dependence.
     """
     yp = soleil_yellow_pages()
     infos = magnet_infos_from_db()
@@ -203,7 +173,11 @@ def build_managers():
     if len(set(magnet_names)) != len(infos):
         raise AssertionError("Magnet names are not unique — required for LUT correctness")
 
-    _linear = lambda: LinearUnitConversion(slope=1.0, intercept=0.0)
+    # Map Tango name → UUID for host element resolution
+    name_to_uuid = _build_name_to_uuid(infos)
+
+    # intercept=0.0, slope=1.0 → PolynomCoefficients(coeffs=[0.0, 1.0], energy_dependent=False)
+    _poly = lambda: PolynomCoefficients(coeffs=[0.0, 1.0], energy_dependent=False)
 
     # ------------------------------------------------------------------
     # Inverse LUT  (DevicePropertyID → LatticeElementPropertyID)
@@ -217,7 +191,7 @@ def build_managers():
     # Bends (dipoles) are not directly controlled — skip them.
     _CONTROLLED_TYPES = {
         "Quadrupole", "Sextupole", "Octupole", "Steerer",
-        "SkewQuadrupole", "RFCavity"
+        "SkewQuadrupoleCorrector", "RFCavity", "QuadrupoleCorrector"
     }
 
     for info in infos:
@@ -225,7 +199,7 @@ def build_managers():
             continue
         dev_prop = _lattice_property(info.name, yp)  # device exposes same name as proxy
         lat_prop = _lattice_property(info.name, yp)  # proxy property name
-        host = _host_element_name(info.name, yp)
+        host = _host_element_name(info.name, yp, name_to_uuid)
         inverse_lut[
             DevicePropertyID(device_name=info.name, property=dev_prop)
         ] = (LatticeElementPropertyID(element_name=host, property=lat_prop),)
@@ -259,7 +233,13 @@ def build_managers():
             DevicePropertyID(device_name=virtual_id, property=prop)
         ] = (LatticeElementPropertyID(element_name=virtual_id, property=prop),)
 
-    lm = LiaisonManager(forward_lut=None, inverse_lut=inverse_lut)
+    lm = LiaisonManager(
+        forward_lut=None,
+        inverse_lut=LiaisonManagerInverseLookupTable(lut=[
+            LiaisonManagerInverseLookupElement(dev_id=k, lat_ids=v)
+            for k, v in inverse_lut.items()
+        ])
+    )
 
     # ------------------------------------------------------------------
     # Translator LUT  (ConversionID → StateConversion)
@@ -273,31 +253,31 @@ def build_managers():
             continue
         dev_prop = _lattice_property(info.name, yp)
         lat_prop = _lattice_property(info.name, yp)
-        host = _host_element_name(info.name, yp)
+        host = _host_element_name(info.name, yp, name_to_uuid)
         translator_lut[ConversionID(
             LatticeElementPropertyID(element_name=host, property=lat_prop),
             DevicePropertyID(device_name=info.name, property=dev_prop),
-        )] = _linear()
+        )] = _poly()
 
     # Cavities — Hz ↔ Hz, slope=1.0 for direct frequency write
     for name in cavity_names:
         translator_lut[ConversionID(
             LatticeElementPropertyID(element_name=name, property="frequency"),
             DevicePropertyID(device_name=name, property="frequency"),
-        )] = _linear()
+        )] = _poly()
         translator_lut[ConversionID(
             LatticeElementPropertyID(element_name=name, property="voltage"),
             DevicePropertyID(device_name=name, property="voltage"),
-        )] = _linear()
+        )] = _poly()
 
     # Master clock — kHz on master clock device
     for name in cavity_names:
         translator_lut[ConversionID(
             LatticeElementPropertyID(element_name=name, property="frequency"),
             DevicePropertyID(device_name="master_clock", property="reference_frequency"),
-        )] = LinearUnitConversion(slope=1e-3, intercept=0.0)
+        )] = PolynomCoefficients(coeffs=[0.0, 1e-3], energy_dependent=False)  # kHz on master clock
 
-    # Virtual result IDs — passthrough
+    # Virtual result IDs — identity passthrough (no conversion)
     for virtual_id, prop in [
         ("twiss",        "parameters"),
         ("tune",         "transversal"),
@@ -308,30 +288,21 @@ def build_managers():
         translator_lut[ConversionID(
             LatticeElementPropertyID(element_name=virtual_id, property=prop),
             DevicePropertyID(device_name=virtual_id, property=prop),
-        )] = _linear()
+        )] = IdentityMapper()
 
-    tm = TranslatorService(translator_lut)
+    tm = TranslatorService(
+        lut=TranslatorLookupTable(lut=[
+            TranslatorLookupTableElement(conversion_id=k, conversion_info=v)
+            for k, v in translator_lut.items()
+        ]),
+        brho=ring_parameters.brho,
+    )
     return yp, lm, tm
 
 
 @functools.lru_cache(maxsize=1)
 def load_managers():
-    """
-    Cached entry point. Registers SOLEIL addon proxies then calls build_managers().
-
-    Note: CQLN/CQLT skew quad correctors still use the ADDON_PROXY_REGISTRY
-    mechanism from element_proxies.py until the new proxy_factory supports
-    compound elements natively.
-    """
-    from dt4acc_lib.pyat_simulator.proxies.addon_registry import ADDON_PROXY_REGISTRY, SkewQuadCorrectorProxy
-    # CQLN (Normal)  → PolynomB[1]  corrector_type="normal"
-    # CQLT (Tourné)  → PolynomA[1]  corrector_type="skew"
-    ADDON_PROXY_REGISTRY["CQLN"] = lambda el, eid, hid: SkewQuadCorrectorProxy(
-        el, element_id=eid, host_element_id=hid, corrector_type="normal"
-    )
-    ADDON_PROXY_REGISTRY["CQLT"] = lambda el, eid, hid: SkewQuadCorrectorProxy(
-        el, element_id=eid, host_element_id=hid, corrector_type="skew"
-    )
+    """Cached entry point."""
     return build_managers()
 
 

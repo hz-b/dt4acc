@@ -1,3 +1,5 @@
+import sys
+
 import yaml
 import json
 from bson import ObjectId
@@ -102,27 +104,38 @@ def main():
 
                 # Determine corrector type from the device name suffix
                 # e.g. OH.02-CQLN.02 → CQLN, OH.01-CQLT.01 → CQLT
-                if "CQLN" in corr_name:
-                    corr_type = "CQLN"
-                elif "CQLT" in corr_name:
+                if "CQLT" in corr_name:
                     corr_type = "CQLT"
+                    corr_obj = {
+                        "_id": {"$oid": str(ObjectId())},
+                        "uuid": f"{uuid}",  # e.g. "CQLT:OH2_QCORROCT_2_001"
+                        "type": "SkewQuadrupoleCorrector",
+                        "corrector_type": corr_type,   # "CQLT"
+                        "FamName": fam_name,      # same FamName as host octupole
+                        "name": corr_name,
+                        "magnetic_strength": 0.0,
+                        "pc": f"{corr_name}-pc",
+                                        "k": 0.0
+                    }
+                elif "CQLN" in corr_name:
+                    corr_type = "CQLN"
+
+                    corr_obj = {
+                        "_id": {"$oid": str(ObjectId())},
+                        "uuid": f"{uuid}",  # e.g. "CQLN:OH2_QCORROCT_2_001"
+                        "type": "QuadrupoleCorrector",
+                        "corrector_type": corr_type,   # "CQLN"
+                        "FamName": fam_name,      # same FamName as host octupole
+                        "name": corr_name,
+                        "magnetic_strength": 0.0,
+                        "pc": f"{corr_name}-pc",
+                                        "k": 0.0
+                    }
+
                 else:
                     # Unknown corrector type — skip with a warning
-                    import sys
                     print(f"WARNING: unknown corrector type in {corr_name!r} — skipping", file=sys.stderr)
                     continue
-
-                corr_obj = {
-                    "_id": {"$oid": str(ObjectId())},
-                    "uuid": f"{corr_type}:{uuid}",  # e.g. "CQLN:OH2_QCORROCT_2_001"
-                    "type": "SkewQuadrupole",
-                    "corrector_type": corr_type,   # "CQLN" or "CQLT"
-                    "FamName": fam_name,      # same FamName as host octupole
-                    "name": corr_name,
-                    "magnetic_strength": 0.0,
-                    "pc": f"{corr_name}-pc",
-                                    "k": 0.0
-                }
                 output.append(corr_obj)
 
     with open(OUTPUT_JSON, "w") as f:

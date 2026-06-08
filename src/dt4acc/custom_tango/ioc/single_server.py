@@ -188,36 +188,42 @@ def refresh_cache_from_lattice(sync_proxy, magnet_uuids: list) -> None:
     logger.warning("Nominal cache refreshed for %d magnets.", len(new_cache))
 
 
-def _preload_initial_values(sync_proxy, magnet_uuids: list) -> None:
+def _preload_initial_values(sync_proxy, magnet_uuids: list, uuid_to_prop: dict = None) -> None:
     """
-    Bulk-read main_strength for all magnets in one batch before Tango starts.
-    Populates _initial_strength_cache so init_device() needs no RPC calls.
-    Skips compound IDs (e.g. "CQLN:<uuid>") — skew quad correctors use
-    "B2"/"A2" not "main_strength".
+    Bulk-read initial values for all magnets before Tango starts.
+    Uses per-uuid lattice_property to avoid sending "main_strength"
+    to octupole/corrector elements that don't support it.
     """
     global _initial_strength_cache # noqa: F824
     if not magnet_uuids:
         return
 
-    # Compound IDs have ":" — skip them as they use different property names
-    simple_uuids = [u for u in magnet_uuids if ":" not in str(u)]
-    if not simple_uuids:
-        return
+    # Group uuids by their lattice_property — one batch per property
+    from collections import defaultdict
+    prop_groups = defaultdict(list)
+    for uuid in magnet_uuids:
+        prop = (uuid_to_prop or {}).get(uuid, "main_strength")
+        # Skip corrector properties (B2/A2) — they start at 0.0 always
+        if prop in ("B2", "A2"):
+            continue
+        prop_groups[prop].append(uuid)
 
-    logger.warning("Pre-loading initial values for %d magnets...", len(simple_uuids))
-    try:
-        ids   = list(simple_uuids)
-        props = ["main_strength"] * len(ids)
-        raw = sync_proxy.sync_trigger_read(ids, props)
-        for rcmd_id, rcmd_prop, payload in raw:
-            if payload is not None:
-                try:
-                    _initial_strength_cache[rcmd_id] = float(payload)
-                except (TypeError, ValueError):
-                    pass
-        logger.warning("Pre-loaded %d initial values.", len(_initial_strength_cache))
-    except Exception as exc:
-        logger.warning("Bulk pre-load failed: %s — devices will start at 0.0", exc)
+    logger.warning("Pre-loading initial values for %d magnets...",
+                   sum(len(v) for v in prop_groups.values()))
+    for prop, ids in prop_groups.items():
+        try:
+            props = [prop] * len(ids)
+            raw = sync_proxy.sync_trigger_read(ids, props)
+            for rcmd_id, rcmd_prop, payload in raw:
+                if payload is not None:
+                    try:
+                        _initial_strength_cache[rcmd_id] = float(payload)
+                    except (TypeError, ValueError):
+                        pass
+        except Exception as exc:
+            logger.warning("Bulk pre-load failed for %s: %s — devices will start at 0.0",
+                           prop, exc)
+    logger.warning("Pre-loaded %d initial values.", len(_initial_strength_cache))
 
 def _inject_controller(prefix: str) -> None:
     """
@@ -271,20 +277,29 @@ def main_loop(server_name: str, instance_name: str, event=None):
 
         # Collect UUIDs for magnets belonging to this server/instance
         my_uuids = []
+        uuid_to_prop = {}
         for pc_name in get_unique_power_converters():
             for m in get_magnets_per_power_converters(pc_name):
-                magnet_name = m["name"]  # e.g. AN01-AR/EM/CQLN.03
+                magnet_name = m["name"]
                 parts = magnet_name.split("/")
                 if len(parts) == 3 and parts[0] == server_name and parts[1] == instance_name:
                     uuid = m.get("uuid", "")
                     if uuid:
                         my_uuids.append(uuid)
+                        # lattice_property from DB tells us which AT property to read
+                        try:
+                            from tango import Database
+                            prop = Database().get_device_property(
+                                magnet_name, "lattice_property"
+                            ).get("lattice_property", ["main_strength"])[0]
+                        except Exception:
+                            prop = "main_strength"
+                        uuid_to_prop[uuid] = prop
 
-        # Store as process-global so _refresh_all_magnet_devices can reuse after reset
         global _my_magnet_uuids
         _my_magnet_uuids = my_uuids
 
-        _preload_initial_values(sync_proxy, my_uuids)
+        _preload_initial_values(sync_proxy, my_uuids, uuid_to_prop)
     except Exception as exc:
         logger.warning("Pre-load setup failed: %s — devices will start at 0.0", exc)
 
