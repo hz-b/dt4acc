@@ -21,13 +21,14 @@ logger = get_logger()
 
 # Map JSON "type" field → Tango device class name
 _TYPE_TO_CLASS = {
-    "Quadrupole":    "MultipoleDevice",
-    "Sextupole":     "MultipoleDevice",
-    "Octupole":      "MultipoleDevice",
-    "Multipole":     "MultipoleDevice",
-    "Steerer":       None,   # determined by is_horizontal/is_vertical below
-    "SkewQuadrupole": "SkewQuadDevice",
-    "RFCavity":      "CavityDevice",
+    "Quadrupole":              "MultipoleDevice",
+    "Sextupole":               "MultipoleDevice",
+    "Octupole":                "MultipoleDevice",
+    "Multipole":               "MultipoleDevice",
+    "Steerer":                 None,
+    "QuadrupoleCorrector":     "SkewQuadDevice",
+    "SkewQuadrupoleCorrector": "SkewQuadDevice",
+    "RFCavity":                "CavityDevice",
 }
 
 def _steerer_class(name: str, subtype: str = None) -> str:
@@ -135,7 +136,13 @@ def register_all_devices():
                     "SkewSext": "B3",
                     "Oct":      "B4",
                 }
-                lattice_prop = _SUBTYPE_TO_LATTICE_PROP.get(magnet_subtype, "main_strength")
+                # For corrector types, use the magnet type directly
+                if magnet_type == "QuadrupoleCorrector":
+                    lattice_prop = "B2"
+                elif magnet_type == "SkewQuadrupoleCorrector":
+                    lattice_prop = "A2"
+                else:
+                    lattice_prop = _SUBTYPE_TO_LATTICE_PROP.get(magnet_subtype, "main_strength")
 
                 db_dev        = DbDevInfo()
                 db_dev._class = class_name
@@ -201,9 +208,9 @@ def register_all_devices():
                 logger.warning("Skipping PC %s (not a valid TRL?): %s", pc_name, e)
 
     # ------------------------------------------------------------
-    # 2) Cavities and SkewQuadrupoles — registered as typed devices
+    # 2) Cavities — registered as typed devices
     # ------------------------------------------------------------
-    for pc_name in get_unique_power_converters_type_specified(["RFCavity", "SkewQuadrupole"]):
+    for pc_name in get_unique_power_converters_type_specified(["RFCavity"]):
         for m in get_magnets_per_power_converters(pc_name):
             dev_name  = m["name"]
             dev_uuid  = m.get("uuid", "")
