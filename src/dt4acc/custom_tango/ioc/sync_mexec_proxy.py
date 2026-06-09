@@ -86,12 +86,13 @@ class SyncMexecProxy:
         2. Clear error state → pending
         3. Clear stored optics
         """
-        import at
         logger.warning("SyncMexecProxy.sync_reset: resetting back end")
-
         try:
-            self.mexec.backend.reset()
-            logger.warning("SyncMexecProxy.sync_reset: backend reset")
+            fut = asyncio.run_coroutine_threadsafe(
+                self.mexec.backend.reset(), self.service_loop
+            )
+            fut.result(timeout=30)
+            logger.warning("SyncMexecProxy.sync_reset: backend reset done")
         except Exception as exc:
             logger.error("SyncMexecProxy.sync_reset failed: %s", exc)
             raise
