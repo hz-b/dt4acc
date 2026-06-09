@@ -8,6 +8,7 @@ from importlib import resources
 from softioc import builder, softioc
 
 from dt4acc.core.bl.controller import Controller
+from dt4acc_lib.pyat_simulator.accelerator_simulator import PyATAcceleratorSimulator
 from dt4acc_lib.pyat_simulator.proxies.proxy_factory import ElementProxyFactory
 from dt4acc_lib.pyat_simulator.simulator_backend import SimulatorBackend
 from dt4acc_lib.bl.command_rewritter import CommandRewriter
@@ -18,9 +19,6 @@ from dt4acc.custom_epics.ioc.controller import Controller as EpicsController, di
 from dt4acc.custom_epics.ioc.view import View
 from dt4acc.custom_facility.bessyii.epics_bessyii_controller import BESSYIIEpicsController
 from dt4acc.custom_facility.bessyii.liasion_translator_setup import load_managers
-from dt4acc_lib.pyat_simulator.accelerator_simulator_proxy_factory import (
-    PyATAcceleratorSimulator,
-)
 
 logging.basicConfig(level=logging.WARNING)
 
