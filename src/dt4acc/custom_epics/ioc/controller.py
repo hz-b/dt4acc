@@ -2,10 +2,9 @@ import asyncio
 import itertools
 import os
 import getpass
-import traceback
 from typing import Sequence
 
-from softioc import softioc, builder, asyncio_dispatcher
+from softioc import builder, asyncio_dispatcher
 
 from dt4acc_lib.interfaces.utils.command_execution_engine import CommandExecutionEngine
 from dt4acc_lib.model.output.result import ReadTogether
@@ -59,31 +58,23 @@ class Controller(ControllerInterface):
 
     async def startup(self):
         """Initialise all PVs, load the IOC database, and start the delayed
-        execution loop."""
-        self.builder.SetDeviceName(self.prefix)
+        execution loop.
 
-        self.delegate.view.update_process_variables(
-            {
-                **await initialize_master_clock_pvs(self.builder, controller=self),
-                **await initialize_cavity_pvs(self.builder, controller=self),
-                **await initialize_power_converter_pvs(
-                    self.builder, self.prefix, controller=self
-                ),
-                **initialize_machine_info_pvs(self.builder),
-                **initialize_orbit_object_pvs(self.builder),
-                **initialize_orbit_pvs(self.builder),
-                **initialize_twiss_pvs(self.builder),
-                **initialize_tune_pvs(self.builder),
-                **initialize_other_pvs(self.builder, self.prefix),
-            }
+        Todo:
+            needs to be refactored
+        """
+        raise NotImplementedError("Need to implement this method for your machine")
+
+    async def update(
+        self,
+        *,
+        cmd: Command,
+        reads: Sequence[ReadCommand],
+        delayed_reads: Sequence[ReadCommand]
+    ):
+        return await self.delegate.update(
+            cmd=cmd, reads=reads, delayed_reads=delayed_reads
         )
-        logger.warning("All PVs set up")
-
-        builder.LoadDatabase()
-        softioc.iocInit(dispatcher)
-
-    async def update(self, *, cmd: Command, reads: Sequence[ReadCommand], delayed_reads: Sequence[ReadCommand]):
-        return await self.delegate.update(cmd=cmd, reads=reads, delayed_reads=delayed_reads)
 
     async def trigger_read(self, reads: Sequence[ReadCommand]) -> ReadTogether:
         return await self.delegate.trigger_read(reads=reads)
