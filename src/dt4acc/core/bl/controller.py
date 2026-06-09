@@ -57,9 +57,14 @@ class Controller(ControllerInterface):
 
     def start(self) -> None:
         """Start the delayed execution loop on the shared event loop."""
-        assert self.pending_task is None, f"{self.__class__.__name__}.start() called twice"
+        assert (
+            self.pending_task is None
+        ), f"{self.__class__.__name__}.start() called twice"
+        # Todo: should one assign some value to pending task (like true ?)
+        #       just to minimise the time for race conditions
 
         from dt4acc.core.bl.shared_event_loop import get_shared_event_loop
+
         shared_loop = get_shared_event_loop()
 
         # Always use the shared loop — it's the one we control and is
@@ -67,10 +72,14 @@ class Controller(ControllerInterface):
         async def _create_queue_and_start():
             self.cmd_queue = asyncio.Queue()
 
-        asyncio.run_coroutine_threadsafe(_create_queue_and_start(), shared_loop).result(timeout=5)
+        asyncio.run_coroutine_threadsafe(_create_queue_and_start(), shared_loop).result(
+            timeout=5
+        )
 
         fut = asyncio.run_coroutine_threadsafe(self._queue_loop(), shared_loop)
-        self._pending_task = fut
+        # Todo: should this not assign to pending_task?
+        #       compare to check at start
+        self.pending_task = fut
         logger.info("%s delayed execution task started on shared loop", self.name)
 
     async def update(
@@ -99,7 +108,9 @@ class Controller(ControllerInterface):
         all_delayed = list(self.default_delayed_reads) + list(delayed_reads)
         await self._enqueue(all_delayed)
 
-    async def trigger_read(self, reads: Sequence[ReadCommand]) -> ReadTogetherAndTranslated:
+    async def trigger_read(
+        self, reads: Sequence[ReadCommand]
+    ) -> ReadTogetherAndTranslated:
         """Direct read from the backend — used for initial value peek at startup."""
         return await self.mexec.trigger_read(reads)
 
@@ -122,7 +133,9 @@ class Controller(ControllerInterface):
 
     async def _enqueue(self, reads: Sequence[ReadCommand]) -> None:
         if self.cmd_queue is None:
-            logger.warning("%s: queue not yet started — delayed reads dropped", self.name)
+            logger.warning(
+                "%s: queue not yet started — delayed reads %s dropped", self.name, reads
+            )
             return
         try:
             await asyncio.wait_for(
@@ -152,12 +165,14 @@ class Controller(ControllerInterface):
             traceback.print_exc()
             # Push NaN to all virtual devices so clients know data is invalid
             await self._push_invalid()
-            return   # never kill the loop
+            return  # never kill the loop
 
         if len(read_result.data) != len(t_rcmds):
             logger.error(
                 "%s: sent %d read commands, got %d results — skipping",
-                self.name, len(t_rcmds), len(read_result.data),
+                self.name,
+                len(t_rcmds),
+                len(read_result.data),
             )
             await self._push_invalid()
             return
@@ -184,3 +199,31 @@ async def consume(queue: asyncio.Queue, delay: float) -> Sequence[ReadCommand]:
         rcmds.append(rcmd)
         queue.task_done()
     return rcmds
+
+
+async def read_and_dispatch(
+    controller: ControllerInterface, view: ViewInterface, rcmds: Sequence[ReadCommand]
+):
+    read_result = [await read_one_by_one(controller, rcmd) for rcmd in rcmds]
+    read_result = [
+        (rcmd, translated) for rcmd, translated in read_result if translated is not None
+    ]
+    # Need to combine translated...
+    for rcmd, translated in read_result:
+        for data in translated.data:
+            await view.dispatch(rcmd, data)
+        logger.debug(f"Controller/View: successful startup at {rcmd}")
+
+
+async def read_one_by_one(controller: ControllerInterface, rcmd: ReadCommand):
+    # so that we can log the ones that fail
+    try:
+        r = await controller.trigger_read([rcmd])
+    except Exception as ex:
+        logger.warning(f"{controller} failed to retrieve data for {rcmd}")
+        # can be still useful to report in one batch
+        return rcmd, None
+    return rcmd, r
+
+
+__all__ = ["Controller", "read_and_dispatch", "read_one_by_one"]
