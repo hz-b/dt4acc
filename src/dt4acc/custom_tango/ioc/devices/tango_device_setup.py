@@ -16,18 +16,20 @@ from dt4acc.custom_tango.ioc.devices.cavity_device import CavityDevice
 from dt4acc.custom_tango.ioc.devices.virtual_devices import RingSimulatorDevice, RING_SIM_DEV
 from dt4acc.custom_tango.ioc.devices.power_converter_device import PowerConverterDevice
 from dt4acc.custom_tango.ioc.devices.bpm_device import BPMDevice
+from dt4acc_lib.model.utils.tango_resource_locator import TangoResourceLocator
 
 logger = get_logger()
 
 # Map JSON "type" field → Tango device class name
 _TYPE_TO_CLASS = {
-    "Quadrupole":    "MultipoleDevice",
-    "Sextupole":     "MultipoleDevice",
-    "Octupole":      "MultipoleDevice",
-    "Multipole":     "MultipoleDevice",
-    "Steerer":       None,   # determined by is_horizontal/is_vertical below
-    "SkewQuadrupole": "SkewQuadDevice",
-    "RFCavity":      "CavityDevice",
+    "Quadrupole":              "MultipoleDevice",
+    "Sextupole":               "MultipoleDevice",
+    "Octupole":                "MultipoleDevice",
+    "Multipole":               "MultipoleDevice",
+    "Steerer":                 None,
+    "QuadrupoleCorrector":     "SkewQuadDevice",
+    "SkewQuadrupoleCorrector": "SkewQuadDevice",
+    "RFCavity":                "CavityDevice",
 }
 
 def _steerer_class(name: str, subtype: str = None) -> str:
@@ -46,14 +48,6 @@ def _steerer_class(name: str, subtype: str = None) -> str:
     if "CDLV" in name or "CDRV" in name or "CRFCY" in name or "CRCOY" in name:
         return "VerticalSteererDevice"
     return "HorizontalSteererDevice"
-
-
-def _split_domain_family_member(device_name: str):
-    """AN10-AR/EM/SCF.11 -> ('AN10-AR', 'EM', 'SCF.11')"""
-    parts = device_name.split("/")
-    if len(parts) != 3:
-        raise ValueError(f"Invalid Soleil device name: {device_name}")
-    return parts[0], parts[1], parts[2]
 
 
 def _register_dservers(db: Database, servers: set[tuple[str, str]]):
@@ -117,7 +111,8 @@ def register_all_devices():
             magnet_type = m.get("type", "")
             magnet_subtype = m.get("subtype", "")
             try:
-                domain, family, _ = _split_domain_family_member(magnet_name)
+                trl = TangoResourceLocator.from_trl(magnet_name)
+                domain, family = trl.domain, trl.family
                 server_name   = domain
                 instance_name = family
                 server_str    = f"{server_name}/{instance_name}"
@@ -129,24 +124,42 @@ def register_all_devices():
                 else:
                     class_name = _TYPE_TO_CLASS.get(magnet_type, "MultipoleDevice")
 
+                _SUBTYPE_TO_LATTICE_PROP = {
+                    "Quad":     "B2",
+                    "Sext":     "B3",
+                    "SkewSext": "B3",
+                    "Oct":      "B4",
+                }
+                # For corrector types, use the magnet type directly
+                if magnet_type == "QuadrupoleCorrector":
+                    lattice_prop = "B2"
+                elif magnet_type == "SkewQuadrupoleCorrector":
+                    lattice_prop = "A2"
+                else:
+                    lattice_prop = _SUBTYPE_TO_LATTICE_PROP.get(magnet_subtype, "main_strength")
+
                 db_dev        = DbDevInfo()
                 db_dev._class = class_name
                 db_dev.server = server_str
                 db_dev.name   = magnet_name
-                db.add_device(db_dev)
+                try:
+                    db.add_device(db_dev)
+                except DevFailed as e:
+                    msg = str(e)
+                    if "DB_DuplicateKey" not in msg and "already" not in msg:
+                        raise
 
-                # Store UUID so the device can uniquely identify its AT element
+                # Always set properties — even if device already existed
+                props = {}
                 if magnet_uuid:
-                    try:
-                        db.put_device_property(
-                            magnet_name, {"element_uuid": [magnet_uuid]}
-                        )
-                    except Exception as e:
-                        logger.warning("Could not set uuid property for %s: %s",
-                                       magnet_name, e)
+                    props["element_uuid"] = [magnet_uuid]
+                if pc_name:
+                    props["power_supply"] = [pc_name]
+                props["lattice_property"] = [lattice_prop]
+                db.put_device_property(magnet_name, props)
 
-                logger.info("🧲 Registered magnet %s uuid=%s (server=%s)",
-                            magnet_name, magnet_uuid, server_str)
+                logger.info("🧲 Registered magnet %s uuid=%s lattice_property=%s (server=%s)",
+                            magnet_name, magnet_uuid, lattice_prop, server_str)
             except Exception as e:
                 logger.error("❌ Failed to register magnet %s: %s", magnet_name, e)
 
@@ -162,7 +175,8 @@ def register_all_devices():
                 continue
             registered_pcs.add(pc_name)
             try:
-                domain, family, _ = _split_domain_family_member(pc_name)
+                trl = TangoResourceLocator.from_trl(pc_name)
+                domain, family = trl.domain, trl.family
                 server_name   = domain
                 instance_name = family
                 server_str    = f"{server_name}/{instance_name}"
@@ -172,23 +186,34 @@ def register_all_devices():
                 db_dev._class = "PowerConverterDevice"
                 db_dev.server = server_str
                 db_dev.name   = pc_name
-                db.add_device(db_dev)
+                try:
+                    db.add_device(db_dev)
+                except DevFailed as e:
+                    msg = str(e)
+                    if "DB_DuplicateKey" not in msg and "already" not in msg:
+                        raise
+
+                # Always set properties
+                pc_magnet_names = [m["name"] for m in get_magnets_per_power_converters(pc_name)]
+                if pc_magnet_names:
+                    db.put_device_property(pc_name, {"magnets": pc_magnet_names})
 
                 logger.info("⚡ Registered PC %s (server=%s)", pc_name, server_str)
             except Exception as e:
                 logger.warning("Skipping PC %s (not a valid TRL?): %s", pc_name, e)
 
     # ------------------------------------------------------------
-    # 2) Cavities and SkewQuadrupoles — registered as typed devices
+    # 2) Cavities — registered as typed devices
     # ------------------------------------------------------------
-    for pc_name in get_unique_power_converters_type_specified(["RFCavity", "SkewQuadrupole"]):
+    for pc_name in get_unique_power_converters_type_specified(["RFCavity"]):
         for m in get_magnets_per_power_converters(pc_name):
             dev_name  = m["name"]
             dev_uuid  = m.get("uuid", "")
             dev_type  = m.get("type", "")
             class_name = _TYPE_TO_CLASS.get(dev_type, "MultipoleDevice")
             try:
-                domain, family, _ = _split_domain_family_member(dev_name)
+                trl = TangoResourceLocator.from_trl(dev_name)
+                domain, family = trl.domain, trl.family
                 server_name   = domain
                 instance_name = family
                 server_str    = f"{server_name}/{instance_name}"
@@ -215,7 +240,8 @@ def register_all_devices():
     # 3) Single RingSimulatorDevice — replaces all PHYSICS/SOLEIL/* devices
     # ------------------------------------------------------------
     try:
-        domain, family, _ = _split_domain_family_member(RING_SIM_DEV)
+        trl = TangoResourceLocator.from_trl(RING_SIM_DEV)
+        domain, family = trl.domain, trl.family
         server_name   = domain
         instance_name = family
         server_str    = f"{server_name}/{instance_name}"
@@ -268,7 +294,8 @@ def register_all_devices():
             logger.warning("BPM %s: uuid=%s not found in lattice BPM map", bpm_name, bpm_uuid)
 
         try:
-            domain, family, member = _split_domain_family_member(bpm_name)
+            trl = TangoResourceLocator.from_trl(bpm_name)
+            domain, family, member = trl.domain, trl.family, trl.member
             server_name   = domain
             instance_name = family
             server_str    = f"{server_name}/{instance_name}"

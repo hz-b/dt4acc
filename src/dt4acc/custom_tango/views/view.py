@@ -113,7 +113,7 @@ class _TwissAdapter:
     __slots__ = ("x", "y")
 
     def __init__(self, twiss):
-        positions = twiss.twiss          # list[TwissAtPosition]
+        positions = twiss.twiss
         self.x = _PlaneAdapter(positions, "x")
         self.y = _PlaneAdapter(positions, "y")
 
@@ -122,9 +122,8 @@ class _OrbitAdapter:
     __slots__ = ("x", "y", "names", "x0", "found")
 
     def __init__(self, track):
-        self.x     = [p.x    for p in track.track]
-        self.y     = [p.y    for p in track.track]
-        self.names = [p.name for p in track.track]
+        self.x     = [p.x        for p in track.track]
+        self.y     = [p.y        for p in track.track]
+        self.names = [p.fam_name for p in track.track]
         self.x0    = []
         self.found = True
-

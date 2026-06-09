@@ -2,7 +2,7 @@
 cavity_device.py
 =================
 Tango device for RF cavities.
-Exposes: frequency only.
+Exposes: frequency and voltage.
 """
 
 from tango.server import attribute, command
@@ -17,12 +17,13 @@ logger = get_logger()
 class CavityDevice(BaseMagnetDevice):
     """
     Tango device for RFCavity elements.
-    Only exposes frequency.
+    Exposes frequency and voltage.
     """
 
     def init_device(self):
         super().init_device()
         self._frequency = 0.0
+        self._voltage = 0.0
 
     @attribute(dtype=float, access=AttrWriteType.READ_WRITE,
                label="Frequency", unit="Hz")
@@ -35,10 +36,22 @@ class CavityDevice(BaseMagnetDevice):
         self._frequency = value
         self._send("frequency", value)
 
+    @attribute(dtype=float, access=AttrWriteType.READ_WRITE,
+               label="Voltage", unit="V")
+    def voltage(self) -> float:
+        return self._voltage
+
+    @voltage.write
+    def voltage(self, value: float) -> None:
+        value = float(value)
+        self._voltage = value
+        self._send("voltage", value)
+
     @command
     def reset(self) -> None:
         self._frequency = 0.0
-        logger.info("%s: reset", self.trl.as_trl())
+        self._voltage = 0.0
+        logger.info("%s: reset", self.magnet_name)
         self.set_state(DevState.STANDBY)
 
     @command
@@ -47,7 +60,8 @@ class CavityDevice(BaseMagnetDevice):
             from dt4acc.custom_tango.ioc.single_server import get_nominal_values
             vals = get_nominal_values(self.lattice_id)
             self._frequency = vals.get("frequency", 0.0)
-            logger.info("%s: RefreshFromCache done — frequency=%.3f",
-                        self.trl.as_trl(), self._frequency)
+            self._voltage   = vals.get("voltage",   0.0)
+            logger.info("%s: RefreshFromCache done — frequency=%.3f voltage=%.3f",
+                        self.magnet_name, self._frequency, self._voltage)
         except Exception as exc:
-            logger.error("%s: RefreshFromCache failed: %s", self.trl.as_trl(), exc)
+            logger.error("%s: RefreshFromCache failed: %s", self.magnet_name, exc)

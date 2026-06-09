@@ -19,24 +19,16 @@ from dt4acc.core.bl.shared_event_loop import get_shared_event_loop
 logger = get_logger()
 
 
-def split_name(name: str):
-    """Split Tango device name 'AN10-AR/EM/SCF.11'."""
-    parts = name.split("/")
-    if len(parts) != 3:
-        raise DevFailed(f"Invalid magnet name '{name}'")
-    return parts[0], parts[1], parts[2]
-
-
 class BaseMagnetDevice(Device):
     """
-    Shared base for all magnet device types.
+    Shared base for all magnet device types across all facilities.
 
     Subclasses add only the attributes that make physical sense:
-        QuadSextOctDevice  → magnetic_strength + readback
+        MultipoleDevice         → magnetic_strength + readback
         HorizontalSteererDevice → x_kick
         VerticalSteererDevice   → y_kick
-        SkewQuadDevice     → skew_quad_strength
-        CavityDevice       → frequency
+        SkewQuadDevice          → corrector_strength
+        CavityDevice            → frequency + voltage
     """
 
     element_uuid = device_property(dtype=str, default_value="")
@@ -48,12 +40,17 @@ class BaseMagnetDevice(Device):
         full_name = self.get_name()
         self.trl = tango_resource_locator.TangoResourceLocator.from_trl(full_name)
 
+        self.magnet_name = full_name
+        self.domain      = self.trl.domain
+        self.family      = self.trl.family
+        self.member      = self.trl.member
+
         # UUID is the unique key into the pyAT lattice.
         # Falls back to member name if not set (shouldn't happen after registration).
-        self.lattice_id = self.element_uuid if self.element_uuid else self.trl.member
+        self.lattice_id = self.element_uuid if self.element_uuid else self.member
 
         logger.info("Initializing %s: %s lattice_id=%s",
-                    self.__class__.__name__, self.trl.as_trl(), self.lattice_id)
+                    self.__class__.__name__, self.magnet_name, self.lattice_id)
 
         self._loop = get_shared_event_loop()
         self.set_state(DevState.ON)
@@ -67,7 +64,13 @@ class BaseMagnetDevice(Device):
             raise DevFailed(str(exc))
 
     def _send(self, property_name: str, value: float) -> None:
-        """Send a set command to the backend via TangoController."""
+        """Send a set command to the backend via TangoController.
+
+        cmd.id = self.lattice_id (the AT element uuid stored in element_uuid
+        DB property). In design view (SOLEIL) the command rewriter does no
+        translation so the uuid goes directly to acc.get(). In device view
+        (MAX IV) the uuid is also the correct identifier.
+        """
         from dt4acc_lib.model.utils.command import Command, BehaviourOnError
         self._async(
             get_controller().update(

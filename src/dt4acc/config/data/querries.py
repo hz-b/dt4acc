@@ -39,8 +39,8 @@ def _match(doc: Dict[str, Any], field: str, allowed: Iterable[str]) -> bool:
 def get_magnets():
     """Return all magnet elements as an iterator."""
     wanted = {
-        "Quadrupole", "Sextupole", "Steerer", "RFCavity", "SkewQuadrupole",
-        "Multipole", "Bend", "Octupole"
+        "Quadrupole", "Sextupole", "Steerer", "SkewQuadrupoleCorrector",
+        "RFCavity", "QuadrupoleCorrector", "Multipole", "Bend", "Octupole"
     }
     return (d for d in _DATA if _match(d, "type", wanted))
 
@@ -54,7 +54,7 @@ def get_unique_power_converters() -> List[str]:
     """Distinct list of power-converter names for magnet elements.
     Skips entries where pc is None (e.g. SOLEIL design view has no PCs)."""
     wanted = {
-        "Quadrupole", "Sextupole", "Steerer", "SkewQuadrupole",
+        "Quadrupole", "Sextupole", "Steerer", "SkewQuadrupoleCorrector", "QuadrupoleCorrector",
         "Multipole", "Bend", "Octupole"
     }
     return sorted({d["pc"] for d in _DATA
