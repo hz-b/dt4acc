@@ -75,27 +75,27 @@ class BPMDevice(Device):
 
     def _on_orbit_x(self, event):
         if event.err:
-            logger.warning("BPMDevice %s: orbit_x event error: %s",
+            logger.info("BPMDevice %s: orbit_x event error: %s",
                            self.get_name(), event.errors)
             return
         if self.orbit_index < 0:
-            logger.warning("BPMDevice %s: orbit_index=-1, cannot index orbit array",
+            logger.info("BPMDevice %s: orbit_index=-1, cannot index orbit array",
                            self.get_name())
             return
         try:
             arr = event.attr_value.value
             if arr is None:
-                logger.warning("BPMDevice %s: orbit_x event value is None", self.get_name())
+                logger.info("BPMDevice %s: orbit_x event value is None", self.get_name())
                 return
             logger.debug("BPMDevice %s: orbit_x event len=%d index=%d",
                          self.get_name(), len(arr), self.orbit_index)
             if self.orbit_index < len(arr):
                 self._x = float(arr[self.orbit_index])
             else:
-                logger.warning("BPMDevice %s: orbit_index=%d >= orbit_x len=%d",
+                logger.info("BPMDevice %s: orbit_index=%d >= orbit_x len=%d",
                                self.get_name(), self.orbit_index, len(arr))
         except Exception as exc:
-            logger.warning("BPMDevice %s: _on_orbit_x failed: %s", self.get_name(), exc)
+            logger.info("BPMDevice %s: _on_orbit_x failed: %s", self.get_name(), exc)
 
     def _on_orbit_y(self, event):
         if event.err:
@@ -107,7 +107,7 @@ class BPMDevice(Device):
             if arr is not None and self.orbit_index < len(arr):
                 self._y = float(arr[self.orbit_index])
         except Exception as exc:
-            logger.warning("BPMDevice %s: _on_orbit_y failed: %s", self.get_name(), exc)
+            logger.info("BPMDevice %s: _on_orbit_y failed: %s", self.get_name(), exc)
 
     def delete_device(self):
         try:
