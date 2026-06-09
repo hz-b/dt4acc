@@ -16,6 +16,7 @@ from dt4acc.custom_tango.ioc.devices.cavity_device import CavityDevice
 from dt4acc.custom_tango.ioc.devices.virtual_devices import RingSimulatorDevice, RING_SIM_DEV
 from dt4acc.custom_tango.ioc.devices.power_converter_device import PowerConverterDevice
 from dt4acc.custom_tango.ioc.devices.bpm_device import BPMDevice
+from dt4acc_lib.model.utils.tango_resource_locator import TangoResourceLocator
 
 logger = get_logger()
 
@@ -47,14 +48,6 @@ def _steerer_class(name: str, subtype: str = None) -> str:
     if "CDLV" in name or "CDRV" in name or "CRFCY" in name or "CRCOY" in name:
         return "VerticalSteererDevice"
     return "HorizontalSteererDevice"
-
-
-def _split_domain_family_member(device_name: str):
-    """AN10-AR/EM/SCF.11 -> ('AN10-AR', 'EM', 'SCF.11')"""
-    parts = device_name.split("/")
-    if len(parts) != 3:
-        raise ValueError(f"Invalid Soleil device name: {device_name}")
-    return parts[0], parts[1], parts[2]
 
 
 def _register_dservers(db: Database, servers: set[tuple[str, str]]):
@@ -118,7 +111,8 @@ def register_all_devices():
             magnet_type = m.get("type", "")
             magnet_subtype = m.get("subtype", "")
             try:
-                domain, family, _ = _split_domain_family_member(magnet_name)
+                trl = TangoResourceLocator.from_trl(magnet_name)
+                domain, family = trl.domain, trl.family
                 server_name   = domain
                 instance_name = family
                 server_str    = f"{server_name}/{instance_name}"
@@ -181,7 +175,8 @@ def register_all_devices():
                 continue
             registered_pcs.add(pc_name)
             try:
-                domain, family, _ = _split_domain_family_member(pc_name)
+                trl = TangoResourceLocator.from_trl(pc_name)
+                domain, family = trl.domain, trl.family
                 server_name   = domain
                 instance_name = family
                 server_str    = f"{server_name}/{instance_name}"
@@ -217,7 +212,8 @@ def register_all_devices():
             dev_type  = m.get("type", "")
             class_name = _TYPE_TO_CLASS.get(dev_type, "MultipoleDevice")
             try:
-                domain, family, _ = _split_domain_family_member(dev_name)
+                trl = TangoResourceLocator.from_trl(dev_name)
+                domain, family = trl.domain, trl.family
                 server_name   = domain
                 instance_name = family
                 server_str    = f"{server_name}/{instance_name}"
@@ -244,7 +240,8 @@ def register_all_devices():
     # 3) Single RingSimulatorDevice — replaces all PHYSICS/SOLEIL/* devices
     # ------------------------------------------------------------
     try:
-        domain, family, _ = _split_domain_family_member(RING_SIM_DEV)
+        trl = TangoResourceLocator.from_trl(RING_SIM_DEV)
+        domain, family = trl.domain, trl.family
         server_name   = domain
         instance_name = family
         server_str    = f"{server_name}/{instance_name}"
@@ -297,7 +294,8 @@ def register_all_devices():
             logger.warning("BPM %s: uuid=%s not found in lattice BPM map", bpm_name, bpm_uuid)
 
         try:
-            domain, family, member = _split_domain_family_member(bpm_name)
+            trl = TangoResourceLocator.from_trl(bpm_name)
+            domain, family, member = trl.domain, trl.family, trl.member
             server_name   = domain
             instance_name = family
             server_str    = f"{server_name}/{instance_name}"

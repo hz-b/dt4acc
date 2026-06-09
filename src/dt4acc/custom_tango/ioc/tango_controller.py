@@ -140,11 +140,11 @@ class TangoController(ControllerInterface):
         """
         try:
             from dt4acc.custom_tango.ioc.single_server import (
-                refresh_cache_from_lattice, _my_magnet_uuids
+                refresh_cache_from_lattice, _my_magnet_uuids, _uuid_to_prop
             )
             from dt4acc.custom_tango.ioc.server_manager import _connect_to_mexec_service
             sync_proxy, _ = _connect_to_mexec_service()
-            refresh_cache_from_lattice(sync_proxy, _my_magnet_uuids)
+            refresh_cache_from_lattice(sync_proxy, _my_magnet_uuids, _uuid_to_prop)
 
             from tango import Database, DeviceProxy
             db = Database()

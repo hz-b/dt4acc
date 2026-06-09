@@ -19,10 +19,15 @@ import asyncio
 import logging
 import os
 import sys
+from collections import defaultdict
 from typing import Sequence
 
+from dt4acc_lib.model.utils.tango_resource_locator import TangoResourceLocator
+
+from dt4acc.config.data.querries import get_unique_power_converters, get_magnets_per_power_converters
 from dt4acc.core.bl.controller import Controller
 from dt4acc.custom_tango.views.view import TangoView
+from dt4acc.custom_tango.ioc.server_manager import _connect_to_mexec_service
 
 # Suppress transitions state machine INFO logs — they fire on every
 # backend.set() call and flood the output (4 lines per state transition)
@@ -34,7 +39,7 @@ from dt4acc_lib.model.utils.command import ReadCommand, Command
 from tango.server import run
 
 from dt4acc.core.utils.logger import get_logger
-from dt4acc.custom_tango.ioc.controller_registry import set_controller
+from dt4acc.custom_tango.ioc.controller_registry import set_controller, get_controller
 from dt4acc.custom_tango.ioc.tango_controller import TangoController, DEFAULT_DELAYED_READS
 
 logger = get_logger()
@@ -84,7 +89,6 @@ class AsyncMexecAdapter:
         now = datetime.datetime.now()
 
         # Group by (id, property) — one TranslatedReading per ReadCommand
-        from collections import defaultdict
         groups = defaultdict(list)
         for rcmd_id, rcmd_prop, payload in raw:
             groups[(rcmd_id, rcmd_prop)].append(
@@ -111,6 +115,7 @@ class AsyncMexecAdapter:
 _initial_strength_cache: dict = {}  # uuid → float (main_strength)
 _nominal_cache: dict = {}           # uuid → {"main_strength": f, "x_kick": f, "y_kick": f}
 _my_magnet_uuids: list = []         # UUIDs of magnets in this server process
+_uuid_to_prop: dict = {}            # uuid → lattice_property (e.g. "main_strength", "B2", "A2")
 _sync_proxy = None                  # MexecService proxy for live reads
 _device_view = False                # True only for device-view facilities (e.g. MAX IV)
 
@@ -148,30 +153,31 @@ def get_nominal_values(uuid: str) -> dict:
     return _nominal_cache.get(uuid, {"main_strength": 0.0, "x_kick": 0.0, "y_kick": 0.0})
 
 
-def refresh_cache_from_lattice(sync_proxy, magnet_uuids: list) -> None:
+def refresh_cache_from_lattice(sync_proxy, magnet_uuids: list, uuid_to_prop: dict = None) -> None:
     """
-    Bulk-read main_strength, x_kick, y_kick for all magnets in one batch.
-    Called after reset to refresh the nominal cache without individual RPCs.
-    One sync_trigger_read per property = 3 cross-process calls total,
-    regardless of the number of magnets.
+    Bulk-read current lattice values for all magnets after reset.
+    Uses per-uuid lattice_property — same approach as _preload_initial_values.
+    Correctors (B2/A2) always reset to 0.0, not read from lattice.
     """
     global _initial_strength_cache, _nominal_cache
     if not magnet_uuids:
         return
 
-    # Skip compound IDs (e.g. "CQLN:<uuid>") — skew quad correctors
-    # use "B2"/"A2" not "main_strength"/"x_kick"/"y_kick"
-    simple_uuids = [u for u in magnet_uuids if ":" not in str(u)]
-    if not simple_uuids:
-        return
+    _TYPE_TO_PROP = {"QuadrupoleCorrector": "B2", "SkewQuadrupoleCorrector": "A2"}
+    prop_groups = defaultdict(list)
+    for uuid in magnet_uuids:
+        prop = (uuid_to_prop or {}).get(uuid, "main_strength")
+        if prop in ("B2", "A2"):
+            continue  # correctors reset to 0.0
+        prop_groups[prop].append(uuid)
 
-    logger.warning("Refreshing nominal cache for %d magnets...", len(simple_uuids))
-    new_cache = {uuid: {"main_strength": 0.0, "x_kick": 0.0, "y_kick": 0.0}
-                 for uuid in simple_uuids}
+    logger.warning("Refreshing nominal cache for %d magnets...",
+                   sum(len(v) for v in prop_groups.values()))
+    new_cache = {uuid: {(uuid_to_prop or {}).get(uuid, "main_strength"): 0.0}
+                 for uuid in magnet_uuids}
 
-    for prop in ("main_strength", "x_kick", "y_kick"):
+    for prop, ids in prop_groups.items():
         try:
-            ids  = list(simple_uuids)
             props = [prop] * len(ids)
             raw = sync_proxy.sync_trigger_read(ids, props)
             for rcmd_id, rcmd_prop, payload in raw:
@@ -184,7 +190,9 @@ def refresh_cache_from_lattice(sync_proxy, magnet_uuids: list) -> None:
             logger.warning("refresh_cache_from_lattice: %s failed: %s", prop, exc)
 
     _nominal_cache = new_cache
-    _initial_strength_cache = {uuid: v["main_strength"] for uuid, v in new_cache.items()}
+    _initial_strength_cache = {
+        uuid: v.get("main_strength", 0.0) for uuid, v in new_cache.items()
+    }
     logger.warning("Nominal cache refreshed for %d magnets.", len(new_cache))
 
 
@@ -199,7 +207,6 @@ def _preload_initial_values(sync_proxy, magnet_uuids: list, uuid_to_prop: dict =
         return
 
     # Group uuids by their lattice_property — one batch per property
-    from collections import defaultdict
     prop_groups = defaultdict(list)
     for uuid in magnet_uuids:
         prop = (uuid_to_prop or {}).get(uuid, "main_strength")
@@ -230,7 +237,6 @@ def _inject_controller(prefix: str) -> None:
     Build AsyncMexecAdapter + TangoController and register in controller_registry.
     Called before tango.server.run() so init_device() can call get_controller().
     """
-    from dt4acc.custom_tango.ioc.server_manager import _connect_to_mexec_service
     sync_proxy, sync_reset = _connect_to_mexec_service()
     global _sync_proxy
     _sync_proxy = sync_proxy
@@ -271,33 +277,37 @@ def main_loop(server_name: str, instance_name: str, event=None):
     # Bulk pre-load initial values for all magnets in this server/instance.
     # One RPC call for all magnets instead of one per magnet in init_device().
     try:
-        from dt4acc.config.data.querries import get_magnets_per_power_converters, get_unique_power_converters
-        from dt4acc.custom_tango.ioc.server_manager import _connect_to_mexec_service
         sync_proxy, _ = _connect_to_mexec_service()
 
         # Collect UUIDs for magnets belonging to this server/instance
         my_uuids = []
         uuid_to_prop = {}
+        _SUBTYPE_TO_PROP = {
+            "Quad": "main_strength", "Sext": "main_strength", "SkewSext": "main_strength",
+            "Oct": "B4",
+        }
+        _TYPE_TO_PROP = {
+            "QuadrupoleCorrector": "B2", "SkewQuadrupoleCorrector": "A2",
+        }
         for pc_name in get_unique_power_converters():
             for m in get_magnets_per_power_converters(pc_name):
                 magnet_name = m["name"]
-                parts = magnet_name.split("/")
-                if len(parts) == 3 and parts[0] == server_name and parts[1] == instance_name:
+                try:
+                    trl = TangoResourceLocator.from_trl(magnet_name)
+                except AssertionError:
+                    continue
+                if trl.domain == server_name and trl.family == instance_name:
                     uuid = m.get("uuid", "")
                     if uuid:
                         my_uuids.append(uuid)
-                        # lattice_property from DB tells us which AT property to read
-                        try:
-                            from tango import Database
-                            prop = Database().get_device_property(
-                                magnet_name, "lattice_property"
-                            ).get("lattice_property", ["main_strength"])[0]
-                        except Exception:
-                            prop = "main_strength"
+                        mtype = m.get("type", "")
+                        subtype = m.get("subtype", "")
+                        prop = _TYPE_TO_PROP.get(mtype) or _SUBTYPE_TO_PROP.get(subtype, "main_strength")
                         uuid_to_prop[uuid] = prop
 
-        global _my_magnet_uuids
+        global _my_magnet_uuids, _uuid_to_prop
         _my_magnet_uuids = my_uuids
+        _uuid_to_prop = uuid_to_prop
 
         _preload_initial_values(sync_proxy, my_uuids, uuid_to_prop)
     except Exception as exc:
@@ -305,7 +315,6 @@ def main_loop(server_name: str, instance_name: str, event=None):
 
     def _post_init_cb():
         # Start the controller's delayed queue loop inside the Tango event loop
-        from dt4acc.custom_tango.ioc.controller_registry import get_controller
         try:
             get_controller().start()
             logger.warning("Server %s/%s ready — TangoController started", server_name, instance_name)
