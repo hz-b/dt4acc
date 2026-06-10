@@ -32,15 +32,15 @@ def backend():
     #       * a simple TME lattice file
     #       * a FODO File
     lattice_file = (
-            Path.home() / "Documents"
-                    / "dt4acc_config_data"
-    / "SOLEIL_II_V3635_STAB_SYM1_SB3_MULT7_4SX60_V001_Nomenclature.m"
+        Path.home()
+        / "Documents"
+        / "dt4acc_config_data"
+        / "SOLEIL_II_V3635_STAB_SYM1_SB3_MULT7_4SX60_V001_Nomenclature.m"
     )
     loader.set_lattice_file(lattice_file)
     acc = loader.load()
     r = SimulatorBackend(
-        name="Facility specific PYAT",
-        acc=PyATAcceleratorSimulator(at_lattice=acc),
+        name="Facility specific PYAT", acc=PyATAcceleratorSimulator(at_lattice=acc)
     )
     return r
 
@@ -67,22 +67,17 @@ def mexec(managers, backend):
 @pytest.fixture(scope="function")
 def controller(mexec):
     controller = Controller(
-        name = "tango-test-controller",
-        mexec = mexec,
-        default_delayed_reads = [],
-        # todo: find out which view is needed here
-        view = None,
-        )
+        name="tango-test-controller", mexec=mexec, default_delayed_reads=[], view=None
+    )
     return controller
 
 
 @pytest.mark.asyncio
 async def test_read_track(controller):
-    rcmds = [
-        ReadCommand(id='track', property='pos'),
-    ]
+    rcmds = [ReadCommand(id="track", property="pos")]
+
     r = await controller.trigger_read(rcmds)
-    track_pkg, = r.all_readings()
+    (track_pkg,) = r.all_readings()
     track = track_pkg.payload
     assert isinstance(track, CalculatedTrack)
     assert len(track.track) > 1000
@@ -97,11 +92,10 @@ async def test_read_track(controller):
 
 @pytest.mark.asyncio
 async def test_read_chromaticity(controller):
-    rcmds = [
-        ReadCommand(id='chromaticity', property='transversal')
-    ]
+    rcmds = [ReadCommand(id="chromaticity", property="transversal")]
+
     r = await controller.trigger_read(rcmds)
-    chroma_pkg, = r.all_readings()
+    (chroma_pkg,) = r.all_readings()
     chroma = chroma_pkg.payload
     assert isinstance(chroma, Chromaticity)
     assert not math.isnan(chroma.x)
@@ -112,12 +106,10 @@ async def test_read_chromaticity(controller):
 
 @pytest.mark.asyncio
 async def test_read_twiss(controller):
-    rcmds = [
-        ReadCommand(id='twiss', property='parameters'),
-    ]
+    rcmds = [ReadCommand(id="twiss", property="parameters")]
 
     r = await controller.trigger_read(rcmds)
-    twiss_pkg, = r.all_readings()
+    (twiss_pkg,) = r.all_readings()
     twiss = twiss_pkg.payload
     assert isinstance(twiss, Twiss)
     assert len(twiss.twiss) > 1000
