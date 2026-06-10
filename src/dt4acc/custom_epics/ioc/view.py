@@ -122,7 +122,11 @@ class View(ViewInterface):
             if self.orbit_server is not None:
                 try:
                     # BPM readings are in nanometer
-                    self.orbit_server.push(x=x_vals * 1e9, y=y_vals * 1e9, names=names)
+                    self.orbit_server.push(
+                        x=[v * 1e9 for v in x_vals],
+                        y=[v * 1e9 for v in y_vals],
+                    names=names
+                    )
                 except Exception as exc:
                     logger.error("OrbitTwinServer.push failed: %s", exc)
         else:
