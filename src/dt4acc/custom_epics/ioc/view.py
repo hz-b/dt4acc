@@ -121,7 +121,8 @@ class View(ViewInterface):
             # PVA NTTable
             if self.orbit_server is not None:
                 try:
-                    self.orbit_server.push(x=x_vals, y=y_vals, names=names)
+                    # BPM readings are in nanometer
+                    self.orbit_server.push(x=x_vals * 1e9, y=y_vals * 1e9, names=names)
                 except Exception as exc:
                     logger.error("OrbitTwinServer.push failed: %s", exc)
         else:
@@ -144,7 +145,9 @@ class View(ViewInterface):
 
             mc_rec = self.process_variables.get(ReadCommand("master_clock", "freq"))
             # Todo: need to read the correct values e.g. from a variable
-            n_buckets_rec = self.process_variables.get(ReadCommand("ring", "n_rf_buckets"))
+            n_buckets_rec = self.process_variables.get(
+                ReadCommand("ring", "n_rf_buckets")
+            )
             assert n_buckets_rec is not None
             n_buckets = n_buckets_rec.get()
             # todo: is this calculation in bact_math_utils ...
@@ -172,7 +175,12 @@ class View(ViewInterface):
         (single_reading,) = pkg.readings
         value = single_reading.payload
         for plane in ("x", "y"):
-            for param in ("beta", "alpha", "nu"):
+
+            rw = self.process_variables.get(ReadCommand("twiss", f"{plane}:nu"))
+            assert rw is not None
+            rw.set([getattr(pos, plane).nu / (2 * math.pi) for pos in value.twiss])
+
+            for param in ("beta", "alpha"):
                 rw = self.process_variables.get(
                     ReadCommand("twiss", f"{plane}:{param}")
                 )
@@ -187,17 +195,20 @@ class View(ViewInterface):
         assert rw_names is not None
         rw_names.set([pos.uid for pos in value.twiss])
 
+        pi2 = 2 * math.pi
+
         if self.orbit_server is not None:
             rec_s = self.process_variables.get(ReadCommand("survey", "s"))
             s_pos = rec_s.get()
+
             try:
                 self.orbit_server.push_model_data(
                     bpm_names=[pos.fam_name for pos in value.twiss],
                     beta_hor=[pos.x.beta for pos in value.twiss],
                     beta_vert=[pos.y.beta for pos in value.twiss],
-                    phase_advance_hor=[pos.x.nu / 2 * math.pi for pos in value.twiss],
-                    phase_advance_vert=[pos.y.nu / 2 * math.pi for pos in value.twiss],
-                    s_pos=s_pos
+                    phase_advance_hor=[pos.x.nu / (pi2) for pos in value.twiss],
+                    phase_advance_vert=[pos.y.nu / (pi2) for pos in value.twiss],
+                    s_pos=s_pos,
                 )
             except Exception as exc:
                 logger.error("OrbitTwinServer.push failed: %s", exc)
