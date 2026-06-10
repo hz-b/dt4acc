@@ -82,9 +82,13 @@ async def main():
     )
 
     prefix = os.environ.get("DT4ACC_PREFIX", getpass.getuser())
+    if prefix:
+        pva_prefix = prefix + ":"
+    else:
+        pva_prefix = ""
     orbit_server = OrbitTwinServer(
-        prefix + "ORBITCC:rdBpm",
-        prefix + "ORBITCC:rdModel",
+        pva_prefix + "ORBITCC:rdBpm",
+        pva_prefix + "ORBITCC:rdModel",
     )
 
     orbit_server.start()
