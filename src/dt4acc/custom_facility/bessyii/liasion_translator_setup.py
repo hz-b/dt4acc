@@ -52,7 +52,7 @@ def build_managers(config_dir: Tuple[str]):
 def load_file(config_dir: Tuple[str]):
     t_file = files("dt4acc").joinpath(*(config_dir))
     with open(t_file, "rt") as fp:
-        obj = yaml.load(fp, yaml.SafeLoader)
+        obj = yaml.load(fp, yaml.Loader)
     return obj
 
 
