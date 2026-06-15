@@ -1,5 +1,5 @@
 # 
-# BESSY II Liaison manager forward table: 2026-06-05 18:28:30.086973
+# BESSY II Liaison manager forward table: 2026-06-11 18:39:20.638589
 # WARNING: automatically generated data
 #          please check when it is updated if you edit it by hand!
 lut:
@@ -1445,8 +1445,4 @@ lut:
   lat_id:
     element_name: track
     property: pos
-- dev_ids: [{device_name: survey, property: s}]
-  lat_id:
-    element_name: survey
-    property: s
 # EOF
