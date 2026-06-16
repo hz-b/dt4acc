@@ -184,6 +184,10 @@ def build_liaison_manager_lut(
         LiaisonManagerInverseLookupElement(
             dev_id=DevicePropertyID(device_name="track", property="pos"),
             lat_ids=[LatticeElementPropertyID(element_name="track", property="pos")]
+        ),
+        LiaisonManagerInverseLookupElement(
+            dev_id=DevicePropertyID(device_name="survey", property="s"),
+            lat_ids=[LatticeElementPropertyID(element_name="survey", property="s")]
         )
     ]
     lut_fwd += [
@@ -194,6 +198,10 @@ def build_liaison_manager_lut(
         LiaisonManagerForwardLookupElement(
             lat_id=LatticeElementPropertyID(element_name="track", property="pos"),
             dev_ids=[DevicePropertyID(device_name="track", property="pos")]
+        ),
+        LiaisonManagerForwardLookupElement(
+            lat_id=LatticeElementPropertyID(element_name="survey", property="s"),
+            dev_ids=[DevicePropertyID(device_name="survey", property="s")]
         )
     ]
 
@@ -381,6 +389,12 @@ def build_translator_manager_lut(
         TranslatorLookupTableElement(
             ConversionID(LatticeElementPropertyID(element_name="track", property="pos"),
                          DevicePropertyID(device_name="track", property="pos"),
+                         ),
+            IdentityMapper()
+        ),
+        TranslatorLookupTableElement(
+            ConversionID(LatticeElementPropertyID(element_name="survey", property="s"),
+                         DevicePropertyID(device_name="survey", property="s"),
                          ),
             IdentityMapper()
         ),

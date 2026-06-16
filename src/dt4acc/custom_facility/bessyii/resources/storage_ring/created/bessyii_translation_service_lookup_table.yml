@@ -1,5 +1,5 @@
 # 
-# BESSY II Translation service table: 2026-06-11 18:39:20.638589
+# BESSY II Translation service table: 2026-06-16 15:23:03.761809
 # WARNING: automatically generated data
 #          please check when it is updated if you edit it by hand!
 lut:
@@ -17935,5 +17935,13 @@ lut:
     lattice_property_id:
       element_name: track
       property: pos
+  conversion_info: {}
+- conversion_id:
+    device_property_id:
+      device_name: survey
+      property: s
+    lattice_property_id:
+      element_name: survey
+      property: s
   conversion_info: {}
 # EOF
