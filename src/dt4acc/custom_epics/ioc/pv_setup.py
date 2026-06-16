@@ -1,3 +1,4 @@
+import math
 from typing import Dict
 
 from softioc.pythonSoftIoc import RecordWrapper
@@ -111,7 +112,7 @@ async def initialize_magnet_pvs(
 
 
 async def initialize_power_converter_pvs(
-    builder, prefix: str, controller: ControllerInterface
+    builder, controller: ControllerInterface
 ):
     """
     Initializes power converter PVs and associated magnets.
@@ -122,12 +123,12 @@ async def initialize_power_converter_pvs(
     """
     d = dict()
     for pc_name in get_unique_power_converters():
-        d.update(await add_pc_pvs(builder, pc_name, prefix, controller))
+        d.update(await add_pc_pvs(builder, pc_name, controller))
     return d
 
 
 async def add_pc_pvs(
-    builder, pc_name: str, prefix: str, controller: ControllerInterface
+    builder, pc_name: str, controller: ControllerInterface
 ) -> Dict[str, RecordWrapper]:
     """
     Adds PVs for a specific power converter and its associated magnets.
@@ -200,8 +201,11 @@ def initialize_orbit_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
         ReadCommand(id="beam", property="x0"): builder.WaveformIn(
             f"beam:orbit:x0", initial_value=[0.0], length=config.n_elements
         ),
-        ReadCommand(id="beam", property="name"): builder.WaveformIn(
+        ReadCommand(id="beam", property="names"): builder.WaveformIn(
             f"beam:orbit:names", initial_value=[""], length=config.n_elements
+        ),
+        ReadCommand(id="beam", property="uids"): builder.WaveformIn(
+            f"beam:orbit:uids", initial_value=[""], length=config.n_elements
         ),
         ReadCommand(id="beam", property="found"): builder.boolIn(
             f"beam:orbit:found", initial_value=False
@@ -248,15 +252,37 @@ def initialize_twiss_pvs(builder):
     d[ReadCommand("twiss", "names")] = builder.WaveformIn(
         f"beam:twiss:names", initial_value=[""], length=config.n_elements
     )
+    d[ReadCommand("twiss", "uids")] = builder.WaveformIn(
+        f"beam:twiss:uids", initial_value=[""], length=config.n_elements
+    )
     return d
 
 
-def initialize_machine_info_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
+def initialize_survey_info_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
+    return {
+        ReadCommand(id="survey", property="s"): builder.WaveformIn(
+            f"survey:s", initial_value=[0.0], EGU="m", length=config.n_elements
+        ),
+        ReadCommand(id="survey", property="name"): builder.WaveformIn(
+            f"survey:name", initial_value=[""], length=config.n_elements
+        ),
+        ReadCommand(id="survey", property="uid"): builder.WaveformIn(
+            f"survey:uid", initial_value=[""], length=config.n_elements
+        ),
+    }
+
+
+def initialize_machine_info_pvs(
+    builder, *, n_ref_buckets
+) -> Dict[ReadCommand, RecordWrapper]:
     """configuration of the machine: e.g. number of bunches"""
 
     return {
         ReadCommand(id="ring", property="n_rf_buckets"): builder.longIn(
-            f"beam:machine:info:n_rf_buckets", initial_value=400
+            # Todo: make this configureable ... this is 328 for ALS
+            #       this data is accessible from AT
+            f"beam:machine:info:n_rf_buckets",
+            initial_value=n_ref_buckets,
         ),
         ReadCommand(id="ring", property="rev_freq"): builder.aIn(
             f"beam:rev_freq", initial_value=0.0, EGU="kHz"
@@ -317,8 +343,8 @@ async def initialize_master_clock_pvs(
     return d
 
 
-def initialize_other_pvs(builder, prefix) -> Dict[ReadCommand, RecordWrapper]:
-    """Initializes miscellaneous PVs (dummy values).
+def initialize_other_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
+    """Initialises miscellaneous PVs (dummy values).
 
     Args:
         builder: The SoftIOC PV builder instance.

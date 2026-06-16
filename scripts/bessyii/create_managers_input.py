@@ -32,46 +32,6 @@ from dt4acc.custom_epics.data.querries import get_magnets
 logger = logging.getLogger("dt4acc")
 
 
-def remove_id(d: Dict) -> Dict:
-    nd = d.copy()
-    del d
-    del nd["_id"]
-    return nd
-
-
-def magnet_infos_from_db() -> Sequence[MagnetElementSetup]:
-    return [MagnetElementSetup(**remove_id(info)) for info in get_magnets()]
-
-
-def element_method(element_name: str, yp: YellowPagesBase):
-    if element_name in yp.get("horizontal_steerers"):
-        return "x_kick"
-    elif element_name in yp.get("vertical_steerers"):
-        return "y_kick"
-    elif element_name in yp.get("quadrupoles"):
-        return "K"
-    elif element_name in yp.get("sextupoles"):
-        return "H"
-    else:
-        raise AssertionError(f"Don't know how to handle {element_name}")
-
-
-def extract_host_element_name(element_name: str, yp: YellowPagesBase) -> str:
-    if element_name in yp.get("vertical_steerers") or element_name in yp.get("horizontal_steerers"):
-        return element_name[1:]
-    return element_name
-
-
-def construct_energy_independent_linear_conversion(
-    slope: float,
-) -> EnergyDependentLinearUnitConversion:
-    if slope is None:
-        raise AssertionError("Refusing creating linear unit conversion without slope")
-    return EnergyDependentLinearUnitConversion(
-        slope=1.0 / slope, intercept=0.0, brho=ring_parameters.brho
-    )
-
-
 def build_liaison_manager_lut(
         data_path: Tuple[str], *, yp: YellowPagesBase
 ) -> (Sequence[LiaisonManagerForwardLookupElement], Sequence[LiaisonManagerInverseLookupElement]):
