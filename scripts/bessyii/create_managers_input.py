@@ -1,6 +1,5 @@
-"""
-Todo:
-    consider to move it to accml
+"""Managers input for BESSY II
+
 """
 import functools
 import logging
@@ -14,11 +13,9 @@ from typing import Dict, Sequence, Tuple, List
 import jsons
 import yaml
 
-from dt4acc.custom_facility.model.config.elementmodel import MagnetElementSetup
 from dt4acc.custom_facility.model.config.magnet import MagneticObject
 from dt4acc.custom_facility.model.config.power_converter import PowerConverter
 from dt4acc_lib.bl.yellow_pages import YellowPages
-from dt4acc_lib.bl.unit_conversion import EnergyDependentLinearUnitConversion
 from dt4acc_lib.interfaces.utils.yellow_pages import YellowPagesBase
 from dt4acc_lib.model.utils.identifiers import DevicePropertyID, LatticeElementPropertyID, ConversionID
 from dt4acc_lib.model.utils.liaison_manager_lookup_table import LiaisonManagerInverseLookupElement, \
@@ -26,8 +23,6 @@ from dt4acc_lib.model.utils.liaison_manager_lookup_table import LiaisonManagerIn
 from dt4acc_lib.model.utils.translator_manager_lookup_table import TranslatorLookupTable, \
     TranslatorLookupTableElement, PolynomCoefficients, TuneConversionCoefficients, IdentityMapper
 
-from dt4acc.custom_epics.data.constants import ring_parameters
-from dt4acc.custom_epics.data.querries import get_magnets
 
 logger = logging.getLogger("dt4acc")
 
@@ -96,11 +91,20 @@ def build_liaison_manager_lut(
         ( "vertical_steerers"   , "y_kick", "V"),
         # fmt:on
     ):
-        names_in_family = [f"{co_wound_prefix}{name}" for name in yp.get(family_name)]
+        names_in_family = yp.get(family_name)
         for entry in magnet_info:
             if entry.elem_id in names_in_family:
                 dev_name = str(pc_magnet_is_connected_to[entry.elem_id])
-                lat_p = LatticeElementPropertyID(element_name=str(entry.elem_id), property=lattice_property)
+                magnet_name = str(entry.elem_id)
+                assert magnet_name[0] == co_wound_prefix
+                host_magnet_name = magnet_name[1:]
+                if co_wound_prefix == "H":
+                    assert host_magnet_name in yp.get("horizontal_steerers_host")
+                elif co_wound_prefix == "V":
+                    assert host_magnet_name in yp.get("vertical_steerers_host")
+                else:
+                    raise AssertionError("Should not end up here")
+                lat_p = LatticeElementPropertyID(element_name=host_magnet_name, property=lattice_property)
                 pc_dev_p = DevicePropertyID(device_name=dev_name, property="set_current")
                 mag_dev_p = DevicePropertyID(device_name=str(entry.dev_id), property="main_strength")
                 fwd_d[lat_p].append(pc_dev_p)
@@ -230,6 +234,40 @@ def build_translator_manager_lut(
     mag_info_lut = {mag_info.elem_id: mag_info for mag_info in magnet_infos}
 
     unhandled = []
+
+    # Need to address conversion: seems I have to invert the used
+    # slope: but do it step by step: lets work on steerers power converters first
+    for dev_p in all_keys:
+        # Todo: seems I need to invert slope for correct translation
+        #       lets do it step by step
+        if not dev_p.device_name[0] in ["H", "V"]:
+            # Not a steerer power converter, go ahead
+            unhandled.append(dev_p)
+            continue
+
+        lat_p, = lm_inv.get(dev_p)
+        if lat_p.element_name in yp.get("horizontal_steerers_host") :
+            magnet_name = "H" + lat_p.element_name
+            assert magnet_name in yp.get("horizontal_steerers")
+        elif lat_p.element_name in yp.get("vertical_steerers_host"):
+            magnet_name = "V" + lat_p.element_name
+            assert magnet_name in yp.get("vertical_steerers")
+        else:
+            raise AssertionError(f"{lat_p} neither horizontal nor vertical steerer")
+        conv = mag_info_lut[magnet_name].conversion
+        assert conv.conversion_type == "linear"
+        intercept, slope = conv.intercept, conv.slope
+        assert intercept == 0.0
+        slope = 1.0 / slope
+        lut.append(
+            TranslatorLookupTableElement(
+                ConversionID(lat_p, dev_p),
+                PolynomCoefficients([intercept, slope], energy_dependent=True)
+            )
+        )
+
+    all_keys, unhandled = unhandled, []
+
     for dev_p in all_keys:
         feed_by_pc = pc_feeds.get(dev_p.device_name)
         if not feed_by_pc:
@@ -242,7 +280,7 @@ def build_translator_manager_lut(
             lut.append(
                 TranslatorLookupTableElement(
                     ConversionID(lat_p, dev_p),
-                    PolynomCoefficients([conv.intercept, conv.slope], energy_dependent=True)
+                    PolynomCoefficients([conv.intercept, 1.0/conv.slope], energy_dependent=True)
                 )
             )
 
@@ -272,13 +310,21 @@ def build_translator_manager_lut(
             continue
         # assuming that there is only one for the steerer main strength
         lat_p, = lm_inv.get(dev_p)
-        # Todo: find out the coefficient for magnet to steerer
-        lut.append(
-            TranslatorLookupTableElement(
-                ConversionID(lat_p, dev_p),
-                PolynomCoefficients([0.0, 1.0], energy_dependent=False)
+        if lat_p.element_name == dev_p.device_name:
+            # Todo: translation of kick to magnet: how to calculate the
+            #       associated dipole strength.
+            #       For the time being do just a linear mapping
+            assert lat_p.property in ["x_kick", "y_kick"]
+            assert dev_p.property == "main_strength"
+            lut.append(
+                TranslatorLookupTableElement(
+                    ConversionID(lat_p, dev_p),
+                    PolynomCoefficients([0.0, 1.0], energy_dependent=False)
+                )
             )
-        )
+        else:
+            pass
+        # Todo: find out the coefficient for magnet to steerer power converter
 
     all_keys, unhandled = unhandled, []
     dev_names = list(yp.get("quadrupoles")) + list(yp.get("sextupoles"))
@@ -315,6 +361,7 @@ def build_translator_manager_lut(
     #                           values
     #     to calculate it one would also need the reference frequency
     # Warning: Frequency needs to be read from master clock or similar
+    # Todo:    investigate if already there
     floquet_to_frequency = 500e3 / 400.0
     lut.extend([
         TranslatorLookupTableElement(
@@ -435,16 +482,19 @@ def create_yellow_pages_lut_from_config(data_path: Tuple[str]) -> Dict[str, Sequ
     # I do not address them here
     steerers = [m.elem_id for m in magnet_info if m.type == "steerer"]
     # All
-    horizontal_steerers = [st[1:] for st in steerers if st.startswith("H")]
-    vertical_steerers = [st[1:] for st in steerers if st.startswith("V")]
+    horizontal_steerers = [st for st in steerers if st.startswith("H")]
+    vertical_steerers = [st for st in steerers if st.startswith("V")]
+
+    horizontal_steerers_host = [st[1:] for st in horizontal_steerers]
+    vertical_steerers_host = [st[1:] for st in vertical_steerers]
 
     horizontal_steerer_not_co_wound = [
-        st  for st in horizontal_steerers if st not in sextupoles
+        st  for st in horizontal_steerers_host if st not in sextupoles
     ]
     if horizontal_steerer_not_co_wound:
         logger.warning("Following horizontal steerers are not on sextupoles ? %s", horizontal_steerer_not_co_wound)
     vertical_steerer_not_co_wound = [
-        st  for st in vertical_steerers if st not in sextupoles
+        st  for st in vertical_steerers_host if st not in sextupoles
     ]
     if vertical_steerer_not_co_wound:
         logger.warning("Following vertical steerers are not on sextupoles ? %s", vertical_steerer_not_co_wound)
@@ -452,6 +502,8 @@ def create_yellow_pages_lut_from_config(data_path: Tuple[str]) -> Dict[str, Sequ
     r = dict(
         horizontal_steerers=horizontal_steerers,
         vertical_steerers=vertical_steerers,
+        horizontal_steerers_host=horizontal_steerers_host,
+        vertical_steerers_host=vertical_steerers_host,
         steerers=steerers,
         quadrupoles=[m.elem_id for m in magnet_info if m.type == "quadrupole"],
         sextupoles=sextupoles,
@@ -536,13 +588,11 @@ def main():
         fp.write(header_fmt.format(**dict(data_type="Translation service table", date=now)))
         yaml.dump(asdict(tlut), fp, Dumper=CompressedSequenceDumper)
         fp.write("# EOF\n")
-    del tlut
-
 
     with open(ts_fname, "rt") as fp:
         tmp = yaml.load(fp, Loader=yaml.SafeLoader)
-    tlut = jsons.load(tmp, TranslatorLookupTable)
-    tlut
+    tlut_loaded = jsons.load(tmp, TranslatorLookupTable)
+    assert tlut == tlut_loaded
     # pprint.pprint(tlut)
 
 
