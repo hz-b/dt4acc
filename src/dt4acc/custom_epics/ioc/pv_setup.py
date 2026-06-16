@@ -263,11 +263,11 @@ def initialize_survey_info_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
         ReadCommand(id="survey", property="s"): builder.WaveformIn(
             f"survey:s", initial_value=[0.0], EGU="m", length=config.n_elements
         ),
-        ReadCommand(id="survey", property="name"): builder.WaveformIn(
-            f"survey:name", initial_value=[""], length=config.n_elements
+        ReadCommand(id="survey", property="names"): builder.WaveformIn(
+            f"survey:names", initial_value=[""], length=config.n_elements
         ),
-        ReadCommand(id="survey", property="uid"): builder.WaveformIn(
-            f"survey:uid", initial_value=[""], length=config.n_elements
+        ReadCommand(id="survey", property="uids"): builder.WaveformIn(
+            f"survey:uids", initial_value=[""], length=config.n_elements
         ),
     }
 

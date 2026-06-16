@@ -38,7 +38,10 @@ from dt4acc.custom_epics.ioc.view import View
 from dt4acc.custom_facility.bessyii.liasion_translator_setup import load_managers
 
 logging.basicConfig(level=logging.WARNING)
-
+logging.getLogger("dt4acc_lib").setLevel(level=logging.WARNING)
+logging.getLogger("transitions").setLevel(level=logging.WARNING)
+logging.getLogger("transitions.core").setLevel(level=logging.WARNING)
+logging.getLogger("lat2db").setLevel(level=logging.WARNING)
 logger = logging.getLogger("dt4acc-bessyii")
 
 

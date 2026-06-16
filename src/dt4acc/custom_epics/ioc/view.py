@@ -74,11 +74,11 @@ class View(ViewInterface):
         assert rec_s
         rec_s.set([datum.s for datum in single_reading.payload])
 
-        rec_name = self.process_variables.get(ReadCommand(id="survey", property="name"))
+        rec_name = self.process_variables.get(ReadCommand(id="survey", property="names"))
         assert rec_name
         rec_name.set([datum.name for datum in single_reading.payload])
 
-        rec_uid = self.process_variables.get(ReadCommand(id="survey", property="uid"))
+        rec_uid = self.process_variables.get(ReadCommand(id="survey", property="uids"))
         assert rec_uid
         rec_uid.set([datum.uid for datum in single_reading.payload])
 
