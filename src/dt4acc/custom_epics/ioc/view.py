@@ -147,7 +147,8 @@ class View(ViewInterface):
             ]
             rec.set(flq)
 
-            mc_rec = self.process_variables.get(ReadCommand("master_clock", "freq"))
+            mc_rec = self.process_variables.get(ReadCommand("master_clock", "reference_frequency"))
+            assert mc_rec is not None
             # Todo: need to read the correct values e.g. from a variable
             n_buckets_rec = self.process_variables.get(
                 ReadCommand("ring", "n_rf_buckets")
