@@ -3,7 +3,7 @@ import getpass
 import json
 import logging
 import os
-from typing import Dict, Any
+from typing import Dict, Any, Sequence, Union
 
 import at
 from importlib import resources
@@ -12,6 +12,7 @@ from softioc import builder, softioc
 
 from dt4acc.core.bl.controller import read_and_dispatch
 from dt4acc.core.interfaces.controller_interface import ControllerInterface
+from dt4acc.core.model.view import Monitor, Setpoint
 from dt4acc.custom_epics.ioc.pv_setup import (
     initialize_master_clock_pvs,
     initialize_cavity_pvs,
@@ -25,6 +26,7 @@ from dt4acc.custom_epics.ioc.pv_setup import (
     initialize_other_pvs,
 )
 from dt4acc.core.bl.controller import Controller
+from dt4acc.custom_epics.ioc.pv_setup_from_model import initialize_pvs_from_model
 from dt4acc_lib.pyat_simulator.accelerator_simulator import PyATAcceleratorSimulator
 from dt4acc_lib.pyat_simulator.simulator_backend import SimulatorBackend
 from dt4acc_lib.bl.command_rewritter import CommandRewriter
@@ -70,7 +72,7 @@ async def main():
         acc=PyATAcceleratorSimulator(at_lattice=acc),
     )
 
-    _, lm, ts = load_managers()
+    _, lm, ts, pv_col = load_managers()
 
     command_rewriter = CommandRewriter(liaison_manager=lm, translation_service=ts)
 
@@ -111,7 +113,11 @@ async def main():
         builder.SetDeviceName(prefix)
 
     view.update_process_variables(
-        await initialise_pvs(builder=builder, controller=controller)
+        await initialise_pvs(
+            builder=builder,
+            models=pv_col.vars,
+            controller=controller
+        )
     )
     # Extra reads at startup
     await read_and_dispatch(
@@ -125,13 +131,16 @@ async def main():
 
 
 async def initialise_pvs(
-    builder, controller: ControllerInterface
+    builder,
+    models: Sequence[Union[Monitor, Setpoint]],
+    controller: ControllerInterface
 ) -> Dict[ReadCommand, Any]:
 
     return {
-        **await initialize_master_clock_pvs(builder, controller=controller),
-        **await initialize_cavity_pvs(builder, controller=controller),
-        **await initialize_power_converter_pvs(builder, controller=controller),
+        **await initialize_pvs_from_model(builder, models, controller),
+#        **await initialize_master_clock_pvs(builder, controller=controller),
+#        **await initialize_cavity_pvs(builder, controller=controller),
+#        **await initialize_power_converter_pvs(builder, controller=controller),
         **initialize_machine_info_pvs(builder, n_ref_buckets=400),
         **initialize_survey_info_pvs(builder),
         **initialize_orbit_object_pvs(builder),
