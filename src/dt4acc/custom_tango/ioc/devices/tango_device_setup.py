@@ -1,6 +1,8 @@
 # tango_device_setup.py
 
 from tango import Database, DbDevInfo, DevFailed
+
+from dataclasses import dataclass, field
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.config.data.querries import (
     get_unique_power_converters,
@@ -19,6 +21,30 @@ from dt4acc.custom_tango.ioc.devices.bpm_device import BPMDevice
 from dt4acc_lib.model.utils.tango_resource_locator import TangoResourceLocator
 
 logger = get_logger()
+
+
+@dataclass
+class DeviceCheckReport:
+    present: list[str] = field(default_factory=list)
+    missing: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+
+
+def check_devices() -> DeviceCheckReport:
+    """
+    Read-only validation entry point.
+
+    Patch 2:
+    - no registration
+    - no behaviour change to existing registration path
+    - foundation for check vs ensure mode
+    """
+    db = Database()
+    report = DeviceCheckReport()
+
+    # TODO: implement device inventory checks in patch 3
+    return report
+
 
 # Map JSON "type" field → Tango device class name
 _TYPE_TO_CLASS = {
