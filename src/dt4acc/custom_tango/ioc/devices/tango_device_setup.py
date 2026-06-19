@@ -23,6 +23,7 @@ from dt4acc_lib.model.utils.tango_resource_locator import TangoResourceLocator
 logger = get_logger()
 
 
+
 @dataclass
 class DeviceCheckReport:
     present: list[str] = field(default_factory=list)
@@ -30,19 +31,80 @@ class DeviceCheckReport:
     errors: list[str] = field(default_factory=list)
 
 
+@dataclass
+class DeviceExpected:
+    kind: str
+    name: str
+
+
+@dataclass
+class DevicePlan:
+    devices: list[DeviceExpected] = field(default_factory=list)
+
+
+def _add_expected_device(plan: DevicePlan, kind: str, name: str) -> None:
+    if name:
+        plan.devices.append(DeviceExpected(kind=kind, name=name))
+
+
+def build_device_plan() -> DevicePlan:
+    """
+    Build the expected device inventory from the same source data used by
+    registration.
+    """
+    plan = DevicePlan()
+
+    # Magnets
+    for pc_name in get_unique_power_converters():
+        for m in get_magnets_per_power_converters(pc_name):
+            _add_expected_device(plan, "magnet", m.get("name", ""))
+
+    # Power converters
+    from dt4acc.custom_tango.ioc.server_manager import EXPECTED_VIEW
+    if EXPECTED_VIEW == "device":
+        seen = set()
+        for pc_name in get_unique_power_converters():
+            if pc_name in seen:
+                continue
+            seen.add(pc_name)
+            _add_expected_device(plan, "power_converter", pc_name)
+
+    # Cavities
+    for pc_name in get_unique_power_converters_type_specified(["RFCavity"]):
+        for m in get_magnets_per_power_converters(pc_name):
+            _add_expected_device(plan, "cavity", m.get("name", ""))
+
+    # Ring simulator
+    _add_expected_device(plan, "ring_simulator", RING_SIM_DEV)
+
+    # BPMs
+    for bpm in get_bpms():
+        _add_expected_device(plan, "bpm", bpm.get("name", ""))
+
+    return plan
+
+
 def check_devices() -> DeviceCheckReport:
     """
     Read-only validation entry point.
 
-    Patch 2:
-    - no registration
-    - no behaviour change to existing registration path
-    - foundation for check vs ensure mode
+    This first version only checks whether Tango can resolve each expected
+    device with get_device_info(). It does not validate properties yet.
     """
     db = Database()
     report = DeviceCheckReport()
+    plan = build_device_plan()
 
-    # TODO: implement device inventory checks in patch 3
+    for expected in plan.devices:
+        try:
+            info = db.get_device_info(expected.name)
+            if info is not None:
+                report.present.append(f"{expected.kind}: {expected.name}")
+            else:
+                report.missing.append(f"{expected.kind}: {expected.name}")
+        except Exception as e:
+            report.errors.append(f"{expected.kind}: {expected.name}: {e}")
+
     return report
 
 
