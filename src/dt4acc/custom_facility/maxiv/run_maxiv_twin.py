@@ -35,7 +35,7 @@ import os
 import sys
 from pathlib import Path
 
-from dt4acc.custom_tango.ioc import handle_lattice
+from dt4acc.custom_tango.ioc import handle_lattice, mexec_config, mexec_server_for_physics_engine
 
 # ---------------------------------------------------------------------------
 # Defaults
@@ -128,9 +128,9 @@ def main():
     enable_device_view_readback()
 
     handle_lattice.lattice_loader.set_lattice_file(args.lattice)
-    server_manager.LOAD_MANAGERS_FN = _maxiv_r1_load_managers
+    mexec_server_for_physics_engine.LOAD_MANAGERS_FN = _maxiv_r1_load_managers
     server_manager.HEARTBEAT_PERIOD = args.heartbeat_period
-    server_manager._MANAGER_PORT    = args.port
+    mexec_config._MANAGER_PORT = args.port
     server_manager.EXPECTED_VIEW    = args.view
 
     server_manager.main()
