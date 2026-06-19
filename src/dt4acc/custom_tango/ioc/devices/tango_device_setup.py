@@ -559,25 +559,17 @@ def _register_bpms(db: Database, unique_servers: set[tuple[str, str]]):
 
     return sorted(unique_servers)
 
-def register_all_devices():
+def register_from_plan(plan: DevicePlan):
     """
-    Register ALL Soleil devices in the Tango DB.
+    Register devices using the shared plan.
 
-    - Device *names* are the Soleil-style names (AN10-AR/EM/SCF.11, ...).
-    - For each device name:
-        domain  -> server_name
-        family  -> instance_name
-        server  -> f"{server_name}/{instance_name}"
-    - Also registers DServer devices for each (server_name, instance_name).
-
-    Returns:
-        list[(server_name, instance_name)] : all unique device servers to start.
+    This is the first step toward making the plan the source of truth for
+    both validation and registration.
     """
     db = Database()
-    plan = build_device_plan()
     unique_servers: set[tuple[str, str]] = set(plan.servers)
 
-    logger.info("📝 Registering ALL devices into Tango DB...")
+    logger.info("📝 Registering devices from plan into Tango DB...")
     logger.info("🧭 Planned %d devices across %d servers", len(plan.devices), len(plan.servers))
 
     _register_magnets(db, unique_servers)
@@ -595,6 +587,23 @@ def register_all_devices():
     _register_dservers(db, unique_servers)
 
     return sorted(unique_servers)
+
+
+def register_all_devices():
+    """
+    Register ALL Soleil devices in the Tango DB.
+
+    - Device *names* are the Soleil-style names (AN10-AR/EM/SCF.11, ...).
+    - For each device name:
+        domain  -> server_name
+        family  -> instance_name
+        server  -> f"{server_name}/{instance_name}"
+    - Also registers DServer devices for each (server_name, instance_name).
+
+    Returns:
+        list[(server_name, instance_name)] : all unique device servers to start.
+    """
+    return register_from_plan(build_device_plan())
 
 
 def ensure_devices(register_missing: bool = False):
