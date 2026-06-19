@@ -624,14 +624,3 @@ def get_all_device_classes():
         RingSimulatorDevice,
         BPMDevice,
     ]
-
-
-def main():
-    import pprint
-
-    servers = register_all_devices()
-    print("Registered %d servers", len(servers))
-    pprint.pprint(servers, compact=True)
-
-if __name__ == "__main__":
-    main()
