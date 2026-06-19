@@ -559,6 +559,30 @@ def _register_bpms(db: Database, unique_servers: set[tuple[str, str]]):
 
     return sorted(unique_servers)
 
+
+def register_device_from_expected(db: Database, expected: DeviceExpected):
+    """
+    Generic registration helper.
+
+    Step 2 migration:
+    currently used for magnet devices only.
+    """
+    db_dev = DbDevInfo()
+    db_dev._class = expected.class_name
+    db_dev.server = expected.server_str
+    db_dev.name = expected.name
+
+    try:
+        db.add_device(db_dev)
+    except DevFailed as e:
+        msg = str(e)
+        if "DB_DuplicateKey" not in msg and "already" not in msg:
+            raise
+
+    if expected.properties:
+        db.put_device_property(expected.name, expected.properties)
+
+
 def register_from_plan(plan: DevicePlan):
     """
     Register devices using the shared plan.
@@ -572,7 +596,11 @@ def register_from_plan(plan: DevicePlan):
     logger.info("📝 Registering devices from plan into Tango DB...")
     logger.info("🧭 Planned %d devices across %d servers", len(plan.devices), len(plan.servers))
 
-    _register_magnets(db, unique_servers)
+    # Step 2: magnets now come directly from the plan.
+    for expected in plan.devices:
+        if expected.kind == "magnet":
+            register_device_from_expected(db, expected)
+
     _register_power_converters(db, unique_servers)
     _register_cavities(db, unique_servers)
     _register_ring_simulator(db, unique_servers)
