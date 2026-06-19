@@ -19,6 +19,7 @@ from dt4acc.custom_tango.ioc.devices.cavity_device import CavityDevice
 from dt4acc.custom_tango.ioc.devices.virtual_devices import RingSimulatorDevice, RING_SIM_DEV
 from dt4acc.custom_tango.ioc.devices.power_converter_device import PowerConverterDevice
 from dt4acc.custom_tango.ioc.devices.bpm_device import BPMDevice
+from dt4acc.custom_tango.ioc.mexec_server_for_physics_engine import EXPECTED_VIEW
 from dt4acc_lib.model.utils.tango_resource_locator import TangoResourceLocator
 
 logger = get_logger()
@@ -130,7 +131,6 @@ def build_device_plan() -> DevicePlan:
             )
 
     # Power converters
-    from dt4acc.custom_tango.ioc.server_manager import EXPECTED_VIEW
     if EXPECTED_VIEW == "device":
         seen = set()
         for pc_name in get_unique_power_converters():
@@ -397,7 +397,6 @@ def _register_power_converters(db: Database, unique_servers: set[tuple[str, str]
     # 2) Power converters — device view only.
     #    In design view the magnet device is the control source — no PC devices.
     # ------------------------------------------------------------
-    from dt4acc.custom_tango.ioc.server_manager import EXPECTED_VIEW
     if EXPECTED_VIEW == "device":
         registered_pcs = set()
         for pc_name in get_unique_power_converters():
@@ -656,3 +655,14 @@ def get_all_device_classes():
         RingSimulatorDevice,
         BPMDevice,
     ]
+
+
+def main():
+    import pprint
+
+    servers = register_all_devices()
+    print("Registered %d servers", len(servers))
+    pprint.pprint(servers, compact=True)
+
+if __name__ == "__main__":
+    main()
