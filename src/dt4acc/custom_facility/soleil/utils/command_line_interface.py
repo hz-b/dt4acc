@@ -20,7 +20,7 @@ DEFAULT_HEARTBEAT_PERIOD_S = 1.0
 # ---------------------------------------------------------------------------
 # CLI: standared arguments
 # ---------------------------------------------------------------------------
-def parse_args():
+def build_args_parser():
     parser = argparse.ArgumentParser(
         description="Launch the SOLEIL digital twin TANGO server"
     )
@@ -53,7 +53,11 @@ def parse_args():
         default=os.environ.get("DT4ACC_VIEW", "design"),
         help="Design or Device view (default: design)",
     )
-    return parser.parse_args()
+    return parser
+
+
+def parse_args():
+    return build_args_parser().parse_args()
 
 
 def standard_setup_from_environment():
