@@ -142,7 +142,7 @@ class TangoController(ControllerInterface):
             from dt4acc.custom_tango.ioc.single_server import (
                 refresh_cache_from_lattice, _my_magnet_uuids, _uuid_to_prop
             )
-            from dt4acc.custom_tango.ioc.server_manager import _connect_to_mexec_service
+            from dt4acc.custom_tango.ioc.mexec_server_for_physics_engine import _connect_to_mexec_service
             sync_proxy, _ = _connect_to_mexec_service()
             refresh_cache_from_lattice(sync_proxy, _my_magnet_uuids, _uuid_to_prop)
 

@@ -27,13 +27,7 @@ from dt4acc_lib.model.utils.tango_resource_locator import TangoResourceLocator
 from dt4acc.config.data.querries import get_unique_power_converters, get_magnets_per_power_converters
 from dt4acc.core.bl.controller import Controller
 from dt4acc.custom_tango.views.view import TangoView
-from dt4acc.custom_tango.ioc.server_manager import _connect_to_mexec_service
-
-# Suppress transitions state machine INFO logs — they fire on every
-# backend.set() call and flood the output (4 lines per state transition)
-logging.getLogger("transitions").setLevel(logging.WARNING)
-logging.getLogger("transitions.core").setLevel(logging.WARNING)
-
+from dt4acc.custom_tango.ioc.mexec_server_for_physics_engine import _connect_to_mexec_service
 from dt4acc_lib.model.output.result import TranslatedReading, ReadTogetherAndTranslated, SingleReading
 from dt4acc_lib.model.utils.command import ReadCommand, Command
 from tango.server import run
@@ -41,6 +35,11 @@ from tango.server import run
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.controller_registry import set_controller, get_controller
 from dt4acc.custom_tango.ioc.tango_controller import TangoController, DEFAULT_DELAYED_READS
+
+# Suppress transitions state machine INFO logs — they fire on every
+# backend.set() call and flood the output (4 lines per state transition)
+logging.getLogger("transitions").setLevel(logging.WARNING)
+logging.getLogger("transitions.core").setLevel(logging.WARNING)
 
 logger = get_logger()
 
@@ -267,6 +266,8 @@ def main_loop(server_name: str, instance_name: str, event=None):
     logging.getLogger("transitions").setLevel(logging.WARNING)
     logging.getLogger("transitions.core").setLevel(logging.WARNING)
 
+    logger.warning("single server start: name %s instance %s", server_name, instance_name)
+
     os.nice(4)
 
     prefix = os.environ.get("DT4ACC_PREFIX", os.getlogin())
@@ -364,6 +365,7 @@ def main():
     if len(sys.argv) != 3:
         print("Usage: single_server.py <server_name> <instance_name>")
         sys.exit(1)
+    logger.warning("cli: single server start: name %s instance %s", sys.argv[1], sys.argv[2])
     main_loop(server_name=sys.argv[1], instance_name=sys.argv[2])
 
 
