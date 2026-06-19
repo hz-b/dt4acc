@@ -376,6 +376,23 @@ def register_all_devices():
 
     return sorted(unique_servers)
 
+
+def ensure_devices(register_missing: bool = False):
+    """
+    Unified public entrypoint.
+
+    register_missing=False:
+        run read-only checks
+
+    register_missing=True:
+        register missing devices (current behaviour)
+    """
+    if register_missing:
+        return register_all_devices()
+
+    return check_devices()
+
+
 def get_all_device_classes():
     """Return all device classes used by the servers."""
     return [
