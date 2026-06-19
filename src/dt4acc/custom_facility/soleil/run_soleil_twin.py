@@ -30,12 +30,15 @@ Environment variables (all optional, CLI args take precedence)
     DT4ACC_VIEW           Design or Device view (default: design)
 """
 
-import argparse
 import os
 import sys
 from pathlib import Path
 
-from dt4acc.custom_tango.ioc import handle_lattice
+
+
+from dt4acc.custom_facility.soleil.utils.command_line_interface import display_setup_from_args, parse_args
+from dt4acc.custom_tango.ioc import handle_lattice, mexec_config, mexec_server_for_physics_engine
+from dt4acc.custom_tango.ioc import server_manager
 
 # ---------------------------------------------------------------------------
 # Resolve paths — script lives at scripts/soleil/, src is two levels up
@@ -47,61 +50,6 @@ SRC_DIR     = ROOT_DIR / "src"
 
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
-
-# ---------------------------------------------------------------------------
-# SOLEIL defaults
-# ---------------------------------------------------------------------------
-
-DEFAULT_LATTICE_FILE = (
-    Path.home()
-    / "Documents"
-    / "dt4acc_config_data"
-    / "SOLEIL_II_V3635_STAB_SYM1_SB3_MULT7_4SX60_V001_Nomenclature.m"
-)
-
-# Calculation heartbeat: recalculates twiss+orbit+tune every N seconds
-# WITHOUT changing the lattice — zero noise, reflects current state
-DEFAULT_HEARTBEAT_PERIOD_S = 1.0
-
-
-# ---------------------------------------------------------------------------
-# CLI
-# ---------------------------------------------------------------------------
-
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description="Launch the SOLEIL digital twin TANGO server"
-    )
-    parser.add_argument(
-        "--lattice",
-        type=Path,
-        default=Path(os.environ.get("DT4ACC_LATTICE_FILE", DEFAULT_LATTICE_FILE)),
-        help=f"Path to the SOLEIL AT lattice .m file (default: {DEFAULT_LATTICE_FILE})",
-    )
-    parser.add_argument(
-        "--tango-host",
-        default=os.environ.get("DT4ACC_TANGO_HOST", "localhost:10000"),
-        help="Tango database host:port (default: localhost:10000)",
-    )
-    parser.add_argument(
-        "--heartbeat-period",
-        type=float,
-        default=DEFAULT_HEARTBEAT_PERIOD_S,
-        help=f"Recalculation period in seconds, 0 to disable (default: {DEFAULT_HEARTBEAT_PERIOD_S})",
-    )
-    parser.add_argument(
-        "--port",
-        type=int,
-        default=50200,
-        help="TCP port for the MexecService manager (default: 50200)",
-    )
-    parser.add_argument(
-        "--view",
-        type=str,
-        default=os.environ.get("DT4ACC_VIEW", "design"),
-        help="Design or Device view (default: design)",
-    )
-    return parser.parse_args()
 
 
 # ---------------------------------------------------------------------------
@@ -125,21 +73,15 @@ def main():
         print(f"ERROR: Lattice file not found: {args.lattice}", file=sys.stderr)
         sys.exit(1)
 
-    print("SOLEIL twin server starting")
-    print(f"  Lattice          : {args.lattice}")
-    print(f"  TANGO            : {args.tango_host}")
-    print(f"  Recalc period    : {args.heartbeat_period}s (no lattice changes)")
-    print(f"  MexecPort        : {args.port}")
-    print(f"  View             : {args.view}")
-
+    print("Starting SOLEIL Digital Twin (all servers)")
+    display_setup_from_args(args)
     os.environ["TANGO_HOST"] = args.tango_host
 
-    from dt4acc.custom_tango.ioc import server_manager
 
     handle_lattice.lattice_loader.set_lattice_file(args.lattice)
-    server_manager.LOAD_MANAGERS_FN  = _soleil_load_managers
+    mexec_server_for_physics_engine.LOAD_MANAGERS_FN = _soleil_load_managers
     server_manager.HEARTBEAT_PERIOD  = args.heartbeat_period
-    server_manager._MANAGER_PORT     = args.port
+    mexec_config._MANAGER_PORT = args.port
     server_manager.EXPECTED_VIEW     = args.view
 
     server_manager.main()
