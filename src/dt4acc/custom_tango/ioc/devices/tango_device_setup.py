@@ -80,25 +80,9 @@ def _register_dservers(db: Database, servers: set[tuple[str, str]]):
                 logger.error(f"❌ Failed to register DServer {dserver_name}: {e}")
 
 
-def register_all_devices():
-    """
-    Register ALL Soleil devices in the Tango DB.
 
-    - Device *names* are the Soleil-style names (AN10-AR/EM/SCF.11, ...).
-    - For each device name:
-        domain  -> server_name
-        family  -> instance_name
-        server  -> f"{server_name}/{instance_name}"
-    - Also registers DServer devices for each (server_name, instance_name).
-
-    Returns:
-        list[(server_name, instance_name)] : all unique device servers to start.
-    """
-    db = Database()
-    unique_servers: set[tuple[str, str]] = set()
-
-    logger.info("📝 Registering ALL devices into Tango DB...")
-
+def _register_magnets(db: Database, unique_servers: set[tuple[str, str]]):
+    """Register magnet devices and properties."""
     # ------------------------------------------------------------
     # 1) Magnets — registered by Tango name (magnet TRL)
     #    UUID/uuids stored as DB property for AT element lookup.
@@ -163,6 +147,8 @@ def register_all_devices():
             except Exception as e:
                 logger.error("❌ Failed to register magnet %s: %s", magnet_name, e)
 
+def _register_power_converters(db: Database, unique_servers: set[tuple[str, str]]):
+    """Register power converter devices and properties."""
     # ------------------------------------------------------------
     # 2) Power converters — device view only.
     #    In design view the magnet device is the control source — no PC devices.
@@ -202,7 +188,8 @@ def register_all_devices():
             except Exception as e:
                 logger.warning("Skipping PC %s (not a valid TRL?): %s", pc_name, e)
 
-    # ------------------------------------------------------------
+def _register_cavities(db: Database, unique_servers: set[tuple[str, str]]):
+    """Register cavity devices."""
     # 2) Cavities — registered as typed devices
     # ------------------------------------------------------------
     for pc_name in get_unique_power_converters_type_specified(["RFCavity"]):
@@ -236,7 +223,8 @@ def register_all_devices():
             except Exception as e:
                 logger.error("❌ Failed to register %s %s: %s", dev_type, dev_name, e)
 
-    # ------------------------------------------------------------
+def _register_ring_simulator(db: Database, unique_servers: set[tuple[str, str]]):
+    """Register the RingSimulatorDevice."""
     # 3) Single RingSimulatorDevice — replaces all PHYSICS/SOLEIL/* devices
     # ------------------------------------------------------------
     try:
@@ -256,7 +244,8 @@ def register_all_devices():
     except Exception as e:
         logger.error("❌ Failed to register RingSimulatorDevice: %s", e)
 
-    # ------------------------------------------------------------
+def _register_bpms(db: Database, unique_servers: set[tuple[str, str]]):
+    """Register BPM devices and properties."""
     # 4) BPM devices — one per Monitor element, read-only
     # ------------------------------------------------------------
     # Build s_pos → AT element index map by loading the lattice directly.
@@ -326,6 +315,40 @@ def register_all_devices():
 
     return sorted(unique_servers)
 
+def register_all_devices():
+    """
+    Register ALL Soleil devices in the Tango DB.
+
+    - Device *names* are the Soleil-style names (AN10-AR/EM/SCF.11, ...).
+    - For each device name:
+        domain  -> server_name
+        family  -> instance_name
+        server  -> f"{server_name}/{instance_name}"
+    - Also registers DServer devices for each (server_name, instance_name).
+
+    Returns:
+        list[(server_name, instance_name)] : all unique device servers to start.
+    """
+    db = Database()
+    unique_servers: set[tuple[str, str]] = set()
+
+    logger.info("📝 Registering ALL devices into Tango DB...")
+
+    _register_magnets(db, unique_servers)
+    _register_power_converters(db, unique_servers)
+    _register_cavities(db, unique_servers)
+    _register_ring_simulator(db, unique_servers)
+    _register_bpms(db, unique_servers)
+
+    logger.info("✔ Unique (server_name, instance_name) pairs: %s", unique_servers)
+    logger.info("✔ Device registration DONE. We have %d servers to start.", len(unique_servers))
+
+    # ------------------------------------------------------------
+    # 5) Make sure dserver/<server_name>/<instance_name> exists
+    # ------------------------------------------------------------
+    _register_dservers(db, unique_servers)
+
+    return sorted(unique_servers)
 
 def get_all_device_classes():
     """Return all device classes used by the servers."""
