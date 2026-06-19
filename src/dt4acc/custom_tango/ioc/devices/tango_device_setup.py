@@ -596,15 +596,9 @@ def register_from_plan(plan: DevicePlan):
     logger.info("📝 Registering devices from plan into Tango DB...")
     logger.info("🧭 Planned %d devices across %d servers", len(plan.devices), len(plan.servers))
 
-    # Step 2: magnets now come directly from the plan.
+    # Step 3: all device families now register from the shared plan.
     for expected in plan.devices:
-        if expected.kind == "magnet":
-            register_device_from_expected(db, expected)
-
-    _register_power_converters(db, unique_servers)
-    _register_cavities(db, unique_servers)
-    _register_ring_simulator(db, unique_servers)
-    _register_bpms(db, unique_servers)
+        register_device_from_expected(db, expected)
 
     logger.info("✔ Unique (server_name, instance_name) pairs: %s", unique_servers)
     logger.info("✔ Device registration DONE. We have %d servers to start.", len(unique_servers))
