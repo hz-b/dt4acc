@@ -54,25 +54,6 @@ logger = get_logger()
 # Set by the launch script. Period in seconds (0 = disabled).
 HEARTBEAT_PERIOD = 1.0
 
-
-
-# ---------------------------------------------------------------------------
-# Heartbeat
-# ---------------------------------------------------------------------------
-
-def _wait_for_heartbeat_start(start_evt, stop_evt):
-    start = time.time()
-    for cnt in itertools.count():
-        if start_evt.is_set():
-            return True
-        if stop_evt.is_set():
-            return False
-        time.sleep(0.2)
-        if (cnt % (5 * 30)) == 0:
-            dt = (time.time() - start) / 60
-            logger.warning("%.1f min: waiting for tango devices to start", dt)
-
-
 # ---------------------------------------------------------------------------
 # Calculation heartbeat — no writes, no lattice perturbation
 # ---------------------------------------------------------------------------
