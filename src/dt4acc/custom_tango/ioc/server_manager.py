@@ -36,10 +36,15 @@ import time
 from dataclasses import dataclass
 from typing import Any, Sequence
 
+import select
+from tango import DeviceProxy, DevFailed
+
 from dt4acc.custom_tango.ioc.mexec_server_for_physics_engine import _run_mexec_service, _connect_to_mexec_service
-
-
+from dt4acc.custom_tango.ioc.devices.tango_device_setup import register_all_devices, ensure_devices
+from dt4acc.custom_tango.ioc.devices.virtual_devices import RING_SIM_DEV
+from dt4acc.custom_tango.ioc import single_server
 from dt4acc.core.utils.logger import get_logger
+
 
 logger = get_logger()
 
@@ -53,6 +58,7 @@ logger = get_logger()
 # Heartbeat — pure recalculation, no lattice writes, no noise
 # Set by the launch script. Period in seconds (0 = disabled).
 HEARTBEAT_PERIOD = 1.0
+
 
 # ---------------------------------------------------------------------------
 # Calculation heartbeat — no writes, no lattice perturbation
@@ -91,8 +97,6 @@ def _calculation_heartbeat(start_evt, stop_evt, period_s=1.0):
     logger.warning("Calculation heartbeat started — recalculating every %.1fs", period_s)
 
     # Connect to the RingSimulatorDevice to trigger recalculation via Recalculate command
-    from tango import DeviceProxy, DevFailed
-    from dt4acc.custom_tango.ioc.devices.virtual_devices import RING_SIM_DEV
 
     dev = None
     while not stop_evt.is_set():
@@ -188,14 +192,24 @@ def main():
         sys.exit(1)
 
     # 2. Register Tango devices in DB
-    from dt4acc.custom_tango.ioc.devices.tango_device_setup import register_all_devices
-    servers = register_all_devices()
-    logger.warning("DB registration done. Starting %d servers.", len(servers))
+    # single_server_args = register_all_devices()
+    single_server_args = ensure_devices(register_missing=False)
+    simulator_server_args = [args for args in single_server_args if args[0] == "simulator"]
+    device_server_args = single_server_args.copy()
+    for arg in simulator_server_args:
+        device_server_args.remove(arg)
+    # selected device server args: just here to start some of them earlier
+    # should be rather started on the commandline.
+    selected_device_server_args = [args for args in device_server_args if args[1].endswith("DIP")]
+    other_device_server_args = device_server_args.copy()
+    for arg in selected_device_server_args:
+        other_device_server_args.remove(arg)
+    logger.warning("DB registration done. Starting %d single_servers.", len(single_server_args))
 
     # 3. Spawn one Tango server process per (server_name, instance_name)
-    from dt4acc.custom_tango.ioc import single_server
     monitors = []
-    for server_name, instance_name in servers:
+    # Start first simulator services then the device servers
+    for server_name, instance_name in simulator_server_args + selected_device_server_args + other_device_server_args:
         evt = mp.Event()
         p = mp.Process(
             target=single_server.main_loop,

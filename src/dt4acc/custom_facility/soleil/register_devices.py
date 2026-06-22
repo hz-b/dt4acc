@@ -1,12 +1,17 @@
 import json
 import pprint
-from typing import Sequence, Tuple
+from typing import Sequence
 
-from dt4acc.custom_facility.soleil.utils.command_line_interface import parse_args, display_setup_from_args, \
-    build_args_parser
+from dt4acc.custom_facility.soleil.utils.command_line_interface import (
+    display_setup_from_args,
+    build_args_parser,
+)
 from dt4acc.custom_tango.ioc import handle_lattice
-from dt4acc.custom_tango.ioc.devices.tango_device_setup import register_all_devices, check_devices
-from dt4acc_lib.model.utils.tango_resource_locator import TangoResourceLocator
+from dt4acc.custom_tango.ioc.devices.tango_device_setup import (
+    register_all_devices,
+    check_devices,
+    family_trl_to_single_server_arguments,
+)
 
 
 def display_server_report(server_report):
@@ -18,20 +23,15 @@ def display_server_report(server_report):
         print("missing:")
         pprint.pprint(server_report.errors, compact=True)
 
-    txt=f"""Server summary report
-     
+    txt = f"""Server summary report
+
     numbers: errors {len(server_report.errors)} missing {len(server_report.missing)} found {len(server_report.present)}
     """
     print(txt)
 
 
-def trl_to_single_server_arguments(trl: Sequence[str]) -> Tuple[str, str]:
-    t = TangoResourceLocator.from_trl(trl)
-    return t.domain, t.family
-
-
-def export_present_devices(trls: Sequence[str], filename: str) -> None :
-    data = [trl_to_single_server_arguments(t) for t in trls]
+def export_present_devices(trls: Sequence[str], filename: str) -> None:
+    data = [family_trl_to_single_server_arguments(t) for t in trls]
     with open(filename, "wt") as fp:
         json.dump(data, fp, indent=4)
 
