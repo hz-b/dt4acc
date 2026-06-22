@@ -3,7 +3,7 @@
 from tango import Database, DbDevInfo, DevFailed
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Sequence, Tuple
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.config.data.querries import (
     get_unique_power_converters,
@@ -640,7 +640,17 @@ def ensure_devices(register_missing: bool = False):
     if register_missing:
         return register_all_devices()
 
-    return check_devices()
+    tmp = [family_trl_to_single_server_arguments(trl) for trl in check_devices().present]
+    single_server_args = list(set(tmp))
+    return single_server_args
+
+
+def family_trl_to_single_server_arguments(family_and_trl: Sequence[str]) -> Tuple[str, str]:
+    """Todo: need to rework DeviceCheckReport to contain proper isolated TRL's
+    """
+    family, trl = family_and_trl.split(":")
+    t = TangoResourceLocator.from_trl(trl.strip())
+    return t.domain, t.family
 
 
 def get_all_device_classes():
