@@ -97,5 +97,35 @@ class SyncMexecProxy:
             logger.error("SyncMexecProxy.sync_reset failed: %s", exc)
             raise
 
+    def sync_reinit(self):
+        """
+        Reset backend to nominal state:
+        1. Reload AT lattice from .m file
+        2. Clear error state → pending
+        3. Clear stored optics
+        """
+        logger.warning("SyncMexecProxy.sync_reinit: re-initialising back end")
+        try:
+            fut = asyncio.run_coroutine_threadsafe(
+                self.mexec.backend.reinit(), self.service_loop
+            )
+            fut.result(timeout=30)
+            logger.warning("SyncMexecProxy.sync_reinit: backend reinit done")
+        except Exception as exc:
+            logger.error("SyncMexecProxy.sync_reinit failed: %s", exc)
+            raise
+
+    def sync_acknowledge(self):
+        logger.warning("SyncMexecProxy.sync_acknowledge: acknowledging error")
+        try:
+            fut = asyncio.run_coroutine_threadsafe(
+                self.mexec.backend.acknowledge(), self.service_loop
+            )
+            fut.result(timeout=30)
+            logger.warning("SyncMexecProxy.sync_acknowledge: backend acknowledge done")
+        except Exception as exc:
+            logger.error("SyncMexecProxy.sync_acknowledge failed: %s", exc)
+            raise
+
 
 __all__  = ["SyncMexecProxy"]

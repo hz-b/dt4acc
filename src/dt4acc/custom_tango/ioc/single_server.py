@@ -42,7 +42,7 @@ logging.getLogger("transitions").setLevel(logging.WARNING)
 logging.getLogger("transitions.core").setLevel(logging.WARNING)
 
 logger = get_logger()
-
+logging.getLogger("dt4acc").setLevel(level=logging.WARNING)
 
 # ---------------------------------------------------------------------------
 # AsyncMexecAdapter — makes SyncMexecProxy look async to TangoController
@@ -107,6 +107,12 @@ class AsyncMexecAdapter:
         ]
         return ReadTogetherAndTranslated(data=data, start=now, end=now)
 
+    async def acknowledge(self):
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(
+            None,
+            lambda: self._proxy.sync_acknowledge(),
+        )
 
 # Process-global cache: uuid → {property: value}
 # Populated by _preload_initial_values() before init_device() runs.

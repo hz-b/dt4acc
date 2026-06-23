@@ -200,7 +200,7 @@ def main():
         device_server_args.remove(arg)
     # selected device server args: just here to start some of them earlier
     # should be rather started on the commandline.
-    selected_device_server_args = [args for args in device_server_args if args[1].endswith("DIP")]
+    selected_device_server_args = [args for args in device_server_args if args[1].endswith("COR")]
     other_device_server_args = device_server_args.copy()
     for arg in selected_device_server_args:
         other_device_server_args.remove(arg)
@@ -209,7 +209,7 @@ def main():
     # 3. Spawn one Tango server process per (server_name, instance_name)
     monitors = []
     # Start first simulator services then the device servers
-    for server_name, instance_name in simulator_server_args + selected_device_server_args + other_device_server_args:
+    for server_name, instance_name in simulator_server_args + selected_device_server_args[:2] #+ other_device_server_args:
         evt = mp.Event()
         p = mp.Process(
             target=single_server.main_loop,
