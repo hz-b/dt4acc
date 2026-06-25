@@ -1,11 +1,13 @@
 import asyncio
 import itertools
+import os
 import traceback
 from typing import Sequence
 
 from dt4acc.core.interfaces.controller_interface import ControllerInterface
 from dt4acc.core.interfaces.view_interface import ViewInterface
 from dt4acc.core.utils.logger import get_logger
+from dt4acc_lib.interfaces.backend.calculation_states import CalculationStates
 from dt4acc_lib.interfaces.utils.command_execution_engine import CommandExecutionEngine
 from dt4acc_lib.model.output.result import ReadTogetherAndTranslated
 from dt4acc_lib.model.utils.command import Command, ReadCommand
@@ -151,6 +153,16 @@ class Controller(ControllerInterface):
             await self._queue_step()
 
     async def _queue_step(self) -> None:
+        # Check that backend is not in error mode
+        # Todo: get_state / acknowlege: communicate messages to backend?
+        #       should the queue be emptied if already in error state?
+        logger.warning("Processing delayed command queue in pid %d", os.getpid())
+        if self.mexec.backend.get_state() in [CalculationStates.error]:
+
+            await self._push_invalid()
+            self.mexec.backend.acknowledge()
+            return
+
         rcmds = await consume(queue=self.cmd_queue, delay=0.05)
         if not rcmds:
             return
@@ -165,7 +177,13 @@ class Controller(ControllerInterface):
             traceback.print_exc()
             # Push NaN to all virtual devices so clients know data is invalid
             await self._push_invalid()
+            if self.mexec.backend.get_state() in [CalculationStates.error]:
+                await self.mexec.backend.acknowledge()
             return  # never kill the loop
+
+        if self.mexec.backend.get_state() in [CalculationStates.error]:
+            await self._push_invalid()
+            await self.mexec.backend.acknowledge()
 
         if len(read_result.data) != len(t_rcmds):
             logger.error(
