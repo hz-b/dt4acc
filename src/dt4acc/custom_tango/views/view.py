@@ -57,21 +57,37 @@ class TangoView(ViewInterface):
     async def _push_orbit(self, result: TranslatedReading) -> None:
         (reading,) = result.readings
         track = reading.payload          # CalculatedTrack from new backend
+        if track is None:
+            # Todo: what to do if no orbit was found?
+            logger.warning("%s: push orbit: no orbit received. Calulation failed?", self.__class__.__name__)
+            return
         await self._calc_view.push_orbit(_OrbitAdapter(track))
 
     async def _push_twiss(self, result: TranslatedReading) -> None:
         (reading,) = result.readings
         twiss = reading.payload          # Twiss from new backend
+        if twiss is None:
+            # Todo: what to do if no orbit was found?
+            logger.warning("%s: push twiss: no Twiss data received. Calulation failed?", self.__class__.__name__)
+            return
         await self._calc_view.push_twiss(_TwissAdapter(twiss))
 
     async def _push_tune(self, result: TranslatedReading) -> None:
         (reading,) = result.readings
         tune = reading.payload
+        if tune is None:
+            # Todo: what to do if no orbit was found?
+            logger.warning("%s: push tune: no tune data received. Calulation failed?", self.__class__.__name__)
+            return
         await self._calc_view.push_tune(tune)
 
     async def _push_chromaticity(self, result: TranslatedReading) -> None:
         (reading,) = result.readings
         chroma = reading.payload           # Tune(.x, .y) reused for xi_x, xi_y
+        if chroma is None:
+            # Todo: what to do if no chromaticity data were received?
+            logger.warning("%s: push chroma: no chromaticity data received. Calulation failed?", self.__class__.__name__)
+            return
         await self._calc_view.push_chromaticity(chroma)
 
     async def push_invalid(self) -> None:

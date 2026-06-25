@@ -6,6 +6,7 @@ from typing import Sequence
 
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.handle_lattice import lattice_loader
+from dt4acc_lib.interfaces.backend.calculation_states import CalculationStates
 from dt4acc_lib.interfaces.utils.command_execution_engine import CommandExecutionEngine
 from dt4acc_lib.model.utils.command import Command, BehaviourOnError, ReadCommand
 
@@ -132,6 +133,11 @@ class SyncMexecProxy:
         except Exception as exc:
             logger.error("SyncMexecProxy.sync_acknowledge failed: %s", exc)
             raise
+
+    def sync_get_state(self) -> CalculationStates:
+        logger.debug("SyncMexecProxy.get_state: see what state ")
+        r =  self.mexec.backend.get_state()
+        return r
 
 
 __all__  = ["SyncMexecProxy"]

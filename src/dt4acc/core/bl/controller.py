@@ -156,11 +156,11 @@ class Controller(ControllerInterface):
         # Check that backend is not in error mode
         # Todo: get_state / acknowlege: communicate messages to backend?
         #       should the queue be emptied if already in error state?
-        logger.warning("Processing delayed command queue in pid %d", os.getpid())
-        if self.mexec.backend.get_state() in [CalculationStates.error]:
+        logger.debug("Processing delayed command queue in pid %d", os.getpid())
+        if self.mexec.get_state() in [CalculationStates.error]:
 
             await self._push_invalid()
-            self.mexec.backend.acknowledge()
+            self.mexec.acknowledge()
             return
 
         rcmds = await consume(queue=self.cmd_queue, delay=0.05)
@@ -177,13 +177,13 @@ class Controller(ControllerInterface):
             traceback.print_exc()
             # Push NaN to all virtual devices so clients know data is invalid
             await self._push_invalid()
-            if self.mexec.backend.get_state() in [CalculationStates.error]:
-                await self.mexec.backend.acknowledge()
+            if self.mexec.get_state() in [CalculationStates.error]:
+                await self.mexec.acknowledge()
             return  # never kill the loop
 
-        if self.mexec.backend.get_state() in [CalculationStates.error]:
+        if self.mexec.get_state() in [CalculationStates.error]:
             await self._push_invalid()
-            await self.mexec.backend.acknowledge()
+            await self.mexec.acknowledge()
 
         if len(read_result.data) != len(t_rcmds):
             logger.error(

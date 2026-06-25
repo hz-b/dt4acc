@@ -22,6 +22,7 @@ import sys
 from collections import defaultdict
 from typing import Sequence
 
+from dt4acc_lib.interfaces.backend.calculation_states import CalculationStates
 from dt4acc_lib.model.utils.tango_resource_locator import TangoResourceLocator
 
 from dt4acc.config.data.querries import get_unique_power_converters, get_magnets_per_power_converters
@@ -113,6 +114,12 @@ class AsyncMexecAdapter:
             None,
             lambda: self._proxy.sync_acknowledge(),
         )
+
+    def get_state(self) -> CalculationStates:
+        # This function is not async: check at backend
+        r = self._proxy.sync_get_state()
+        return r
+
 
 # Process-global cache: uuid → {property: value}
 # Populated by _preload_initial_values() before init_device() runs.
