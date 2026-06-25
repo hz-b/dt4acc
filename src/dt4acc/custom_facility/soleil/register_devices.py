@@ -46,7 +46,7 @@ def main():
 
     if args.register_devices:
         servers = register_all_devices()
-        print("Registered %d servers", len(servers))
+        print(f"Registered {len(servers)} servers")
         pprint.pprint(servers, compact=True)
     else:
         server_report = check_devices()
