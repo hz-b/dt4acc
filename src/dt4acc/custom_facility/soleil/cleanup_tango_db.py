@@ -51,6 +51,7 @@ MANAGED_CLASSES = {
     "HorizontalSteererDevice",
     "CavityDevice",
     "PowerConverterDevice",
+    "BPMDevice"
 }
 
 
