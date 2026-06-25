@@ -272,7 +272,7 @@ def main_loop(server_name: str, instance_name: str, event=None):
     logging.getLogger("transitions").setLevel(logging.WARNING)
     logging.getLogger("transitions.core").setLevel(logging.WARNING)
 
-    logger.warning("single server start: name %s instance %s", server_name, instance_name)
+    logger.warning("single server start: name %s instance %s pid %d", server_name, instance_name, os.getpid())
 
     os.nice(4)
 

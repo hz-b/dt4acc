@@ -1,5 +1,6 @@
 import asyncio
 import math
+import os
 import traceback
 from typing import Sequence
 
@@ -12,11 +13,16 @@ logger = get_logger()
 
 
 class SyncMexecProxy:
-    """Synchronous wrapper around mexec for crossing the process boundary."""
+    """Synchronous wrapper around mexec for crossing the process boundary.
+
+    Todo:
+        on which side are you running on?
+    """
 
     def __init__(self,*, mexec: CommandExecutionEngine, service_loop: asyncio.AbstractEventLoop):
         self.mexec = mexec
         self.service_loop = service_loop
+        logger.warning("SyncMexecProxy: running in pid = %d", os.getpid())
 
     def sync_set(self, cmd_id: str, cmd_property: str, value: float):
         cmd = Command(
@@ -86,7 +92,7 @@ class SyncMexecProxy:
         2. Clear error state → pending
         3. Clear stored optics
         """
-        logger.warning("SyncMexecProxy.sync_reset: resetting back end")
+        logger.warning("SyncMexecProxy.sync_reset: resetting back end (pid = %d)", os.getpid())
         try:
             fut = asyncio.run_coroutine_threadsafe(
                 self.mexec.backend.reset(), self.service_loop
