@@ -113,12 +113,12 @@ def soleil_yellow_pages() -> YellowPages:
     def is_horizontal(e: dict) -> bool:
         name = e["name"]
         fam = e.get("FamName", "")
-        return "CDLH" in name or fam.endswith("_HCOR")
+        return "CDLH" in name or "EM-COR/CH" in name or fam.endswith("_HCOR")
 
     def is_vertical(e: dict) -> bool:
         name = e["name"]
         fam = e.get("FamName", "")
-        return "CDLV" in name or fam.endswith("_VCOR")
+        return "CDLV" in name or "EM-COR/CV" in name or fam.endswith("_VCOR")
 
     quadrupoles = [e["name"] for e in elements if e["type"] == "Quadrupole"]
     sextupoles = [e["name"] for e in elements if e["type"] == "Sextupole"]
