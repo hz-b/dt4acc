@@ -150,7 +150,10 @@ class Controller(ControllerInterface):
     async def _queue_loop(self) -> None:
         for step in itertools.count():
             logger.debug("%s: queue loop step %d", self.name, step)
-            await self._queue_step()
+            try:
+                await self._queue_step()
+            except Exception as exc:
+                logger.info("%s: queue loop step %d failed %exc", self.name, step, exc)
 
     async def _queue_step(self) -> None:
         # Check that backend is not in error mode
