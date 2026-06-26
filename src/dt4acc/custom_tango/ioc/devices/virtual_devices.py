@@ -275,17 +275,19 @@ class RingSimulatorDevice(Device, AsyncMixin):
             msg = str(exc)
             if "infs or NaN" in msg or "nan" in msg.lower() or "inf" in msg.lower():
                 logger.warning("RingSimulatorDevice: beam lost — setting FAULT state")
-                self.set_state(DevState.FAULT)
+                self.set_state(DevState.ALARM)
                 self.set_status("Beam lost: lattice optics diverged (NaN/inf). "
-                                "Reset magnets to nominal and call Reset.")
+                                "Reset magnets to nominal and call Reset or use Reinit"
+                )
             else:
                 logger.debug("RingSimulatorDevice.Recalculate: %s", exc)
 
     @command
     def Reset(self):
-        """Reset the digital twin to nominal state after beam loss."""
+        """Reset the digital twin: calculations are possible now again"""
         logger.warning("RingSimulatorDevice.Reset: initiating backend reset...")
-        self.set_state(DevState.INIT)
+        # Todo: is there a state like reset?
+        # self.set_state(DevState.RESET)
         try:
             self._start_async()
             get_controller().reset()
@@ -293,5 +295,35 @@ class RingSimulatorDevice(Device, AsyncMixin):
             logger.warning("RingSimulatorDevice.Reset: complete — nominal state restored")
         except Exception as exc:
             logger.error("RingSimulatorDevice.Reset failed: %s", exc)
+            self.set_state(DevState.FAULT)
+            raise DevFailed(str(exc))
+
+    @command
+    def Acknowledge(self):
+        """Acknowledge that the calculation engine is in error mode """
+        logger.warning("RingSimulatorDevice.Acknowledge: acknowledge engine is in error mode")
+        self.set_state(DevState.INIT)
+        try:
+            self._start_async()
+            get_controller().acknowledge()
+            self.set_state(DevState.ON)
+            logger.warning("RingSimulatorDevice.Acknowledge: complete — nominal state restored")
+        except Exception as exc:
+            logger.error("RingSimulatorDevice.Acknowledge failed: %s", exc)
+            self.set_state(DevState.FAULT)
+            raise DevFailed(str(exc))
+
+    @command
+    def Reinit(self):
+        """Reset the digital twin to nominal state after beam loss."""
+        logger.warning("RingSimulatorDevice.Reinit: re instantiating backend ...")
+        self.set_state(DevState.INIT)
+        try:
+            self._start_async()
+            get_controller().reinit()
+            self.set_state(DevState.ON)
+            logger.warning("RingSimulatorDevice.Reinit: complete — nominal state restored")
+        except Exception as exc:
+            logger.error("RingSimulatorDevice.Reinit failed: %s", exc)
             self.set_state(DevState.FAULT)
             raise DevFailed(str(exc))

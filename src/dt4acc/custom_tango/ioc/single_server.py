@@ -22,6 +22,7 @@ import sys
 from collections import defaultdict
 from typing import Sequence
 
+from dt4acc_lib.interfaces.backend.calculation_states import CalculationStates
 from dt4acc_lib.model.utils.tango_resource_locator import TangoResourceLocator
 
 from dt4acc.config.data.querries import get_unique_power_converters, get_magnets_per_power_converters
@@ -42,7 +43,7 @@ logging.getLogger("transitions").setLevel(logging.WARNING)
 logging.getLogger("transitions.core").setLevel(logging.WARNING)
 
 logger = get_logger()
-
+logging.getLogger("dt4acc").setLevel(level=logging.WARNING)
 
 # ---------------------------------------------------------------------------
 # AsyncMexecAdapter — makes SyncMexecProxy look async to TangoController
@@ -106,6 +107,18 @@ class AsyncMexecAdapter:
             for k, readings in groups.items()
         ]
         return ReadTogetherAndTranslated(data=data, start=now, end=now)
+
+    async def acknowledge(self):
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(
+            None,
+            lambda: self._proxy.sync_acknowledge(),
+        )
+
+    def get_state(self) -> CalculationStates:
+        # This function is not async: check at backend
+        r = self._proxy.sync_get_state()
+        return r
 
 
 # Process-global cache: uuid → {property: value}
@@ -266,7 +279,7 @@ def main_loop(server_name: str, instance_name: str, event=None):
     logging.getLogger("transitions").setLevel(logging.WARNING)
     logging.getLogger("transitions.core").setLevel(logging.WARNING)
 
-    logger.warning("single server start: name %s instance %s", server_name, instance_name)
+    logger.warning("single server start: name %s instance %s pid %d", server_name, instance_name, os.getpid())
 
     os.nice(4)
 

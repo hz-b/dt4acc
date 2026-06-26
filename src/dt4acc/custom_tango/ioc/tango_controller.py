@@ -27,7 +27,9 @@ from typing import Sequence
 from dt4acc.core.interfaces.controller_interface import ControllerInterface
 from dt4acc_lib.model.output.result import ReadTogether
 from dt4acc_lib.model.utils.command import ReadCommand, Command
+from dt4acc.core.bl.shared_event_loop import get_shared_event_loop
 from dt4acc.core.utils.logger import get_logger
+from dt4acc.custom_tango.ioc.mexec_server_for_physics_engine import _connect_to_mexec_service
 
 logger = get_logger()
 
@@ -101,6 +103,41 @@ class TangoController(ControllerInterface):
         self.cmd_queue: asyncio.Queue = None  # created in start() on running loop
         self._pending_task = None
 
+    def reinit(self) -> None:
+        if self._sync_reset is None:
+            raise RuntimeError("TangoController: no sync_reset callable registered")
+        logger.warning("TangoController.reinit resetting backend to nominal state...")
+
+        shared_loop = get_shared_event_loop()
+
+        # Queue fresh full calculation
+        asyncio.run_coroutine_threadsafe(
+            self.delegate.reread_default_readings(),
+            shared_loop
+        ).result(timeout=10)
+
+        # Refresh all MagnetDevice local attributes from the reloaded lattice
+        self._refresh_all_magnet_devices()
+
+        logger.warning("TangoController.reset: done — recalculation queued")
+
+    def acknowledge(self) -> None:
+        logger.warning("TangoController.acknowledge: acknowledge that calculation engine in error state ...")
+
+        shared_loop = get_shared_event_loop()
+
+        # Todo: need to fix whne to call async and when to call sync
+        self.mexec._proxy.sync_acknowledge()
+        # asyncio.run_coroutine_threadsafe(
+        #     self.delegate.backend.acknowledge(),
+        #     shared_loop
+        # ).result(timeout=10)
+
+        # Refresh all MagnetDevice local attributes from the reloaded lattice
+        self._refresh_all_magnet_devices()
+
+        logger.warning("TangoController.reset: done — recalculation queued")
+
     def reset(self) -> None:
         """
         Reset backend to nominal state and trigger fresh calculations.
@@ -116,7 +153,6 @@ class TangoController(ControllerInterface):
             raise RuntimeError("TangoController: no sync_reset callable registered")
         logger.warning("TangoController.reset: resetting backend to nominal state...")
 
-        from dt4acc.core.bl.shared_event_loop import get_shared_event_loop
         shared_loop = get_shared_event_loop()
 
         # Reload lattice + clear error state
@@ -142,7 +178,6 @@ class TangoController(ControllerInterface):
             from dt4acc.custom_tango.ioc.single_server import (
                 refresh_cache_from_lattice, _my_magnet_uuids, _uuid_to_prop
             )
-            from dt4acc.custom_tango.ioc.mexec_server_for_physics_engine import _connect_to_mexec_service
             sync_proxy, _ = _connect_to_mexec_service()
             refresh_cache_from_lattice(sync_proxy, _my_magnet_uuids, _uuid_to_prop)
 

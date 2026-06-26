@@ -1,10 +1,12 @@
 import asyncio
 import math
+import os
 import traceback
 from typing import Sequence
 
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.handle_lattice import lattice_loader
+from dt4acc_lib.interfaces.backend.calculation_states import CalculationStates
 from dt4acc_lib.interfaces.utils.command_execution_engine import CommandExecutionEngine
 from dt4acc_lib.model.utils.command import Command, BehaviourOnError, ReadCommand
 
@@ -12,11 +14,16 @@ logger = get_logger()
 
 
 class SyncMexecProxy:
-    """Synchronous wrapper around mexec for crossing the process boundary."""
+    """Synchronous wrapper around mexec for crossing the process boundary.
+
+    Todo:
+        on which side are you running on?
+    """
 
     def __init__(self,*, mexec: CommandExecutionEngine, service_loop: asyncio.AbstractEventLoop):
         self.mexec = mexec
         self.service_loop = service_loop
+        logger.warning("SyncMexecProxy: running in pid = %d", os.getpid())
 
     def sync_set(self, cmd_id: str, cmd_property: str, value: float):
         cmd = Command(
@@ -86,7 +93,7 @@ class SyncMexecProxy:
         2. Clear error state → pending
         3. Clear stored optics
         """
-        logger.warning("SyncMexecProxy.sync_reset: resetting back end")
+        logger.warning("SyncMexecProxy.sync_reset: resetting back end (pid = %d)", os.getpid())
         try:
             fut = asyncio.run_coroutine_threadsafe(
                 self.mexec.backend.reset(), self.service_loop
@@ -96,6 +103,41 @@ class SyncMexecProxy:
         except Exception as exc:
             logger.error("SyncMexecProxy.sync_reset failed: %s", exc)
             raise
+
+    def sync_reinit(self):
+        """
+        Reset backend to nominal state:
+        1. Reload AT lattice from .m file
+        2. Clear error state → pending
+        3. Clear stored optics
+        """
+        logger.warning("SyncMexecProxy.sync_reinit: re-initialising back end")
+        try:
+            fut = asyncio.run_coroutine_threadsafe(
+                self.mexec.backend.reinit(), self.service_loop
+            )
+            fut.result(timeout=30)
+            logger.warning("SyncMexecProxy.sync_reinit: backend reinit done")
+        except Exception as exc:
+            logger.error("SyncMexecProxy.sync_reinit failed: %s", exc)
+            raise
+
+    def sync_acknowledge(self):
+        logger.warning("SyncMexecProxy.sync_acknowledge: acknowledging error")
+        try:
+            fut = asyncio.run_coroutine_threadsafe(
+                self.mexec.backend.acknowledge(), self.service_loop
+            )
+            fut.result(timeout=30)
+            logger.warning("SyncMexecProxy.sync_acknowledge: backend acknowledge done")
+        except Exception as exc:
+            logger.error("SyncMexecProxy.sync_acknowledge failed: %s", exc)
+            raise
+
+    def sync_get_state(self) -> CalculationStates:
+        logger.debug("SyncMexecProxy.get_state: see what state ")
+        r =  self.mexec.backend.get_state()
+        return r
 
 
 __all__  = ["SyncMexecProxy"]

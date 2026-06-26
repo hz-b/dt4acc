@@ -16,6 +16,7 @@ import itertools
 from typing import Any, Mapping, Sequence
 
 from dt4acc_lib.interfaces.backend.backend import BackendRW
+from dt4acc_lib.interfaces.backend.calculation_states import CalculationStates
 from dt4acc_lib.interfaces.utils.command_execution_engine import CommandExecutionEngine
 from dt4acc_lib.interfaces.utils.command_rewritter import CommandRewriterBase
 from dt4acc_lib.model.utils.command import ReadCommand, Command
@@ -93,6 +94,19 @@ class TranslatingCommandExecutionEngine(CommandExecutionEngine):
             self.backend,
             translated_commands
         )
+
+    def get_state(self) -> CalculationStates:
+        """get state of backend
+
+        Todo:
+            rename or get rid of it
+        """
+        return self.backend.get_state()
+
+    async def acknowledge(self):
+        """acknowledge error state of backend
+        """
+        await self.backend.acknowledge()
 
 
 async def set_(backend: BackendRW, transaction_commands: Sequence[Command]) -> None:

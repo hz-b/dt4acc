@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import multiprocessing.managers
+import os
 import threading
 
 from dt4acc.core.utils.logger import get_logger
@@ -71,6 +72,7 @@ def _run_mexec_service():
     service_loop = asyncio.new_event_loop()
 
     def _run_loop():
+        logger.warning("Mexec service loop runing on pid %d", os.getpid())
         asyncio.set_event_loop(service_loop)
         service_loop.run_forever()
 
@@ -78,7 +80,7 @@ def _run_mexec_service():
 
     future = asyncio.run_coroutine_threadsafe(_async_build_mexec(), service_loop)
     mexec = future.result(timeout=120)
-    logger.warning("MexecService: lattice ready, mexec built.")
+    logger.warning("MexecService: lattice ready, mexec built. running on pid %d", os.getpid())
 
 
     proxy = SyncMexecProxy(mexec=mexec, service_loop=service_loop)
