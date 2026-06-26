@@ -9,6 +9,8 @@ Single virtual Tango device for the digital twin:
 """
 
 import asyncio
+from typing import Tuple
+
 import numpy as np
 from tango import DevState, DevFailed, DevDouble, DevString
 from tango.server import Device, attribute, command, AttrDataFormat, device_property, AttrWriteType
@@ -32,9 +34,12 @@ _orbit_x_cache: np.ndarray = np.array([], dtype=np.float64)
 _orbit_y_cache: np.ndarray = np.array([], dtype=np.float64)
 
 
-def get_orbit_at_index(index: int):
+def get_orbit_at_index(index: int) -> Tuple[float, float]:
     """Return (x, y) from the latest orbit cache at the given AT element index.
     Returns (0.0, 0.0) if the cache is empty or index is out of range.
+
+    Todo:
+        consider if it should rather return (math.nan, math.nan) if it fails
     """
     if index < len(_orbit_x_cache) and index < len(_orbit_y_cache):
         return float(_orbit_x_cache[index]), float(_orbit_y_cache[index])

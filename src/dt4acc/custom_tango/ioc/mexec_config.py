@@ -1,0 +1,3 @@
+_MANAGER_HOST = "127.0.0.1"
+_MANAGER_PORT = 50200
+_MANAGER_AUTHKEY = b"dt4acc-tango-secret"
