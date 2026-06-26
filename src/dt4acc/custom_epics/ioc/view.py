@@ -1,3 +1,4 @@
+from copy import copy as _copy
 import math
 from typing import Optional, Dict
 
@@ -5,6 +6,7 @@ from softioc import pythonSoftIoc
 
 from dt4acc.core.interfaces.view_interface import ViewInterface
 from dt4acc.core.utils.logger import get_logger
+from dt4acc_lib.model.output.result import TranslatedReading, SingleReading
 from .orbit_pva import OrbitTwinServer
 from dt4acc_lib.model.utils.command import ReadCommand
 
@@ -25,6 +27,8 @@ class View(ViewInterface):
     def __init__(self, *, orbit_server: Optional[OrbitTwinServer] = None):
         self.process_variables: Dict[ReadCommand, pythonSoftIoc.RecordWrapper] = dict()
         self.orbit_server = orbit_server
+        # used for creating invalid data
+        self.last_data_cache = dict()
 
     def update_process_variables(
         self, variables: Dict[ReadCommand, pythonSoftIoc.RecordWrapper]
@@ -32,7 +36,22 @@ class View(ViewInterface):
         self.process_variables.update(variables)
 
     async def push_invalid(self) -> None:
-        raise NotImplementedError("push_invalid needs to be implemented for epics view")
+        rcmd = ReadCommand(id="twiss", property="transveral")
+        self.update_twiss(
+            rcmd,
+            TranslatedReading(
+                rcmd,
+                [SingleReading(cmd=rcmd, name="invalidate-twiss", payload=None)]
+            )
+        )
+        rcmd = ReadCommand(id="track", property="pos")
+        self.update_track(
+            rcmd,
+            TranslatedReading(
+                rcmd,
+                [SingleReading(cmd=rcmd, name="invalidate-track", payload=None)]
+            )
+        )
 
     async def dispatch(self, var: ReadCommand, pkg):
         """Update the value of a process variable.
@@ -86,6 +105,19 @@ class View(ViewInterface):
         assert var.id == "track", f"Only prepared to process 'track' but got {var}"
         (single_reading,) = pkg.readings
         value = single_reading.payload
+        if value is None:
+            ref_value = self.last_data_cache.get(ReadCommand("track", "pos"))
+            if ref_value is None:
+                logger.warning(
+                    "%s.update_track got no data: calculation succeded?: but no reference data for producing invalid data",
+                    self.__class__.__name__
+                )
+                return
+            value = _copy(ref_value)
+            for pos in value.track:
+                pos.x = pos.y = math.nan
+        else:
+            self.last_data_cache[var] = value
 
         if var.property == "pos":
             x_vals = [pos.x for pos in value.track]
@@ -138,6 +170,19 @@ class View(ViewInterface):
         ), f"Only prepared to extract tune from 'twiss' but got {var}"
         (single_reading,) = pkg.readings
         value = single_reading.payload
+
+        if value is None:
+            for plane in ("x", "y"):
+                rec = self.process_variables[
+                    ReadCommand(id="tune", property=f"flq_{plane}")
+                ]
+                rec.set(math.nan)
+                rec = self.process_variables[
+                    ReadCommand(id="tune", property=f"{plane}")
+                ]
+                rec.set(math.nan)
+            return
+
         for plane in ("x", "y"):
             twiss_data_of_last_element = getattr(value.twiss[-1], plane)
             # Hard coded dependency for AT: returns phase advance times 2pi
@@ -179,6 +224,22 @@ class View(ViewInterface):
 
         (single_reading,) = pkg.readings
         value = single_reading.payload
+        if value is None:
+            ref_value = self.last_data_cache.get(ReadCommand("twiss", "parameters"))
+            if ref_value is None:
+                logger.warning(
+                    "%s.update_twiss got no data: calculation succeded?: but no reference data for producing invalid data",
+                    self.__class__.__name__
+                )
+                return
+            value = _copy(ref_value)
+            for item in value.twiss:
+                for vals_plane in item.x, item.y:
+                    vals_plane.beta = vals_plane.alpha = vals_plane.mu = math.nan
+            del item, vals_plane
+        else:
+            self.last_data_cache[var] = value
+
         for plane in ("x", "y"):
 
             rw = self.process_variables.get(ReadCommand("twiss", f"{plane}:nu"))
