@@ -137,6 +137,8 @@ def element_method(element_name: str, yp: YellowPages):
         return "skew_quad_strength"
     elif element_name in yp.cavity_names():
         return "frequency"
+    elif element_name in yp.bend_names:
+        return "main_strength"
     else:
         raise AssertionError(f"Don't know how to handle {element_name}")
 
