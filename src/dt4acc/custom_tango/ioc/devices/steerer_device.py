@@ -3,13 +3,17 @@ steerer_device.py
 ==================
 Tango devices for horizontal and vertical dipole correctors (steerers).
 
-HorizontalSteererDevice → x_kick only
-VerticalSteererDevice   → y_kick only
+HorizontalSteererDevice exposes x_kick and magnetic_strength.
+VerticalSteererDevice exposes y_kick and magnetic_strength.
 
-Steerers share the UUID of their host sextupole in the AT lattice.
-The property name ("x_kick" / "y_kick") routes to the correct
-KickAngle index in ElementProxy._update().
+Steerers can share the UUID of their host multipole in the AT lattice.
+The public attribute names ("x_kick" / "y_kick") are kept for compatibility,
+but the backend stores them through the host dipolar strength:
+angle = atan(strength), strength = tan(angle), using PolynomB[0] for horizontal
+and PolynomA[0] for vertical correctors when those arrays exist.
 """
+
+import math
 
 from tango.server import attribute, command
 from tango import DevState, AttrWriteType
@@ -23,7 +27,6 @@ logger = get_logger()
 class HorizontalSteererDevice(BaseMagnetDevice):
     """
     Tango device for horizontal dipole correctors (CDLH, CDRH).
-    Only exposes x_kick.
     """
 
     def init_device(self):
@@ -40,6 +43,16 @@ class HorizontalSteererDevice(BaseMagnetDevice):
         value = float(value)
         self._x = value
         self._send("x_kick", value)
+
+    @attribute(dtype=float, access=AttrWriteType.READ_WRITE,
+               label="Magnetic strength")
+    def magnetic_strength(self) -> float:
+        return math.tan(self._x)
+
+    @magnetic_strength.write
+    def magnetic_strength(self, value: float) -> None:
+        self._x = math.atan(float(value))
+        self._send("x_kick", self._x)
 
     @command
     def reset(self) -> None:
@@ -62,7 +75,6 @@ class HorizontalSteererDevice(BaseMagnetDevice):
 class VerticalSteererDevice(BaseMagnetDevice):
     """
     Tango device for vertical dipole correctors (CDLV, CDRV).
-    Only exposes y_kick.
     """
 
     def init_device(self):
@@ -79,6 +91,16 @@ class VerticalSteererDevice(BaseMagnetDevice):
         value = float(value)
         self._y = value
         self._send("y_kick", value)
+
+    @attribute(dtype=float, access=AttrWriteType.READ_WRITE,
+               label="Magnetic strength")
+    def magnetic_strength(self) -> float:
+        return math.tan(self._y)
+
+    @magnetic_strength.write
+    def magnetic_strength(self, value: float) -> None:
+        self._y = math.atan(float(value))
+        self._send("y_kick", self._y)
 
     @command
     def reset(self) -> None:

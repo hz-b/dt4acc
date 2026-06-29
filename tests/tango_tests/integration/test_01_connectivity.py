@@ -76,9 +76,12 @@ class TestDeviceConnectivity:
         assert "magnetic_strength" in attr_names
         assert "magnetic_strength_readback" in attr_names
 
-    def test_steerer_has_x_kick_only(self, dp_steerer_h):
-        """HorizontalSteererDevice must have x_kick but not y_kick."""
+    def test_steerer_has_x_kick_and_magnetic_strength(self, dp_steerer_h):
+        """HorizontalSteererDevice must have x_kick and magnetic_strength but not y_kick."""
         attr_names = [a.name for a in dp_steerer_h.attribute_list_query()]
         assert "x_kick" in attr_names, "HorizontalSteererDevice missing x_kick"
+        assert "magnetic_strength" in attr_names, (
+            "HorizontalSteererDevice missing magnetic_strength"
+        )
         assert "y_kick" not in attr_names, \
             "HorizontalSteererDevice should not have y_kick"

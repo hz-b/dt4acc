@@ -34,6 +34,7 @@ import logging
 import multiprocessing as mp
 import multiprocessing.managers
 import multiprocessing.synchronize
+import numpy as np
 import os
 import signal
 import sys
@@ -102,7 +103,7 @@ class VirtualPassthroughCommandRewriter(CommandRewriter):
 
 
 class VoltageAwareElementProxy:
-    """Add generic RFCavity voltage support to dt4acc-lib element proxies."""
+    """Add local element-property support missing from dt4acc-lib proxies."""
 
     def __init__(self, wrapped):
         self._wrapped = wrapped
@@ -115,13 +116,126 @@ class VoltageAwareElementProxy:
             elements = list(self._wrapped._obj)
         except Exception as exc:
             raise NotImplementedError(
-                "voltage handling requires an AT element proxy with element storage"
+                "custom element handling requires an AT element proxy with element storage"
             ) from exc
         if not elements:
-            raise NotImplementedError("voltage handling requires at least one AT element")
+            raise NotImplementedError("custom element handling requires at least one AT element")
         return elements
 
+    @staticmethod
+    def _is_dipole(element) -> bool:
+        return element.__class__.__name__ == "Dipole"
+
+    @staticmethod
+    def _dipole_main_strength(element) -> float:
+        length = float(getattr(element, "Length", 0.0) or 0.0)
+        if length == 0.0:
+            raise NotImplementedError(
+                f"Element {getattr(element, 'FamName', element)!r} has no usable Length"
+            )
+        return float(element.BendingAngle) / length
+
+    @classmethod
+    def _set_dipole_main_strength(cls, element, value: object) -> None:
+        length = float(getattr(element, "Length", 0.0) or 0.0)
+        if length == 0.0:
+            raise NotImplementedError(
+                f"Element {getattr(element, 'FamName', element)!r} has no usable Length"
+            )
+        element.update(BendingAngle=float(value) * length)
+
+    @staticmethod
+    def _polynom(element, name: str):
+        polynom = getattr(element, name, None)
+        if polynom is None or len(polynom) < 1:
+            raise NotImplementedError(
+                f"Element {getattr(element, 'FamName', element)!r} has no {name}[0]"
+            )
+        return polynom
+
+    @staticmethod
+    def _corrector_polynom_name(property_id: str) -> str:
+        if property_id == "x_kick":
+            return "PolynomB"
+        if property_id == "y_kick":
+            return "PolynomA"
+        raise AssertionError(f"Unexpected corrector property {property_id!r}")
+
+    @staticmethod
+    def _corrector_sign(property_id: str) -> float:
+        if property_id == "x_kick":
+            return -1.0
+        if property_id == "y_kick":
+            return 1.0
+        raise AssertionError(f"Unexpected corrector property {property_id!r}")
+
+    @classmethod
+    def _corrector_strength(cls, elements, property_id: str) -> float:
+        polynom_name = cls._corrector_polynom_name(property_id)
+        sign = cls._corrector_sign(property_id)
+        usable_elements = [
+            element
+            for element in elements
+            if getattr(element, polynom_name, None) is not None
+        ]
+        lengths = [
+            float(getattr(element, "Length", 0.0) or 0.0)
+            for element in usable_elements
+        ]
+        use_length = any(length > 0.0 for length in lengths)
+        strength = 0.0
+        for element, length in zip(usable_elements, lengths):
+            polynom = getattr(element, polynom_name)
+            factor = length if use_length else 1.0
+            strength += float(polynom[0]) * sign * factor
+        if usable_elements and not use_length:
+            strength /= len(usable_elements)
+        return strength
+
+    @classmethod
+    def _corrector_angle(cls, elements, property_id: str) -> float:
+        return float(np.arctan(cls._corrector_strength(elements, property_id)))
+
+    @classmethod
+    def _set_corrector_angle(cls, elements, property_id: str, value: object) -> None:
+        polynom_name = cls._corrector_polynom_name(property_id)
+        sign = cls._corrector_sign(property_id)
+        usable_elements = [
+            element
+            for element in elements
+            if getattr(element, polynom_name, None) is not None
+        ]
+        lengths = [
+            float(getattr(element, "Length", 0.0) or 0.0)
+            for element in usable_elements
+        ]
+        total_length = sum(lengths)
+        if not usable_elements:
+            raise NotImplementedError(
+                f"Cannot write {property_id}: no host element with {polynom_name}[0]"
+            )
+
+        strength = float(np.tan(float(value)))
+        factor = total_length if total_length else 1.0
+        for element, length in zip(usable_elements, lengths):
+            coefficient = strength / (factor * sign)
+            polynom = np.array(cls._polynom(element, polynom_name), copy=True)
+            polynom[0] = coefficient
+            setattr(element, polynom_name, polynom)
+
     async def update(self, property_id: str, value: object):
+        if property_id in {"x_kick", "y_kick"}:
+            elements = self._elements()
+            self._set_corrector_angle(elements, property_id, value)
+            return None
+
+        if property_id == "main_strength":
+            elements = self._elements()
+            if all(self._is_dipole(element) for element in elements):
+                for element in elements:
+                    self._set_dipole_main_strength(element, value)
+                return None
+
         if property_id != "voltage":
             return await self._wrapped.update(property_id, value)
 
@@ -135,6 +249,15 @@ class VoltageAwareElementProxy:
             element.update(Voltage=voltage)
 
     def peek(self, property_id: str) -> float:
+        if property_id in {"x_kick", "y_kick"}:
+            elements = self._elements()
+            return self._corrector_angle(elements, property_id)
+
+        if property_id == "main_strength":
+            elements = self._elements()
+            if all(self._is_dipole(element) for element in elements):
+                return sum(self._dipole_main_strength(element) for element in elements)
+
         if property_id != "voltage":
             return self._wrapped.peek(property_id)
 

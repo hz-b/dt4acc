@@ -224,10 +224,10 @@ def build_managers():
     magnet_lut = {info.name: info for info in infos}
     # todo: check if property must be different for the different magnets ...
 
-    # first for steerers : for AT these are angles applied to the host magnet
-    # I use that I know one pc goes to one steerer
-    # first for steerers : for AT these are angles applied to the host magnet
-    # I use that I know one pc goes to one steerer
+    # Steerers keep the historical x_kick/y_kick property names in Tango, but
+    # the pyAT proxy maps them to PolynomB[0]/PolynomA[0] strengths on the host
+    # magnet when available. One corrector power supply is expected to feed one
+    # steerer.
     inverse_lut = {
         DevicePropertyID(device_name=info.pc, property="set_current"): (
             LatticeElementPropertyID(
