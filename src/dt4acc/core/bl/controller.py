@@ -54,6 +54,9 @@ class Controller(ControllerInterface):
             name=f"controller-delayed-execution-task-{task_count}",
         )
 
+    def get_backend_state(self):
+        return self.mexec.get_state()
+
     def get_default_delayed_reads(self) -> Sequence[ReadCommand]:
         return self.default_delayed_reads
 
@@ -163,7 +166,7 @@ class Controller(ControllerInterface):
         if self.mexec.get_state() in [CalculationStates.error]:
 
             await self._push_invalid()
-            self.mexec.acknowledge()
+            await self.mexec.acknowledge()
             return
 
         rcmds = await consume(queue=self.cmd_queue, delay=0.05)

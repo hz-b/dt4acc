@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
-from typing import Sequence
+from typing import Optional, Sequence
 
+from dt4acc_lib.interfaces.backend.calculation_states import CalculationStates
 from dt4acc_lib.model.output.result import ReadTogether
 from dt4acc_lib.model.utils.command import Command, ReadCommand
 
@@ -27,6 +28,10 @@ class ControllerInterface(metaclass=ABCMeta):
     @abstractmethod
     async def trigger_read(self, reads: Sequence[ReadCommand]) -> ReadTogether:
         """just a simple wrapper of mexec.trigger_read"""
+
+    def get_backend_state(self) -> Optional[CalculationStates]:
+        """Return the current backend calculation state, or None if unavailable."""
+        return None
 
     @abstractmethod
     async def reread_default_readings(self) -> None:

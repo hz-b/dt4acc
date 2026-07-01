@@ -13,17 +13,35 @@
 # rework this to use the file repository along with mongodb
 
 import json
+import os
 from pathlib import Path
-from typing import Iterable, List, Dict, Any
+from typing import Iterable, List, Dict, Any, Optional
 
 # -----------------------------------------------------------------
-# locate and load the data file once; keep it cached in _DATA
+# locate and load the data file — lazy, configurable at runtime
 # -----------------------------------------------------------------
 
-_DATA_FILE = Path.home() / "Documents" / "dt4acc_config_data" / "accelerator_setup.json"
+_DEFAULT_DATA_FILE = Path.home() / "Documents" / "dt4acc_config_data" / "accelerator_setup.json"
+_DATA_FILE = Path(os.environ.get("DT4ACC_ACCELERATOR_SETUP_FILE", _DEFAULT_DATA_FILE))
+_DATA: Optional[List[Dict[str, Any]]] = None
 
-with _DATA_FILE.open() as fp:
-    _DATA: List[Dict[str, Any]] = json.load(fp)
+
+def configure_data_file(path: "str | Path") -> None:
+    global _DATA_FILE, _DATA
+    _DATA_FILE = Path(path)
+    _DATA = None
+
+
+def get_data_file() -> Path:
+    return _DATA_FILE
+
+
+def _data() -> List[Dict[str, Any]]:
+    global _DATA
+    if _DATA is None:
+        with _DATA_FILE.open() as fp:
+            _DATA = json.load(fp)
+    return _DATA
 
 
 # -----------------------------------------------------------------
@@ -42,12 +60,12 @@ def get_magnets():
         "Quadrupole", "Sextupole", "Steerer", "SkewQuadrupoleCorrector",
         "RFCavity", "QuadrupoleCorrector", "Multipole", "Bend", "Octupole"
     }
-    return (d for d in _DATA if _match(d, "type", wanted))
+    return (d for d in _data() if _match(d, "type", wanted))
 
 
 def get_magnets_per_power_converters(pc: str) -> List[Dict[str, Any]]:
     """Return all magnets driven by the given power-converter name."""
-    return [d for d in _DATA if d.get("pc") == pc]
+    return [d for d in _data() if d.get("pc") == pc]
 
 
 def get_unique_power_converters() -> List[str]:
@@ -57,17 +75,27 @@ def get_unique_power_converters() -> List[str]:
         "Quadrupole", "Sextupole", "Steerer", "SkewQuadrupoleCorrector", "QuadrupoleCorrector",
         "Multipole", "Bend", "Octupole"
     }
-    return sorted({d["pc"] for d in _DATA
+    return sorted({d["pc"] for d in _data()
                    if _match(d, "type", wanted) and d.get("pc")})
 
 
 def get_unique_power_converters_type_specified(type_list: Iterable[str]) -> List[str]:
     """Distinct list of power-converter names for the supplied magnet types."""
     wanted = set(type_list)
-    return sorted({d["pc"] for d in _DATA
+    return sorted({d["pc"] for d in _data()
                    if _match(d, "type", wanted) and d.get("pc")})
+
+
+def get_rf_cavity_uuids() -> List[str]:
+    """UUIDs of non-harmonic (main) RF cavities for design-view fan-out."""
+    return [
+        d["uuid"] for d in _data()
+        if d.get("type") == "RFCavity"
+        and "HARM" not in (d.get("FamName") or "")
+        and d.get("uuid")
+    ]
 
 
 def get_bpms() -> List[Dict[str, Any]]:
     """Return all BPM entries from the setup JSON."""
-    return [d for d in _DATA if d.get("type") == "BPM"]
+    return [d for d in _data() if d.get("type") == "BPM"]

@@ -103,6 +103,9 @@ class TangoController(ControllerInterface):
         self.cmd_queue: asyncio.Queue = None  # created in start() on running loop
         self._pending_task = None
 
+    def get_backend_state(self):
+        return self.mexec.get_state()
+
     def reinit(self) -> None:
         if self._sync_reset is None:
             raise RuntimeError("TangoController: no sync_reset callable registered")

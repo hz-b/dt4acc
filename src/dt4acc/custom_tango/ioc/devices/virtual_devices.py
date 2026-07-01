@@ -15,7 +15,9 @@ import numpy as np
 from tango import DevState, DevFailed, DevDouble, DevString
 from tango.server import Device, attribute, command, AttrDataFormat, device_property, AttrWriteType
 
+from dt4acc.config.data.querries import get_rf_cavity_uuids
 from dt4acc.core.bl.shared_event_loop import get_shared_event_loop
+from dt4acc_lib.interfaces.backend.calculation_states import CalculationStates
 from dt4acc_lib.model.utils.command import Command, BehaviourOnError, ReadCommand
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.controller_registry import get_controller
@@ -83,6 +85,7 @@ class RingSimulatorDevice(Device, AsyncMixin):
         self._xi_x      = 0.0
         self._xi_y      = 0.0
         self._reference_frequency = 0.0
+        self._rf_cavity_uuids = get_rf_cavity_uuids()
         for attr_name in ("orbit_x", "orbit_y",
                           "beta_x", "beta_y", "alpha_x", "alpha_y", "nu_x", "nu_y",
                           "bpm_x_attr", "bpm_y_attr", "hor", "vert"):
@@ -165,17 +168,19 @@ class RingSimulatorDevice(Device, AsyncMixin):
     def reference_frequency(self, value: float):
         value = float(value)
         self._reference_frequency = value
-        self._async(
-            get_controller().update(
+        self._async(self._fan_out_frequency(value * 1000.0))  # kHz → Hz
+
+    async def _fan_out_frequency(self, hz: float) -> None:
+        for uuid in self._rf_cavity_uuids:
+            await get_controller().update(
                 cmd=Command(
-                    id="master_clock",
-                    property="reference_frequency",
-                    value=value,
+                    id=uuid,
+                    property="frequency",
+                    value=hz,
                     behaviour_on_error=BehaviourOnError.stop,
                 ),
                 reads=[], delayed_reads=[],
             )
-        )
 
     # Orbit push commands
     @command(dtype_in=(float,))
@@ -249,6 +254,19 @@ class RingSimulatorDevice(Device, AsyncMixin):
             self.push_change_event("xi_x", self._xi_x)
             self.push_change_event("xi_y", self._xi_y)
 
+    def _sync_tango_state(self):
+        """Map backend calculation state to Tango device state (color in Jive)."""
+        backend_state = get_controller().get_backend_state()
+        if backend_state == CalculationStates.error:
+            self.set_state(DevState.FAULT)
+            self.set_status("Backend error: optics calculation failed.")
+        elif backend_state == CalculationStates.acknowledged:
+            self.set_state(DevState.ALARM)
+            self.set_status("Acknowledged: optics calculation failed. Call Reset or Reinit.")
+        else:
+            self.set_state(DevState.ON)
+            self.set_status("Running")
+
     # Reset
     @command
     def Recalculate(self):
@@ -259,28 +277,15 @@ class RingSimulatorDevice(Device, AsyncMixin):
         Called by the calculation heartbeat every second, and can also be
         called manually after a measurement to get an updated result.
         Does NOT perturb the lattice — zero noise.
-        Sets State=FAULT if beam is lost (NaN/inf in AT optics), ON on recovery.
         """
         controller = get_controller()
         assert callable(controller.reread_default_readings)
         try:
-            self._async(
-                # Todo: provide a public method for it
-                get_controller().reread_default_readings()
-            )
-            # Successful calculation — restore ON if we were in FAULT
-            if self.get_state() == DevState.FAULT:
-                self.set_state(DevState.ON)
+            self._async(get_controller().reread_default_readings())
         except Exception as exc:
-            msg = str(exc)
-            if "infs or NaN" in msg or "nan" in msg.lower() or "inf" in msg.lower():
-                logger.warning("RingSimulatorDevice: beam lost — setting FAULT state")
-                self.set_state(DevState.ALARM)
-                self.set_status("Beam lost: lattice optics diverged (NaN/inf). "
-                                "Reset magnets to nominal and call Reset or use Reinit"
-                )
-            else:
-                logger.debug("RingSimulatorDevice.Recalculate: %s", exc)
+            logger.debug("RingSimulatorDevice.Recalculate: %s", exc)
+        finally:
+            self._sync_tango_state()
 
     @command
     def Reset(self):

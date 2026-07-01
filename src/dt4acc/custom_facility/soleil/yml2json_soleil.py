@@ -46,6 +46,12 @@ def main():
         if cls not in MAGNET_CLASSES:
             continue
 
+        # Main RF cavities share one PC; harmonic cavities get their own per-device PC
+        if cls == "RFCavity" and "HARM" not in (fam_name or ""):
+            pc_name = "simulator/rfpc/rfpc"
+        else:
+            pc_name = f"{name}-pc"
+
         # base magnet (as in your original script)
         base_obj = {
             "_id": {"$oid": str(ObjectId())},
@@ -54,7 +60,7 @@ def main():
             "FamName": fam_name,
             "name": name,
             "magnetic_strength": 1.0,
-            "pc": f"{name}-pc",
+            "pc": pc_name,
             "k": 1.0
         }
         output.append(base_obj)

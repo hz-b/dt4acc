@@ -1,17 +1,17 @@
 import asyncio
 
-import numpy as np
-
 from dt4acc.core.bl.shared_event_loop import get_shared_event_loop
 from dt4acc_lib.model.utils import tango_resource_locator
-from dt4acc_lib.model.utils.command import ReadCommand, BehaviourOnError, Command
+from dt4acc_lib.model.utils.command import BehaviourOnError, Command
 from tango import DevState, DevFailed
 from tango.server import Device, attribute, device_property, AttrWriteType
 
+from dt4acc.config.data.querries import get_magnets_per_power_converters
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.controller_registry import get_controller
 
 logger = get_logger()
+
 
 class PowerConverterDevice(Device):
     """
@@ -104,6 +104,76 @@ class PowerConverterDevice(Device):
     @attribute(dtype=float, label="Current readback", unit="A")
     def current_readback(self) -> float:
         return self._current_rb
+
+    @attribute(dtype=float, label="Voltage readback", unit="V")
+    def voltage(self) -> float:
+        return self._voltage
+
+
+class CavityPowerConverterDevice(Device):
+    """
+    Shared RF power converter for all cavities.
+
+    In SOLEIL design view the command rewriter does no liaison translation —
+    commands go straight to the AT backend using the lattice element UUID as
+    the identifier. This device therefore fans out to each cavity UUID directly,
+    setting property "voltage" on every cavity it controls.
+
+    The voltage readback is the average of all cavity voltages. Since all are
+    set to the same value the readback equals the set value.
+    """
+
+    def init_device(self):
+        super().init_device()
+        self.set_state(DevState.INIT)
+
+        self._loop = get_shared_event_loop()
+        self.pc_name = self.get_name()
+        self._current = 0.0
+        self._voltage = 0.0
+
+        cavities = get_magnets_per_power_converters(self.pc_name)
+        self._cavity_uuids = [c["uuid"] for c in cavities if c.get("uuid")]
+        logger.info("%s: controlling cavity UUIDs: %s", self.pc_name, self._cavity_uuids)
+
+        self.set_state(DevState.ON)
+
+    def _async(self, coro):
+        try:
+            fut = asyncio.run_coroutine_threadsafe(coro, self._loop)
+            return fut.result(timeout=10)
+        except Exception as exc:
+            raise DevFailed(str(exc))
+
+    async def _fan_out_voltage(self, value: float) -> None:
+        """Send voltage to every controlled cavity UUID in the AT lattice."""
+        for uuid in self._cavity_uuids:
+            await get_controller().update(
+                cmd=Command(
+                    id=uuid,
+                    property="voltage",
+                    value=value,
+                    behaviour_on_error=BehaviourOnError.stop,
+                ),
+                reads=[],
+                delayed_reads=[],
+            )
+
+    @attribute(dtype=float, access=AttrWriteType.READ_WRITE,
+               label="Current setpoint", unit="A")
+    def current_set(self) -> float:
+        return self._current
+
+    @current_set.write
+    def current_set(self, value: float) -> None:
+        value = float(value)
+        self._current = value
+        self._voltage = value  # all cavities share the same value → average = value
+        self._async(self._fan_out_voltage(value))
+
+    @attribute(dtype=float, label="Current readback", unit="A")
+    def current_readback(self) -> float:
+        return self._current
 
     @attribute(dtype=float, label="Voltage readback", unit="V")
     def voltage(self) -> float:
