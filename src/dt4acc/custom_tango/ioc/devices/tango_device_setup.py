@@ -17,7 +17,7 @@ from dt4acc.custom_tango.ioc.devices.steerer_device import HorizontalSteererDevi
 from dt4acc.custom_tango.ioc.devices.skew_quad_device import SkewQuadDevice
 from dt4acc.custom_tango.ioc.devices.cavity_device import CavityDevice
 from dt4acc.custom_tango.ioc.devices.virtual_devices import RingSimulatorDevice, RING_SIM_DEV
-from dt4acc.custom_tango.ioc.devices.power_converter_device import PowerConverterDevice
+from dt4acc.custom_tango.ioc.devices.power_converter_device import PowerConverterDevice, CavityPowerConverterDevice
 from dt4acc.custom_tango.ioc.devices.bpm_device import BPMDevice
 from dt4acc.custom_tango.ioc.mexec_server_for_physics_engine import EXPECTED_VIEW
 from dt4acc_lib.model.utils.tango_resource_locator import TangoResourceLocator
@@ -192,6 +192,19 @@ def build_device_plan() -> DevicePlan:
         trl.family,
         {},
     )
+
+    # Cavity power converter — one shared PC for all cavities
+    for cavity_pc_name in get_unique_power_converters_type_specified(["RFCavity"]):
+        trl = TangoResourceLocator.from_trl(cavity_pc_name)
+        _add_expected_device(
+            plan,
+            "cavity_power_converter",
+            cavity_pc_name,
+            "CavityPowerConverterDevice",
+            trl.domain,
+            trl.family,
+            {},
+        )
 
     # BPMs
     bpm_index_map: dict = {}
@@ -487,6 +500,27 @@ def _register_ring_simulator(db: Database, unique_servers: set[tuple[str, str]])
     except Exception as e:
         logger.error("❌ Failed to register RingSimulatorDevice: %s", e)
 
+
+def _register_cavity_power_converter(db: Database, unique_servers: set[tuple[str, str]]):
+    """Register the shared cavity power converter (one PC for all cavities)."""
+    for cavity_pc_name in get_unique_power_converters_type_specified(["RFCavity"]):
+        try:
+            trl = TangoResourceLocator.from_trl(cavity_pc_name)
+            domain, family = trl.domain, trl.family
+            server_name   = domain
+            instance_name = family
+            server_str    = f"{server_name}/{instance_name}"
+            unique_servers.add((server_name, instance_name))
+
+            db_dev        = DbDevInfo()
+            db_dev._class = "CavityPowerConverterDevice"
+            db_dev.server = server_str
+            db_dev.name   = cavity_pc_name
+            db.add_device(db_dev)
+            logger.info("⚡ Registered cavity PC %s (server=%s)", cavity_pc_name, server_str)
+        except Exception as e:
+            logger.error("❌ Failed to register cavity PC %s: %s", cavity_pc_name, e)
+
 def _register_bpms(db: Database, unique_servers: set[tuple[str, str]]):
     """Register BPM devices and properties."""
     # 4) BPM devices — one per Monitor element, read-only
@@ -583,6 +617,7 @@ def register_all_devices():
     _register_power_converters(db, unique_servers)
     _register_cavities(db, unique_servers)
     _register_ring_simulator(db, unique_servers)
+    _register_cavity_power_converter(db, unique_servers)
     _register_bpms(db, unique_servers)
 
     logger.info("✔ Unique (server_name, instance_name) pairs: %s", unique_servers)
@@ -631,6 +666,7 @@ def get_all_device_classes():
         SkewQuadDevice,
         CavityDevice,
         PowerConverterDevice,
+        CavityPowerConverterDevice,
         RingSimulatorDevice,
         BPMDevice,
     ]

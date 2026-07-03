@@ -45,7 +45,7 @@ from dt4acc_lib.model.utils.translator_manager_lookup_table import (
 
 from dt4acc.config.data.constants import ring_parameters
 from dt4acc.custom_facility.model.config.elementmodel import MagnetElementSetup
-from dt4acc.config.data.querries import get_magnets
+from dt4acc.config.data.querries import get_magnets, get_unique_power_converters_type_specified, get_magnets_per_power_converters
 from dt4acc.custom_facility.soleil.soleil_yellow_pages import soleil_yellow_pages
 
 logger = logging.getLogger("dt4acc_lm")
@@ -169,6 +169,8 @@ def build_managers():
     infos = magnet_infos_from_db()
     cavity_names = _get_cavity_names()
 
+    cavity_pc_names = get_unique_power_converters_type_specified(["RFCavity"])
+
     magnet_names = [info.name for info in infos]
     if len(set(magnet_names)) != len(infos):
         raise AssertionError("Magnet names are not unique — required for LUT correctness")
@@ -220,6 +222,18 @@ def build_managers():
         LatticeElementPropertyID(element_name=name, property="frequency")
         for name in cavity_names
     )
+
+    # Cavity power converter(s) → controlled cavity voltages (each PC maps to its own cavities)
+    for cavity_pc_name in cavity_pc_names:
+        controlled = [m["name"] for m in get_magnets_per_power_converters(cavity_pc_name)
+                      if m.get("type") == "RFCavity"]
+        if controlled:
+            inverse_lut[
+                DevicePropertyID(device_name=cavity_pc_name, property="set_current")
+            ] = tuple(
+                LatticeElementPropertyID(element_name=name, property="voltage")
+                for name in controlled
+            )
 
     # Virtual result IDs — passthrough (tune, twiss, track, orbit, chromaticity)
     for virtual_id, prop in [
@@ -276,6 +290,16 @@ def build_managers():
             LatticeElementPropertyID(element_name=name, property="frequency"),
             DevicePropertyID(device_name="master_clock", property="reference_frequency"),
         )] = PolynomCoefficients(coeffs=[0.0, 1e-3], energy_dependent=False)  # kHz on master clock
+
+    # Cavity power converter — V on both sides, slope=1.0 (design view: no current→voltage conversion)
+    for cavity_pc_name in cavity_pc_names:
+        controlled = [m["name"] for m in get_magnets_per_power_converters(cavity_pc_name)
+                      if m.get("type") == "RFCavity"]
+        for name in controlled:
+            translator_lut[ConversionID(
+                LatticeElementPropertyID(element_name=name, property="voltage"),
+                DevicePropertyID(device_name=cavity_pc_name, property="set_current"),
+            )] = _poly()
 
     # Virtual result IDs — identity passthrough (no conversion)
     for virtual_id, prop in [
