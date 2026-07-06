@@ -41,30 +41,3 @@ class CoefficientsForDevices:
     # only for device / child pair
     for_device_pairs: Sequence[Tuple[int, int]] = ()
     coefficients: PolynomCoefficients = None
-
-
-class _ProcessVariableView(BaseModel):
-    rcmd: ReadCommand
-    pv_name: EpicsPVCompatibleString
-    prec: int
-    # Most values will be updated immediately
-    # some like BPM or similar only delayewd.
-    # review if it should be handled differently ?
-    # e.g. all BPM declare a read command of ['track', 'pos']
-    # then view dispatches it to them
-    # or converter object does it ...
-    update: Literal["immediate", "delayed"] = "immediate"
-
-    # what data will be returned and how to process when more
-    # than value is returned
-    # todo: how to name that?
-    returned_data: Literal["single", "average"] = "single"
-
-
-class Monitor(_ProcessVariableView):
-    record_type: Literal["ai", "longin"]
-
-
-class Setpoint(_ProcessVariableView):
-    record_type: Literal["ao", "longout"]
-    reads: Sequence[ReadCommand]
