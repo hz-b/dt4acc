@@ -281,7 +281,11 @@ def main_loop(server_name: str, instance_name: str, event=None):
 
     logger.warning("single server start: name %s instance %s pid %d", server_name, instance_name, os.getpid())
 
-    os.nice(4)
+    if hasattr(os, "nice"):
+        try:
+            os.nice(4)
+        except OSError as exc:
+            logger.debug("Could not adjust process niceness: %s", exc)
 
     prefix = os.environ.get("DT4ACC_PREFIX", os.getlogin())
 
