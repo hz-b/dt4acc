@@ -38,7 +38,7 @@ def export_present_devices(trls: Sequence[str], filename: str) -> None:
 
 def main():
     arg_parser = build_args_parser()
-    arg_parser.add_argument("--register-devices", default=False)
+    arg_parser.add_argument("--register-devices", action="store_true")
     arg_parser.add_argument("--export-present-devices", default="")
     args = arg_parser.parse_args()
     display_setup_from_args(args)
