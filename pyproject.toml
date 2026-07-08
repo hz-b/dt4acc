@@ -9,6 +9,7 @@ description = "digital twin for accelerators"
 authors = [
   { name = "Waheedullah Sulaiman Khail" },
   { name = "Pierre Schnizer" },
+  { name = "Guillaume Pichon" }
 ]
 license = { text = "GPL-3.0" }
 requires-python = ">=3.7"
