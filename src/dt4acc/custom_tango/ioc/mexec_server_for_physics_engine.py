@@ -97,6 +97,7 @@ def _run_mexec_service():
     proxy = SyncMexecProxy(mexec=mexec, service_loop=service_loop)
     MexecManagerService.register("get_mexec_proxy", callable=lambda: proxy)
     MexecManagerService.register("sync_reset", callable=proxy.sync_reset)
+    MexecManagerService.register("sync_reinit", callable=proxy.sync_reinit)
     MexecManagerService.register("sync_peek", callable=proxy.sync_peek)
 
     mgr = MexecManagerService(
@@ -113,10 +114,11 @@ async def _async_build_mexec():
 def _connect_to_mexec_service():
     MexecManagerService.register("get_mexec_proxy")
     MexecManagerService.register("sync_reset")
+    MexecManagerService.register("sync_reinit")
     MexecManagerService.register("sync_peek")
     client = MexecManagerService(
         address=(mexec_config._MANAGER_HOST, mexec_config._MANAGER_PORT),
         authkey=mexec_config._MANAGER_AUTHKEY,
     )
     client.connect()
-    return client.get_mexec_proxy(), client.sync_reset
+    return client.get_mexec_proxy(), client.sync_reset, client.sync_reinit

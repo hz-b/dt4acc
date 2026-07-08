@@ -6,12 +6,12 @@ Tango devices for horizontal and vertical dipole correctors (steerers).
 HorizontalSteererDevice → x_kick only
 VerticalSteererDevice   → y_kick only
 
-Steerers share the UUID of their host sextupole in the AT lattice.
-The property name ("x_kick" / "y_kick") routes to the correct
-KickAngle index in ElementProxy._update().
+Steerers can share a UUID in the AT lattice. The lattice_property DB property
+routes horizontal devices to B1/PolynomB[0] and vertical devices to
+A1/PolynomA[0].
 """
 
-from tango.server import attribute, command
+from tango.server import attribute, command, device_property
 from tango import DevState, AttrWriteType
 
 from dt4acc.custom_tango.ioc.devices.base_magnet_device import BaseMagnetDevice
@@ -25,6 +25,7 @@ class HorizontalSteererDevice(BaseMagnetDevice):
     Tango device for horizontal dipole correctors (CDLH, CDRH).
     Only exposes x_kick.
     """
+    lattice_property = device_property(dtype=str, default_value="B1")
 
     def init_device(self):
         super().init_device()
@@ -39,7 +40,7 @@ class HorizontalSteererDevice(BaseMagnetDevice):
     def x_kick(self, value: float) -> None:
         value = float(value)
         self._x = value
-        self._send("x_kick", value)
+        self._send(self.lattice_property, value)
 
     @command
     def reset(self) -> None:
@@ -52,7 +53,7 @@ class HorizontalSteererDevice(BaseMagnetDevice):
         try:
             from dt4acc.custom_tango.ioc.single_server import get_nominal_values
             vals = get_nominal_values(self.lattice_id)
-            self._x = vals["x_kick"]
+            self._x = vals.get(self.lattice_property, 0.0)
             logger.info("%s: RefreshFromCache done — x_kick=%.6f",
                         self.trl.as_trl(), self._x)
         except Exception as exc:
@@ -64,6 +65,7 @@ class VerticalSteererDevice(BaseMagnetDevice):
     Tango device for vertical dipole correctors (CDLV, CDRV).
     Only exposes y_kick.
     """
+    lattice_property = device_property(dtype=str, default_value="A1")
 
     def init_device(self):
         super().init_device()
@@ -78,7 +80,7 @@ class VerticalSteererDevice(BaseMagnetDevice):
     def y_kick(self, value: float) -> None:
         value = float(value)
         self._y = value
-        self._send("y_kick", value)
+        self._send(self.lattice_property, value)
 
     @command
     def reset(self) -> None:
@@ -91,7 +93,7 @@ class VerticalSteererDevice(BaseMagnetDevice):
         try:
             from dt4acc.custom_tango.ioc.single_server import get_nominal_values
             vals = get_nominal_values(self.lattice_id)
-            self._y = vals["y_kick"]
+            self._y = vals.get(self.lattice_property, 0.0)
             logger.info("%s: RefreshFromCache done — y_kick=%.6f",
                         self.trl.as_trl(), self._y)
         except Exception as exc:

@@ -88,12 +88,9 @@ class SyncMexecProxy:
 
     def sync_reset(self):
         """
-        Reset backend to nominal state:
-        1. Reload AT lattice from .m file
-        2. Clear error state → pending
-        3. Clear stored optics
+        Clear backend error state and stored optics without reloading the lattice.
         """
-        logger.warning("SyncMexecProxy.sync_reset: resetting back end (pid = %d)", os.getpid())
+        logger.warning("SyncMexecProxy.sync_reset: clearing backend state (pid = %d)", os.getpid())
         try:
             fut = asyncio.run_coroutine_threadsafe(
                 self.mexec.backend.reset(), self.service_loop
@@ -125,10 +122,21 @@ class SyncMexecProxy:
     def sync_acknowledge(self):
         logger.warning("SyncMexecProxy.sync_acknowledge: acknowledging error")
         try:
-            fut = asyncio.run_coroutine_threadsafe(
-                self.mexec.backend.acknowledge(), self.service_loop
-            )
-            fut.result(timeout=30)
+            async def _acknowledge_if_error():
+                state = self.mexec.backend.get_state()
+                if state == CalculationStates.error:
+                    await self.mexec.backend.acknowledge()
+                    return True, state
+                return False, state
+
+            fut = asyncio.run_coroutine_threadsafe(_acknowledge_if_error(), self.service_loop)
+            acknowledged, state = fut.result(timeout=30)
+            if not acknowledged:
+                logger.warning(
+                    "SyncMexecProxy.sync_acknowledge: backend state is %s, nothing to acknowledge",
+                    state,
+                )
+                return
             logger.warning("SyncMexecProxy.sync_acknowledge: backend acknowledge done")
         except Exception as exc:
             logger.error("SyncMexecProxy.sync_acknowledge failed: %s", exc)

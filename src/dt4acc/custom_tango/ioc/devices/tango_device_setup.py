@@ -1,5 +1,4 @@
 # tango_device_setup.py
-
 from tango import Database, DbDevInfo, DevFailed
 
 from dataclasses import dataclass, field
@@ -106,7 +105,9 @@ def build_device_plan() -> DevicePlan:
                 "SkewSext": "B3",
                 "Oct": "B4",
             }
-            if magnet_type == "QuadrupoleCorrector":
+            if magnet_type == "Steerer":
+                lattice_prop = _steerer_lattice_property(magnet_name, subtype=magnet_subtype)
+            elif magnet_type == "QuadrupoleCorrector":
                 lattice_prop = "B2"
             elif magnet_type == "SkewQuadrupoleCorrector":
                 lattice_prop = "A2"
@@ -214,7 +215,7 @@ def build_device_plan() -> DevicePlan:
 
         lattice = lattice_loader.load()
         for i, elem in enumerate(lattice):
-            if getattr(elem, "FamName", None) in ("BPM", "FBPM"):
+            if isinstance(elem, _at.Monitor):
                 uuid = getattr(elem, "UUID", None)
                 if uuid:
                     bpm_index_map[uuid] = i
@@ -307,6 +308,16 @@ def _steerer_class(name: str, subtype: str = None) -> str:
     return "HorizontalSteererDevice"
 
 
+def _steerer_lattice_property(name: str, subtype: str = None) -> str:
+    if subtype == "H":
+        return "B1"
+    if subtype == "V":
+        return "A1"
+    if _steerer_class(name, subtype=subtype) == "VerticalSteererDevice":
+        return "A1"
+    return "B1"
+
+
 def _register_dservers(db: Database, servers: set[tuple[str, str]]):
     """
     Ensure a DServer device exists for each (server_name, instance_name).
@@ -372,7 +383,9 @@ def _register_magnets(db: Database, unique_servers: set[tuple[str, str]]):
                     "Oct":      "B4",
                 }
                 # For corrector types, use the magnet type directly
-                if magnet_type == "QuadrupoleCorrector":
+                if magnet_type == "Steerer":
+                    lattice_prop = _steerer_lattice_property(magnet_name, subtype=magnet_subtype)
+                elif magnet_type == "QuadrupoleCorrector":
                     lattice_prop = "B2"
                 elif magnet_type == "SkewQuadrupoleCorrector":
                     lattice_prop = "A2"
@@ -535,12 +548,11 @@ def _register_bpms(db: Database, unique_servers: set[tuple[str, str]]):
 
         lattice = lattice_loader.load()
         for i, elem in enumerate(lattice):
-            if getattr(elem, "FamName", None) in ("BPM", "FBPM"):
+            if isinstance(elem, _at.Monitor):
                 uuid = getattr(elem, "UUID", None)
                 if uuid:
                     bpm_index_map[uuid] = i
-        logger.info("BPM registration: resolved %d BPM orbit indices from lattice",
-                    len(bpm_index_map))
+        logger.info(f"BPM registration: resolved {len(bpm_index_map)} BPM orbit indices from lattice")
         if bpm_index_map:
             sample = list(bpm_index_map.items())[:3]
             logger.info("BPM registration: sample uuid→index: %s", sample)

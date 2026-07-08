@@ -297,7 +297,7 @@ class RingSimulatorDevice(Device, AsyncMixin):
             self._start_async()
             get_controller().reset()
             self.set_state(DevState.ON)
-            logger.warning("RingSimulatorDevice.Reset: complete — nominal state restored")
+            logger.warning("RingSimulatorDevice.Reset: complete — recalculation queued")
         except Exception as exc:
             logger.error("RingSimulatorDevice.Reset failed: %s", exc)
             self.set_state(DevState.FAULT)
@@ -312,7 +312,7 @@ class RingSimulatorDevice(Device, AsyncMixin):
             self._start_async()
             get_controller().acknowledge()
             self.set_state(DevState.ON)
-            logger.warning("RingSimulatorDevice.Acknowledge: complete — nominal state restored")
+            logger.warning("RingSimulatorDevice.Acknowledge: complete")
         except Exception as exc:
             logger.error("RingSimulatorDevice.Acknowledge failed: %s", exc)
             self.set_state(DevState.FAULT)

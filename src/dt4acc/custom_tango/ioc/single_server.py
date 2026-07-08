@@ -127,7 +127,7 @@ class AsyncMexecAdapter:
 _initial_strength_cache: dict = {}  # uuid → float (main_strength)
 _nominal_cache: dict = {}           # uuid → {"main_strength": f, "x_kick": f, "y_kick": f}
 _my_magnet_uuids: list = []         # UUIDs of magnets in this server process
-_uuid_to_prop: dict = {}            # uuid → lattice_property (e.g. "main_strength", "B2", "A2")
+_uuid_to_prop: dict = {}            # uuid → lattice properties
 _sync_proxy = None                  # MexecService proxy for live reads
 _device_view = False                # True only for device-view facilities (e.g. MAX IV)
 
@@ -155,6 +155,23 @@ def peek_from_lattice(element_id: str, prop: str) -> float:
         return 0.0
 
 
+def _steerer_lattice_property(name: str, subtype: str = "") -> str:
+    if subtype == "H":
+        return "B1"
+    if subtype == "V":
+        return "A1"
+    if "CDLV" in name or "CDRV" in name or "CRFCY" in name or "CRCOY" in name or "EM-COR/CV" in name:
+        return "A1"
+    return "B1"
+
+
+def _properties_for_uuid(uuid: str, uuid_to_prop: dict = None) -> list:
+    value = (uuid_to_prop or {}).get(uuid, "main_strength")
+    if isinstance(value, (set, list, tuple)):
+        return list(value)
+    return [value]
+
+
 def get_initial_strength(uuid: str) -> float:
     """Called by MagnetDevice.init_device() to get cached initial value."""
     return _initial_strength_cache.get(uuid, 0.0)
@@ -175,18 +192,19 @@ def refresh_cache_from_lattice(sync_proxy, magnet_uuids: list, uuid_to_prop: dic
     if not magnet_uuids:
         return
 
-    _TYPE_TO_PROP = {"QuadrupoleCorrector": "B2", "SkewQuadrupoleCorrector": "A2"}
     prop_groups = defaultdict(list)
     for uuid in magnet_uuids:
-        prop = (uuid_to_prop or {}).get(uuid, "main_strength")
-        if prop in ("B2", "A2"):
-            continue  # correctors reset to 0.0
-        prop_groups[prop].append(uuid)
+        for prop in _properties_for_uuid(uuid, uuid_to_prop):
+            if prop in ("B2", "A2"):
+                continue  # correctors reset to 0.0
+            prop_groups[prop].append(uuid)
 
     logger.warning("Refreshing nominal cache for %d magnets...",
                    sum(len(v) for v in prop_groups.values()))
-    new_cache = {uuid: {(uuid_to_prop or {}).get(uuid, "main_strength"): 0.0}
-                 for uuid in magnet_uuids}
+    new_cache = {
+        uuid: {prop: 0.0 for prop in _properties_for_uuid(uuid, uuid_to_prop)}
+        for uuid in magnet_uuids
+    }
 
     for prop, ids in prop_groups.items():
         try:
@@ -221,11 +239,11 @@ def _preload_initial_values(sync_proxy, magnet_uuids: list, uuid_to_prop: dict =
     # Group uuids by their lattice_property — one batch per property
     prop_groups = defaultdict(list)
     for uuid in magnet_uuids:
-        prop = (uuid_to_prop or {}).get(uuid, "main_strength")
-        # Skip corrector properties (B2/A2) — they start at 0.0 always
-        if prop in ("B2", "A2"):
-            continue
-        prop_groups[prop].append(uuid)
+        for prop in _properties_for_uuid(uuid, uuid_to_prop):
+            # Skip corrector properties (B2/A2) — they start at 0.0 always
+            if prop in ("B2", "A2"):
+                continue
+            prop_groups[prop].append(uuid)
 
     logger.warning("Pre-loading initial values for %d magnets...",
                    sum(len(v) for v in prop_groups.values()))
@@ -249,7 +267,7 @@ def _inject_controller(prefix: str) -> None:
     Build AsyncMexecAdapter + TangoController and register in controller_registry.
     Called before tango.server.run() so init_device() can call get_controller().
     """
-    sync_proxy, sync_reset = _connect_to_mexec_service()
+    sync_proxy, sync_reset, sync_reinit = _connect_to_mexec_service()
     global _sync_proxy
     _sync_proxy = sync_proxy
     mexec = AsyncMexecAdapter(sync_proxy)
@@ -264,6 +282,7 @@ def _inject_controller(prefix: str) -> None:
             view = TangoView(prefix=prefix),
             ),
             sync_reset = sync_reset,
+            sync_reinit = sync_reinit,
     )
 
     set_controller(controller)
@@ -289,10 +308,11 @@ def main_loop(server_name: str, instance_name: str, event=None):
     # Bulk pre-load initial values for all magnets in this server/instance.
     # One RPC call for all magnets instead of one per magnet in init_device().
     try:
-        sync_proxy, _ = _connect_to_mexec_service()
+        sync_proxy, _, _ = _connect_to_mexec_service()
 
         # Collect UUIDs for magnets belonging to this server/instance
         my_uuids = []
+        seen_uuids = set()
         uuid_to_prop = {}
         _SUBTYPE_TO_PROP = {
             "Quad": "main_strength", "Sext": "main_strength", "SkewSext": "main_strength",
@@ -311,11 +331,16 @@ def main_loop(server_name: str, instance_name: str, event=None):
                 if trl.domain == server_name and trl.family == instance_name:
                     uuid = m.get("uuid", "")
                     if uuid:
-                        my_uuids.append(uuid)
+                        if uuid not in seen_uuids:
+                            my_uuids.append(uuid)
+                            seen_uuids.add(uuid)
                         mtype = m.get("type", "")
                         subtype = m.get("subtype", "")
-                        prop = _TYPE_TO_PROP.get(mtype) or _SUBTYPE_TO_PROP.get(subtype, "main_strength")
-                        uuid_to_prop[uuid] = prop
+                        if mtype == "Steerer":
+                            prop = _steerer_lattice_property(magnet_name, subtype=subtype)
+                        else:
+                            prop = _TYPE_TO_PROP.get(mtype) or _SUBTYPE_TO_PROP.get(subtype, "main_strength")
+                        uuid_to_prop.setdefault(uuid, set()).add(prop)
 
         global _my_magnet_uuids, _uuid_to_prop
         _my_magnet_uuids = my_uuids

@@ -92,13 +92,15 @@ class TangoController(ControllerInterface):
         # prefix: str,
         # default_delayed_reads: Sequence[ReadCommand] = DEFAULT_DELAYED_READS,
         sync_reset=None,
+        sync_reinit=None,
     ):
         self.delegate = controller_delegate
         self.name = name
 
         # a missing link to get running again ?
         self.mexec = self.delegate.mexec
-        self._sync_reset = sync_reset  # callable: reloads lattice + clears error state
+        self._sync_reset = sync_reset  # callable: clears error state
+        self._sync_reinit = sync_reinit  # callable: reloads lattice + clears error state
 
         self.cmd_queue: asyncio.Queue = None  # created in start() on running loop
         self._pending_task = None
@@ -107,11 +109,14 @@ class TangoController(ControllerInterface):
         return self.mexec.get_state()
 
     def reinit(self) -> None:
-        if self._sync_reset is None:
-            raise RuntimeError("TangoController: no sync_reset callable registered")
-        logger.warning("TangoController.reinit resetting backend to nominal state...")
+        if self._sync_reinit is None:
+            raise RuntimeError("TangoController: no sync_reinit callable registered")
+        logger.warning("TangoController.reinit: reinitialising backend to nominal state...")
 
         shared_loop = get_shared_event_loop()
+
+        # Reload lattice + clear error state
+        self._sync_reinit()
 
         # Queue fresh full calculation
         asyncio.run_coroutine_threadsafe(
@@ -122,7 +127,7 @@ class TangoController(ControllerInterface):
         # Refresh all MagnetDevice local attributes from the reloaded lattice
         self._refresh_all_magnet_devices()
 
-        logger.warning("TangoController.reset: done — recalculation queued")
+        logger.warning("TangoController.reinit: done — recalculation queued")
 
     def acknowledge(self) -> None:
         logger.warning("TangoController.acknowledge: acknowledge that calculation engine in error state ...")
@@ -143,7 +148,7 @@ class TangoController(ControllerInterface):
 
     def reset(self) -> None:
         """
-        Reset backend to nominal state and trigger fresh calculations.
+        Clear backend error state and trigger fresh calculations on the current lattice.
         Called from TwissOrbitDevice.Reset command.
 
         NOTE: Do NOT call push_invalid() here — Reset runs inside the
@@ -154,11 +159,11 @@ class TangoController(ControllerInterface):
         """
         if self._sync_reset is None:
             raise RuntimeError("TangoController: no sync_reset callable registered")
-        logger.warning("TangoController.reset: resetting backend to nominal state...")
+        logger.warning("TangoController.reset: clearing backend state...")
 
         shared_loop = get_shared_event_loop()
 
-        # Reload lattice + clear error state
+        # Clear error state
         self._sync_reset()
 
         # Queue fresh full calculation
@@ -181,7 +186,7 @@ class TangoController(ControllerInterface):
             from dt4acc.custom_tango.ioc.single_server import (
                 refresh_cache_from_lattice, _my_magnet_uuids, _uuid_to_prop
             )
-            sync_proxy, _ = _connect_to_mexec_service()
+            sync_proxy, _, _ = _connect_to_mexec_service()
             refresh_cache_from_lattice(sync_proxy, _my_magnet_uuids, _uuid_to_prop)
 
             from tango import Database, DeviceProxy

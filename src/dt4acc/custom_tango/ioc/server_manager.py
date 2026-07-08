@@ -58,6 +58,10 @@ logger = get_logger()
 # Heartbeat — pure recalculation, no lattice writes, no noise
 # Set by the launch script. Period in seconds (0 = disabled).
 HEARTBEAT_PERIOD = 1.0
+DEFAULT_TANGO_START_BATCH_SIZE = 1
+TANGO_START_BATCH_SIZE_ENV = "DT4ACC_TANGO_START_BATCH_SIZE"
+DEFAULT_TANGO_START_TIMEOUT_S = 240.0
+TANGO_START_TIMEOUT_ENV = "DT4ACC_TANGO_START_TIMEOUT_S"
 
 
 # ---------------------------------------------------------------------------
@@ -137,12 +141,16 @@ class ProcessMonitor:
         return f"{self.server_name}/{self.instance_name}"
 
 
-def _wait_all_started(monitors: Sequence[ProcessMonitor]) -> bool:
+def _wait_all_started(
+    monitors: Sequence[ProcessMonitor],
+    timeout_s: float = DEFAULT_TANGO_START_TIMEOUT_S,
+) -> bool:
     start = time.time()
     remaining = {pm.trl_prefix(): pm for pm in monitors}
 
     for cnt in itertools.count():
-        dt = (time.time() - start) / 60
+        elapsed_s = time.time() - start
+        dt = elapsed_s / 60
         newly_ready = {k: pm for k, pm in remaining.items() if pm.event.is_set()}
         for k in newly_ready:
             logger.info("%.2f min: %s signalled startup", dt, k)
@@ -155,9 +163,107 @@ def _wait_all_started(monitors: Sequence[ProcessMonitor]) -> bool:
                 logger.error("Process %s (pid=%s) died", pm.trl_prefix(), pm.process.pid)
                 return False
 
+        if timeout_s > 0 and elapsed_s >= timeout_s:
+            logger.error(
+                "Timed out after %.1fs waiting for Tango server(s): %s",
+                timeout_s,
+                list(remaining),
+            )
+            return False
+
         time.sleep(0.2)
         if (cnt % (5 * 30)) == 0:
             logger.warning("%.2f min: still waiting for %s", dt, list(remaining))
+
+
+def _get_tango_start_batch_size() -> int:
+    raw_value = os.environ.get(
+        TANGO_START_BATCH_SIZE_ENV,
+        str(DEFAULT_TANGO_START_BATCH_SIZE),
+    )
+    if raw_value == "":
+        return DEFAULT_TANGO_START_BATCH_SIZE
+
+    try:
+        batch_size = int(raw_value)
+    except ValueError:
+        logger.warning(
+            "Invalid %s=%r; using default batch size %d",
+            TANGO_START_BATCH_SIZE_ENV,
+            raw_value,
+            DEFAULT_TANGO_START_BATCH_SIZE,
+        )
+        return DEFAULT_TANGO_START_BATCH_SIZE
+
+    if batch_size < 0:
+        logger.warning(
+            "Invalid %s=%d; using default batch size %d",
+            TANGO_START_BATCH_SIZE_ENV,
+            batch_size,
+            DEFAULT_TANGO_START_BATCH_SIZE,
+        )
+        return DEFAULT_TANGO_START_BATCH_SIZE
+
+    return batch_size
+
+
+def _get_tango_start_timeout_s() -> float:
+    raw_value = os.environ.get(
+        TANGO_START_TIMEOUT_ENV,
+        str(DEFAULT_TANGO_START_TIMEOUT_S),
+    )
+    if raw_value == "":
+        return DEFAULT_TANGO_START_TIMEOUT_S
+
+    try:
+        timeout_s = float(raw_value)
+    except ValueError:
+        logger.warning(
+            "Invalid %s=%r; using default timeout %.1fs",
+            TANGO_START_TIMEOUT_ENV,
+            raw_value,
+            DEFAULT_TANGO_START_TIMEOUT_S,
+        )
+        return DEFAULT_TANGO_START_TIMEOUT_S
+
+    if timeout_s < 0:
+        logger.warning(
+            "Invalid %s=%.1f; using default timeout %.1fs",
+            TANGO_START_TIMEOUT_ENV,
+            timeout_s,
+            DEFAULT_TANGO_START_TIMEOUT_S,
+        )
+        return DEFAULT_TANGO_START_TIMEOUT_S
+
+    return timeout_s
+
+
+def _iter_batches(items: Sequence[tuple[str, str]], batch_size: int):
+    if batch_size == 0:
+        yield list(items)
+        return
+
+    for start in range(0, len(items), batch_size):
+        yield list(items[start:start + batch_size])
+
+
+def _start_tango_server_process(
+    server_name: str,
+    instance_name: str,
+) -> ProcessMonitor:
+    evt = mp.Event()
+    process = mp.Process(
+        target=single_server.main_loop,
+        args=(server_name, instance_name, evt),
+        name=f"tango-{server_name}-{instance_name}",
+    )
+    process.start()
+    return ProcessMonitor(
+        event=evt,
+        process=process,
+        server_name=server_name,
+        instance_name=instance_name,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -205,40 +311,27 @@ def main():
     other_device_server_args = device_server_args.copy()
     for arg in selected_device_server_args:
         other_device_server_args.remove(arg)
-    logger.warning("DB registration done. Starting %d single_servers.", len(single_server_args))
+    start_order = simulator_server_args + selected_device_server_args + other_device_server_args
+    batch_size = _get_tango_start_batch_size()
+    start_timeout_s = _get_tango_start_timeout_s()
+    if batch_size == 0:
+        logger.warning(
+            "DB registration done. Starting %d single_servers in parallel (%s=0).",
+            len(single_server_args),
+            TANGO_START_BATCH_SIZE_ENV,
+        )
+    else:
+        logger.warning(
+            "DB registration done. Starting %d single_servers in batches of %d (timeout %.1fs).",
+            len(single_server_args),
+            batch_size,
+            start_timeout_s,
+        )
 
     # 3. Spawn one Tango server process per (server_name, instance_name)
     monitors = []
-    # Start first simulator services then the device servers
-    for server_name, instance_name in simulator_server_args + selected_device_server_args + other_device_server_args:
-        evt = mp.Event()
-        p = mp.Process(
-            target=single_server.main_loop,
-            args=(server_name, instance_name, evt),
-            name=f"tango-{server_name}-{instance_name}",
-        )
-        p.start()
-        monitors.append(ProcessMonitor(
-            event=evt, process=p,
-            server_name=server_name, instance_name=instance_name,
-        ))
-        time.sleep(0.3)
-
-    # 4. Calculation heartbeat — recalculates twiss+orbit+tune every second
-    #    without writing to or changing the lattice (zero noise)
     start_evt = threading.Event()
     stop_evt  = threading.Event()
-    if HEARTBEAT_PERIOD > 0:
-        hb = threading.Thread(
-            target=_calculation_heartbeat,
-            args=(start_evt, stop_evt),
-            kwargs=dict(period_s=HEARTBEAT_PERIOD),
-            daemon=True,
-            name="calculation-heartbeat",
-        )
-        hb.start()
-    else:
-        logger.warning("Calculation heartbeat disabled (HEARTBEAT_PERIOD=0)")
 
     def _shutdown(*_):
         logger.warning("Shutting down.")
@@ -252,11 +345,41 @@ def main():
         time.sleep(1.0)
         sys.exit(0)
 
+    # Start first simulator services then the device servers
+    for batch_index, batch in enumerate(_iter_batches(start_order, batch_size), start=1):
+        logger.warning(
+            "Starting Tango server batch %d (%d server(s)): %s",
+            batch_index,
+            len(batch),
+            [f"{server_name}/{instance_name}" for server_name, instance_name in batch],
+        )
+        for server_name, instance_name in batch:
+            monitors.append(_start_tango_server_process(server_name, instance_name))
+            time.sleep(0.3)
+
+        if batch_size != 0 and not _wait_all_started(monitors, timeout_s=start_timeout_s):
+            logger.error("A Tango process died during startup — shutting down.")
+            _shutdown()
+
+    # 4. Calculation heartbeat — recalculates twiss+orbit+tune every second
+    #    without writing to or changing the lattice (zero noise)
+    if HEARTBEAT_PERIOD > 0:
+        hb = threading.Thread(
+            target=_calculation_heartbeat,
+            args=(start_evt, stop_evt),
+            kwargs=dict(period_s=HEARTBEAT_PERIOD),
+            daemon=True,
+            name="calculation-heartbeat",
+        )
+        hb.start()
+    else:
+        logger.warning("Calculation heartbeat disabled (HEARTBEAT_PERIOD=0)")
+
     signal.signal(signal.SIGINT, _shutdown)
     signal.signal(signal.SIGTERM, _shutdown)
 
     # 5. Wait for all Tango processes to signal startup
-    if not _wait_all_started(monitors):
+    if not _wait_all_started(monitors, timeout_s=start_timeout_s):
         logger.error("A Tango process died during startup — shutting down.")
         _shutdown()
 

@@ -10,8 +10,8 @@ Property name conventions (must match ElementPropertyInterface.handles_property(
     Quadrupole  → "main_strength"  (MainStrengthForQuadrupole → K / PolynomB[1])
     Sextupole   → "main_strength"  (MainStrengthForSextupole  → H / PolynomB[2])
     Octupole    → "B4"             (Multipole(normal, 4)       → PolynomB[3])
-    H-steerer   → "x_kick"        (XKick                      → KickAngle[0])
-    V-steerer   → "y_kick"        (YKick                      → KickAngle[1])
+    H-steerer   → "B1"            (Multipole normal order 1   → PolynomB[0])
+    V-steerer   → "A1"            (Multipole skew order 1     → PolynomA[0])
     SkewQuad    → "A2"             (Multipole(skew, 2)         → PolynomA[1])
     Cavity      → "frequency"     (Frequency                  → obj.Frequency)
 
@@ -101,15 +101,15 @@ def _lattice_property(element_name: str, yp: YellowPages) -> str:
         Quadrupole  → "main_strength"  (MainStrengthForQuadrupole)
         Sextupole   → "main_strength"  (MainStrengthForSextupole)
         Octupole    → "B4"             (Multipole(normal, 4))
-        H-steerer   → "x_kick"        (XKick)
-        V-steerer   → "y_kick"        (YKick)
+        H-steerer   → "B1"            (PolynomB[0])
+        V-steerer   → "A1"            (PolynomA[0])
         SkewQuad    → "A2"             (Multipole(skew, 2))
         Cavity      → "frequency"     (Frequency)
     """
     if element_name in yp.horizontal_steerer_names():
-        return "x_kick"
+        return "B1"
     elif element_name in yp.vertical_steerer_names():
-        return "y_kick"
+        return "A1"
     elif element_name in yp.quadrupole_names():
         return "main_strength"
     elif element_name in yp.sextupole_names():
