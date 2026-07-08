@@ -249,7 +249,7 @@ def _inject_controller(prefix: str) -> None:
     Build AsyncMexecAdapter + TangoController and register in controller_registry.
     Called before tango.server.run() so init_device() can call get_controller().
     """
-    sync_proxy, sync_reset = _connect_to_mexec_service()
+    sync_proxy, sync_reset, sync_reinit = _connect_to_mexec_service()
     global _sync_proxy
     _sync_proxy = sync_proxy
     mexec = AsyncMexecAdapter(sync_proxy)
@@ -264,6 +264,7 @@ def _inject_controller(prefix: str) -> None:
             view = TangoView(prefix=prefix),
             ),
             sync_reset = sync_reset,
+            sync_reinit = sync_reinit,
     )
 
     set_controller(controller)
@@ -289,7 +290,7 @@ def main_loop(server_name: str, instance_name: str, event=None):
     # Bulk pre-load initial values for all magnets in this server/instance.
     # One RPC call for all magnets instead of one per magnet in init_device().
     try:
-        sync_proxy, _ = _connect_to_mexec_service()
+        sync_proxy, _, _ = _connect_to_mexec_service()
 
         # Collect UUIDs for magnets belonging to this server/instance
         my_uuids = []
