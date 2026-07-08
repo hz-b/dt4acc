@@ -1,4 +1,5 @@
 import asyncio
+import importlib
 import logging
 import multiprocessing.managers
 import os
@@ -6,7 +7,7 @@ import threading
 
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.handle_lattice import lattice_loader
-from dt4acc.custom_tango.ioc.mexec_config import _MANAGER_HOST, _MANAGER_PORT, _MANAGER_AUTHKEY
+from dt4acc.custom_tango.ioc import mexec_config
 from dt4acc.custom_tango.ioc.sync_mexec_proxy import SyncMexecProxy
 from dt4acc.custom_tango.ioc.virtual_pass_through_command_rewriter import VirtualPassthroughCommandRewriter
 from dt4acc_lib.pyat_simulator.accelerator_simulator import PyATAcceleratorSimulator
@@ -27,12 +28,22 @@ EXPECTED_VIEW = "design"
 
 def _get_load_managers():
     """Return the load_managers callable set by the launch script."""
+    if LOAD_MANAGERS_FN is not None:
+        return LOAD_MANAGERS_FN
+
+    spec = os.environ.get("DT4ACC_LOAD_MANAGERS")
+    if spec:
+        module_name, _, function_name = spec.partition(":")
+        if not module_name or not function_name:
+            raise ValueError("DT4ACC_LOAD_MANAGERS must use 'module:function' syntax")
+        module = importlib.import_module(module_name)
+        return getattr(module, function_name)
+
     if LOAD_MANAGERS_FN is None:
         raise ValueError(
             f"LOAD_MANAGERS_FN not set — set {__name__}.LOAD_MANAGERS_FN "
-            "in the launch script before calling main()"
+            "in the launch script before calling main(), or set DT4ACC_LOAD_MANAGERS"
         )
-    return LOAD_MANAGERS_FN
 
 
 def _build_mexec():
@@ -54,7 +65,7 @@ def _build_mexec():
     return TranslatingCommandExecutionEngine(
         backend=backend,
         cmd_rewriter=cmd_rewriter,
-        expected_view_for_output=EXPECTED_VIEW,
+        expected_view_for_output=os.environ.get("DT4ACC_VIEW", EXPECTED_VIEW),
         num_readings=1,
     )
 
@@ -89,8 +100,8 @@ def _run_mexec_service():
     MexecManagerService.register("sync_peek", callable=proxy.sync_peek)
 
     mgr = MexecManagerService(
-        address=(_MANAGER_HOST, _MANAGER_PORT),
-        authkey=_MANAGER_AUTHKEY,
+        address=(mexec_config._MANAGER_HOST, mexec_config._MANAGER_PORT),
+        authkey=mexec_config._MANAGER_AUTHKEY,
     )
     mgr.get_server().serve_forever()
 
@@ -104,9 +115,8 @@ def _connect_to_mexec_service():
     MexecManagerService.register("sync_reset")
     MexecManagerService.register("sync_peek")
     client = MexecManagerService(
-        address=(_MANAGER_HOST, _MANAGER_PORT),
-        authkey=_MANAGER_AUTHKEY,
+        address=(mexec_config._MANAGER_HOST, mexec_config._MANAGER_PORT),
+        authkey=mexec_config._MANAGER_AUTHKEY,
     )
     client.connect()
     return client.get_mexec_proxy(), client.sync_reset
-

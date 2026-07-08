@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 import at
 
@@ -15,6 +16,10 @@ class LatticeLoader:
         self.path = filename
 
     def load(self):
+        if self.path is None:
+            filename = os.environ.get("DT4ACC_LATTICE_FILE")
+            if filename:
+                self.path = Path(filename)
         if self.path is None:
             raise ValueError(
                 "default_lattice_filename not set"

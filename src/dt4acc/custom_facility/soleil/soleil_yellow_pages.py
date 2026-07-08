@@ -1,8 +1,9 @@
 import json
 from abc import ABCMeta, abstractmethod
 from enum import Enum
-from pathlib import Path
 from typing import Sequence, Union
+
+from dt4acc.config.data.querries import get_data_file
 
 
 class FamilyTree(metaclass=ABCMeta):
@@ -95,22 +96,21 @@ class YellowPages(FamilyTree):
 
 def soleil_yellow_pages() -> YellowPages:
     """
-    Creates a YellowPages instance for SOLEIL using the magnet names
-    from ~/Documents/soleil/accelerator_setup.json.
+    Creates a YellowPages instance for SOLEIL using the configured
+    accelerator_setup.json.
     """
 
-    data_file = Path.home() / "Documents" / "dt4acc_config_data" / "accelerator_setup.json"
-    elements = json.loads(data_file.read_text())
+    elements = json.loads(get_data_file().read_text())
 
     def is_horizontal(e: dict) -> bool:
         name = e["name"]
         fam = e.get("FamName", "")
-        return "CDLH" in name or fam.endswith("_HCOR")
+        return "CDLH" in name or fam.endswith("_HCOR") or "EM-COR/CH" in name
 
     def is_vertical(e: dict) -> bool:
         name = e["name"]
         fam = e.get("FamName", "")
-        return "CDLV" in name or fam.endswith("_VCOR")
+        return "CDLV" in name or fam.endswith("_VCOR") or "EM-COR/CV" in name
 
     quadrupoles = [e["name"] for e in elements if e["type"] == "Quadrupole"]
     sextupoles = [e["name"] for e in elements if e["type"] == "Sextupole"]

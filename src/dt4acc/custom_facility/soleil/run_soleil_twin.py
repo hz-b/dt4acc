@@ -76,13 +76,19 @@ def main():
     print("Starting SOLEIL Digital Twin (all servers)")
     display_setup_from_args(args)
     os.environ["TANGO_HOST"] = args.tango_host
+    os.environ["DT4ACC_LATTICE_FILE"] = str(args.lattice)
+    os.environ["DT4ACC_LOAD_MANAGERS"] = (
+        "dt4acc.custom_facility.soleil.liasion_translator_setup:load_managers"
+    )
+    os.environ["DT4ACC_MEXEC_PORT"] = str(args.port)
+    os.environ["DT4ACC_VIEW"] = args.view
 
 
     handle_lattice.lattice_loader.set_lattice_file(args.lattice)
     mexec_server_for_physics_engine.LOAD_MANAGERS_FN = _soleil_load_managers
     server_manager.HEARTBEAT_PERIOD  = args.heartbeat_period
     mexec_config._MANAGER_PORT = args.port
-    server_manager.EXPECTED_VIEW     = args.view
+    mexec_server_for_physics_engine.EXPECTED_VIEW = args.view
 
     server_manager.main()
 
