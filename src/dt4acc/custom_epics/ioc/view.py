@@ -80,6 +80,9 @@ class View(ViewInterface):
         elif var.id == "track":
             self.update_track(var, value)
             return True
+        elif var.id == "turn_by_turn":
+            self.update_turn_by_turn(var, value)
+            return True
         elif var.id == "survey":
             self.update_survey(var, value)
             return True
@@ -164,6 +167,28 @@ class View(ViewInterface):
                     logger.error("OrbitTwinServer.push failed: %s", exc)
         else:
             raise AssertionError(f"Don't know track property {var.property}")
+
+    def update_turn_by_turn(self, var: ReadCommand, pkg):
+        assert (
+            var.id == "turn_by_turn"
+        ), f"Only prepared to work on turn by turn data {var}"
+        (single_reading,) = pkg.readings
+        tbt_data = single_reading.payload
+        for elem_tbt in tbt_data.per_element:
+            # Assuming that the element names correspond to
+            # id uses for the record names
+            rcmd = ReadCommand(id=f"turn_by_turn:{elem_tbt.uid}:x", property="pos")
+            rc = self.process_variables.get(rcmd)
+            if rc is None:
+                logger.warning("%s: no record for %s", self.__class__.__name__, rcmd)
+            else:
+                rc.set(elem_tbt.get_x().mean_per_turn())
+            rcmd = ReadCommand(id=f"turn_by_turn:{elem_tbt.uid}:y", property="pos")
+            rc = self.process_variables.get(rcmd)
+            if rc is None:
+                logger.warning("%s: no record for %s", self.__class__.__name__, rcmd)
+            else:
+                rc.set(elem_tbt.get_y().mean_per_turn())
 
     def update_tune(self, var: ReadCommand, pkg):
         assert (
