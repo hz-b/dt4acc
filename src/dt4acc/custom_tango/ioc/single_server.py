@@ -214,7 +214,7 @@ def get_initial_strength(uuid: str) -> float:
 
 def get_nominal_values(uuid: str) -> dict:
     """Called by MagnetDevice.RefreshFromCache() after reset."""
-    return _nominal_cache.get(uuid, {"main_strength": 0.0, "x_kick": 0.0, "y_kick": 0.0})
+    return _nominal_cache.get(uuid, {"main_strength": 0.0, "A1": 0.0, "B1": 0.0, "A2": 0.0, "B2": 0.0})
 
 
 def get_rf_reference_frequency_khz() -> float:

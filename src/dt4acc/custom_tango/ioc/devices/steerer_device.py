@@ -3,8 +3,8 @@ steerer_device.py
 ==================
 Tango devices for horizontal and vertical dipole correctors (steerers).
 
-HorizontalSteererDevice → x_kick only
-VerticalSteererDevice   → y_kick only
+HorizontalSteererDevice → magnetic_strength, mapped to B1/PolynomB[0]
+VerticalSteererDevice   → magnetic_strength, mapped to A1/PolynomA[0]
 
 Steerers can share a UUID in the AT lattice. The lattice_property DB property
 routes horizontal devices to B1/PolynomB[0] and vertical devices to
@@ -23,28 +23,28 @@ logger = get_logger()
 class HorizontalSteererDevice(BaseMagnetDevice):
     """
     Tango device for horizontal dipole correctors (CDLH, CDRH).
-    Only exposes x_kick.
+    Exposes magnetic_strength.
     """
     lattice_property = device_property(dtype=str, default_value="B1")
 
     def init_device(self):
         super().init_device()
-        self._x = 0.0
+        self._magnetic_strength = 0.0
 
     @attribute(dtype=float, access=AttrWriteType.READ_WRITE,
-               label="Horizontal kick", unit="rad")
-    def x_kick(self) -> float:
-        return self._x
+               label="Magnetic strength", unit="1/m")
+    def magnetic_strength(self) -> float:
+        return self._magnetic_strength
 
-    @x_kick.write
-    def x_kick(self, value: float) -> None:
+    @magnetic_strength.write
+    def magnetic_strength(self, value: float) -> None:
         value = float(value)
-        self._x = value
+        self._magnetic_strength = value
         self._send(self.lattice_property, value)
 
     @command
     def reset(self) -> None:
-        self._x = 0.0
+        self._magnetic_strength = 0.0
         logger.info("%s: reset", self.trl.as_trl())
         self.set_state(DevState.STANDBY)
 
@@ -53,9 +53,9 @@ class HorizontalSteererDevice(BaseMagnetDevice):
         try:
             from dt4acc.custom_tango.ioc.single_server import get_nominal_values
             vals = get_nominal_values(self.lattice_id)
-            self._x = vals.get(self.lattice_property, 0.0)
-            logger.info("%s: RefreshFromCache done — x_kick=%.6f",
-                        self.trl.as_trl(), self._x)
+            self._magnetic_strength = vals.get(self.lattice_property, 0.0)
+            logger.info("%s: RefreshFromCache done — magnetic_strength=%.6f",
+                        self.trl.as_trl(), self._magnetic_strength)
         except Exception as exc:
             logger.error("%s: RefreshFromCache failed: %s", self.trl.as_trl(), exc)
 
@@ -63,28 +63,28 @@ class HorizontalSteererDevice(BaseMagnetDevice):
 class VerticalSteererDevice(BaseMagnetDevice):
     """
     Tango device for vertical dipole correctors (CDLV, CDRV).
-    Only exposes y_kick.
+    Exposes magnetic_strength.
     """
     lattice_property = device_property(dtype=str, default_value="A1")
 
     def init_device(self):
         super().init_device()
-        self._y = 0.0
+        self._magnetic_strength = 0.0
 
     @attribute(dtype=float, access=AttrWriteType.READ_WRITE,
-               label="Vertical kick", unit="rad")
-    def y_kick(self) -> float:
-        return self._y
+               label="Magnetic strength", unit="1/m")
+    def magnetic_strength(self) -> float:
+        return self._magnetic_strength
 
-    @y_kick.write
-    def y_kick(self, value: float) -> None:
+    @magnetic_strength.write
+    def magnetic_strength(self, value: float) -> None:
         value = float(value)
-        self._y = value
+        self._magnetic_strength = value
         self._send(self.lattice_property, value)
 
     @command
     def reset(self) -> None:
-        self._y = 0.0
+        self._magnetic_strength = 0.0
         logger.info("%s: reset", self.trl.as_trl())
         self.set_state(DevState.STANDBY)
 
@@ -93,8 +93,8 @@ class VerticalSteererDevice(BaseMagnetDevice):
         try:
             from dt4acc.custom_tango.ioc.single_server import get_nominal_values
             vals = get_nominal_values(self.lattice_id)
-            self._y = vals.get(self.lattice_property, 0.0)
-            logger.info("%s: RefreshFromCache done — y_kick=%.6f",
-                        self.trl.as_trl(), self._y)
+            self._magnetic_strength = vals.get(self.lattice_property, 0.0)
+            logger.info("%s: RefreshFromCache done — magnetic_strength=%.6f",
+                        self.trl.as_trl(), self._magnetic_strength)
         except Exception as exc:
             logger.error("%s: RefreshFromCache failed: %s", self.trl.as_trl(), exc)
