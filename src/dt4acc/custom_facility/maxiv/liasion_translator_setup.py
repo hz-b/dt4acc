@@ -41,7 +41,7 @@ from dt4acc_lib.model.utils.identifiers import (
     CurvePoint,
 )
 
-from dt4acc.config.data.querries import get_magnets, get_magnets_per_power_converters
+from dt4acc.config.data.querries import get_controlled_elements, get_elements_per_power_converter
 from dt4acc.custom_facility.model.config.elementmodel import MagnetElementSetup
 from dt4acc.custom_facility.maxiv.maxiv_r1_yellow_pages import YellowPages, maxiv_r1_yellow_pages
 from dt4acc.config.data.constants import ring_parameters
@@ -105,15 +105,15 @@ def _make_magnet_setup(d: Dict) -> Optional[MagnetElementSetup]:
 
 
 def magnet_infos_from_db() -> Sequence[MagnetElementSetup]:
-    raw = [_remove_id(info) for info in get_magnets()]
+    raw = [_remove_id(info) for info in get_controlled_elements()]
     return [i for i in (_make_magnet_setup(d) for d in raw) if i is not None]
 
 
 def _get_cavity_names() -> list:
-    from dt4acc.config.data.querries import get_unique_power_converters_type_specified
+    from dt4acc.config.data.querries import get_unique_power_converters_for_types
     names = []
-    for pc in get_unique_power_converters_type_specified(["RFCavity"]):
-        for m in get_magnets_per_power_converters(pc):
+    for pc in get_unique_power_converters_for_types(["RFCavity"]):
+        for m in get_elements_per_power_converter(pc):
             names.append(m["name"])
     return names
 

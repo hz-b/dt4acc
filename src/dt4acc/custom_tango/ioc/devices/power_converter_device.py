@@ -4,9 +4,9 @@ from dt4acc.core.bl.shared_event_loop import get_shared_event_loop
 from dt4acc_lib.model.utils import tango_resource_locator
 from dt4acc_lib.model.utils.command import BehaviourOnError, Command
 from tango import DevState, DevFailed
-from tango.server import Device, attribute, device_property, AttrWriteType
+from tango.server import Device, attribute, command, device_property, AttrWriteType
 
-from dt4acc.config.data.querries import get_magnets_per_power_converters
+from dt4acc.config.data.querries import get_elements_per_power_converter
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.controller_registry import get_controller
 
@@ -132,10 +132,11 @@ class CavityPowerConverterDevice(Device):
         self._current = 0.0
         self._voltage = 0.0
 
-        cavities = get_magnets_per_power_converters(self.pc_name)
+        cavities = get_elements_per_power_converter(self.pc_name)
         self._cavity_uuids = [c["uuid"] for c in cavities if c.get("uuid")]
         logger.info("%s: controlling cavity UUIDs: %s", self.pc_name, self._cavity_uuids)
 
+        self._refresh_from_backend()
         self.set_state(DevState.ON)
 
     def _async(self, coro):
@@ -178,3 +179,29 @@ class CavityPowerConverterDevice(Device):
     @attribute(dtype=float, label="Voltage readback", unit="V")
     def voltage(self) -> float:
         return self._voltage
+
+    @command
+    def RefreshFromCache(self) -> None:
+        self._refresh_from_backend()
+
+    def _refresh_from_backend(self) -> None:
+        if not self._cavity_uuids:
+            self._voltage = 0.0
+            return
+        try:
+            from dt4acc.custom_tango.ioc.mexec_server_for_physics_engine import _connect_to_mexec_service
+
+            sync_proxy, _, _ = _connect_to_mexec_service()
+            raw = sync_proxy.sync_trigger_read(
+                self._cavity_uuids,
+                ["voltage"] * len(self._cavity_uuids),
+            )
+            voltages = [
+                float(payload)
+                for _rcmd_id, _rcmd_prop, payload in raw
+                if payload is not None
+            ]
+            if voltages:
+                self._voltage = sum(voltages) / len(voltages)
+        except Exception as exc:
+            logger.error("%s: RefreshFromCache failed: %s", self.pc_name, exc)

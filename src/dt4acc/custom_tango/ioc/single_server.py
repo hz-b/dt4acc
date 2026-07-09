@@ -25,7 +25,7 @@ from typing import Sequence
 from dt4acc_lib.interfaces.backend.calculation_states import CalculationStates
 from dt4acc_lib.model.utils.tango_resource_locator import TangoResourceLocator
 
-from dt4acc.config.data.querries import get_unique_power_converters, get_magnets_per_power_converters
+from dt4acc.config.data.querries import get_controlled_elements, get_unique_magnet_power_converters, get_elements_per_power_converter
 from dt4acc.core.bl.controller import Controller
 from dt4acc.custom_tango.views.view import TangoView
 from dt4acc.custom_tango.ioc.mexec_server_for_physics_engine import _connect_to_mexec_service
@@ -367,8 +367,8 @@ def main_loop(server_name: str, instance_name: str, event=None):
         my_uuids = []
         seen_uuids = set()
         uuid_to_prop = {}
-        for pc_name in get_unique_power_converters():
-            for m in get_magnets_per_power_converters(pc_name):
+        for pc_name in get_unique_magnet_power_converters():
+            for m in get_elements_per_power_converter(pc_name):
                 magnet_name = m["name"]
                 uuid = m.get("uuid", "")
                 mtype = m.get("type", "")
@@ -396,6 +396,17 @@ def main_loop(server_name: str, instance_name: str, event=None):
                         seen_uuids=seen_uuids,
                         uuid_to_prop=uuid_to_prop,
                     )
+
+        for m in get_controlled_elements():
+            if m.get("type") != "RFCavity":
+                continue
+            _add_cache_element(
+                uuid=m.get("uuid", ""),
+                props=_properties_for_element(m["name"], "RFCavity"),
+                uuids=my_uuids,
+                seen_uuids=seen_uuids,
+                uuid_to_prop=uuid_to_prop,
+            )
 
         global _my_magnet_uuids, _uuid_to_prop
         _my_magnet_uuids = my_uuids

@@ -179,8 +179,9 @@ class TangoController(ControllerInterface):
 
     def _refresh_all_magnet_devices(self) -> None:
         """
-        Refresh all MagnetDevice local attributes from the reloaded lattice.
-        Bulk cache refresh (3 cross-process calls) then RefreshFromCache per device.
+        Refresh local device attributes from the current backend lattice.
+        Bulk-refreshes this process cache, then asks exported devices that
+        support RefreshFromCache to resynchronise their own process-local state.
         """
         try:
             from dt4acc.custom_tango.ioc.single_server import (
@@ -191,19 +192,28 @@ class TangoController(ControllerInterface):
 
             from tango import Database, DeviceProxy
             db = Database()
-            dev_list = db.get_device_exported_for_class("MagnetDevice")
+            refreshable_classes = (
+                "MultipoleDevice",
+                "HorizontalSteererDevice",
+                "VerticalSteererDevice",
+                "SkewQuadDevice",
+                "CavityDevice",
+                "CavityPowerConverterDevice",
+            )
             count = 0
-            for dev_name in dev_list.value_string:
-                try:
-                    dp = DeviceProxy(str(dev_name))
-                    dp.set_timeout_millis(1000)
-                    dp.command_inout("RefreshFromCache")
-                    count += 1
-                except Exception as exc:
-                    logger.debug("RefreshFromCache failed for %s: %s", dev_name, exc)
-            logger.warning("TangoController.reset: RefreshFromCache sent to %d magnets", count)
+            for class_name in refreshable_classes:
+                dev_list = db.get_device_exported_for_class(class_name)
+                for dev_name in dev_list.value_string:
+                    try:
+                        dp = DeviceProxy(str(dev_name))
+                        dp.set_timeout_millis(5000)
+                        dp.command_inout("RefreshFromCache")
+                        count += 1
+                    except Exception as exc:
+                        logger.debug("RefreshFromCache failed for %s: %s", dev_name, exc)
+            logger.warning("TangoController.reset: RefreshFromCache sent to %d devices", count)
         except Exception as exc:
-            logger.warning("TangoController.reset: could not refresh magnets: %s", exc)
+            logger.warning("TangoController.reset: could not refresh devices: %s", exc)
 
     def start(self):
         return self.delegate.start()

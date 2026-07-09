@@ -304,6 +304,7 @@ class RingSimulatorDevice(Device, AsyncMixin):
         try:
             self._start_async()
             get_controller().reset()
+            self._reference_frequency = self._initial_reference_frequency()
             self.set_state(DevState.ON)
             logger.warning("RingSimulatorDevice.Reset: complete — recalculation queued")
         except Exception as exc:
@@ -334,6 +335,7 @@ class RingSimulatorDevice(Device, AsyncMixin):
         try:
             self._start_async()
             get_controller().reinit()
+            self._reference_frequency = self._initial_reference_frequency()
             self.set_state(DevState.ON)
             logger.warning("RingSimulatorDevice.Reinit: complete — nominal state restored")
         except Exception as exc:

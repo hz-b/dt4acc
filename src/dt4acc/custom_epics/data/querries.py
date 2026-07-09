@@ -41,29 +41,46 @@ def _match(doc: Dict[str, Any], field: str, allowed: Iterable[str]) -> bool:
 
 
 # -----------------------------------------------------------------
-# public API – identical signatures to the Mongo version
+# public API
 # -----------------------------------------------------------------
-def get_magnets():
-    """Return all Quadrupole/Sextupole/Steerer magnets as an iterator."""
+def get_controlled_elements():
+    """Return all controlled magnetic elements as an iterator."""
     wanted = {"Quadrupole", "Sextupole", "Steerer"}
     return (d for d in _DATA if _match(d, "type", wanted))
 
 
-def get_magnets_per_power_converters(pc: str) -> List[Dict[str, Any]]:
-    """Return all magnets driven by the given power-converter name."""
+def get_elements_per_power_converter(pc: str) -> List[Dict[str, Any]]:
+    """Return all controlled elements driven by the given power-converter name."""
     return [d for d in _DATA if d.get("pc") == pc]
 
 
-def get_unique_power_converters() -> List[str]:
+def get_unique_magnet_power_converters() -> List[str]:
     """Distinct list of power-converter names for Quad/Sext/Steerer magnets."""
     wanted = {"Quadrupole", "Sextupole", "Steerer"}
     return sorted({d["pc"] for d in _DATA if _match(d, "type", wanted)})
 
 
-def get_unique_power_converters_type_specified(type_list: Iterable[str]) -> List[str]:
+def get_unique_power_converters_for_types(type_list: Iterable[str]) -> List[str]:
     """Distinct list of power-converter names for the supplied magnet types."""
     wanted = set(type_list)
     return sorted({d["pc"] for d in _DATA if _match(d, "type", wanted)})
+
+
+# Backward-compatible aliases for older call sites.
+def get_magnets():
+    return get_controlled_elements()
+
+
+def get_magnets_per_power_converters(pc: str) -> List[Dict[str, Any]]:
+    return get_elements_per_power_converter(pc)
+
+
+def get_unique_power_converters() -> List[str]:
+    return get_unique_magnet_power_converters()
+
+
+def get_unique_power_converters_type_specified(type_list: Iterable[str]) -> List[str]:
+    return get_unique_power_converters_for_types(type_list)
 
 #
 # def get_magnets():
