@@ -1,10 +1,11 @@
 import math
-from typing import Dict
+from typing import Dict, Sequence
 
 from softioc.pythonSoftIoc import RecordWrapper
 import numpy as np
 
-from dt4acc_lib.model.utils.command import ReadCommand, Command
+from dt4acc_lib.model.output.track import ParticleState
+from dt4acc_lib.model.utils.command import ReadCommand, Command, BehaviourOnError
 from dt4acc.core.interfaces.controller_interface import ControllerInterface
 from ..data.constants import config, special_pvs, cavity_names
 from ..data.querries import (
@@ -365,6 +366,47 @@ def initialize_bpm_pvs_obsolete(builder):
         f"{special_pvs['bpm_pv']}:bdata", initial_value=tmp, length=len(tmp)
     )
     builder.longOut(f"{special_pvs['bpm_pv']}:count", initial_value=0)
+
+
+async def initialize_turn_by_turn_p0(builder, controller: ControllerInterface) -> Dict[ReadCommand, RecordWrapper]:
+    # "Setpoint(
+    #    pv_name="simulator_ring:turn_by_turn:start_vec",
+    #    rcmd=ReadCommand("turn_by_turn_start", "p0"),
+    #    record_type="waveform_out[float]",
+    #    treat_returned_data="single",
+    #    # 10 particls per Athena core
+    #    default_waveform_length=6 * 1024 * 10,
+    #    prec=0,
+    #    reads=[]
+    rcmd = ReadCommand("turn_by_turn_start", "p0")
+    pkg = await controller.trigger_read([rcmd])
+    (translated,) = pkg.data
+    (expected_single,) = translated.readings
+    initial_vecs = expected_single.payload
+    tmp = np.array([p0.as_array() for p0 in initial_vecs])
+    inital_vector = tmp.ravel()
+
+    async def update(val: Sequence[float]):
+        vecs = np.reshape(val, (-1, 6))
+        start_vecs = [ParticleState.from_sequence(p0) for p0 in vecs]
+        return await controller.update(
+            cmd=Command(
+                id=rcmd.id,
+                property=rcmd.property,
+                value=start_vecs,
+                behaviour_on_error=BehaviourOnError.ignore,
+            ),
+            reads=[],
+            delayed_reads=[]
+        )
+
+    rec = builder.WaveformOut(
+        "simulator_ring:turn_by_turn:start_vec",
+        initial_value=inital_vector,
+        length=6 * 16, # * 1024,
+        on_update=update,
+    )
+    return {rcmd: rec}
 
 
 def initialize_orbit_object_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:
