@@ -121,13 +121,13 @@ class AsyncMexecAdapter:
         return r
 
 
-# Process-global cache: uuid → {property: value}
+# Process-global cache: uuid -> {property: value}
 # Populated by _preload_initial_values() before init_device() runs.
 # Re-populated by refresh_cache_from_lattice() after reset.
-_initial_strength_cache: dict = {}  # uuid → float (main_strength)
-_nominal_cache: dict = {}           # uuid → {"main_strength": f, "x_kick": f, "y_kick": f}
-_my_magnet_uuids: list = []         # UUIDs of magnets in this server process
-_uuid_to_prop: dict = {}            # uuid → lattice properties
+_initial_strength_cache: dict = {}  # uuid -> float (main_strength)
+_nominal_cache: dict = {}           # uuid -> {property: value}
+_my_magnet_uuids: list = []         # UUIDs of elements in this server process
+_uuid_to_prop: dict = {}            # uuid -> lattice properties
 _sync_proxy = None                  # MexecService proxy for live reads
 _device_view = False                # True only for device-view facilities (e.g. MAX IV)
 
@@ -172,6 +172,41 @@ def _properties_for_uuid(uuid: str, uuid_to_prop: dict = None) -> list:
     return [value]
 
 
+def _properties_for_element(name: str, mtype: str, subtype: str = "") -> list:
+    if mtype == "RFCavity":
+        return ["frequency", "voltage"]
+    if mtype == "Steerer":
+        return [_steerer_lattice_property(name, subtype=subtype)]
+
+    subtype_to_prop = {
+        "Quad": "main_strength",
+        "Sext": "main_strength",
+        "SkewSext": "main_strength",
+        "Oct": "B4",
+    }
+    type_to_prop = {
+        "QuadrupoleCorrector": "B2",
+        "SkewQuadrupoleCorrector": "A2",
+    }
+    return [type_to_prop.get(mtype) or subtype_to_prop.get(subtype, "main_strength")]
+
+
+def _add_cache_element(
+    *,
+    uuid: str,
+    props: list,
+    uuids: list,
+    seen_uuids: set,
+    uuid_to_prop: dict,
+) -> None:
+    if not uuid:
+        return
+    if uuid not in seen_uuids:
+        uuids.append(uuid)
+        seen_uuids.add(uuid)
+    uuid_to_prop.setdefault(uuid, set()).update(props)
+
+
 def get_initial_strength(uuid: str) -> float:
     """Called by MagnetDevice.init_device() to get cached initial value."""
     return _initial_strength_cache.get(uuid, 0.0)
@@ -180,6 +215,15 @@ def get_initial_strength(uuid: str) -> float:
 def get_nominal_values(uuid: str) -> dict:
     """Called by MagnetDevice.RefreshFromCache() after reset."""
     return _nominal_cache.get(uuid, {"main_strength": 0.0, "x_kick": 0.0, "y_kick": 0.0})
+
+
+def get_rf_reference_frequency_khz() -> float:
+    for values in _nominal_cache.values():
+        frequency = values.get("frequency")
+        if frequency is None or frequency <= 0.0:
+            continue
+        return float(frequency) * 1e-3
+    return 0.0
 
 
 def refresh_cache_from_lattice(sync_proxy, magnet_uuids: list, uuid_to_prop: dict = None) -> None:
@@ -232,7 +276,7 @@ def _preload_initial_values(sync_proxy, magnet_uuids: list, uuid_to_prop: dict =
     Uses per-uuid lattice_property to avoid sending "main_strength"
     to octupole/corrector elements that don't support it.
     """
-    global _initial_strength_cache # noqa: F824
+    global _initial_strength_cache, _nominal_cache # noqa: F824
     if not magnet_uuids:
         return
 
@@ -245,22 +289,31 @@ def _preload_initial_values(sync_proxy, magnet_uuids: list, uuid_to_prop: dict =
                 continue
             prop_groups[prop].append(uuid)
 
-    logger.warning("Pre-loading initial values for %d magnets...",
+    logger.warning("Pre-loading initial values for %d element properties...",
                    sum(len(v) for v in prop_groups.values()))
+    new_cache = {
+        uuid: {prop: 0.0 for prop in _properties_for_uuid(uuid, uuid_to_prop)}
+        for uuid in magnet_uuids
+    }
     for prop, ids in prop_groups.items():
         try:
             props = [prop] * len(ids)
             raw = sync_proxy.sync_trigger_read(ids, props)
             for rcmd_id, rcmd_prop, payload in raw:
-                if payload is not None:
+                if payload is not None and rcmd_id in new_cache:
                     try:
-                        _initial_strength_cache[rcmd_id] = float(payload)
+                        new_cache[rcmd_id][prop] = float(payload)
                     except (TypeError, ValueError):
                         pass
         except Exception as exc:
             logger.warning("Bulk pre-load failed for %s: %s — devices will start at 0.0",
                            prop, exc)
-    logger.warning("Pre-loaded %d initial values.", len(_initial_strength_cache))
+    _nominal_cache = new_cache
+    _initial_strength_cache = {
+        uuid: values.get("main_strength", 0.0)
+        for uuid, values in new_cache.items()
+    }
+    logger.warning("Pre-loaded initial values for %d elements.", len(_nominal_cache))
 
 def _inject_controller(prefix: str) -> None:
     """
@@ -314,33 +367,35 @@ def main_loop(server_name: str, instance_name: str, event=None):
         my_uuids = []
         seen_uuids = set()
         uuid_to_prop = {}
-        _SUBTYPE_TO_PROP = {
-            "Quad": "main_strength", "Sext": "main_strength", "SkewSext": "main_strength",
-            "Oct": "B4",
-        }
-        _TYPE_TO_PROP = {
-            "QuadrupoleCorrector": "B2", "SkewQuadrupoleCorrector": "A2",
-        }
         for pc_name in get_unique_power_converters():
             for m in get_magnets_per_power_converters(pc_name):
                 magnet_name = m["name"]
+                uuid = m.get("uuid", "")
+                mtype = m.get("type", "")
+                subtype = m.get("subtype", "")
+                props = _properties_for_element(magnet_name, mtype, subtype=subtype)
+
+                if mtype == "RFCavity":
+                    _add_cache_element(
+                        uuid=uuid,
+                        props=props,
+                        uuids=my_uuids,
+                        seen_uuids=seen_uuids,
+                        uuid_to_prop=uuid_to_prop,
+                    )
+
                 try:
                     trl = TangoResourceLocator.from_trl(magnet_name)
                 except AssertionError:
                     continue
                 if trl.domain == server_name and trl.family == instance_name:
-                    uuid = m.get("uuid", "")
-                    if uuid:
-                        if uuid not in seen_uuids:
-                            my_uuids.append(uuid)
-                            seen_uuids.add(uuid)
-                        mtype = m.get("type", "")
-                        subtype = m.get("subtype", "")
-                        if mtype == "Steerer":
-                            prop = _steerer_lattice_property(magnet_name, subtype=subtype)
-                        else:
-                            prop = _TYPE_TO_PROP.get(mtype) or _SUBTYPE_TO_PROP.get(subtype, "main_strength")
-                        uuid_to_prop.setdefault(uuid, set()).add(prop)
+                    _add_cache_element(
+                        uuid=uuid,
+                        props=props,
+                        uuids=my_uuids,
+                        seen_uuids=seen_uuids,
+                        uuid_to_prop=uuid_to_prop,
+                    )
 
         global _my_magnet_uuids, _uuid_to_prop
         _my_magnet_uuids = my_uuids

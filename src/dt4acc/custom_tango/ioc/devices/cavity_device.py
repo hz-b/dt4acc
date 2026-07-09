@@ -24,6 +24,7 @@ class CavityDevice(BaseMagnetDevice):
         super().init_device()
         self._frequency = 0.0
         self._voltage = 0.0
+        self._refresh_from_cache()
 
     @attribute(dtype=float, access=AttrWriteType.READ_WRITE,
                label="Frequency", unit="Hz")
@@ -56,6 +57,9 @@ class CavityDevice(BaseMagnetDevice):
 
     @command
     def RefreshFromCache(self) -> None:
+        self._refresh_from_cache()
+
+    def _refresh_from_cache(self) -> None:
         try:
             from dt4acc.custom_tango.ioc.single_server import get_nominal_values
             vals = get_nominal_values(self.lattice_id)

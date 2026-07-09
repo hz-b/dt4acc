@@ -84,13 +84,21 @@ class RingSimulatorDevice(Device, AsyncMixin):
         self._tune_vert = 0.0
         self._xi_x      = 0.0
         self._xi_y      = 0.0
-        self._reference_frequency = 0.0
+        self._reference_frequency = self._initial_reference_frequency()
         self._rf_cavity_uuids = get_rf_cavity_uuids()
         for attr_name in ("orbit_x", "orbit_y",
                           "beta_x", "beta_y", "alpha_x", "alpha_y", "nu_x", "nu_y",
                           "bpm_x_attr", "bpm_y_attr", "hor", "vert"):
             self.set_change_event(attr_name, True, False)
         self.set_state(DevState.ON)
+
+    def _initial_reference_frequency(self) -> float:
+        try:
+            from dt4acc.custom_tango.ioc.single_server import get_rf_reference_frequency_khz
+            return get_rf_reference_frequency_khz()
+        except Exception as exc:
+            logger.warning("RingSimulatorDevice: could not initialise reference_frequency: %s", exc)
+            return 0.0
 
     # Orbit
     @attribute(dtype=DevDouble, dformat=AttrDataFormat.SPECTRUM, max_dim_x=MAX_ELEMS)
