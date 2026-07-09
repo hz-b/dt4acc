@@ -27,6 +27,17 @@ class MMLStyleDeviceIdentifier:
         """matching how a device reference is stored in ao"""
         return (self.sector, self.child)
 
+    def as_abbreviation(self) -> str:
+        return f"{self.family}:sec{self.sector}:ch{self.child}"
+
+    def __str__(self):
+        """
+        Todo: remove me!
+              view update should not rely on some std (debug) function
+              overloaded
+        """
+        return self.as_abbreviation()
+
 
 @dataclass(frozen=True)
 class PolynomialCoefficientsForDevices:
