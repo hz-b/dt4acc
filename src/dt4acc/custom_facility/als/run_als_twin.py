@@ -17,16 +17,22 @@ from dt4acc.core.interfaces.controller_interface import ControllerInterface
 from dt4acc.core.model.view import Monitor, Setpoint
 from dt4acc.custom_epics.ioc.controller import dispatcher
 from dt4acc.custom_epics.ioc.pv_setup import initialize_master_clock_pvs, initialize_machine_info_pvs, \
-    initialize_orbit_pvs, initialize_twiss_pvs, initialize_tune_pvs, initialize_calculation_state_pvs
+    initialize_orbit_pvs, initialize_twiss_pvs, initialize_tune_pvs, initialize_calculation_state_pvs, \
+    initialize_turn_by_turn_p0
 from dt4acc.custom_epics.ioc.pv_setup_from_model import initialize_pvs_from_model
 from dt4acc.custom_facility.als.liaison_translator_setup import load_managers
 from dt4acc.custom_facility.als.read_lattice import als_get_lattice, default_filename
 from dt4acc.custom_facility.als.view import ALSView
-from dt4acc_lib.model.utils.command import ReadCommand
+from dt4acc_lib.model.utils.command import ReadCommand, Command
 from dt4acc_lib.pyat_simulator.accelerator_simulator import PyATAcceleratorSimulator
 from dt4acc_lib.pyat_simulator.simulator_backend import SimulatorBackend
 from dt4acc_lib.bl.command_rewritter import CommandRewriter
+from dt4acc_lib.model.output.track import ParticleState
 
+# dt4acc lib etc only warning level info only for dt4acc
+logging.getLogger("transitions").setLevel(logging.WARNING)
+logging.getLogger("dt4acc_lib").setLevel(logging.WARNING)
+logging.getLogger("dt4acc").setLevel(logging.INFO)
 
 async def main():
 
@@ -36,7 +42,7 @@ async def main():
         acc=PyATAcceleratorSimulator(at_lattice=lat),
     )
 
-    _, lm, ts, process_variable_views = load_managers()
+    yp, lm, ts, process_variable_views = load_managers()
     command_rewriter = CommandRewriter(liaison_manager=lm, translation_service=ts)
 
     mexec = TranslatingCommandExecutionEngine(
@@ -56,14 +62,38 @@ async def main():
         default_delayed_reads=[
             ReadCommand("track", "pos"),
             ReadCommand("twiss", "parameters"),
+            # will calculate any time something changes on the twin
+            ReadCommand("turn_by_turn", "pos"),
             # ReadCommand("tune", "x"),
             # ReadCommand("tune", "y"),
         ],
     )
-    controller.start()
+    # controller.start()
     if prefix:
         builder.SetDeviceName(prefix)
 
+    # by default: set all beam position monitors as
+    # I assume that the names of the BPM match lattice element
+    # markers
+    await controller.update(
+        cmd=Command(
+            "turn_by_turn_start",
+            "data_needed_at",
+            yp.get("BPM"),
+            None
+        ),
+        reads=[]
+    )
+
+    # Todo: re evaluate if turn by turn data should default to tracking reference particle
+    await controller.update(
+        cmd=Command("turn_by_turn_start", "p0", [ParticleState.from_sequence([0] * 6)] * 3, None), reads=[]
+    )
+    # Todo: re evaluate if turn by turn data should default to tracking one turn
+    await controller.update(
+        cmd=Command("turn_by_turn_start", "n_turns", 1, None), reads=[]
+    )
+    r = await controller.trigger_read([ReadCommand("turn_by_turn_start", "p0")])
     view.update_process_variables(
         await initialise_pvs(
             builder=builder,
@@ -71,7 +101,11 @@ async def main():
             controller=controller
         )
     )
+    # Only start controller: at this stage the delayed queue will
+    # start to work
+    controller.start()
 
+    # Extra reads at startup
     await read_and_dispatch(
         controller=controller,
         view=view,
