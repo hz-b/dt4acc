@@ -258,11 +258,11 @@ class RingSimulatorDevice(Device, AsyncMixin):
         """Map backend calculation state to Tango device state (color in Jive)."""
         backend_state = get_controller().get_backend_state()
         if backend_state == CalculationStates.error:
-            self.set_state(DevState.FAULT)
-            self.set_status("Backend error: optics calculation failed.")
+            self.set_state(DevState.ALARM)
+            self.set_status("Beam loss: optics calculation failed. Call Reset or Reinit.")
         elif backend_state == CalculationStates.acknowledged:
             self.set_state(DevState.ALARM)
-            self.set_status("Acknowledged: optics calculation failed. Call Reset or Reinit.")
+            self.set_status("Beam loss acknowledged. Call Reset or Reinit.")
         else:
             self.set_state(DevState.ON)
             self.set_status("Running")
@@ -300,21 +300,6 @@ class RingSimulatorDevice(Device, AsyncMixin):
             logger.warning("RingSimulatorDevice.Reset: complete — recalculation queued")
         except Exception as exc:
             logger.error("RingSimulatorDevice.Reset failed: %s", exc)
-            self.set_state(DevState.FAULT)
-            raise DevFailed(str(exc))
-
-    @command
-    def Acknowledge(self):
-        """Acknowledge that the calculation engine is in error mode """
-        logger.warning("RingSimulatorDevice.Acknowledge: acknowledge engine is in error mode")
-        self.set_state(DevState.INIT)
-        try:
-            self._start_async()
-            get_controller().acknowledge()
-            self.set_state(DevState.ON)
-            logger.warning("RingSimulatorDevice.Acknowledge: complete")
-        except Exception as exc:
-            logger.error("RingSimulatorDevice.Acknowledge failed: %s", exc)
             self.set_state(DevState.FAULT)
             raise DevFailed(str(exc))
 
