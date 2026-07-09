@@ -1,6 +1,7 @@
-from typing import Dict, Sequence, Union
+from typing import Callable, Dict, Sequence, Union, TypeVar
 
 import numpy as np
+import numpy.typing as npt
 from softioc.pythonSoftIoc import RecordWrapper
 
 from dt4acc.core.interfaces.controller_interface import ControllerInterface
@@ -11,14 +12,16 @@ from dt4acc_lib.model.utils.command import ReadCommand, Command, BehaviourOnErro
 
 logger = get_logger()
 
+T = TypeVar("T")
+
 
 def handle_returned_data(
-    pkg: ReadTogetherAndTranslated, returned_data_type: str
-) -> float:
+    pkg: ReadTogetherAndTranslated, returned_data_type: str, force_type: Callable[[T], T]
+) -> T:
     if returned_data_type == "single":
-        return unpack_translated_reading_expecting_single_float(pkg)
+        return unpack_translated_reading_expecting_single_value(pkg, force_type)
     elif returned_data_type == "average":
-        return unpack_translated_reading_calculate_average(pkg)
+        return unpack_translated_reading_calculate_average(pkg, force_type)
     else:
         raise AssertionError(
             f"Not prepared to handle returned_data {returned_data_type}"
@@ -29,9 +32,10 @@ class NotSingleReading(Exception):
     pass
 
 
-def unpack_translated_reading_expecting_single_float(
+def unpack_translated_reading_expecting_single_value(
     pkg: ReadTogetherAndTranslated,
-) -> float:
+    force_type: Callable[[T], T]
+) -> T:
     (translated,) = pkg.data
     L = len(translated.readings)
     if L != 1:
@@ -40,17 +44,18 @@ def unpack_translated_reading_expecting_single_float(
             f", returned: {[r.cmd for r in translated.readings]}"
         )
     (expected_single,) = translated.readings
-    val = float(expected_single.payload)
+    val = force_type(expected_single.payload)
     return val
 
 
 def unpack_translated_reading_calculate_average(
     pkg: ReadTogetherAndTranslated,
-) -> float:
+    force_type: Callable[[T], T]
+) -> T:
     if len(pkg.data) == 1:
         # Todo: consider if this options should be here
         try:
-            return unpack_translated_reading_expecting_single_float(pkg)
+            return unpack_translated_reading_expecting_single_value(pkg, force_type)
         except NotSingleReading as nsr:
             logger.info("pkg %s: was not a single reading %s", pkg.data[0].cmd, nsr)
 
@@ -61,11 +66,11 @@ def unpack_translated_reading_calculate_average(
         #       is what should happen ...
         # (expected_single,) = translated.readings
         for single in translated.readings:
-            val = float(single.payload)
+            val = force_type(single.payload)
             values.append(val)
 
     val = np.mean(values)
-    return float(val)
+    return force_type(val)
 
 
 class PotentialLoopError(Exception):
@@ -87,7 +92,7 @@ async def build_ao_record(
     builder, model: Setpoint, controller: ControllerInterface
 ) -> RecordWrapper:
     initial_val = handle_returned_data(
-        await controller.trigger_read([model.rcmd]), model.treat_returned_data
+        await controller.trigger_read([model.rcmd]), model.treat_returned_data, float
     )
     # don't forget the ones that should be updated
     # when this changes: e.g. read backs from power converters
@@ -128,7 +133,7 @@ async def build_ai_record(builder, model: Monitor, controller: ControllerInterfa
         initial_val = np.nan
     else:
         initial_val = handle_returned_data(
-            await controller.trigger_read([model.rcmd]), model.treat_returned_data
+            await controller.trigger_read([model.rcmd]), model.treat_returned_data, float
         )
     rec = builder.aIn(
         model.pv_name,
@@ -137,12 +142,128 @@ async def build_ai_record(builder, model: Monitor, controller: ControllerInterfa
     )
     return rec
 
+async def build_longout_record(builder, model: Setpoint, controller: ControllerInterface):
+    reads = model.reads or []
+    if model.rcmd in reads:
+        raise PotentialLoopError(
+            f"For setpoint {model.pv_name} potential infinite loop detected:"
+            f"{model.rcmd} is in (model) reads {reads}"
+        )
+
+    initial_val = handle_returned_data(
+        await controller.trigger_read([model.rcmd]), model.treat_returned_data, int
+    )
+
+    async def update(val: int):
+        return await controller.update(
+            cmd=Command(
+                id=model.rcmd.id,
+                property=model.rcmd.property,
+                value=val,
+                behaviour_on_error=BehaviourOnError.ignore,
+            ),
+            reads=reads,
+            delayed_reads=[],
+        )
+
+    rec = builder.longOut(
+        model.pv_name, initial_value=initial_val, on_update=update
+    )
+    return rec
 
 
-factory = dict(
-    ai=build_ai_record,
-    ao=build_ao_record,
-)
+def check_float_vector(inp: Sequence[float]) -> npt.NDArray[np.floating]:
+    return np.asarray(inp, dtype=float)
+
+
+def check_string_vector(inp: Sequence[str]) -> Sequence[str]:
+    return [str(v) for v in inp]
+
+
+
+async def build_waveform_in_record(builder, model: Monitor, controller: ControllerInterface):
+    """
+    Currently only handling float array
+    """
+    if model.update == "delayed":
+        initial_val = [np.nan]
+        length = model.default_waveform_length
+    else:
+        # Warning: this path has not been used yet!
+        initial_val = handle_returned_data(
+            await controller.trigger_read([model.rcmd]), model.treat_returned_data, check_float_vector
+        )
+        length = max(initial_val, model.default_waveform_length)
+    rec =  builder.WaveformIn(
+        model.pv_name,
+        initial_value=initial_val,
+        length=length,
+    )
+    return rec
+
+
+async def build_waveform_out_record(
+        builder, model: Setpoint, controller: ControllerInterface, type: str
+):
+    reads = model.reads or []
+    if model.rcmd in reads:
+        raise PotentialLoopError(
+            f"For setpoint {model.pv_name} potential infinite loop detected:"
+            f"{model.rcmd} is in (model) reads {reads}"
+        )
+
+    if type == "float":
+        check = check_float_vector
+    elif type == "str":
+        check = check_string_vector
+    else:
+        raise AssertionError(f"Unknown type {type}")
+
+    initial_val = handle_returned_data(
+        await controller.trigger_read([model.rcmd]), model.treat_returned_data, check
+    )
+
+    async def update(val: int):
+        return await controller.update(
+            cmd=Command(
+                id=model.rcmd.id,
+                property=model.rcmd.property,
+                value=val,
+                behaviour_on_error=BehaviourOnError.ignore,
+            ),
+            reads=reads,
+            delayed_reads=[],
+        )
+
+    if type == "str":
+        if initial_val == []:
+             initial_val = [""]
+
+    try:
+        rec = builder.WaveformOut(
+            model.pv_name, initial_value=initial_val, on_update=update, length=model.default_waveform_length
+        )
+    except ValueError as ve:
+        raise ve
+    return rec
+
+
+async def build_waveform_out_record_string(builder, model: Setpoint, controller: ControllerInterface):
+    return await build_waveform_out_record(builder, model, controller, type="str")
+
+
+async def build_waveform_out_record_float(builder, model: Setpoint, controller: ControllerInterface):
+    return await build_waveform_out_record(builder, model, controller, type="float")
+
+
+factory = {
+    "ai": build_ai_record,
+    "ao": build_ao_record,
+    "longout": build_longout_record,
+    "waveform_in[float]": build_waveform_in_record,
+    "waveform_out[str]": build_waveform_out_record_string,
+    "waveform_out[float]": build_waveform_out_record_float,
+}
 
 
 async def initialize_pvs_from_model(
@@ -163,14 +284,17 @@ async def initialize_pvs_from_model(
         rec = None
         try:
             rec = await f(builder, model, controller)
+        except ValueError as ve:
+            logger.error("Could not instantiate %s due to value error %s", model, ve)
+            raise ve
         except KeyError as ke:
             logger.warning("Could not instantiate %s due to key error %s", model, ke)
         except PotentialLoopError as loop_error:
             logger.warning("Could not instantiate %s due to potential loop %s", model, loop_error)
         return rec
 
-    r = {model.rcmd: await instantiate(model) for model in models}
-    r = {rcmd: rec for rcmd, rec in r.items() if rec is not None}
+    r = {model.get_pvid(): await instantiate(model) for model in models}
+    r = {pvid: rec for pvid, rec in r.items() if rec is not None}
     return r
 
 
