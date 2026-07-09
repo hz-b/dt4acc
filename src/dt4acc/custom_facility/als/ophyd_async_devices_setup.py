@@ -4,11 +4,14 @@ Todo:
     resolve dependency: orbit depends on custom epics
     Should be a separate package
 """
+# import json
 import logging
 import os
 import re
 from collections import defaultdict
+from itertools import zip_longest
 
+from accml.custom.epics.devices.bpm import BPMTbTPosition
 from accml.custom.epics.devices.orbit import Orbit
 from accml_lib.core.interfaces.utils.devices_facade import DevicesFacade as DevicesFacadeInterface
 from accml.core.utils.ophyd_async.multiplexer_for_settable_devices import (
@@ -17,8 +20,9 @@ from accml.core.utils.ophyd_async.multiplexer_for_settable_devices import (
 from accml.custom.epics.devices.master_clock import MasterClock
 from accml.custom.epics.devices.power_converter import PowerConverter
 from accml.custom.epics.devices.tunes import Tunes
+from dt4acc.core.model.view import Setpoint
 from dt4acc.custom_facility.als.liaison_translator_setup import load_managers
-from dt4acc.custom_facility.als.model import Setpoint
+from dt4acc.custom_facility.als.model import MMLStyleDeviceIdentifier
 
 # Todo: clarify with markus if this code will be contributed
 
@@ -42,6 +46,69 @@ class DevicesFacade(DevicesFacadeInterface):
         return self._devices.get(name)
 
 
+def try_put_bpms_into_nomencalutra(signal_lut):
+    """
+    I can not derive the BPM's directly from the signal lut
+    So I create them manually
+    I use signal_lut to see which I should create
+    """
+    bpm_pv_names = defaultdict(list)
+    bpm_tbt_names = defaultdict(list)
+
+    tmp = [v for rcmd, v in signal_lut.items() if isinstance(rcmd.id, MMLStyleDeviceIdentifier) ]
+    for rcmd, v in signal_lut.items():
+        if isinstance(rcmd.id, MMLStyleDeviceIdentifier) and rcmd.id.family.startswith("BPM"):
+            if v.pv_name.endswith(":SA:X") or v.pv_name.endswith(":SA:Y"):
+                # Turn by turn BPM's
+                bpm_tbt_names[v.pv_name[:-5]].append(v)
+            elif "X" in v.pv_name or "Y" in v.pv_name:
+                # single value bpms
+                bpm_pv_names[v.pv_name].append(v)
+
+    # now lets find which names we have here
+    bpm_names = defaultdict(list)
+    # combinable bpm pv_names
+    bpm_pv_names_ctl = {k: False for k in bpm_pv_names}
+    for k, v in bpm_pv_names.items():
+        if "X" in k:
+            k_for_y = k.replace("X", "Y")
+            # need to take out the X
+            k_without_coor = k.replace("X", "?")
+            bpm_names[k_without_coor].append(k)
+            bpm_pv_names_ctl[k] = True
+            bpm_pv_names_ctl[k_for_y] = True
+
+        if "Y" in k:
+            k_for_x = k.replace("Y", "X")
+            k_without_coor = k.replace("Y", "?")
+            bpm_names[k_without_coor].append(k)
+            bpm_pv_names_ctl[k] = True
+            bpm_pv_names_ctl[k_for_x] = True
+    assert not {k: v for k, v in bpm_pv_names_ctl.items() if v == False}
+
+    reduced = bpm_names.copy()
+    two_dim = {k: v  for k, v in reduced.items() if len(v) == 2}
+    for k, v in two_dim.items():
+        reduced.pop(k)
+    single_dim = {k: v  for k, v in reduced.items() if len(v) == 1}
+    for k, v in single_dim.items():
+        reduced.pop(k)
+    assert not reduced
+    return dict(bpm_tbt_names), (two_dim, single_dim)
+
+
+def setup_bpms(signals_lut, prefix):
+    bpm_names_for_tbt, _ = try_put_bpms_into_nomencalutra(signals_lut)
+    bpm_names_for_tbt
+    # json.dump(dict(bpm_tbt_names=list(bpm_names_for_tbt)), open("als_bpm_tbt_data.json", "wt"))
+
+    d = {
+        BPMTbTPosition(prefix + k, name="k")
+        for k in bpm_names_for_tbt.keys()
+    }
+    return d
+
+
 def setup(prefix: str=None) -> DevicesFacade:
     """
 
@@ -61,20 +128,34 @@ def setup(prefix: str=None) -> DevicesFacade:
         signals_lut[model.rcmd].append(model)
     # single object per read command, lookup can be made
     assert not [v for v in signals_lut.values() if len(v) > 1]
-    def extract_single_value(values):
+
+    def extract_single_rcmd(k, values):
         val, = values
         return val
-    signals_lut = {k: extract_single_value(v) for k, v in signals_lut.items()}
 
+    signals_lut = {k: extract_single_rcmd(k, v) for k, v in signals_lut.items()}
+
+    tbt_bpms = setup_bpms(signals_lut, prefix)
     # This is a hack for now ... I know that I can match quadrupoles by name
-    setpoints = [v for v in signals_lut.values() if isinstance(v, Setpoint)]
+    # **NB**: I assume that there is a least a single read there, otherwise it is ignored
+    setpoints = [v for v in signals_lut.values() if isinstance(v, Setpoint) and len(v.reads) > 0]
     # mml uses monitor, bluesky / ophyd-async readbacks
     # here I follow ophyd-async
-    readbacks = [extract_single_value(setp.reads) for setp in setpoints]
+    readbacks = [extract_single_rcmd(setp.rcmd, setp.reads) for setp in setpoints]
+    assert len(setpoints) == len(readbacks)
+    # some need to be removed as these readbacks have no signal assigned to them
 
-    # I need setpoint and redaback pvs
-    combined_setp_rdbk_pvs = {setp.pv_name: (setp.pv_name, signals_lut[rdbk].pv_name) for setp, rdbk in zip(setpoints, readbacks)}
-    combined_setp_rdbk_pvs
+    # I need setpoint and readback pvs ... but the rdbk do not necessarily have
+    # a signal assigned to them
+    not_handled = [(setp, rdbk) for setp, rdbk in zip_longest(setpoints, readbacks) if signals_lut.get(rdbk, None) == None]
+    for setp, rdbk in not_handled:
+        logger.info(f"Can not handle automatically setpoint pv name {setp.pv_name} with associated {rdbk} as no signal is assigned to this rcmd")
+
+    combined_setp_rdbk_pvs = {
+        setp.pv_name: (setp.pv_name, signals_lut[rdbk].pv_name)
+        for setp, rdbk in zip_longest(setpoints, readbacks) if signals_lut.get(rdbk, None) != None
+    }
+    pass
 
     quad_pcs = (
         [name for name in combined_setp_rdbk_pvs if "QF" in name]
@@ -125,6 +206,9 @@ def setup(prefix: str=None) -> DevicesFacade:
     master_clock = MasterClock(f'{prefix}:master_clock:ref_freq', name="mc")
     tune = Tunes(f"{prefix}TUNEZR", name="tune")
 
+    # need to handle BPMs
+    [rcmd for rcmd in list(signals_lut) if isinstance(rcmd, MMLStyleDeviceIdentifier)]
+
     #: todo: what to do if names can not be made to match easily
     # aux = { "mc-frequency" : master_clock.frequency}
     d = {
@@ -133,6 +217,8 @@ def setup(prefix: str=None) -> DevicesFacade:
             master_clock=master_clock,
             tune=tune,
             steerer_pcs=steerer_pcs,
+            steerer_mux=steerers,
+            tbt_bpms=tbt_bpms,
             # orbit=orbit
         ),
         **quad_pcs,
