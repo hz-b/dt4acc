@@ -478,8 +478,13 @@ def create_liaison_lut(
             process_variable_views.extend([monitor, setp])
             pass
 
-    dev_prop_mc = DevicePropertyID(
+    # To set
+    dev_prop_mc_ref = DevicePropertyID(
         device_name="master_clock", property="reference_frequency"
+    )
+    # to read
+    dev_prop_mc = DevicePropertyID(
+        device_name="master_clock", property="frequency"
     )
 
     # master clock defines frequency of cavity
@@ -502,9 +507,10 @@ def create_liaison_lut(
                 )
             )
         # inverse_lut.append(LiaisonManagerInverseLookupElement(dev_id=dev_prop_set, lat_ids=elem_props))
-        inverse_lut.append(
+        inverse_lut += [
+            LiaisonManagerInverseLookupElement(dev_id=dev_prop_mc_ref, lat_ids=elem_props),
             LiaisonManagerInverseLookupElement(dev_id=dev_prop_mc, lat_ids=elem_props)
-        )
+        ]
 
     # Todo: check if these are the correct PV'S to interface to the cavities
     #       where to ramp up and down voltage
@@ -514,34 +520,35 @@ def create_liaison_lut(
     set_pv = str(sel.Setpoint.ChannelNames).strip()
 
     # Todo: adjust to names actually used at ALS
-    cavity_monitors = [
-        Monitor(
-            pv_name=mon_pv,
-            rcmd=ReadCommand(cavity_name, "frequency"),
-            prec=9,
-            record_type="ai",
-            treat_returned_data="single",
-        )
-        for cavity_name in yp.get("RF")
-    ]
+    # cavity_monitors = [
+    #     Monitor(
+    #         pv_name=mon_pv,
+    #         rcmd=ReadCommand(cavity_name, "frequency"),
+    #         prec=9,
+    #         record_type="ai",
+    #         treat_returned_data="single",
+    #     )
+    #     for cavity_name in yp.get("RF")
+    # ]
 
     # Todo: adjust to names actually used at ALS
     master_clock_monitor = Monitor(
-        pv_name=set_pv,
+        pv_name=mon_pv,
         rcmd=ReadCommand("master_clock", "frequency"),
         prec=9,
         record_type="ai",
         treat_returned_data="average",
     )
     setp = Setpoint(
-        pv_name="MCLKHX251C:freq",
+        # Todo: need to set it to the PV used at ALS
+        pv_name=set_pv,
         rcmd=ReadCommand("master_clock", "reference_frequency"),
         prec=9,
         record_type="ao",
-        reads=[master_clock_monitor.rcmd] + [cav_m.rcmd for cav_m in cavity_monitors],
+        reads=[master_clock_monitor.rcmd], # + [cav_m.rcmd for cav_m in cavity_monitors],
         treat_returned_data="average",
     )
-    process_variable_views.extend(cavity_monitors + [master_clock_monitor, setp])
+    process_variable_views.extend([master_clock_monitor, setp]) # +cavity_monitors
 
     inverse_lut += [
         LiaisonManagerInverseLookupElement(
@@ -554,6 +561,27 @@ def create_liaison_lut(
             dev_id=DevicePropertyID(device_name="track", property="pos"),
             lat_ids=[LatticeElementPropertyID(element_name="track", property="pos")],
         ),
+        LiaisonManagerInverseLookupElement(
+            dev_id=DevicePropertyID(device_name="turn_by_turn", property="pos"),
+            lat_ids=[LatticeElementPropertyID(element_name="turn_by_turn", property="pos")],
+        ),
+        LiaisonManagerInverseLookupElement(
+            dev_id=DevicePropertyID(device_name="turn_by_turn_start", property="start"),
+            lat_ids=[LatticeElementPropertyID(element_name="turn_by_turn_start", property="start")],
+        ),
+        LiaisonManagerInverseLookupElement(
+            dev_id=DevicePropertyID(device_name="turn_by_turn_start", property="n_turns"),
+            lat_ids=[LatticeElementPropertyID(element_name="turn_by_turn_start", property="n_turns")],
+        ),
+        LiaisonManagerInverseLookupElement(
+            dev_id=DevicePropertyID(device_name="turn_by_turn_start", property="data_needed_at"),
+            lat_ids=[LatticeElementPropertyID(element_name="turn_by_turn_start", property="data_needed_at")],
+        ),
+        LiaisonManagerInverseLookupElement(
+            dev_id=DevicePropertyID(device_name="turn_by_turn_start", property="p0"),
+            lat_ids=[LatticeElementPropertyID(element_name="turn_by_turn_start", property="p0")],
+        ),
+
     ]
     forward_lut += [
         LiaisonManagerForwardLookupElement(
@@ -565,6 +593,26 @@ def create_liaison_lut(
         LiaisonManagerForwardLookupElement(
             lat_id=LatticeElementPropertyID(element_name="track", property="pos"),
             dev_ids=[DevicePropertyID(device_name="track", property="pos")],
+        ),
+        LiaisonManagerForwardLookupElement(
+            lat_id=LatticeElementPropertyID(element_name="turn_by_turn", property="pos"),
+            dev_ids=[DevicePropertyID(device_name="turn_by_turn", property="pos")],
+        ),
+        LiaisonManagerForwardLookupElement(
+            lat_id=LatticeElementPropertyID(element_name="turn_by_turn_start", property="start"),
+            dev_ids=[DevicePropertyID(device_name="turn_by_turn_start", property="start")],
+        ),
+        LiaisonManagerForwardLookupElement(
+            lat_id=LatticeElementPropertyID(element_name="turn_by_turn_start", property="n_turns"),
+            dev_ids=[DevicePropertyID(device_name="turn_by_turn_start", property="n_turns")],
+        ),
+        LiaisonManagerForwardLookupElement(
+            lat_id=LatticeElementPropertyID(element_name="turn_by_turn_start", property="data_needed_at"),
+            dev_ids=[DevicePropertyID(device_name="turn_by_turn_start", property="data_needed_at")],
+        ),
+        LiaisonManagerForwardLookupElement(
+            lat_id=LatticeElementPropertyID(element_name="turn_by_turn_start", property="p0"),
+            dev_ids=[DevicePropertyID(device_name="turn_by_turn_start", property="p0")],
         ),
         # for tune correction: a frequency change in tune is translated to
         #                      current change
@@ -578,22 +626,6 @@ def create_liaison_lut(
         ),
     ]
 
-    LiaisonManagerForwardLookupElement(
-        lat_id=LatticeElementPropertyID(element_name="turn_by_turn", property="pos"),
-        dev_ids=[DevicePropertyID(device_name="turn_by_turn", property="pos")],
-    ),
-    LiaisonManagerForwardLookupElement(
-        lat_id=LatticeElementPropertyID(element_name="turn_by_turn_start", property="n_turns"),
-        dev_ids=[DevicePropertyID(device_name="turn_by_turn_start", property="n_turns")],
-    ),
-    LiaisonManagerForwardLookupElement(
-        lat_id=LatticeElementPropertyID(element_name="turn_by_turn_start", property="data_needed_at"),
-        dev_ids=[DevicePropertyID(device_name="turn_by_turn_start", property="data_needed_at")],
-    ),
-    LiaisonManagerForwardLookupElement(
-        lat_id=LatticeElementPropertyID(element_name="turn_by_turn_start", property="p0"),
-        dev_ids=[DevicePropertyID(device_name="turn_by_turn_start", property="p0")],
-    ),
     inverse_lut.append(
         LiaisonManagerInverseLookupElement(
             dev_id=DevicePropertyID(device_name="tune", property="transversal"),
@@ -613,6 +645,7 @@ def create_liaison_lut(
             reads=[]
         ),
         Setpoint(
+            # pv_name="simulator_ring:turn_by_turn:data_needed_at",
             pv_name="simulator_ring:turn_by_turn:data_needed_at",
             rcmd=ReadCommand("turn_by_turn_start", "data_needed_at"),
             record_type="waveform_out[str]",
@@ -620,6 +653,16 @@ def create_liaison_lut(
             default_waveform_length=2048,
             prec=0,
             reads=[]
+        ),
+        Setpoint(
+            pv_name="simulator_ring:turn_by_turn:run",
+            rcmd=ReadCommand("turn_by_turn_start", "start"),
+            record_type="longout",
+            treat_returned_data="single",
+            default_waveform_length=2048,
+            update="immediate",
+            prec=0,
+            reads=[ReadCommand("turn_by_turn", "pos"),]
         ),
         # to much extra to handle ... better to do it by hand
         # Setpoint(
@@ -656,25 +699,23 @@ def create_translator_luts(
     # for dev_name in yp.get("RF"):
     dev_name = "master_clock"
     d = lm.objects_for_device(dev_name=dev_name)
-    (src,) = d
-    assert src.device_name == dev_name
-    (tmp,) = d.values()
-    (tgt,) = tmp
-
-    translator_lut.append(
-        TranslatorLookupTableElement(
-            conversion_id=ConversionID(tgt, src),
-            # As cavities are treated differently from magnets
-            # energy is a property of the beam as well as the
-            # energy of the reference particle
-            #
-            # "design energy" is what belongs to the lattice ant its
-            # design!
-            conversion_info=PolynomCoefficients(
-                coeffs=[0.0, 1.0], energy_dependent=False
-            ),
+    for src, tmp in d.items():
+        assert src.device_name == dev_name
+        (tgt,) = tmp
+        translator_lut.append(
+            TranslatorLookupTableElement(
+                conversion_id=ConversionID(tgt, src),
+                # As cavities are treated differently from magnets
+                # energy is a property of the beam as well as the
+                # energy of the reference particle
+                #
+                # "design energy" is what belongs to the lattice ant its
+                # design!
+                conversion_info=PolynomCoefficients(
+                    coeffs=[0.0, 1.0], energy_dependent=False
+                ),
+            )
         )
-    )
     del d, src, tgt, tmp, dev_name
 
     for family_name in "SHF", "SHD":
@@ -910,7 +951,7 @@ def create_translator_luts(
             ),
         )
     )
-    translator_lut.append(
+    translator_lut += [
         TranslatorLookupTableElement(
             ConversionID(
                 lattice_property_id=LatticeElementPropertyID(
@@ -923,8 +964,43 @@ def create_translator_luts(
             TuneConversionCoefficients(
                 PolynomCoefficients([0e0, floquet_to_frequency], energy_dependent=False)
             ),
+        ),
+        TranslatorLookupTableElement(
+            ConversionID(
+                LatticeElementPropertyID(element_name="turn_by_turn", property="pos"),
+                DevicePropertyID(device_name="turn_by_turn", property="pos"),
+            ),
+            IdentityMapper(),
+        ),
+        TranslatorLookupTableElement(
+            ConversionID(
+                LatticeElementPropertyID(element_name="turn_by_turn_start", property="start"),
+                DevicePropertyID(device_name="turn_by_turn_start", property="start"),
+            ),
+            IdentityMapper(),
+        ),
+        TranslatorLookupTableElement(
+            ConversionID(
+                LatticeElementPropertyID(element_name="turn_by_turn_start", property="n_turns"),
+                DevicePropertyID(device_name="turn_by_turn_start", property="n_turns"),
+            ),
+            IdentityMapper(),
+        ),
+        TranslatorLookupTableElement(
+            ConversionID(
+                LatticeElementPropertyID(element_name="turn_by_turn_start", property="data_needed_at"),
+                DevicePropertyID(device_name="turn_by_turn_start", property="data_needed_at"),
+            ),
+            IdentityMapper(),
+        ),
+        TranslatorLookupTableElement(
+            ConversionID(
+                LatticeElementPropertyID(element_name="turn_by_turn_start", property="p0"),
+                DevicePropertyID(device_name="turn_by_turn_start", property="p0"),
+            ),
+            IdentityMapper(),
         )
-    )
+    ]
 
     r = TranslatorLookupTable(lut=translator_lut)
     r.verify()
