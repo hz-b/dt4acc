@@ -28,15 +28,7 @@ class MMLStyleDeviceIdentifier:
         return (self.sector, self.child)
 
     def as_abbreviation(self) -> str:
-        return f"{self.family}:sec{self.sector}:ch{self.child}"
-
-    def __str__(self):
-        """
-        Todo: remove me!
-              view update should not rely on some std (debug) function
-              overloaded
-        """
-        return self.as_abbreviation()
+        return f"{self.family}-sec_{self.sector}-child_{self.child}"
 
 
 @dataclass(frozen=True)
