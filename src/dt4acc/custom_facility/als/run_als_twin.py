@@ -79,7 +79,7 @@ async def main():
         cmd=Command(
             "turn_by_turn_start",
             "data_needed_at",
-            yp.get("BPM"),
+            [mml_id.as_abbreviation() for mml_id in yp.get("BPM")],
             None
         ),
         reads=[]
