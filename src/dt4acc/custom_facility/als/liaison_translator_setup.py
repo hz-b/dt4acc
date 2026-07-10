@@ -357,49 +357,73 @@ def create_liaison_lut(
         process_variable_views.extend([monitor, setp])
     del pv_views
 
-    # BPMs are not directly handled within in translating
+    # BPMs (standard x, y)  are not directly handled within in translating
     # mexec engine (yet)
     # but the view can use this information
+    # starting to add it for the turn by turn BPM's
+    tbt_lat_id = LatticeElementPropertyID("turn_by_turn", "pos")
+    tbt_fwd_lut_tgt = []
     for family_name, property in [
         ("BPMx", "dx"),
         ("BPMy", "dy"),
     ]:
         for dev_name in yp.get(family_name):
             # expect only one
-            dev_prop_set = DevicePropertyID(device_name=dev_name, property=property)
+            dev_prop_bpm = DevicePropertyID(device_name=dev_name, property=property)
             (bpm_name,) = get_element_uuids_for_device(
                 ao_table=ao_table, lat=lat, dev_id=dev_name
             )
             sel = ao_table[dev_name.family]
             device_index = sel.get_device_index(*dev_name.mml_device_index())
             mon_pv = sel.Monitor.ChannelNames[device_index].strip()
+            is_tbt_pv = False
+            if ":SA:" in mon_pv:
+                is_tbt_pv = True
             lat_prop = LatticeElementPropertyID(
                 element_name=bpm_name, property=property
             )
-            forward_lut.append(
-                LiaisonManagerForwardLookupElement(
-                    lat_id=lat_prop, dev_ids=[dev_prop_set]
+            if not is_tbt_pv:
+                forward_lut.append(
+                    LiaisonManagerForwardLookupElement(
+                        lat_id=lat_prop, dev_ids=[dev_prop_bpm]
+                    )
                 )
-            )
-            inverse_lut.append(
-                LiaisonManagerInverseLookupElement(
-                    dev_id=dev_prop_set,
-                    lat_ids=[lat_prop],
+            else:
+                inverse_lut.append(
+                    LiaisonManagerInverseLookupElement(
+                        dev_id=dev_prop_bpm,
+                        lat_ids=[tbt_lat_id],
+                    )
                 )
-            )
+                tbt_fwd_lut_tgt.append(dev_prop_bpm)
+            # add monitor to it
             try:
-                mon = Monitor(
-                    pv_name=mon_pv,
-                    rcmd=ReadCommand(id=dev_name, property=property),
-                    prec=3,
-                    record_type="ai",
-                    update="delayed",
-                )
+                if is_tbt_pv:
+                    mon = Monitor(
+                        pv_name=mon_pv,
+                        rcmd=ReadCommand(id=dev_name, property=property),
+                        prec=3,
+                        record_type="waveform_in[float]",
+                        update="delayed",
+                        default_waveform_length=1024 * 64
+                    )
+                else:
+                    mon = Monitor(
+                        pv_name=mon_pv,
+                        rcmd=ReadCommand(id=dev_name, property=property),
+                        prec=3,
+                        record_type="ai",
+                        update="delayed",
+                    )
             except pydantic.ValidationError as ex:
                 logger.error(f"Failed to add monitor for {dev_name}: {ex}")
                 continue
             process_variable_views.append(mon)
             pass
+    # turn-by-turn is now offloaded to all bpm's
+    forward_lut.append(
+        LiaisonManagerForwardLookupElement(tbt_lat_id, tbt_fwd_lut_tgt)
+    )
 
     for family_name, property in [
         # just to get started
@@ -562,7 +586,7 @@ def create_liaison_lut(
             lat_ids=[LatticeElementPropertyID(element_name="track", property="pos")],
         ),
         LiaisonManagerInverseLookupElement(
-            dev_id=DevicePropertyID(device_name="turn_by_turn", property="pos"),
+             dev_id=DevicePropertyID(device_name="turn_by_turn", property="pos"),
             lat_ids=[LatticeElementPropertyID(element_name="turn_by_turn", property="pos")],
         ),
         LiaisonManagerInverseLookupElement(
@@ -594,10 +618,10 @@ def create_liaison_lut(
             lat_id=LatticeElementPropertyID(element_name="track", property="pos"),
             dev_ids=[DevicePropertyID(device_name="track", property="pos")],
         ),
-        LiaisonManagerForwardLookupElement(
-            lat_id=LatticeElementPropertyID(element_name="turn_by_turn", property="pos"),
-            dev_ids=[DevicePropertyID(device_name="turn_by_turn", property="pos")],
-        ),
+        # LiaisonManagerForwardLookupElement(
+        #     lat_id=LatticeElementPropertyID(element_name="turn_by_turn", property="pos"),
+        #     dev_ids=[DevicePropertyID(device_name="turn_by_turn", property="pos")],
+        # ),
         LiaisonManagerForwardLookupElement(
             lat_id=LatticeElementPropertyID(element_name="turn_by_turn_start", property="start"),
             dev_ids=[DevicePropertyID(device_name="turn_by_turn_start", property="start")],
