@@ -218,7 +218,6 @@ def get_nominal_values(uuid: str) -> dict:
 
 def refresh_one_from_lattice(uuid: str, prop_spec=None) -> None:
     """Refresh one element in this Tango server process cache from the lattice."""
-    global _initial_values_cache, _initial_strength_cache, _nominal_cache
     if _sync_proxy is None:
         return
     props = _props_for_uuid(uuid, prop_spec)
