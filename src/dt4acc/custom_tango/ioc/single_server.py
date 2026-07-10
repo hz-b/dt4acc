@@ -26,6 +26,7 @@ from dt4acc_lib.interfaces.backend.calculation_states import CalculationStates
 from dt4acc_lib.model.utils.tango_resource_locator import TangoResourceLocator
 
 from dt4acc.config.data.querries import get_controlled_elements, get_unique_magnet_power_converters, get_elements_per_power_converter
+from dt4acc.config.data.querries import get_rf_cavity_uuids
 from dt4acc.core.bl.controller import Controller
 from dt4acc.custom_tango.views.view import TangoView
 from dt4acc.custom_tango.ioc.mexec_server_for_physics_engine import _connect_to_mexec_service
@@ -124,12 +125,27 @@ class AsyncMexecAdapter:
 # Process-global cache: uuid -> {property: value}
 # Populated by _preload_initial_values() before init_device() runs.
 # Re-populated by refresh_cache_from_lattice() after reset.
+_initial_values_cache: dict = {}    # uuid -> {property: value}
 _initial_strength_cache: dict = {}  # uuid -> float (main_strength)
 _nominal_cache: dict = {}           # uuid -> {property: value}
 _my_magnet_uuids: list = []         # UUIDs of elements in this server process
 _uuid_to_prop: dict = {}            # uuid -> lattice properties
 _sync_proxy = None                  # MexecService proxy for live reads
 _device_view = False                # True only for device-view facilities (e.g. MAX IV)
+
+
+def _default_lattice_values() -> dict:
+    return {
+        "main_strength": 0.0,
+        "A1": 0.0,
+        "B1": 0.0,
+        "A2": 0.0,
+        "B2": 0.0,
+        "B3": 0.0,
+        "B4": 0.0,
+        "frequency": 0.0,
+        "voltage": 0.0,
+    }
 
 
 def enable_device_view_readback() -> None:
@@ -172,6 +188,18 @@ def _properties_for_uuid(uuid: str, uuid_to_prop: dict = None) -> list:
     return [value]
 
 
+def _properties_for_uuid_or_spec(uuid: str, prop_spec=None) -> list:
+    if prop_spec is not None:
+        if isinstance(prop_spec, (set, list, tuple)):
+            return list(prop_spec)
+        return [prop_spec]
+    if uuid in _uuid_to_prop:
+        return _properties_for_uuid(uuid, _uuid_to_prop)
+    if uuid in set(get_rf_cavity_uuids()):
+        return ["frequency", "voltage"]
+    return ["main_strength"]
+
+
 def _properties_for_element(name: str, mtype: str, subtype: str = "") -> list:
     if mtype == "RFCavity":
         return ["frequency", "voltage"]
@@ -212,12 +240,29 @@ def get_initial_strength(uuid: str) -> float:
     return _initial_strength_cache.get(uuid, 0.0)
 
 
+def get_initial_values(uuid: str) -> dict:
+    """Called by Tango devices to get cached initial lattice values."""
+    values = _default_lattice_values()
+    values.update(_initial_values_cache.get(uuid, {}))
+    return values
+
+
 def get_nominal_values(uuid: str) -> dict:
     """Called by MagnetDevice.RefreshFromCache() after reset."""
-    return _nominal_cache.get(uuid, {"main_strength": 0.0, "A1": 0.0, "B1": 0.0, "A2": 0.0, "B2": 0.0})
+    values = _default_lattice_values()
+    values.update(_nominal_cache.get(uuid, {}))
+    return values
 
 
 def get_rf_reference_frequency_khz() -> float:
+    frequencies = []
+    for uuid in get_rf_cavity_uuids():
+        frequency = _nominal_cache.get(uuid, {}).get("frequency")
+        if frequency is not None and frequency > 0.0:
+            frequencies.append(float(frequency) * 1e-3)
+    if frequencies:
+        return sum(frequencies) / len(frequencies)
+
     for values in _nominal_cache.values():
         frequency = values.get("frequency")
         if frequency is None or frequency <= 0.0:
@@ -230,17 +275,14 @@ def refresh_cache_from_lattice(sync_proxy, magnet_uuids: list, uuid_to_prop: dic
     """
     Bulk-read current lattice values for all magnets after reset.
     Uses per-uuid lattice_property — same approach as _preload_initial_values.
-    Correctors (B2/A2) always reset to 0.0, not read from lattice.
     """
-    global _initial_strength_cache, _nominal_cache
+    global _initial_values_cache, _initial_strength_cache, _nominal_cache
     if not magnet_uuids:
         return
 
     prop_groups = defaultdict(list)
     for uuid in magnet_uuids:
         for prop in _properties_for_uuid(uuid, uuid_to_prop):
-            if prop in ("B2", "A2"):
-                continue  # correctors reset to 0.0
             prop_groups[prop].append(uuid)
 
     logger.warning("Refreshing nominal cache for %d magnets...",
@@ -264,10 +306,36 @@ def refresh_cache_from_lattice(sync_proxy, magnet_uuids: list, uuid_to_prop: dic
             logger.warning("refresh_cache_from_lattice: %s failed: %s", prop, exc)
 
     _nominal_cache = new_cache
+    _initial_values_cache = dict(new_cache)
     _initial_strength_cache = {
         uuid: v.get("main_strength", 0.0) for uuid, v in new_cache.items()
     }
     logger.warning("Nominal cache refreshed for %d magnets.", len(new_cache))
+
+
+def refresh_one_from_lattice(uuid: str, prop_spec=None) -> None:
+    """Refresh one cached element from the lattice for direct RefreshFromCache."""
+    global _initial_values_cache, _initial_strength_cache, _nominal_cache
+    if _sync_proxy is None or not uuid:
+        return
+
+    props = _properties_for_uuid_or_spec(uuid, prop_spec)
+    try:
+        raw = _sync_proxy.sync_trigger_read([uuid] * len(props), props)
+    except Exception as exc:
+        logger.debug("refresh_one_from_lattice: %s failed: %s", uuid, exc)
+        return
+
+    values = _nominal_cache.setdefault(uuid, {})
+    for rcmd_id, rcmd_prop, payload in raw:
+        if rcmd_id != uuid or payload is None:
+            continue
+        try:
+            values[rcmd_prop] = float(payload)
+        except (TypeError, ValueError):
+            pass
+    _initial_values_cache[uuid] = dict(values)
+    _initial_strength_cache[uuid] = values.get("main_strength", 0.0)
 
 
 def _preload_initial_values(sync_proxy, magnet_uuids: list, uuid_to_prop: dict = None) -> None:
@@ -276,7 +344,7 @@ def _preload_initial_values(sync_proxy, magnet_uuids: list, uuid_to_prop: dict =
     Uses per-uuid lattice_property to avoid sending "main_strength"
     to octupole/corrector elements that don't support it.
     """
-    global _initial_strength_cache, _nominal_cache # noqa: F824
+    global _initial_values_cache, _initial_strength_cache, _nominal_cache # noqa: F824
     if not magnet_uuids:
         return
 
@@ -284,9 +352,6 @@ def _preload_initial_values(sync_proxy, magnet_uuids: list, uuid_to_prop: dict =
     prop_groups = defaultdict(list)
     for uuid in magnet_uuids:
         for prop in _properties_for_uuid(uuid, uuid_to_prop):
-            # Skip corrector properties (B2/A2) — they start at 0.0 always
-            if prop in ("B2", "A2"):
-                continue
             prop_groups[prop].append(uuid)
 
     logger.warning("Pre-loading initial values for %d element properties...",
@@ -309,6 +374,7 @@ def _preload_initial_values(sync_proxy, magnet_uuids: list, uuid_to_prop: dict =
             logger.warning("Bulk pre-load failed for %s: %s — devices will start at 0.0",
                            prop, exc)
     _nominal_cache = new_cache
+    _initial_values_cache = dict(new_cache)
     _initial_strength_cache = {
         uuid: values.get("main_strength", 0.0)
         for uuid, values in new_cache.items()

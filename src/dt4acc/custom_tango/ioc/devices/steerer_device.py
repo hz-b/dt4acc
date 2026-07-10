@@ -29,7 +29,12 @@ class HorizontalSteererDevice(BaseMagnetDevice):
 
     def init_device(self):
         super().init_device()
-        self._magnetic_strength = 0.0
+        from dt4acc.custom_tango.ioc.single_server import get_initial_values
+        self._magnetic_strength = get_initial_values(self.lattice_id).get(
+            self.lattice_property,
+            0.0,
+        )
+        self._sync_write_value("magnetic_strength", self._magnetic_strength)
 
     @attribute(dtype=float, access=AttrWriteType.READ_WRITE,
                label="Magnetic strength", unit="1/m")
@@ -51,9 +56,11 @@ class HorizontalSteererDevice(BaseMagnetDevice):
     @command
     def RefreshFromCache(self) -> None:
         try:
-            from dt4acc.custom_tango.ioc.single_server import get_nominal_values
+            from dt4acc.custom_tango.ioc.single_server import refresh_one_from_lattice, get_nominal_values
+            refresh_one_from_lattice(self.lattice_id)
             vals = get_nominal_values(self.lattice_id)
             self._magnetic_strength = vals.get(self.lattice_property, 0.0)
+            self._sync_write_value("magnetic_strength", self._magnetic_strength)
             logger.info("%s: RefreshFromCache done — magnetic_strength=%.6f",
                         self.trl.as_trl(), self._magnetic_strength)
         except Exception as exc:
@@ -69,7 +76,12 @@ class VerticalSteererDevice(BaseMagnetDevice):
 
     def init_device(self):
         super().init_device()
-        self._magnetic_strength = 0.0
+        from dt4acc.custom_tango.ioc.single_server import get_initial_values
+        self._magnetic_strength = get_initial_values(self.lattice_id).get(
+            self.lattice_property,
+            0.0,
+        )
+        self._sync_write_value("magnetic_strength", self._magnetic_strength)
 
     @attribute(dtype=float, access=AttrWriteType.READ_WRITE,
                label="Magnetic strength", unit="1/m")
@@ -91,9 +103,11 @@ class VerticalSteererDevice(BaseMagnetDevice):
     @command
     def RefreshFromCache(self) -> None:
         try:
-            from dt4acc.custom_tango.ioc.single_server import get_nominal_values
+            from dt4acc.custom_tango.ioc.single_server import refresh_one_from_lattice, get_nominal_values
+            refresh_one_from_lattice(self.lattice_id)
             vals = get_nominal_values(self.lattice_id)
             self._magnetic_strength = vals.get(self.lattice_property, 0.0)
+            self._sync_write_value("magnetic_strength", self._magnetic_strength)
             logger.info("%s: RefreshFromCache done — magnetic_strength=%.6f",
                         self.trl.as_trl(), self._magnetic_strength)
         except Exception as exc:

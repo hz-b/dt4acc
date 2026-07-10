@@ -61,26 +61,15 @@ class CavityDevice(BaseMagnetDevice):
 
     def _refresh_from_cache(self) -> None:
         try:
-            from dt4acc.custom_tango.ioc.mexec_server_for_physics_engine import _connect_to_mexec_service
-            from dt4acc.custom_tango.ioc.single_server import get_nominal_values
+            from dt4acc.custom_tango.ioc.single_server import refresh_one_from_lattice, get_nominal_values
+            refresh_one_from_lattice(self.lattice_id)
 
             vals = get_nominal_values(self.lattice_id)
             self._frequency = vals.get("frequency", 0.0)
             self._voltage = vals.get("voltage", 0.0)
 
-            sync_proxy, _, _ = _connect_to_mexec_service()
-            raw = sync_proxy.sync_trigger_read(
-                [self.lattice_id, self.lattice_id],
-                ["frequency", "voltage"],
-            )
-            for _rcmd_id, rcmd_prop, payload in raw:
-                if payload is None:
-                    continue
-                if rcmd_prop == "frequency":
-                    self._frequency = float(payload)
-                elif rcmd_prop == "voltage":
-                    self._voltage = float(payload)
-
+            self._sync_write_value("frequency", self._frequency)
+            self._sync_write_value("voltage", self._voltage)
             logger.info("%s: RefreshFromCache done — frequency=%.3f voltage=%.3f",
                         self.magnet_name, self._frequency, self._voltage)
         except Exception as exc:

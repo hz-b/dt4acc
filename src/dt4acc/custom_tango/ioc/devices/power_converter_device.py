@@ -9,6 +9,7 @@ from tango.server import Device, attribute, command, device_property, AttrWriteT
 from dt4acc.config.data.querries import get_elements_per_power_converter
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.controller_registry import get_controller
+from dt4acc.custom_tango.ioc.devices.write_value_sync import sync_write_value
 
 logger = get_logger()
 
@@ -52,6 +53,7 @@ class PowerConverterDevice(Device):
         self._current = self._peek_initial_current()
         self._current_rb = self._current
         self._voltage = 0.0
+        sync_write_value(self, "current_set", self._current)
 
         self.set_state(DevState.ON)
 
@@ -136,8 +138,26 @@ class CavityPowerConverterDevice(Device):
         self._cavity_uuids = [c["uuid"] for c in cavities if c.get("uuid")]
         logger.info("%s: controlling cavity UUIDs: %s", self.pc_name, self._cavity_uuids)
 
-        self._refresh_from_backend()
+        self._current = self._initial_cavity_voltage()
+        self._voltage = self._current
+        sync_write_value(self, "current_set", self._current)
         self.set_state(DevState.ON)
+
+    def _initial_cavity_voltage(self) -> float:
+        try:
+            from dt4acc.custom_tango.ioc.single_server import refresh_one_from_lattice, get_initial_values
+            for uuid in self._cavity_uuids:
+                refresh_one_from_lattice(uuid, ("voltage",))
+            voltages = [
+                get_initial_values(uuid).get("voltage", 0.0)
+                for uuid in self._cavity_uuids
+            ]
+            voltages = [float(value) for value in voltages if value is not None]
+            if voltages:
+                return sum(voltages) / len(voltages)
+        except Exception as exc:
+            logger.debug("%s: could not initialise RF PC voltage: %s", self.pc_name, exc)
+        return 0.0
 
     def _async(self, coro):
         try:
@@ -182,26 +202,15 @@ class CavityPowerConverterDevice(Device):
 
     @command
     def RefreshFromCache(self) -> None:
-        self._refresh_from_backend()
-
-    def _refresh_from_backend(self) -> None:
-        if not self._cavity_uuids:
-            self._voltage = 0.0
-            return
         try:
-            from dt4acc.custom_tango.ioc.mexec_server_for_physics_engine import _connect_to_mexec_service
-
-            sync_proxy, _, _ = _connect_to_mexec_service()
-            raw = sync_proxy.sync_trigger_read(
-                self._cavity_uuids,
-                ["voltage"] * len(self._cavity_uuids),
+            self._current = self._initial_cavity_voltage()
+            self._voltage = self._current
+            sync_write_value(self, "current_set", self._current)
+            logger.info(
+                "%s: RefreshFromCache done — current_set=%.3f voltage=%.3f",
+                self.pc_name,
+                self._current,
+                self._voltage,
             )
-            voltages = [
-                float(payload)
-                for _rcmd_id, _rcmd_prop, payload in raw
-                if payload is not None
-            ]
-            if voltages:
-                self._voltage = sum(voltages) / len(voltages)
         except Exception as exc:
             logger.error("%s: RefreshFromCache failed: %s", self.pc_name, exc)
