@@ -35,7 +35,12 @@ class SkewQuadDevice(BaseMagnetDevice):
 
     def init_device(self):
         super().init_device()
-        self._corrector_strength = 0.0
+        from dt4acc.custom_tango.ioc.single_server import get_initial_values
+        self._corrector_strength = get_initial_values(self.lattice_id).get(
+            self.lattice_property,
+            0.0,
+        )
+        self._sync_write_value("corrector_strength", self._corrector_strength)
         logger.info("Initializing %s: %s lattice_id=%s lattice_property=%s",
                     self.__class__.__name__, self.get_name(),
                     self.lattice_id, self.lattice_property)
@@ -60,9 +65,11 @@ class SkewQuadDevice(BaseMagnetDevice):
     @command
     def RefreshFromCache(self) -> None:
         try:
-            from dt4acc.custom_tango.ioc.single_server import get_nominal_values
+            from dt4acc.custom_tango.ioc.single_server import refresh_one_from_lattice, get_nominal_values
+            refresh_one_from_lattice(self.lattice_id)
             vals = get_nominal_values(self.lattice_id)
             self._corrector_strength = vals.get(self.lattice_property, 0.0)
+            self._sync_write_value("corrector_strength", self._corrector_strength)
             logger.info("%s: RefreshFromCache done — corrector_strength=%.6f",
                         self.magnet_name, self._corrector_strength)
         except Exception as exc:

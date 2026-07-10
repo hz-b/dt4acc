@@ -4,11 +4,12 @@ from dt4acc.core.bl.shared_event_loop import get_shared_event_loop
 from dt4acc_lib.model.utils import tango_resource_locator
 from dt4acc_lib.model.utils.command import BehaviourOnError, Command
 from tango import DevState, DevFailed
-from tango.server import Device, attribute, device_property, AttrWriteType
+from tango.server import Device, attribute, command, device_property, AttrWriteType
 
 from dt4acc.config.data.querries import get_magnets_per_power_converters
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.controller_registry import get_controller
+from dt4acc.custom_tango.ioc.devices.write_value_sync import sync_write_value
 
 logger = get_logger()
 
@@ -52,6 +53,7 @@ class PowerConverterDevice(Device):
         self._current = self._peek_initial_current()
         self._current_rb = self._current
         self._voltage = 0.0
+        sync_write_value(self, "current_set", self._current)
 
         self.set_state(DevState.ON)
 
@@ -136,7 +138,42 @@ class CavityPowerConverterDevice(Device):
         self._cavity_uuids = [c["uuid"] for c in cavities if c.get("uuid")]
         logger.info("%s: controlling cavity UUIDs: %s", self.pc_name, self._cavity_uuids)
 
+        self._current = self._initial_cavity_voltage()
+        self._voltage = self._current
+        sync_write_value(self, "current_set", self._current)
+
         self.set_state(DevState.ON)
+
+    def _initial_cavity_voltage(self) -> float:
+        try:
+            from dt4acc.custom_tango.ioc.single_server import refresh_one_from_lattice, get_initial_values
+            for uuid in self._cavity_uuids:
+                refresh_one_from_lattice(uuid, ("voltage",))
+            voltages = [
+                get_initial_values(uuid).get("voltage", 0.0)
+                for uuid in self._cavity_uuids
+            ]
+            voltages = [float(v) for v in voltages if v is not None]
+            if voltages:
+                return sum(voltages) / len(voltages)
+        except Exception as exc:
+            logger.debug("%s: could not initialise RF PC voltage: %s", self.pc_name, exc)
+        return 0.0
+
+    @command
+    def RefreshFromCache(self) -> None:
+        try:
+            self._current = self._initial_cavity_voltage()
+            self._voltage = self._current
+            sync_write_value(self, "current_set", self._current)
+            logger.info(
+                "%s: RefreshFromCache done — current_set=%.3f voltage=%.3f",
+                self.pc_name,
+                self._current,
+                self._voltage,
+            )
+        except Exception as exc:
+            logger.error("%s: RefreshFromCache failed: %s", self.pc_name, exc)
 
     def _async(self, coro):
         try:

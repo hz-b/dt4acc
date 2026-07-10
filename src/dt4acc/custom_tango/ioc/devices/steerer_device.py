@@ -28,7 +28,9 @@ class HorizontalSteererDevice(BaseMagnetDevice):
 
     def init_device(self):
         super().init_device()
-        self._x = 0.0
+        from dt4acc.custom_tango.ioc.single_server import get_initial_values
+        self._x = get_initial_values(self.lattice_id).get("x_kick", 0.0)
+        self._sync_write_value("x_kick", self._x)
 
     @attribute(dtype=float, access=AttrWriteType.READ_WRITE,
                label="Horizontal kick", unit="rad")
@@ -50,9 +52,11 @@ class HorizontalSteererDevice(BaseMagnetDevice):
     @command
     def RefreshFromCache(self) -> None:
         try:
-            from dt4acc.custom_tango.ioc.single_server import get_nominal_values
+            from dt4acc.custom_tango.ioc.single_server import refresh_one_from_lattice, get_nominal_values
+            refresh_one_from_lattice(self.lattice_id)
             vals = get_nominal_values(self.lattice_id)
-            self._x = vals["x_kick"]
+            self._x = vals.get("x_kick", 0.0)
+            self._sync_write_value("x_kick", self._x)
             logger.info("%s: RefreshFromCache done — x_kick=%.6f",
                         self.trl.as_trl(), self._x)
         except Exception as exc:
@@ -67,7 +71,9 @@ class VerticalSteererDevice(BaseMagnetDevice):
 
     def init_device(self):
         super().init_device()
-        self._y = 0.0
+        from dt4acc.custom_tango.ioc.single_server import get_initial_values
+        self._y = get_initial_values(self.lattice_id).get("y_kick", 0.0)
+        self._sync_write_value("y_kick", self._y)
 
     @attribute(dtype=float, access=AttrWriteType.READ_WRITE,
                label="Vertical kick", unit="rad")
@@ -89,9 +95,11 @@ class VerticalSteererDevice(BaseMagnetDevice):
     @command
     def RefreshFromCache(self) -> None:
         try:
-            from dt4acc.custom_tango.ioc.single_server import get_nominal_values
+            from dt4acc.custom_tango.ioc.single_server import refresh_one_from_lattice, get_nominal_values
+            refresh_one_from_lattice(self.lattice_id)
             vals = get_nominal_values(self.lattice_id)
-            self._y = vals["y_kick"]
+            self._y = vals.get("y_kick", 0.0)
+            self._sync_write_value("y_kick", self._y)
             logger.info("%s: RefreshFromCache done — y_kick=%.6f",
                         self.trl.as_trl(), self._y)
         except Exception as exc:

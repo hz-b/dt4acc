@@ -191,16 +191,29 @@ class TangoController(ControllerInterface):
 
             from tango import Database, DeviceProxy
             db = Database()
-            dev_list = db.get_device_exported_for_class("MagnetDevice")
             count = 0
-            for dev_name in dev_list.value_string:
+            class_names = (
+                "MultipoleDevice",
+                "HorizontalSteererDevice",
+                "VerticalSteererDevice",
+                "SkewQuadDevice",
+                "CavityDevice",
+                "CavityPowerConverterDevice",
+            )
+            for class_name in class_names:
                 try:
-                    dp = DeviceProxy(str(dev_name))
-                    dp.set_timeout_millis(1000)
-                    dp.command_inout("RefreshFromCache")
-                    count += 1
+                    dev_list = db.get_device_exported_for_class(class_name)
                 except Exception as exc:
-                    logger.debug("RefreshFromCache failed for %s: %s", dev_name, exc)
+                    logger.debug("Could not list exported %s devices: %s", class_name, exc)
+                    continue
+                for dev_name in dev_list.value_string:
+                    try:
+                        dp = DeviceProxy(str(dev_name))
+                        dp.set_timeout_millis(1000)
+                        dp.command_inout("RefreshFromCache")
+                        count += 1
+                    except Exception as exc:
+                        logger.debug("RefreshFromCache failed for %s: %s", dev_name, exc)
             logger.warning("TangoController.reset: RefreshFromCache sent to %d magnets", count)
         except Exception as exc:
             logger.warning("TangoController.reset: could not refresh magnets: %s", exc)

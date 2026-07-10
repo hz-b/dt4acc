@@ -15,6 +15,7 @@ from tango.server import Device, device_property
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.controller_registry import get_controller
 from dt4acc.core.bl.shared_event_loop import get_shared_event_loop
+from dt4acc.custom_tango.ioc.devices.write_value_sync import sync_write_value
 
 logger = get_logger()
 
@@ -84,3 +85,6 @@ class BaseMagnetDevice(Device):
                 delayed_reads=[],
             )
         )
+
+    def _sync_write_value(self, attr_name: str, value) -> None:
+        sync_write_value(self, attr_name, value)
