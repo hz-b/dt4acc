@@ -80,6 +80,8 @@ orbit_type = Type(
                     ( "B"        , "ad" ),
                     ( "C"        , "ad" ),
                     ( "D"        , "ad" ),
+                    ( "Sum"      , "ad" ),
+                    ( "Q"        , "ad" ),
                     # fmt:on
                 ],
             ),
@@ -123,7 +125,9 @@ initial_data = {
         "X"  : [] ,
         "Y"  : [] ,
         "Ignored" : [],
-        "TimeStamp" : []
+        "TimeStamp" : [],
+        "Sum" : [],
+        "Q"   : [],
         # fmt:on
     },
     "labels" : [ "BPM", "Ignored", "TimeStamp", "A", "B", "C", "D", "X", "Y", "Sum", "Q" ]
@@ -234,6 +238,9 @@ class OrbitTwinServer:
                 "Y": y,
                 "Ignored": [0] * len(x),
                 "TimeStamp": [now] * len(x),
+                # Todo: these should reflect the actual beam
+                "Sum": [1] * len(x),
+                "Q": [1] * len(x),
             },
             "timeStamp": {
                 "secondsPastEpoch": int(now),
