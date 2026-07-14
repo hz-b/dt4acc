@@ -71,13 +71,15 @@ orbit_type = Type(
                 None,
                 [
                     # fmt:off
-                    ( "BPM", "as" ),
-                    ( "X"  , "ad" ),
-                    ( "Y"  , "ad" ),
-                    ( "A"  , "ad" ),
-                    ( "B"  , "ad" ),
-                    ( "C"  , "ad" ),
-                    ( "D"  , "ad" ),
+                    ( "BPM"      , "as" ),
+                    ( "Ignored"  , "ai" ),
+                    ( "TimeStamp", "ad" ),
+                    ( "X"        , "ad" ),
+                    ( "Y"        , "ad" ),
+                    ( "A"        , "ad" ),
+                    ( "B"        , "ad" ),
+                    ( "C"        , "ad" ),
+                    ( "D"        , "ad" ),
                     # fmt:on
                 ],
             ),
@@ -120,6 +122,8 @@ initial_data = {
         "D"  : [] ,
         "X"  : [] ,
         "Y"  : [] ,
+        "Ignored" : [],
+        "TimeStamp" : []
         # fmt:on
     },
     "labels" : [ "BPM", "Ignored", "TimeStamp", "A", "B", "C", "D", "X", "Y", "Sum", "Q" ]
@@ -228,6 +232,8 @@ class OrbitTwinServer:
                 "D": [v * 0.80 for v in x],
                 "X": x,
                 "Y": y,
+                "Ignored": [0] * len(x),
+                "TimeStamp": [now] * len(x),
             },
             "timeStamp": {
                 "secondsPastEpoch": int(now),
