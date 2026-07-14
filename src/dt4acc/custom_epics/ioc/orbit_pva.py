@@ -106,6 +106,7 @@ orbit_type = Type(
                 ],
             ),
         ),
+        ("labels", "as")
     ],
 )
 
@@ -121,6 +122,7 @@ initial_data = {
         "Y"  : [] ,
         # fmt:on
     },
+    "labels" : [ "BPM", "Ignored", "TimeStamp", "A", "B", "C", "D", "X", "Y", "Sum", "Q" ]
 }
 
 initial_beam_physics_data = dict(
