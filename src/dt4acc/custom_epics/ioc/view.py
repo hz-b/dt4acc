@@ -177,18 +177,19 @@ class View(ViewInterface):
         for elem_tbt in tbt_data.per_element:
             # Assuming that the element names correspond to
             # id uses for the record names
-            rcmd = ReadCommand(id=f"turn_by_turn:{elem_tbt.uid}:x", property="pos")
+            rcmd = ReadCommand(id=elem_tbt.uid.device_name, property="tbt_x")
             rc = self.process_variables.get(rcmd)
             if rc is None:
                 logger.warning("%s: no record for %s", self.__class__.__name__, rcmd)
             else:
                 rc.set(elem_tbt.get_x().mean_per_turn())
-            rcmd = ReadCommand(id=f"turn_by_turn:{elem_tbt.uid}:y", property="pos")
+            rcmd = ReadCommand(id=elem_tbt.uid.device_name, property="tbt_y")
             rc = self.process_variables.get(rcmd)
             if rc is None:
                 logger.warning("%s: no record for %s", self.__class__.__name__, rcmd)
             else:
                 rc.set(elem_tbt.get_y().mean_per_turn())
+            # Todo: handle sum signal
 
     def update_tune(self, var: ReadCommand, pkg):
         assert (
