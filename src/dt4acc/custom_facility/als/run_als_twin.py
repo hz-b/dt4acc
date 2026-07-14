@@ -20,7 +20,8 @@ from dt4acc.custom_epics.ioc.pv_setup import initialize_master_clock_pvs, initia
     initialize_orbit_pvs, initialize_twiss_pvs, initialize_tune_pvs, initialize_calculation_state_pvs, \
     initialize_turn_by_turn_p0
 from dt4acc.custom_epics.ioc.pv_setup_from_model import initialize_pvs_from_model
-from dt4acc.custom_facility.als.liaison_translator_setup import load_managers
+from dt4acc.custom_facility.als.gpt.dt4acc_bootstrap import load_managers
+# from dt4acc.custom_facility.als.liaison_translator_setup import load_managers
 from dt4acc.custom_facility.als.read_lattice import als_get_lattice, default_filename
 from dt4acc.custom_facility.als.view import ALSView
 from dt4acc_lib.model.utils.command import ReadCommand, Command
@@ -31,8 +32,11 @@ from dt4acc_lib.model.output.track import ParticleState
 
 # dt4acc lib etc only warning level info only for dt4acc
 logging.getLogger("transitions").setLevel(logging.WARNING)
-logging.getLogger("dt4acc_lib").setLevel(logging.WARNING)
+logging.getLogger("dt4acc_lib").setLevel(logging.INFO)
 logging.getLogger("dt4acc").setLevel(logging.INFO)
+
+logger = logging.getLogger("dt4acc")
+
 
 async def main():
 
@@ -105,6 +109,9 @@ async def main():
     # start to work
     controller.start()
 
+    logger.warning(
+        "Started controller, queue should be active by now, dispatching delayed reads"
+    )
     # Extra reads at startup
     await read_and_dispatch(
         controller=controller,
