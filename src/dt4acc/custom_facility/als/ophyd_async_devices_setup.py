@@ -10,9 +10,11 @@ import os
 import re
 from collections import defaultdict
 from itertools import zip_longest
+from typing import Sequence
 
 from accml.custom.epics.devices.bpm import BPMTbTPosition
 from accml.custom.epics.devices.orbit import Orbit
+from accml.custom.epics.devices.turn_by_turn_data_config import TurnByTurnDataConfig
 from accml_lib.core.interfaces.utils.devices_facade import DevicesFacade as DevicesFacadeInterface
 from accml.core.utils.ophyd_async.multiplexer_for_settable_devices import (
     MultiplexerProxy,
@@ -21,7 +23,7 @@ from accml.custom.epics.devices.master_clock import MasterClock
 from accml.custom.epics.devices.power_converter import PowerConverter
 from accml.custom.epics.devices.tunes import Tunes
 from dt4acc.core.model.view import Setpoint
-from dt4acc.custom_facility.als.liaison_translator_setup import load_managers
+from dt4acc.custom_facility.als.gpt.dt4acc_bootstrap import load_managers
 from dt4acc.custom_facility.als.model import MMLStyleDeviceIdentifier
 
 # Todo: clarify with markus if this code will be contributed
@@ -38,12 +40,16 @@ match = re.compile(
     "AC(?P<child>[0-9]+)"
 )
 
+
 class DevicesFacade(DevicesFacadeInterface):
     def __init__(self, d):
         self._devices = d
 
     def get(self, name: str):
         return self._devices.get(name)
+
+    def names(self) -> Sequence[str]:
+        return tuple(self._devices.keys())
 
 
 def try_put_bpms_into_nomencalutra(signal_lut):
@@ -98,13 +104,15 @@ def try_put_bpms_into_nomencalutra(signal_lut):
 
 
 def setup_bpms(signals_lut, prefix):
-    bpm_names_for_tbt, _ = try_put_bpms_into_nomencalutra(signals_lut)
-    bpm_names_for_tbt
-    # json.dump(dict(bpm_tbt_names=list(bpm_names_for_tbt)), open("als_bpm_tbt_data.json", "wt"))
+    bpms_with_tbt, _ = try_put_bpms_into_nomencalutra(signals_lut)
+    # Todo: find out how that could slip here
+    #       or why the twin does not create an interface for it
+    bpms_with_tbt =  {k: v for k, v in bpms_with_tbt.items() if k != "SR01C:BPM4"}
+    # json.dump(dict(bpm_tbt_names=list(bpms_with_tbt)), open("als_bpm_tbt_data.json", "wt"))
 
     d = {
-        BPMTbTPosition(prefix + k, name="k")
-        for k in bpm_names_for_tbt.keys()
+        k: BPMTbTPosition(f"{prefix}{k}:", name=k)
+        for k in bpms_with_tbt.keys()
     }
     return d
 
@@ -149,7 +157,10 @@ def setup(prefix: str=None) -> DevicesFacade:
     # a signal assigned to them
     not_handled = [(setp, rdbk) for setp, rdbk in zip_longest(setpoints, readbacks) if signals_lut.get(rdbk, None) == None]
     for setp, rdbk in not_handled:
-        logger.info(f"Can not handle automatically setpoint pv name {setp.pv_name} with associated {rdbk} as no signal is assigned to this rcmd")
+        logger.info(
+            f"%s.setup Can not handle automatically setpoint pv name {setp.pv_name} with associated {rdbk} as no signal is assigned to this rcmd",
+            __name__,
+        )
 
     combined_setp_rdbk_pvs = {
         setp.pv_name: (setp.pv_name, signals_lut[rdbk].pv_name)
@@ -206,6 +217,7 @@ def setup(prefix: str=None) -> DevicesFacade:
     master_clock = MasterClock(f'{prefix}:master_clock:ref_freq', name="mc")
     tune = Tunes(f"{prefix}TUNEZR", name="tune")
 
+    turn_by_turn = TurnByTurnDataConfig(f"{prefix}simulator_ring:turn_by_turn:", name="tbt")
     # need to handle BPMs
     [rcmd for rcmd in list(signals_lut) if isinstance(rcmd, MMLStyleDeviceIdentifier)]
 
@@ -219,8 +231,11 @@ def setup(prefix: str=None) -> DevicesFacade:
             steerer_pcs=steerer_pcs,
             steerer_mux=steerers,
             tbt_bpms=tbt_bpms,
+            turn_by_turn=turn_by_turn,
             # orbit=orbit
         ),
+        # so that these can be accessed individually
+        **tbt_bpms,
         **quad_pcs,
         # **aux,
         **steerer_pcs,
