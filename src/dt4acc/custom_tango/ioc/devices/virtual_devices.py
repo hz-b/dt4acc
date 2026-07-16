@@ -21,6 +21,7 @@ from dt4acc_lib.interfaces.backend.calculation_states import CalculationStates
 from dt4acc_lib.model.utils.command import Command, BehaviourOnError, ReadCommand
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.controller_registry import get_controller
+from dt4acc.custom_tango.ioc.devices.write_value_sync import sync_write_value
 
 logger = get_logger()
 
@@ -84,13 +85,48 @@ class RingSimulatorDevice(Device, AsyncMixin):
         self._tune_vert = 0.0
         self._xi_x      = 0.0
         self._xi_y      = 0.0
-        self._reference_frequency = 0.0
         self._rf_cavity_uuids = get_rf_cavity_uuids()
+        self._reference_frequency = self._initial_reference_frequency()
+        self._sync_write_value("reference_frequency", self._reference_frequency)
         for attr_name in ("orbit_x", "orbit_y",
                           "beta_x", "beta_y", "alpha_x", "alpha_y", "nu_x", "nu_y",
                           "bpm_x_attr", "bpm_y_attr", "hor", "vert"):
             self.set_change_event(attr_name, True, False)
         self.set_state(DevState.ON)
+
+    def _sync_write_value(self, attr_name: str, value) -> None:
+        sync_write_value(self, attr_name, value)
+
+    def _initial_reference_frequency(self) -> float:
+        """Return the average RF cavity frequency in kHz from the current lattice."""
+        if not self._rf_cavity_uuids:
+            return 0.0
+        try:
+            raw = get_controller().mexec._proxy.sync_trigger_read(
+                self._rf_cavity_uuids,
+                ["frequency"] * len(self._rf_cavity_uuids),
+            )
+            values = [
+                float(payload) / 1000.0
+                for _, _, payload in raw
+                if payload is not None
+            ]
+            if values:
+                return sum(values) / len(values)
+        except Exception as exc:
+            logger.debug("RingSimulatorDevice: could not initialise RF frequency: %s", exc)
+        return 0.0
+
+    @command
+    def RefreshFromCache(self) -> None:
+        """Refresh RF aggregate read/write cache from the current lattice."""
+        self._reference_frequency = self._initial_reference_frequency()
+        self._sync_write_value("reference_frequency", self._reference_frequency)
+        logger.info(
+            "%s: RefreshFromCache done — reference_frequency=%.6f kHz",
+            self.get_name(),
+            self._reference_frequency,
+        )
 
     # Orbit
     @attribute(dtype=DevDouble, dformat=AttrDataFormat.SPECTRUM, max_dim_x=MAX_ELEMS)
@@ -296,6 +332,7 @@ class RingSimulatorDevice(Device, AsyncMixin):
         try:
             self._start_async()
             get_controller().reset()
+            self.RefreshFromCache()
             self.set_state(DevState.ON)
             logger.warning("RingSimulatorDevice.Reset: complete — recalculation queued")
         except Exception as exc:
@@ -311,6 +348,7 @@ class RingSimulatorDevice(Device, AsyncMixin):
         try:
             self._start_async()
             get_controller().reinit()
+            self.RefreshFromCache()
             self.set_state(DevState.ON)
             logger.warning("RingSimulatorDevice.Reinit: complete — nominal state restored")
         except Exception as exc:
