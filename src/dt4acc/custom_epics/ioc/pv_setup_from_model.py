@@ -123,7 +123,7 @@ async def build_ao_record(
         )
 
     rec = builder.aOut(
-        model.pv_name, initial_value=initial_val, on_update=update, PREC=model.prec
+        model.pv_name, initial_value=initial_val, on_update=update, PREC=model.prec, always_update=model.always_update
     )
     return rec
 
@@ -167,7 +167,7 @@ async def build_longout_record(builder, model: Setpoint, controller: ControllerI
         )
 
     rec = builder.longOut(
-        model.pv_name, initial_value=initial_val, on_update=update
+        model.pv_name, initial_value=initial_val, on_update=update, always_update=model.always_update
     )
     return rec
 
@@ -241,7 +241,7 @@ async def build_waveform_out_record(
 
     try:
         rec = builder.WaveformOut(
-            model.pv_name, initial_value=initial_val, on_update=update, length=model.default_waveform_length
+            model.pv_name, initial_value=initial_val, on_update=update, length=model.default_waveform_length, always_update=model.always_update
         )
     except ValueError as ve:
         raise ve

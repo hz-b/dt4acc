@@ -120,7 +120,7 @@ class Setpoint(_ProcessVariableView):
     """a process variable that can also be set"""
 
     record_type: Literal["ao", "longout", "waveform_out[str]", "waveform_out[float]"]
-
+    always_update: bool = False
     reads: Sequence[ReadCommand]
     """Which reads to add to dispatch to the controller when the update is made
 
