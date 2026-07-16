@@ -2,6 +2,7 @@ from copy import copy as _copy
 import math
 from typing import Optional, Dict
 
+import numpy as np
 from softioc import pythonSoftIoc
 
 from dt4acc.core.interfaces.view_interface import ViewInterface
@@ -179,17 +180,31 @@ class View(ViewInterface):
             # id uses for the record names
             rcmd = ReadCommand(id=elem_tbt.uid.device_name, property="tbt_x")
             rc = self.process_variables.get(rcmd)
+            x = elem_tbt.get_x().nanmean_per_turn()
             if rc is None:
                 logger.warning("%s: no record for %s", self.__class__.__name__, rcmd)
             else:
-                rc.set(elem_tbt.get_x().mean_per_turn())
+                rc.set(x)
             rcmd = ReadCommand(id=elem_tbt.uid.device_name, property="tbt_y")
+            rc = self.process_variables.get(rcmd)
+            y = elem_tbt.get_y().nanmean_per_turn()
+            if rc is None:
+                logger.warning("%s: no record for %s", self.__class__.__name__, rcmd)
+            else:
+                rc.set(y)
+
+            # Todo: handle sum signal in a smarter way
+            #       should it be calculated in view ?
+            #
+            #       correctly scale for current
+            survived = elem_tbt.get_survived()
+            n_particles = survived.get_n_particles_survived_per_turn()
+            rcmd = ReadCommand(id=elem_tbt.uid.device_name, property="tbt_sum")
             rc = self.process_variables.get(rcmd)
             if rc is None:
                 logger.warning("%s: no record for %s", self.__class__.__name__, rcmd)
             else:
-                rc.set(elem_tbt.get_y().mean_per_turn())
-            # Todo: handle sum signal
+                rc.set(n_particles)
 
     def update_tune(self, var: ReadCommand, pkg):
         assert (
