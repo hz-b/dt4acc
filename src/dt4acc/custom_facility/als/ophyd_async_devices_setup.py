@@ -23,7 +23,7 @@ from accml.custom.epics.devices.master_clock import MasterClock
 from accml.custom.epics.devices.power_converter import PowerConverter
 from accml.custom.epics.devices.tunes import Tunes
 from dt4acc.core.model.view import Setpoint
-from dt4acc.custom_facility.als.gpt.dt4acc_bootstrap import load_managers
+from dt4acc.custom_facility.als.managers_input.dt4acc_bootstrap import load_managers
 from dt4acc.custom_facility.als.model import MMLStyleDeviceIdentifier
 
 # Todo: clarify with markus if this code will be contributed
