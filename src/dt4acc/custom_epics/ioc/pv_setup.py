@@ -403,7 +403,7 @@ async def initialize_turn_by_turn_p0(builder, controller: ControllerInterface) -
     rec = builder.WaveformOut(
         "simulator_ring:turn_by_turn:start_vec",
         initial_value=inital_vector,
-        length=6 * 16, # * 1024,
+        length=6 * 1024,
         on_update=update,
     )
     return {rcmd: rec}
