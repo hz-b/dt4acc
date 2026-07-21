@@ -2,11 +2,13 @@ from copy import copy as _copy
 import math
 from typing import Optional, Dict
 
+import numpy as np
 from softioc import pythonSoftIoc
 
 from dt4acc.core.interfaces.view_interface import ViewInterface
 from dt4acc.core.utils.logger import get_logger
 from dt4acc_lib.model.output.result import TranslatedReading, SingleReading
+from dt4acc_lib.model.output.result import TranslatedReading
 from .orbit_pva import OrbitTwinServer
 from dt4acc_lib.model.utils.command import ReadCommand
 
@@ -78,6 +80,9 @@ class View(ViewInterface):
             return True
         elif var.id == "track":
             self.update_track(var, value)
+            return True
+        elif var.id == "turn_by_turn":
+            self.update_turn_by_turn(var, value)
             return True
         elif var.id == "survey":
             self.update_survey(var, value)
@@ -164,6 +169,43 @@ class View(ViewInterface):
         else:
             raise AssertionError(f"Don't know track property {var.property}")
 
+    def update_turn_by_turn(self, var: ReadCommand, pkg):
+        assert (
+            var.id == "turn_by_turn"
+        ), f"Only prepared to work on turn by turn data {var}"
+        (single_reading,) = pkg.readings
+        tbt_data = single_reading.payload
+        for elem_tbt in tbt_data.per_element:
+            # Assuming that the element names correspond to
+            # id uses for the record names
+            rcmd = ReadCommand(id=elem_tbt.uid.device_name, property="tbt_x")
+            rc = self.process_variables.get(rcmd)
+            x = elem_tbt.get_x().nanmean_per_turn()
+            if rc is None:
+                logger.warning("%s: no record for %s", self.__class__.__name__, rcmd)
+            else:
+                rc.set(x)
+            rcmd = ReadCommand(id=elem_tbt.uid.device_name, property="tbt_y")
+            rc = self.process_variables.get(rcmd)
+            y = elem_tbt.get_y().nanmean_per_turn()
+            if rc is None:
+                logger.warning("%s: no record for %s", self.__class__.__name__, rcmd)
+            else:
+                rc.set(y)
+
+            # Todo: handle sum signal in a smarter way
+            #       should it be calculated in view ?
+            #
+            #       correctly scale for current
+            survived = elem_tbt.get_survived()
+            n_particles = survived.get_n_particles_survived_per_turn()
+            rcmd = ReadCommand(id=elem_tbt.uid.device_name, property="tbt_sum")
+            rc = self.process_variables.get(rcmd)
+            if rc is None:
+                logger.warning("%s: no record for %s", self.__class__.__name__, rcmd)
+            else:
+                rc.set(n_particles)
+
     def update_tune(self, var: ReadCommand, pkg):
         assert (
             var.id == "twiss"
@@ -214,6 +256,7 @@ class View(ViewInterface):
             rec.set(tune_freq)
             logger.debug(f"Updated Tune for plane {plane}")
             pass
+
 
     def update_twiss(self, var: ReadCommand, pkg):
         """
