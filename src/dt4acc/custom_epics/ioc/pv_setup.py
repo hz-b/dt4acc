@@ -413,3 +413,20 @@ async def initialize_cavity_pvs(builder, controller: ControllerInterface):
         builder.aIn(f"{cavity_name}:freq", initial_value=start_val, EGU="kHz", PREC=3)
         for cavity_name in cavity_names
     }
+
+
+def initialize_calculation_state_pvs(builder, controller):
+    assert callable(controller.mexec.backend.reset)
+    assert callable(controller.mexec.backend.reinit)
+    return {
+        ReadCommand(id="simulator_ring", property="reset"):
+            builder.longOut(
+                "simulator_ring:reset", initial_value=0,
+                on_update=lambda val: controller.mexec.backend.reset()
+        ),
+        ReadCommand(id="simulator_ring", property="reinit"):
+            builder.stringOut(
+                "simulator_ring:reinit", initial_value="",
+                on_update=lambda val: controller.mexec.backend.reinit()
+            ),
+    }
