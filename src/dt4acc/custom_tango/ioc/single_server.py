@@ -17,6 +17,7 @@ Responsibilities
 
 import asyncio
 import logging
+import getpass
 import os
 import sys
 from collections import defaultdict
@@ -347,6 +348,15 @@ def _inject_controller(prefix: str) -> None:
     logger.info("TangoController created and registered for prefix=%s", prefix)
 
 
+def _get_dt4acc_prefix() -> str:
+    if os.environ.get("DT4ACC_PREFIX"):
+        return os.environ["DT4ACC_PREFIX"]
+    try:
+        return getpass.getuser()
+    except Exception:
+        return "dt4acc"
+
+
 # ---------------------------------------------------------------------------
 # main_loop — called by server_manager for each (server_name, instance_name)
 # ---------------------------------------------------------------------------
@@ -358,7 +368,7 @@ def main_loop(server_name: str, instance_name: str, event=None):
 
     logger.warning("single server start: name %s instance %s pid %d", server_name, instance_name, os.getpid())
 
-    prefix = os.environ.get("DT4ACC_PREFIX", os.getlogin())
+    prefix = _get_dt4acc_prefix()
 
     # Inject controller BEFORE Tango initialises any device
     _inject_controller(prefix)
