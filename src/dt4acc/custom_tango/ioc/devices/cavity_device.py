@@ -22,9 +22,12 @@ class CavityDevice(BaseMagnetDevice):
 
     def init_device(self):
         super().init_device()
-        self._frequency = 0.0
-        self._voltage = 0.0
-        self._refresh_from_cache()
+        from dt4acc.custom_tango.ioc.single_server import get_initial_values
+        vals = get_initial_values(self.lattice_id)
+        self._frequency = vals.get("frequency", 0.0)
+        self._voltage = vals.get("voltage", 0.0)
+        self._sync_write_value("frequency", self._frequency)
+        self._sync_write_value("voltage", self._voltage)
 
     @attribute(dtype=float, access=AttrWriteType.READ_WRITE,
                label="Frequency", unit="Hz")
@@ -57,17 +60,12 @@ class CavityDevice(BaseMagnetDevice):
 
     @command
     def RefreshFromCache(self) -> None:
-        self._refresh_from_cache()
-
-    def _refresh_from_cache(self) -> None:
         try:
             from dt4acc.custom_tango.ioc.single_server import refresh_one_from_lattice, get_nominal_values
             refresh_one_from_lattice(self.lattice_id)
-
             vals = get_nominal_values(self.lattice_id)
             self._frequency = vals.get("frequency", 0.0)
-            self._voltage = vals.get("voltage", 0.0)
-
+            self._voltage   = vals.get("voltage",   0.0)
             self._sync_write_value("frequency", self._frequency)
             self._sync_write_value("voltage", self._voltage)
             logger.info("%s: RefreshFromCache done — frequency=%.3f voltage=%.3f",

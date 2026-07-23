@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/d/dt4acc
+      url: https://pypi.org/p/dt4acc
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
 

@@ -32,10 +32,8 @@ class MultipoleDevice(BaseMagnetDevice):
         super().init_device()
         from dt4acc.custom_tango.ioc.single_server import get_initial_values
         vals = get_initial_values(self.lattice_id)
-        self._magnetic_strength = vals.get(
-            self.lattice_property,
-            vals.get("main_strength", 0.0),
-        )
+        self._magnetic_strength = vals.get(self.lattice_property,
+                                           vals.get("main_strength", 0.0))
         self._magnetic_strength_readback = self._magnetic_strength
         self._sync_write_value("magnetic_strength", self._magnetic_strength)
 
