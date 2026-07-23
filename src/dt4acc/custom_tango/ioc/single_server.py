@@ -316,7 +316,6 @@ def refresh_cache_from_lattice(sync_proxy, magnet_uuids: list, uuid_to_prop: dic
 
 def refresh_one_from_lattice(uuid: str, prop_spec=None) -> None:
     """Refresh one cached element from the lattice for direct RefreshFromCache."""
-    global _initial_values_cache, _initial_strength_cache, _nominal_cache
     if _sync_proxy is None or not uuid:
         return
 
