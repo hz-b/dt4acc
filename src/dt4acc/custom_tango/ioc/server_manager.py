@@ -58,7 +58,7 @@ logger = get_logger()
 # Heartbeat — pure recalculation, no lattice writes, no noise
 # Set by the launch script. Period in seconds (0 = disabled).
 HEARTBEAT_PERIOD = 1.0
-DEFAULT_TANGO_START_BATCH_SIZE = 1
+DEFAULT_TANGO_START_BATCH_SIZE = 0
 TANGO_START_BATCH_SIZE_ENV = "DT4ACC_TANGO_START_BATCH_SIZE"
 DEFAULT_TANGO_START_TIMEOUT_S = 240.0
 TANGO_START_TIMEOUT_ENV = "DT4ACC_TANGO_START_TIMEOUT_S"
