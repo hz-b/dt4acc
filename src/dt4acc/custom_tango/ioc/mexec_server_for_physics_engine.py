@@ -4,6 +4,7 @@ import logging
 import multiprocessing.managers
 import os
 import threading
+import time
 
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.custom_tango.ioc.handle_lattice import lattice_loader
@@ -24,6 +25,8 @@ LOAD_MANAGERS_FN = None
 
 # Expected view for output — "design" for SOLEIL (commands in lattice space)
 EXPECTED_VIEW = "design"
+MEXEC_CONNECT_RETRY_TIMEOUT_S = float(os.environ.get("DT4ACC_MEXEC_CONNECT_RETRY_TIMEOUT_S", "15"))
+MEXEC_CONNECT_RETRY_INTERVAL_S = float(os.environ.get("DT4ACC_MEXEC_CONNECT_RETRY_INTERVAL_S", "0.2"))
 
 
 def _get_load_managers():
@@ -116,9 +119,17 @@ def _connect_to_mexec_service():
     MexecManagerService.register("sync_reset")
     MexecManagerService.register("sync_reinit")
     MexecManagerService.register("sync_peek")
-    client = MexecManagerService(
-        address=(mexec_config._MANAGER_HOST, mexec_config._MANAGER_PORT),
-        authkey=mexec_config._MANAGER_AUTHKEY,
-    )
-    client.connect()
-    return client.get_mexec_proxy(), client.sync_reset, client.sync_reinit
+    deadline = time.monotonic() + MEXEC_CONNECT_RETRY_TIMEOUT_S
+
+    while True:
+        try:
+            client = MexecManagerService(
+                address=(mexec_config._MANAGER_HOST, mexec_config._MANAGER_PORT),
+                authkey=mexec_config._MANAGER_AUTHKEY,
+            )
+            client.connect()
+            return client.get_mexec_proxy(), client.sync_reset, client.sync_reinit
+        except (ConnectionRefusedError, EOFError, OSError):
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(MEXEC_CONNECT_RETRY_INTERVAL_S)
