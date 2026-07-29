@@ -26,9 +26,9 @@ class BaseMagnetDevice(Device):
 
     Subclasses add only the attributes that make physical sense:
         MultipoleDevice         → magnetic_strength + readback
-        HorizontalSteererDevice → x_kick
-        VerticalSteererDevice   → y_kick
-        SkewQuadDevice          → corrector_strength
+        HorizontalSteererDevice → magnetic_strength
+        VerticalSteererDevice   → magnetic_strength
+        SkewQuadDevice          → magnetic_strength
         CavityDevice            → frequency + voltage
     """
 

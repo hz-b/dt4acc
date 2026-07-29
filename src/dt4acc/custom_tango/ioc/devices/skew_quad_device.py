@@ -23,7 +23,7 @@ logger = get_logger()
 class SkewQuadDevice(BaseMagnetDevice):
     """
     Tango device for CQLN/CQLT correctors on octupoles.
-    Exposes corrector_strength (READ_WRITE).
+    Exposes magnetic_strength (READ_WRITE).
 
     lattice_property is set by tango_device_setup.py:
         QuadrupoleCorrector     (CQLN) → "B2"
@@ -36,29 +36,29 @@ class SkewQuadDevice(BaseMagnetDevice):
     def init_device(self):
         super().init_device()
         from dt4acc.custom_tango.ioc.single_server import get_initial_values
-        self._corrector_strength = get_initial_values(self.lattice_id).get(
+        self._magnetic_strength = get_initial_values(self.lattice_id).get(
             self.lattice_property,
             0.0,
         )
-        self._sync_write_value("corrector_strength", self._corrector_strength)
+        self._sync_write_value("magnetic_strength", self._magnetic_strength)
         logger.info("Initializing %s: %s lattice_id=%s lattice_property=%s",
                     self.__class__.__name__, self.get_name(),
                     self.lattice_id, self.lattice_property)
 
     @attribute(dtype=float, access=AttrWriteType.READ_WRITE,
-               label="Corrector strength", unit="1/m²")
-    def corrector_strength(self) -> float:
-        return self._corrector_strength
+               label="Magnetic strength", unit="1/m²")
+    def magnetic_strength(self) -> float:
+        return self._magnetic_strength
 
-    @corrector_strength.write
-    def corrector_strength(self, value: float) -> None:
+    @magnetic_strength.write
+    def magnetic_strength(self, value: float) -> None:
         value = float(value)
-        self._corrector_strength = value
+        self._magnetic_strength = value
         self._send(self.lattice_property, value)
 
     @command
     def reset(self) -> None:
-        self._corrector_strength = 0.0
+        self._magnetic_strength = 0.0
         logger.info("%s: reset", self.magnet_name)
         self.set_state(DevState.STANDBY)
 
@@ -68,9 +68,9 @@ class SkewQuadDevice(BaseMagnetDevice):
             from dt4acc.custom_tango.ioc.single_server import refresh_one_from_lattice, get_nominal_values
             refresh_one_from_lattice(self.lattice_id)
             vals = get_nominal_values(self.lattice_id)
-            self._corrector_strength = vals.get(self.lattice_property, 0.0)
-            self._sync_write_value("corrector_strength", self._corrector_strength)
-            logger.info("%s: RefreshFromCache done — corrector_strength=%.6f",
-                        self.magnet_name, self._corrector_strength)
+            self._magnetic_strength = vals.get(self.lattice_property, 0.0)
+            self._sync_write_value("magnetic_strength", self._magnetic_strength)
+            logger.info("%s: RefreshFromCache done — magnetic_strength=%.6f",
+                        self.magnet_name, self._magnetic_strength)
         except Exception as exc:
             logger.error("%s: RefreshFromCache failed: %s", self.magnet_name, exc)

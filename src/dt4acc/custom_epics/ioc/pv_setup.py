@@ -8,8 +8,8 @@ from dt4acc_lib.model.utils.command import ReadCommand, Command
 from dt4acc.core.interfaces.controller_interface import ControllerInterface
 from ..data.constants import config, special_pvs, cavity_names
 from ..data.querries import (
-    get_unique_power_converters,
-    get_magnets_per_power_converters,
+    get_unique_magnet_power_converters,
+    get_elements_per_power_converter,
 )
 from ...core.utils.logger import get_logger
 
@@ -122,7 +122,7 @@ async def initialize_power_converter_pvs(
         prefix (str): The prefix used for PV naming.
     """
     d = dict()
-    for pc_name in get_unique_power_converters():
+    for pc_name in get_unique_magnet_power_converters():
         d.update(await add_pc_pvs(builder, pc_name, controller))
     return d
 
@@ -138,7 +138,7 @@ async def add_pc_pvs(
         pc_name (str): Power converter name.
         prefix (str): Prefix for PVs.
     """
-    magnets = get_magnets_per_power_converters(pc_name)
+    magnets = get_elements_per_power_converter(pc_name)
     element = {"magnets": [item["name"] for item in magnets]}
     element_cache = {}  # Store magnet information for reference
     element_cache[pc_name] = element

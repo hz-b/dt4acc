@@ -1,14 +1,13 @@
 # tango_device_setup.py
-
 from tango import Database, DbDevInfo, DevFailed
 
 from dataclasses import dataclass, field
 from typing import Any, Sequence, Tuple
 from dt4acc.core.utils.logger import get_logger
 from dt4acc.config.data.querries import (
-    get_unique_power_converters,
-    get_magnets_per_power_converters,
-    get_unique_power_converters_type_specified,
+    get_unique_magnet_power_converters,
+    get_elements_per_power_converter,
+    get_unique_power_converters_for_types,
     get_bpms,
 )
 
@@ -85,8 +84,8 @@ def build_device_plan() -> DevicePlan:
     plan = DevicePlan()
 
     # Magnets
-    for pc_name in get_unique_power_converters():
-        for m in get_magnets_per_power_converters(pc_name):
+    for pc_name in get_unique_magnet_power_converters():
+        for m in get_elements_per_power_converter(pc_name):
             magnet_name = m["name"]
             magnet_uuid = m.get("uuid", "") or (m.get("uuids", [""])[0] if m.get("uuids") else "")
             magnet_type = m.get("type", "")
@@ -106,7 +105,9 @@ def build_device_plan() -> DevicePlan:
                 "SkewSext": "B3",
                 "Oct": "B4",
             }
-            if magnet_type == "QuadrupoleCorrector":
+            if magnet_type == "Steerer":
+                lattice_prop = _steerer_lattice_property(magnet_name, subtype=magnet_subtype)
+            elif magnet_type == "QuadrupoleCorrector":
                 lattice_prop = "B2"
             elif magnet_type == "SkewQuadrupoleCorrector":
                 lattice_prop = "A2"
@@ -133,14 +134,14 @@ def build_device_plan() -> DevicePlan:
     # Power converters
     if EXPECTED_VIEW == "device":
         seen = set()
-        for pc_name in get_unique_power_converters():
+        for pc_name in get_unique_magnet_power_converters():
             if pc_name in seen:
                 continue
             seen.add(pc_name)
 
             trl = TangoResourceLocator.from_trl(pc_name)
             server_name, instance_name = trl.domain, trl.family
-            pc_magnet_names = [m["name"] for m in get_magnets_per_power_converters(pc_name)]
+            pc_magnet_names = [m["name"] for m in get_elements_per_power_converter(pc_name)]
 
             props: dict[str, list[str]] = {}
             if pc_magnet_names:
@@ -157,8 +158,8 @@ def build_device_plan() -> DevicePlan:
             )
 
     # Cavities
-    for pc_name in get_unique_power_converters_type_specified(["RFCavity"]):
-        for m in get_magnets_per_power_converters(pc_name):
+    for pc_name in get_unique_power_converters_for_types(["RFCavity"]):
+        for m in get_elements_per_power_converter(pc_name):
             dev_name = m["name"]
             dev_uuid = m.get("uuid", "")
             dev_type = m.get("type", "")
@@ -194,7 +195,7 @@ def build_device_plan() -> DevicePlan:
     )
 
     # Cavity power converter — one shared PC for all cavities
-    for cavity_pc_name in get_unique_power_converters_type_specified(["RFCavity"]):
+    for cavity_pc_name in get_unique_power_converters_for_types(["RFCavity"]):
         trl = TangoResourceLocator.from_trl(cavity_pc_name)
         _add_expected_device(
             plan,
@@ -214,7 +215,7 @@ def build_device_plan() -> DevicePlan:
 
         lattice = lattice_loader.load()
         for i, elem in enumerate(lattice):
-            if getattr(elem, "FamName", None) in ("BPM", "FBPM"):
+            if isinstance(elem, _at.Monitor):
                 uuid = getattr(elem, "UUID", None)
                 if uuid:
                     bpm_index_map[uuid] = i
@@ -307,6 +308,16 @@ def _steerer_class(name: str, subtype: str = None) -> str:
     return "HorizontalSteererDevice"
 
 
+def _steerer_lattice_property(name: str, subtype: str = None) -> str:
+    if subtype == "H":
+        return "B1"
+    if subtype == "V":
+        return "A1"
+    if _steerer_class(name, subtype=subtype) == "VerticalSteererDevice":
+        return "A1"
+    return "B1"
+
+
 def _register_dservers(db: Database, servers: set[tuple[str, str]]):
     """
     Ensure a DServer device exists for each (server_name, instance_name).
@@ -344,8 +355,8 @@ def _register_magnets(db: Database, unique_servers: set[tuple[str, str]]):
     # 1) Magnets — registered by Tango name (magnet TRL)
     #    UUID/uuids stored as DB property for AT element lookup.
     # ------------------------------------------------------------
-    for pc_name in get_unique_power_converters():
-        magnets = get_magnets_per_power_converters(pc_name)
+    for pc_name in get_unique_magnet_power_converters():
+        magnets = get_elements_per_power_converter(pc_name)
         for m in magnets:
             magnet_name = m["name"]
             magnet_uuid = m.get("uuid", "") or (m.get("uuids", [""])[0] if m.get("uuids") else "")
@@ -372,7 +383,9 @@ def _register_magnets(db: Database, unique_servers: set[tuple[str, str]]):
                     "Oct":      "B4",
                 }
                 # For corrector types, use the magnet type directly
-                if magnet_type == "QuadrupoleCorrector":
+                if magnet_type == "Steerer":
+                    lattice_prop = _steerer_lattice_property(magnet_name, subtype=magnet_subtype)
+                elif magnet_type == "QuadrupoleCorrector":
                     lattice_prop = "B2"
                 elif magnet_type == "SkewQuadrupoleCorrector":
                     lattice_prop = "A2"
@@ -412,7 +425,7 @@ def _register_power_converters(db: Database, unique_servers: set[tuple[str, str]
     # ------------------------------------------------------------
     if EXPECTED_VIEW == "device":
         registered_pcs = set()
-        for pc_name in get_unique_power_converters():
+        for pc_name in get_unique_magnet_power_converters():
             if pc_name in registered_pcs:
                 continue
             registered_pcs.add(pc_name)
@@ -436,7 +449,7 @@ def _register_power_converters(db: Database, unique_servers: set[tuple[str, str]
                         raise
 
                 # Always set properties
-                pc_magnet_names = [m["name"] for m in get_magnets_per_power_converters(pc_name)]
+                pc_magnet_names = [m["name"] for m in get_elements_per_power_converter(pc_name)]
                 if pc_magnet_names:
                     db.put_device_property(pc_name, {"magnets": pc_magnet_names})
 
@@ -448,8 +461,8 @@ def _register_cavities(db: Database, unique_servers: set[tuple[str, str]]):
     """Register cavity devices."""
     # 2) Cavities — registered as typed devices
     # ------------------------------------------------------------
-    for pc_name in get_unique_power_converters_type_specified(["RFCavity"]):
-        for m in get_magnets_per_power_converters(pc_name):
+    for pc_name in get_unique_power_converters_for_types(["RFCavity"]):
+        for m in get_elements_per_power_converter(pc_name):
             dev_name  = m["name"]
             dev_uuid  = m.get("uuid", "")
             dev_type  = m.get("type", "")
@@ -503,7 +516,7 @@ def _register_ring_simulator(db: Database, unique_servers: set[tuple[str, str]])
 
 def _register_cavity_power_converter(db: Database, unique_servers: set[tuple[str, str]]):
     """Register the shared cavity power converter (one PC for all cavities)."""
-    for cavity_pc_name in get_unique_power_converters_type_specified(["RFCavity"]):
+    for cavity_pc_name in get_unique_power_converters_for_types(["RFCavity"]):
         try:
             trl = TangoResourceLocator.from_trl(cavity_pc_name)
             domain, family = trl.domain, trl.family
@@ -535,12 +548,11 @@ def _register_bpms(db: Database, unique_servers: set[tuple[str, str]]):
 
         lattice = lattice_loader.load()
         for i, elem in enumerate(lattice):
-            if getattr(elem, "FamName", None) in ("BPM", "FBPM"):
+            if isinstance(elem, _at.Monitor):
                 uuid = getattr(elem, "UUID", None)
                 if uuid:
                     bpm_index_map[uuid] = i
-        logger.info("BPM registration: resolved %d BPM orbit indices from lattice",
-                    len(bpm_index_map))
+        logger.info(f"BPM registration: resolved {len(bpm_index_map)} BPM orbit indices from lattice")
         if bpm_index_map:
             sample = list(bpm_index_map.items())[:3]
             logger.info("BPM registration: sample uuid→index: %s", sample)

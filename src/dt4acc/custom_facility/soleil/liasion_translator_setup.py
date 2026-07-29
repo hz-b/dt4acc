@@ -10,8 +10,8 @@ Property name conventions (must match ElementPropertyInterface.handles_property(
     Quadrupole  → "main_strength"  (MainStrengthForQuadrupole → K / PolynomB[1])
     Sextupole   → "main_strength"  (MainStrengthForSextupole  → H / PolynomB[2])
     Octupole    → "B4"             (Multipole(normal, 4)       → PolynomB[3])
-    H-steerer   → "x_kick"        (XKick                      → KickAngle[0])
-    V-steerer   → "y_kick"        (YKick                      → KickAngle[1])
+    H-steerer   → "B1"            (Multipole normal order 1   → PolynomB[0])
+    V-steerer   → "A1"            (Multipole skew order 1     → PolynomA[0])
     SkewQuad    → "A2"             (Multipole(skew, 2)         → PolynomA[1])
     Cavity      → "frequency"     (Frequency                  → obj.Frequency)
 
@@ -45,7 +45,7 @@ from dt4acc_lib.model.utils.translator_manager_lookup_table import (
 
 from dt4acc.config.data.constants import ring_parameters
 from dt4acc.custom_facility.model.config.elementmodel import MagnetElementSetup
-from dt4acc.config.data.querries import get_magnets, get_unique_power_converters_type_specified, get_magnets_per_power_converters
+from dt4acc.config.data.querries import get_controlled_elements, get_unique_power_converters_for_types, get_elements_per_power_converter
 from dt4acc.custom_facility.soleil.soleil_yellow_pages import soleil_yellow_pages
 
 logger = logging.getLogger("dt4acc_lm")
@@ -72,7 +72,7 @@ def _remove_id(d: Dict) -> Dict:
 
 def _get_cavity_names() -> list:
     """Return cavity device names directly from the setup JSON."""
-    return [m["name"] for m in get_magnets() if m.get("type") == "RFCavity"]
+    return [m["name"] for m in get_controlled_elements() if m.get("type") == "RFCavity"]
 
 
 def magnet_infos_from_db() -> Sequence[MagnetElementSetup]:
@@ -81,7 +81,7 @@ def magnet_infos_from_db() -> Sequence[MagnetElementSetup]:
         "subtype", "type", "pc", "k", "FamName",
     }
     result = []
-    for raw in get_magnets():
+    for raw in get_controlled_elements():
         d = _remove_id(raw)
         filtered = {k: v for k, v in d.items() if k in known}
         try:
@@ -101,15 +101,15 @@ def _lattice_property(element_name: str, yp: YellowPages) -> str:
         Quadrupole  → "main_strength"  (MainStrengthForQuadrupole)
         Sextupole   → "main_strength"  (MainStrengthForSextupole)
         Octupole    → "B4"             (Multipole(normal, 4))
-        H-steerer   → "x_kick"        (XKick)
-        V-steerer   → "y_kick"        (YKick)
+        H-steerer   → "B1"            (PolynomB[0])
+        V-steerer   → "A1"            (PolynomA[0])
         SkewQuad    → "A2"             (Multipole(skew, 2))
         Cavity      → "frequency"     (Frequency)
     """
     if element_name in yp.horizontal_steerer_names():
-        return "x_kick"
+        return "B1"
     elif element_name in yp.vertical_steerer_names():
-        return "y_kick"
+        return "A1"
     elif element_name in yp.quadrupole_names():
         return "main_strength"
     elif element_name in yp.sextupole_names():
@@ -169,7 +169,7 @@ def build_managers():
     infos = magnet_infos_from_db()
     cavity_names = _get_cavity_names()
 
-    cavity_pc_names = get_unique_power_converters_type_specified(["RFCavity"])
+    cavity_pc_names = get_unique_power_converters_for_types(["RFCavity"])
 
     magnet_names = [info.name for info in infos]
     if len(set(magnet_names)) != len(infos):
@@ -225,7 +225,7 @@ def build_managers():
 
     # Cavity power converter(s) → controlled cavity voltages (each PC maps to its own cavities)
     for cavity_pc_name in cavity_pc_names:
-        controlled = [m["name"] for m in get_magnets_per_power_converters(cavity_pc_name)
+        controlled = [m["name"] for m in get_elements_per_power_converter(cavity_pc_name)
                       if m.get("type") == "RFCavity"]
         if controlled:
             inverse_lut[
@@ -293,7 +293,7 @@ def build_managers():
 
     # Cavity power converter — V on both sides, slope=1.0 (design view: no current→voltage conversion)
     for cavity_pc_name in cavity_pc_names:
-        controlled = [m["name"] for m in get_magnets_per_power_converters(cavity_pc_name)
+        controlled = [m["name"] for m in get_elements_per_power_converter(cavity_pc_name)
                       if m.get("type") == "RFCavity"]
         for name in controlled:
             translator_lut[ConversionID(
