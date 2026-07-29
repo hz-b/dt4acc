@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "dt4acc"
-version = "0.9.0"
+version = "0.9.1"
 description = "digital twin for accelerators"
 authors = [
   { name = "Waheedullah Sulaiman Khail" },
