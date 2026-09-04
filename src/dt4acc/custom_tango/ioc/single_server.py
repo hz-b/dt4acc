@@ -173,13 +173,9 @@ def peek_from_lattice(element_id: str, prop: str) -> float:
 
 
 def _steerer_lattice_property(name: str, subtype: str = "") -> str:
-    if subtype == "H":
-        return "B1"
-    if subtype == "V":
-        return "A1"
-    if "CDLV" in name or "CDRV" in name or "CRFCY" in name or "CRCOY" in name or "EM-COR/CV" in name:
-        return "A1"
-    return "B1"
+    from dt4acc.custom_facility.soleil.corrector_direction import corrector_lattice_property
+
+    return corrector_lattice_property(name, subtype=subtype) or "B1"
 
 
 def _properties_for_uuid(uuid: str, uuid_to_prop: dict = None) -> list:
@@ -201,11 +197,19 @@ def _properties_for_uuid_or_spec(uuid: str, prop_spec=None) -> list:
     return ["main_strength"]
 
 
-def _properties_for_element(name: str, mtype: str, subtype: str = "") -> list:
+def _properties_for_element(
+    name: str,
+    mtype: str,
+    subtype: str = "",
+    family_name: str = "",
+) -> list:
+    from dt4acc.custom_facility.soleil.corrector_direction import corrector_lattice_property
+
     if mtype == "RFCavity":
         return ["frequency", "voltage"]
-    if mtype == "Steerer":
-        return [_steerer_lattice_property(name, subtype=subtype)]
+    corrector_prop = corrector_lattice_property(name, family_name, subtype)
+    if mtype == "Steerer" or corrector_prop is not None:
+        return [corrector_prop or _steerer_lattice_property(name, subtype=subtype)]
 
     subtype_to_prop = {
         "Quad": "main_strength",
@@ -448,7 +452,12 @@ def main_loop(server_name: str, instance_name: str, event=None):
                 uuid = m.get("uuid", "")
                 mtype = m.get("type", "")
                 subtype = m.get("subtype", "")
-                props = _properties_for_element(magnet_name, mtype, subtype=subtype)
+                props = _properties_for_element(
+                    magnet_name,
+                    mtype,
+                    subtype=subtype,
+                    family_name=m.get("FamName", ""),
+                )
 
                 if mtype == "RFCavity":
                     _add_cache_element(
