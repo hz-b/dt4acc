@@ -1,0 +1,962 @@
+[
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82bf0"
+    },
+    "type": "Quadrupole",
+    "name": "QF_001",
+    "magnetic_strength": 1.2580503144087112,
+    "pc": "QF_001_PC",
+    "k": 1.2580503144087112
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82bf1"
+    },
+    "type": "Sextupole",
+    "name": "SF_001",
+    "magnetic_strength": 2.1149384071729247,
+    "pc": "SF_001_PC",
+    "k": 2.1149384071729247
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82bf2"
+    },
+    "type": "Steerer",
+    "name": "HCOR_001",
+    "magnetic_strength": -0.0,
+    "pc": "HCOR_001_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82bf3"
+    },
+    "type": "Steerer",
+    "name": "VCOR_001",
+    "magnetic_strength": 0.0,
+    "pc": "VCOR_001_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82bf4"
+    },
+    "type": "Quadrupole",
+    "name": "QD_001",
+    "magnetic_strength": -1.3094253462460304,
+    "pc": "QD_001_PC",
+    "k": -1.3094253462460304
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82bf5"
+    },
+    "type": "Sextupole",
+    "name": "SD_001",
+    "magnetic_strength": -3.4137638639939585,
+    "pc": "SD_001_PC",
+    "k": -3.4137638639939585
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82bf6"
+    },
+    "type": "Quadrupole",
+    "name": "QF_002",
+    "magnetic_strength": 1.2580503144087112,
+    "pc": "QF_002_PC",
+    "k": 1.2580503144087112
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82bf7"
+    },
+    "type": "Sextupole",
+    "name": "SF_002",
+    "magnetic_strength": 2.1149384071729247,
+    "pc": "SF_002_PC",
+    "k": 2.1149384071729247
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82bf8"
+    },
+    "type": "Steerer",
+    "name": "HCOR_002",
+    "magnetic_strength": -0.0,
+    "pc": "HCOR_002_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82bf9"
+    },
+    "type": "Steerer",
+    "name": "VCOR_002",
+    "magnetic_strength": 0.0,
+    "pc": "VCOR_002_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82bfa"
+    },
+    "type": "Quadrupole",
+    "name": "QD_002",
+    "magnetic_strength": -1.3094253462460304,
+    "pc": "QD_002_PC",
+    "k": -1.3094253462460304
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82bfb"
+    },
+    "type": "Sextupole",
+    "name": "SD_002",
+    "magnetic_strength": -3.4137638639939585,
+    "pc": "SD_002_PC",
+    "k": -3.4137638639939585
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82bfc"
+    },
+    "type": "Quadrupole",
+    "name": "QF_003",
+    "magnetic_strength": 1.2580503144087112,
+    "pc": "QF_003_PC",
+    "k": 1.2580503144087112
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82bfd"
+    },
+    "type": "Sextupole",
+    "name": "SF_003",
+    "magnetic_strength": 2.1149384071729247,
+    "pc": "SF_003_PC",
+    "k": 2.1149384071729247
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82bfe"
+    },
+    "type": "Steerer",
+    "name": "HCOR_003",
+    "magnetic_strength": -0.0,
+    "pc": "HCOR_003_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82bff"
+    },
+    "type": "Steerer",
+    "name": "VCOR_003",
+    "magnetic_strength": 0.0,
+    "pc": "VCOR_003_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c00"
+    },
+    "type": "Quadrupole",
+    "name": "QD_003",
+    "magnetic_strength": -1.3094253462460304,
+    "pc": "QD_003_PC",
+    "k": -1.3094253462460304
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c01"
+    },
+    "type": "Sextupole",
+    "name": "SD_003",
+    "magnetic_strength": -3.4137638639939585,
+    "pc": "SD_003_PC",
+    "k": -3.4137638639939585
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c02"
+    },
+    "type": "Quadrupole",
+    "name": "QF_004",
+    "magnetic_strength": 1.2580503144087112,
+    "pc": "QF_004_PC",
+    "k": 1.2580503144087112
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c03"
+    },
+    "type": "Sextupole",
+    "name": "SF_004",
+    "magnetic_strength": 2.1149384071729247,
+    "pc": "SF_004_PC",
+    "k": 2.1149384071729247
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c04"
+    },
+    "type": "Steerer",
+    "name": "HCOR_004",
+    "magnetic_strength": -0.0,
+    "pc": "HCOR_004_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c05"
+    },
+    "type": "Steerer",
+    "name": "VCOR_004",
+    "magnetic_strength": 0.0,
+    "pc": "VCOR_004_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c06"
+    },
+    "type": "Quadrupole",
+    "name": "QD_004",
+    "magnetic_strength": -1.3094253462460304,
+    "pc": "QD_004_PC",
+    "k": -1.3094253462460304
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c07"
+    },
+    "type": "Sextupole",
+    "name": "SD_004",
+    "magnetic_strength": -3.4137638639939585,
+    "pc": "SD_004_PC",
+    "k": -3.4137638639939585
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c08"
+    },
+    "type": "Quadrupole",
+    "name": "QF_005",
+    "magnetic_strength": 1.2580503144087112,
+    "pc": "QF_005_PC",
+    "k": 1.2580503144087112
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c09"
+    },
+    "type": "Sextupole",
+    "name": "SF_005",
+    "magnetic_strength": 2.1149384071729247,
+    "pc": "SF_005_PC",
+    "k": 2.1149384071729247
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c0a"
+    },
+    "type": "Steerer",
+    "name": "HCOR_005",
+    "magnetic_strength": -0.0,
+    "pc": "HCOR_005_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c0b"
+    },
+    "type": "Steerer",
+    "name": "VCOR_005",
+    "magnetic_strength": 0.0,
+    "pc": "VCOR_005_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c0c"
+    },
+    "type": "Quadrupole",
+    "name": "QD_005",
+    "magnetic_strength": -1.3094253462460304,
+    "pc": "QD_005_PC",
+    "k": -1.3094253462460304
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c0d"
+    },
+    "type": "Sextupole",
+    "name": "SD_005",
+    "magnetic_strength": -3.4137638639939585,
+    "pc": "SD_005_PC",
+    "k": -3.4137638639939585
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c0e"
+    },
+    "type": "Quadrupole",
+    "name": "QF_006",
+    "magnetic_strength": 1.2580503144087112,
+    "pc": "QF_006_PC",
+    "k": 1.2580503144087112
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c0f"
+    },
+    "type": "Sextupole",
+    "name": "SF_006",
+    "magnetic_strength": 2.1149384071729247,
+    "pc": "SF_006_PC",
+    "k": 2.1149384071729247
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c10"
+    },
+    "type": "Steerer",
+    "name": "HCOR_006",
+    "magnetic_strength": -0.0,
+    "pc": "HCOR_006_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c11"
+    },
+    "type": "Steerer",
+    "name": "VCOR_006",
+    "magnetic_strength": 0.0,
+    "pc": "VCOR_006_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c12"
+    },
+    "type": "Quadrupole",
+    "name": "QD_006",
+    "magnetic_strength": -1.3094253462460304,
+    "pc": "QD_006_PC",
+    "k": -1.3094253462460304
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c13"
+    },
+    "type": "Sextupole",
+    "name": "SD_006",
+    "magnetic_strength": -3.4137638639939585,
+    "pc": "SD_006_PC",
+    "k": -3.4137638639939585
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c14"
+    },
+    "type": "Quadrupole",
+    "name": "QF_007",
+    "magnetic_strength": 1.2580503144087112,
+    "pc": "QF_007_PC",
+    "k": 1.2580503144087112
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c15"
+    },
+    "type": "Sextupole",
+    "name": "SF_007",
+    "magnetic_strength": 2.1149384071729247,
+    "pc": "SF_007_PC",
+    "k": 2.1149384071729247
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c16"
+    },
+    "type": "Steerer",
+    "name": "HCOR_007",
+    "magnetic_strength": -0.0,
+    "pc": "HCOR_007_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c17"
+    },
+    "type": "Steerer",
+    "name": "VCOR_007",
+    "magnetic_strength": 0.0,
+    "pc": "VCOR_007_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c18"
+    },
+    "type": "Quadrupole",
+    "name": "QD_007",
+    "magnetic_strength": -1.3094253462460304,
+    "pc": "QD_007_PC",
+    "k": -1.3094253462460304
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c19"
+    },
+    "type": "Sextupole",
+    "name": "SD_007",
+    "magnetic_strength": -3.4137638639939585,
+    "pc": "SD_007_PC",
+    "k": -3.4137638639939585
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c1a"
+    },
+    "type": "Quadrupole",
+    "name": "QF_008",
+    "magnetic_strength": 1.2580503144087112,
+    "pc": "QF_008_PC",
+    "k": 1.2580503144087112
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c1b"
+    },
+    "type": "Sextupole",
+    "name": "SF_008",
+    "magnetic_strength": 2.1149384071729247,
+    "pc": "SF_008_PC",
+    "k": 2.1149384071729247
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c1c"
+    },
+    "type": "Steerer",
+    "name": "HCOR_008",
+    "magnetic_strength": -0.0,
+    "pc": "HCOR_008_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c1d"
+    },
+    "type": "Steerer",
+    "name": "VCOR_008",
+    "magnetic_strength": 0.0,
+    "pc": "VCOR_008_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c1e"
+    },
+    "type": "Quadrupole",
+    "name": "QD_008",
+    "magnetic_strength": -1.3094253462460304,
+    "pc": "QD_008_PC",
+    "k": -1.3094253462460304
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c1f"
+    },
+    "type": "Sextupole",
+    "name": "SD_008",
+    "magnetic_strength": -3.4137638639939585,
+    "pc": "SD_008_PC",
+    "k": -3.4137638639939585
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c20"
+    },
+    "type": "Quadrupole",
+    "name": "QF_009",
+    "magnetic_strength": 1.2580503144087112,
+    "pc": "QF_009_PC",
+    "k": 1.2580503144087112
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c21"
+    },
+    "type": "Sextupole",
+    "name": "SF_009",
+    "magnetic_strength": 2.1149384071729247,
+    "pc": "SF_009_PC",
+    "k": 2.1149384071729247
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c22"
+    },
+    "type": "Steerer",
+    "name": "HCOR_009",
+    "magnetic_strength": -0.0,
+    "pc": "HCOR_009_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c23"
+    },
+    "type": "Steerer",
+    "name": "VCOR_009",
+    "magnetic_strength": 0.0,
+    "pc": "VCOR_009_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c24"
+    },
+    "type": "Quadrupole",
+    "name": "QD_009",
+    "magnetic_strength": -1.3094253462460304,
+    "pc": "QD_009_PC",
+    "k": -1.3094253462460304
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c25"
+    },
+    "type": "Sextupole",
+    "name": "SD_009",
+    "magnetic_strength": -3.4137638639939585,
+    "pc": "SD_009_PC",
+    "k": -3.4137638639939585
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c26"
+    },
+    "type": "Quadrupole",
+    "name": "QF_010",
+    "magnetic_strength": 1.2580503144087112,
+    "pc": "QF_010_PC",
+    "k": 1.2580503144087112
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c27"
+    },
+    "type": "Sextupole",
+    "name": "SF_010",
+    "magnetic_strength": 2.1149384071729247,
+    "pc": "SF_010_PC",
+    "k": 2.1149384071729247
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c28"
+    },
+    "type": "Steerer",
+    "name": "HCOR_010",
+    "magnetic_strength": -0.0,
+    "pc": "HCOR_010_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c29"
+    },
+    "type": "Steerer",
+    "name": "VCOR_010",
+    "magnetic_strength": 0.0,
+    "pc": "VCOR_010_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c2a"
+    },
+    "type": "Quadrupole",
+    "name": "QD_010",
+    "magnetic_strength": -1.3094253462460304,
+    "pc": "QD_010_PC",
+    "k": -1.3094253462460304
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c2b"
+    },
+    "type": "Sextupole",
+    "name": "SD_010",
+    "magnetic_strength": -3.4137638639939585,
+    "pc": "SD_010_PC",
+    "k": -3.4137638639939585
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c2c"
+    },
+    "type": "Quadrupole",
+    "name": "QF_011",
+    "magnetic_strength": 1.2580503144087112,
+    "pc": "QF_011_PC",
+    "k": 1.2580503144087112
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c2d"
+    },
+    "type": "Sextupole",
+    "name": "SF_011",
+    "magnetic_strength": 2.1149384071729247,
+    "pc": "SF_011_PC",
+    "k": 2.1149384071729247
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c2e"
+    },
+    "type": "Steerer",
+    "name": "HCOR_011",
+    "magnetic_strength": -0.0,
+    "pc": "HCOR_011_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c2f"
+    },
+    "type": "Steerer",
+    "name": "VCOR_011",
+    "magnetic_strength": 0.0,
+    "pc": "VCOR_011_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c30"
+    },
+    "type": "Quadrupole",
+    "name": "QD_011",
+    "magnetic_strength": -1.3094253462460304,
+    "pc": "QD_011_PC",
+    "k": -1.3094253462460304
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c31"
+    },
+    "type": "Sextupole",
+    "name": "SD_011",
+    "magnetic_strength": -3.4137638639939585,
+    "pc": "SD_011_PC",
+    "k": -3.4137638639939585
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c32"
+    },
+    "type": "Quadrupole",
+    "name": "QF_012",
+    "magnetic_strength": 1.2580503144087112,
+    "pc": "QF_012_PC",
+    "k": 1.2580503144087112
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c33"
+    },
+    "type": "Sextupole",
+    "name": "SF_012",
+    "magnetic_strength": 2.1149384071729247,
+    "pc": "SF_012_PC",
+    "k": 2.1149384071729247
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c34"
+    },
+    "type": "Steerer",
+    "name": "HCOR_012",
+    "magnetic_strength": -0.0,
+    "pc": "HCOR_012_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c35"
+    },
+    "type": "Steerer",
+    "name": "VCOR_012",
+    "magnetic_strength": 0.0,
+    "pc": "VCOR_012_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c36"
+    },
+    "type": "Quadrupole",
+    "name": "QD_012",
+    "magnetic_strength": -1.3094253462460304,
+    "pc": "QD_012_PC",
+    "k": -1.3094253462460304
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c37"
+    },
+    "type": "Sextupole",
+    "name": "SD_012",
+    "magnetic_strength": -3.4137638639939585,
+    "pc": "SD_012_PC",
+    "k": -3.4137638639939585
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c38"
+    },
+    "type": "Quadrupole",
+    "name": "QF_013",
+    "magnetic_strength": 1.2580503144087112,
+    "pc": "QF_013_PC",
+    "k": 1.2580503144087112
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c39"
+    },
+    "type": "Sextupole",
+    "name": "SF_013",
+    "magnetic_strength": 2.1149384071729247,
+    "pc": "SF_013_PC",
+    "k": 2.1149384071729247
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c3a"
+    },
+    "type": "Steerer",
+    "name": "HCOR_013",
+    "magnetic_strength": -0.0,
+    "pc": "HCOR_013_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c3b"
+    },
+    "type": "Steerer",
+    "name": "VCOR_013",
+    "magnetic_strength": 0.0,
+    "pc": "VCOR_013_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c3c"
+    },
+    "type": "Quadrupole",
+    "name": "QD_013",
+    "magnetic_strength": -1.3094253462460304,
+    "pc": "QD_013_PC",
+    "k": -1.3094253462460304
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c3d"
+    },
+    "type": "Sextupole",
+    "name": "SD_013",
+    "magnetic_strength": -3.4137638639939585,
+    "pc": "SD_013_PC",
+    "k": -3.4137638639939585
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c3e"
+    },
+    "type": "Quadrupole",
+    "name": "QF_014",
+    "magnetic_strength": 1.2580503144087112,
+    "pc": "QF_014_PC",
+    "k": 1.2580503144087112
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c3f"
+    },
+    "type": "Sextupole",
+    "name": "SF_014",
+    "magnetic_strength": 2.1149384071729247,
+    "pc": "SF_014_PC",
+    "k": 2.1149384071729247
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c40"
+    },
+    "type": "Steerer",
+    "name": "HCOR_014",
+    "magnetic_strength": -0.0,
+    "pc": "HCOR_014_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c41"
+    },
+    "type": "Steerer",
+    "name": "VCOR_014",
+    "magnetic_strength": 0.0,
+    "pc": "VCOR_014_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c42"
+    },
+    "type": "Quadrupole",
+    "name": "QD_014",
+    "magnetic_strength": -1.3094253462460304,
+    "pc": "QD_014_PC",
+    "k": -1.3094253462460304
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c43"
+    },
+    "type": "Sextupole",
+    "name": "SD_014",
+    "magnetic_strength": -3.4137638639939585,
+    "pc": "SD_014_PC",
+    "k": -3.4137638639939585
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c44"
+    },
+    "type": "Quadrupole",
+    "name": "QF_015",
+    "magnetic_strength": 1.2580503144087112,
+    "pc": "QF_015_PC",
+    "k": 1.2580503144087112
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c45"
+    },
+    "type": "Sextupole",
+    "name": "SF_015",
+    "magnetic_strength": 2.1149384071729247,
+    "pc": "SF_015_PC",
+    "k": 2.1149384071729247
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c46"
+    },
+    "type": "Steerer",
+    "name": "HCOR_015",
+    "magnetic_strength": -0.0,
+    "pc": "HCOR_015_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c47"
+    },
+    "type": "Steerer",
+    "name": "VCOR_015",
+    "magnetic_strength": 0.0,
+    "pc": "VCOR_015_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c48"
+    },
+    "type": "Quadrupole",
+    "name": "QD_015",
+    "magnetic_strength": -1.3094253462460304,
+    "pc": "QD_015_PC",
+    "k": -1.3094253462460304
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c49"
+    },
+    "type": "Sextupole",
+    "name": "SD_015",
+    "magnetic_strength": -3.4137638639939585,
+    "pc": "SD_015_PC",
+    "k": -3.4137638639939585
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c4a"
+    },
+    "type": "Quadrupole",
+    "name": "QF_016",
+    "magnetic_strength": 1.2580503144087112,
+    "pc": "QF_016_PC",
+    "k": 1.2580503144087112
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c4b"
+    },
+    "type": "Sextupole",
+    "name": "SF_016",
+    "magnetic_strength": 2.1149384071729247,
+    "pc": "SF_016_PC",
+    "k": 2.1149384071729247
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c4c"
+    },
+    "type": "Steerer",
+    "name": "HCOR_016",
+    "magnetic_strength": -0.0,
+    "pc": "HCOR_016_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c4d"
+    },
+    "type": "Steerer",
+    "name": "VCOR_016",
+    "magnetic_strength": 0.0,
+    "pc": "VCOR_016_PC",
+    "k": null
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c4e"
+    },
+    "type": "Quadrupole",
+    "name": "QD_016",
+    "magnetic_strength": -1.3094253462460304,
+    "pc": "QD_016_PC",
+    "k": -1.3094253462460304
+  },
+  {
+    "_id": {
+      "$oid": "6a9eb569f0cc1ac176d82c4f"
+    },
+    "type": "Sextupole",
+    "name": "SD_016",
+    "magnetic_strength": -3.4137638639939585,
+    "pc": "SD_016_PC",
+    "k": -3.4137638639939585
+  }
+]
