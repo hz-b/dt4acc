@@ -18,7 +18,10 @@ from dt4acc.custom_tango.ioc.devices.cavity_device import CavityDevice
 from dt4acc.custom_tango.ioc.devices.virtual_devices import RingSimulatorDevice, RING_SIM_DEV
 from dt4acc.custom_tango.ioc.devices.power_converter_device import PowerConverterDevice, CavityPowerConverterDevice
 from dt4acc.custom_tango.ioc.devices.bpm_device import BPMDevice
-from dt4acc.custom_tango.ioc.mexec_server_for_physics_engine import EXPECTED_VIEW
+from dt4acc.custom_tango.ioc.mexec_server_for_physics_engine import (
+    EXPECTED_VIEW,
+    lattice_properties_for_device,
+)
 from dt4acc_lib.model.utils.tango_resource_locator import TangoResourceLocator
 
 logger = get_logger()
@@ -89,30 +92,16 @@ def build_device_plan() -> DevicePlan:
             magnet_name = m["name"]
             magnet_uuid = m.get("uuid", "") or (m.get("uuids", [""])[0] if m.get("uuids") else "")
             magnet_type = m.get("type", "")
-            magnet_subtype = m.get("subtype", "")
 
             trl = TangoResourceLocator.from_trl(magnet_name)
             server_name, instance_name = trl.domain, trl.family
 
             if magnet_type == "Steerer":
-                class_name = _steerer_class(magnet_name, subtype=magnet_subtype)
+                class_name = _steerer_class(magnet_name)
             else:
                 class_name = _TYPE_TO_CLASS.get(magnet_type, "MultipoleDevice")
 
-            _SUBTYPE_TO_LATTICE_PROP = {
-                "Quad": "B2",
-                "Sext": "B3",
-                "SkewSext": "B3",
-                "Oct": "B4",
-            }
-            if magnet_type == "Steerer":
-                lattice_prop = _steerer_lattice_property(magnet_name, subtype=magnet_subtype)
-            elif magnet_type == "QuadrupoleCorrector":
-                lattice_prop = "B2"
-            elif magnet_type == "SkewQuadrupoleCorrector":
-                lattice_prop = "A2"
-            else:
-                lattice_prop = _SUBTYPE_TO_LATTICE_PROP.get(magnet_subtype, "main_strength")
+            lattice_prop = _lattice_property_for_magnet(magnet_name)
 
             props: dict[str, list[str]] = {}
             if magnet_uuid:
@@ -290,32 +279,24 @@ _TYPE_TO_CLASS = {
     "RFCavity":                "CavityDevice",
 }
 
-def _steerer_class(name: str, subtype: str = None) -> str:
+def _lattice_property_for_magnet(name: str) -> str:
+    """The AT lattice property this magnet device controls (e.g.
+    "main_strength", "B1", "A1", "B2", "A2", "B4"), from the active
+    facility's liaison manager (lattice_properties_for_device) — not
+    re-derived from device-name patterns or a type/subtype dict.
     """
-    Determine steerer class from device name or subtype field.
-    subtype="H"/"V" is set by MAX IV JSON generator.
-    SOLEIL uses name patterns (CDLH/CDLV).
+    props = lattice_properties_for_device(name)
+    return props[0] if props else "main_strength"
+
+
+def _steerer_class(name: str) -> str:
+    """Horizontal vs vertical steerer class, from the magnet's actual
+    lattice property (B1 = normal/horizontal kick, A1 = skew/vertical
+    kick) rather than a subtype field or SOLEIL-specific name patterns.
     """
-    if subtype == "H":
-        return "HorizontalSteererDevice"
-    if subtype == "V":
-        return "VerticalSteererDevice"
-    # SOLEIL fallback — name-based detection
-    if "CDLH" in name or "CDRH" in name or "CRFCX" in name or "CRCOX" in name:
-        return "HorizontalSteererDevice"
-    if "CDLV" in name or "CDRV" in name or "CRFCY" in name or "CRCOY" in name:
+    if _lattice_property_for_magnet(name) == "A1":
         return "VerticalSteererDevice"
     return "HorizontalSteererDevice"
-
-
-def _steerer_lattice_property(name: str, subtype: str = None) -> str:
-    if subtype == "H":
-        return "B1"
-    if subtype == "V":
-        return "A1"
-    if _steerer_class(name, subtype=subtype) == "VerticalSteererDevice":
-        return "A1"
-    return "B1"
 
 
 def _register_dservers(db: Database, servers: set[tuple[str, str]]):
@@ -361,7 +342,6 @@ def _register_magnets(db: Database, unique_servers: set[tuple[str, str]]):
             magnet_name = m["name"]
             magnet_uuid = m.get("uuid", "") or (m.get("uuids", [""])[0] if m.get("uuids") else "")
             magnet_type = m.get("type", "")
-            magnet_subtype = m.get("subtype", "")
             try:
                 trl = TangoResourceLocator.from_trl(magnet_name)
                 domain, family = trl.domain, trl.family
@@ -372,25 +352,11 @@ def _register_magnets(db: Database, unique_servers: set[tuple[str, str]]):
 
                 # Pick the correct Tango class for this physical type
                 if magnet_type == "Steerer":
-                    class_name = _steerer_class(magnet_name, subtype=magnet_subtype)
+                    class_name = _steerer_class(magnet_name)
                 else:
                     class_name = _TYPE_TO_CLASS.get(magnet_type, "MultipoleDevice")
 
-                _SUBTYPE_TO_LATTICE_PROP = {
-                    "Quad":     "B2",
-                    "Sext":     "B3",
-                    "SkewSext": "B3",
-                    "Oct":      "B4",
-                }
-                # For corrector types, use the magnet type directly
-                if magnet_type == "Steerer":
-                    lattice_prop = _steerer_lattice_property(magnet_name, subtype=magnet_subtype)
-                elif magnet_type == "QuadrupoleCorrector":
-                    lattice_prop = "B2"
-                elif magnet_type == "SkewQuadrupoleCorrector":
-                    lattice_prop = "A2"
-                else:
-                    lattice_prop = _SUBTYPE_TO_LATTICE_PROP.get(magnet_subtype, "main_strength")
+                lattice_prop = _lattice_property_for_magnet(magnet_name)
 
                 db_dev        = DbDevInfo()
                 db_dev._class = class_name
