@@ -1,0 +1,2623 @@
+{
+  "atjson": 1,
+  "at_version": "0.8.0",
+  "elements": [
+    {
+      "FamName": "RF_001",
+      "Length": 0.0,
+      "PassMethod": "RFCavityPass",
+      "Energy": 1000000000.0,
+      "Frequency": 351319286.71874994,
+      "HarmNumber": 90,
+      "TimeLag": 0.0,
+      "UUID": "RF_001_6363b723d15843ab",
+      "Voltage": 300000.0,
+      "Class": "RFCavity"
+    },
+    {
+      "FamName": "QF_001",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        1.2580503144087112
+      ],
+      "UUID": "QF_001_314d440dcc3348c6",
+      "K": 1.2580503144087112,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SF_001",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        2.1149384071729247
+      ],
+      "UUID": "SF_001_edcc66b4534e41e9",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "BPM_001",
+      "Length": 0.0,
+      "PassMethod": "IdentityPass",
+      "UUID": "BPM_001_13747cd19dcd4645",
+      "Class": "Monitor"
+    },
+    {
+      "FamName": "COR_001",
+      "Length": 0.0,
+      "PassMethod": "ThinMPolePass",
+      "UUID": "COR_001_40245a63817f45fd",
+      "Class": "Multipole",
+      "MaxOrder": 0,
+      "NumIntSteps": 1,
+      "PolynomA": [
+        0.0
+      ],
+      "PolynomB": [
+        -0.0
+      ]
+    },
+    {
+      "FamName": "DRs_001",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_001",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_001_5f1afe65b5f740b2",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_001",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QD_001",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        -1.3094253462460304
+      ],
+      "UUID": "QD_001_b9826a8c73d642d6",
+      "K": -1.3094253462460304,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SD_001",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        -3.4137638639939585
+      ],
+      "UUID": "SD_001_0f91beb1c65a4c0c",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "DRs_002",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_002",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_002_a736eb95b9f641fa",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_002",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QF_002",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        1.2580503144087112
+      ],
+      "UUID": "QF_002_77738075da634369",
+      "K": 1.2580503144087112,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SF_002",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        2.1149384071729247
+      ],
+      "UUID": "SF_002_adf891f146274708",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "BPM_002",
+      "Length": 0.0,
+      "PassMethod": "IdentityPass",
+      "UUID": "BPM_002_6811d1cdf38447a5",
+      "Class": "Monitor"
+    },
+    {
+      "FamName": "COR_002",
+      "Length": 0.0,
+      "PassMethod": "ThinMPolePass",
+      "UUID": "COR_002_da1aed18178646bf",
+      "Class": "Multipole",
+      "MaxOrder": 0,
+      "NumIntSteps": 1,
+      "PolynomA": [
+        0.0
+      ],
+      "PolynomB": [
+        -0.0
+      ]
+    },
+    {
+      "FamName": "DRs_003",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_003",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_003_13470d5d861841a6",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_003",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QD_002",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        -1.3094253462460304
+      ],
+      "UUID": "QD_002_9ddbc1b0ac004bb8",
+      "K": -1.3094253462460304,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SD_002",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        -3.4137638639939585
+      ],
+      "UUID": "SD_002_69ddf4e0a6cb4c10",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "DRs_004",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_004",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_004_626a5b828edc4ed8",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_004",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QF_003",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        1.2580503144087112
+      ],
+      "UUID": "QF_003_fdc3743f439640b8",
+      "K": 1.2580503144087112,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SF_003",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        2.1149384071729247
+      ],
+      "UUID": "SF_003_675b74daa1d94766",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "BPM_003",
+      "Length": 0.0,
+      "PassMethod": "IdentityPass",
+      "UUID": "BPM_003_0a8398e87d954664",
+      "Class": "Monitor"
+    },
+    {
+      "FamName": "COR_003",
+      "Length": 0.0,
+      "PassMethod": "ThinMPolePass",
+      "UUID": "COR_003_a47e4afce05e42c7",
+      "Class": "Multipole",
+      "MaxOrder": 0,
+      "NumIntSteps": 1,
+      "PolynomA": [
+        0.0
+      ],
+      "PolynomB": [
+        -0.0
+      ]
+    },
+    {
+      "FamName": "DRs_005",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_005",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_005_51e275d1f4c04653",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_005",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QD_003",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        -1.3094253462460304
+      ],
+      "UUID": "QD_003_f3adbe2c1b3b4e96",
+      "K": -1.3094253462460304,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SD_003",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        -3.4137638639939585
+      ],
+      "UUID": "SD_003_8847f52a1ab24139",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "DRs_006",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_006",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_006_efa60311fb494a26",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_006",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QF_004",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        1.2580503144087112
+      ],
+      "UUID": "QF_004_3d6633b2daab4497",
+      "K": 1.2580503144087112,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SF_004",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        2.1149384071729247
+      ],
+      "UUID": "SF_004_994280b85ca5424c",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "BPM_004",
+      "Length": 0.0,
+      "PassMethod": "IdentityPass",
+      "UUID": "BPM_004_130263628b354604",
+      "Class": "Monitor"
+    },
+    {
+      "FamName": "COR_004",
+      "Length": 0.0,
+      "PassMethod": "ThinMPolePass",
+      "UUID": "COR_004_df8065c70f8343b3",
+      "Class": "Multipole",
+      "MaxOrder": 0,
+      "NumIntSteps": 1,
+      "PolynomA": [
+        0.0
+      ],
+      "PolynomB": [
+        -0.0
+      ]
+    },
+    {
+      "FamName": "DRs_007",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_007",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_007_e171d6d45d0a40b0",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_007",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QD_004",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        -1.3094253462460304
+      ],
+      "UUID": "QD_004_0d27ccc7536744e5",
+      "K": -1.3094253462460304,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SD_004",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        -3.4137638639939585
+      ],
+      "UUID": "SD_004_9dd9281637544366",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "DRs_008",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_008",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_008_2ab18de726d24f37",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_008",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QF_005",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        1.2580503144087112
+      ],
+      "UUID": "QF_005_eedbaf0b897245a7",
+      "K": 1.2580503144087112,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SF_005",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        2.1149384071729247
+      ],
+      "UUID": "SF_005_d03c9d8336ea467a",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "BPM_005",
+      "Length": 0.0,
+      "PassMethod": "IdentityPass",
+      "UUID": "BPM_005_48a3a7f9195a487e",
+      "Class": "Monitor"
+    },
+    {
+      "FamName": "COR_005",
+      "Length": 0.0,
+      "PassMethod": "ThinMPolePass",
+      "UUID": "COR_005_9215a7c55cca49a7",
+      "Class": "Multipole",
+      "MaxOrder": 0,
+      "NumIntSteps": 1,
+      "PolynomA": [
+        0.0
+      ],
+      "PolynomB": [
+        -0.0
+      ]
+    },
+    {
+      "FamName": "DRs_009",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_009",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_009_55172c2c1e354e24",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_009",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QD_005",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        -1.3094253462460304
+      ],
+      "UUID": "QD_005_86031f371c6e4a03",
+      "K": -1.3094253462460304,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SD_005",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        -3.4137638639939585
+      ],
+      "UUID": "SD_005_8f33822faf52429f",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "DRs_010",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_010",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_010_a9b4e9f8ae2a4e91",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_010",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QF_006",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        1.2580503144087112
+      ],
+      "UUID": "QF_006_ac8563ac0cf549d4",
+      "K": 1.2580503144087112,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SF_006",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        2.1149384071729247
+      ],
+      "UUID": "SF_006_5fdcf7038343474f",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "BPM_006",
+      "Length": 0.0,
+      "PassMethod": "IdentityPass",
+      "UUID": "BPM_006_2875c012f3454392",
+      "Class": "Monitor"
+    },
+    {
+      "FamName": "COR_006",
+      "Length": 0.0,
+      "PassMethod": "ThinMPolePass",
+      "UUID": "COR_006_dd5a91ce11124e60",
+      "Class": "Multipole",
+      "MaxOrder": 0,
+      "NumIntSteps": 1,
+      "PolynomA": [
+        0.0
+      ],
+      "PolynomB": [
+        -0.0
+      ]
+    },
+    {
+      "FamName": "DRs_011",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_011",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_011_3d8537487c4a475b",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_011",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QD_006",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        -1.3094253462460304
+      ],
+      "UUID": "QD_006_baaa109b7de4464e",
+      "K": -1.3094253462460304,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SD_006",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        -3.4137638639939585
+      ],
+      "UUID": "SD_006_9a910185762c4669",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "DRs_012",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_012",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_012_0b859d92d0d24ae9",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_012",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QF_007",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        1.2580503144087112
+      ],
+      "UUID": "QF_007_85bc483c3eaa4e0b",
+      "K": 1.2580503144087112,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SF_007",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        2.1149384071729247
+      ],
+      "UUID": "SF_007_4ac2e46aa5bb4c38",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "BPM_007",
+      "Length": 0.0,
+      "PassMethod": "IdentityPass",
+      "UUID": "BPM_007_6b8c2d93530940ba",
+      "Class": "Monitor"
+    },
+    {
+      "FamName": "COR_007",
+      "Length": 0.0,
+      "PassMethod": "ThinMPolePass",
+      "UUID": "COR_007_3cd2e2d7f28d442a",
+      "Class": "Multipole",
+      "MaxOrder": 0,
+      "NumIntSteps": 1,
+      "PolynomA": [
+        0.0
+      ],
+      "PolynomB": [
+        -0.0
+      ]
+    },
+    {
+      "FamName": "DRs_013",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_013",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_013_fa5b9deca6c0447f",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_013",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QD_007",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        -1.3094253462460304
+      ],
+      "UUID": "QD_007_423c1d2bd5704dc0",
+      "K": -1.3094253462460304,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SD_007",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        -3.4137638639939585
+      ],
+      "UUID": "SD_007_8073281429e249bf",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "DRs_014",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_014",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_014_e3b3cd7118734d9a",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_014",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QF_008",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        1.2580503144087112
+      ],
+      "UUID": "QF_008_9d30486816f14f42",
+      "K": 1.2580503144087112,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SF_008",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        2.1149384071729247
+      ],
+      "UUID": "SF_008_3242d83833824998",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "BPM_008",
+      "Length": 0.0,
+      "PassMethod": "IdentityPass",
+      "UUID": "BPM_008_0a034d2069ff4fa5",
+      "Class": "Monitor"
+    },
+    {
+      "FamName": "COR_008",
+      "Length": 0.0,
+      "PassMethod": "ThinMPolePass",
+      "UUID": "COR_008_7a8f6a10d6c147b0",
+      "Class": "Multipole",
+      "MaxOrder": 0,
+      "NumIntSteps": 1,
+      "PolynomA": [
+        0.0
+      ],
+      "PolynomB": [
+        -0.0
+      ]
+    },
+    {
+      "FamName": "DRs_015",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_015",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_015_debe465500ea450c",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_015",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QD_008",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        -1.3094253462460304
+      ],
+      "UUID": "QD_008_39a76afbc5c0448f",
+      "K": -1.3094253462460304,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SD_008",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        -3.4137638639939585
+      ],
+      "UUID": "SD_008_78e4371b8fd54fd0",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "DRs_016",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_016",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_016_cb7ff66004864777",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_016",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QF_009",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        1.2580503144087112
+      ],
+      "UUID": "QF_009_a82e998e865c43c3",
+      "K": 1.2580503144087112,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SF_009",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        2.1149384071729247
+      ],
+      "UUID": "SF_009_b8699ab8bc87481a",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "BPM_009",
+      "Length": 0.0,
+      "PassMethod": "IdentityPass",
+      "UUID": "BPM_009_71951baace814f41",
+      "Class": "Monitor"
+    },
+    {
+      "FamName": "COR_009",
+      "Length": 0.0,
+      "PassMethod": "ThinMPolePass",
+      "UUID": "COR_009_72d51334bf7847e1",
+      "Class": "Multipole",
+      "MaxOrder": 0,
+      "NumIntSteps": 1,
+      "PolynomA": [
+        0.0
+      ],
+      "PolynomB": [
+        -0.0
+      ]
+    },
+    {
+      "FamName": "DRs_017",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_017",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_017_84e24e15c84d41b4",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_017",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QD_009",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        -1.3094253462460304
+      ],
+      "UUID": "QD_009_0954ff1f957d4496",
+      "K": -1.3094253462460304,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SD_009",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        -3.4137638639939585
+      ],
+      "UUID": "SD_009_6fc6326d3a3e4d53",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "DRs_018",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_018",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_018_af1cdae072a34116",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_018",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QF_010",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        1.2580503144087112
+      ],
+      "UUID": "QF_010_64354ff742804522",
+      "K": 1.2580503144087112,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SF_010",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        2.1149384071729247
+      ],
+      "UUID": "SF_010_b463a021c7bb4d5b",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "BPM_010",
+      "Length": 0.0,
+      "PassMethod": "IdentityPass",
+      "UUID": "BPM_010_5aa612b6346d4cfd",
+      "Class": "Monitor"
+    },
+    {
+      "FamName": "COR_010",
+      "Length": 0.0,
+      "PassMethod": "ThinMPolePass",
+      "UUID": "COR_010_a68a73b307f1433a",
+      "Class": "Multipole",
+      "MaxOrder": 0,
+      "NumIntSteps": 1,
+      "PolynomA": [
+        0.0
+      ],
+      "PolynomB": [
+        -0.0
+      ]
+    },
+    {
+      "FamName": "DRs_019",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_019",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_019_1191ed5588124131",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_019",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QD_010",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        -1.3094253462460304
+      ],
+      "UUID": "QD_010_d28b40ccd1d64770",
+      "K": -1.3094253462460304,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SD_010",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        -3.4137638639939585
+      ],
+      "UUID": "SD_010_af2dbed722e74675",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "DRs_020",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_020",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_020_f8ca0a3e66104b92",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_020",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QF_011",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        1.2580503144087112
+      ],
+      "UUID": "QF_011_24042a2d336945b2",
+      "K": 1.2580503144087112,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SF_011",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        2.1149384071729247
+      ],
+      "UUID": "SF_011_4ab4d5bb6e65417c",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "BPM_011",
+      "Length": 0.0,
+      "PassMethod": "IdentityPass",
+      "UUID": "BPM_011_1606a2e9abd54b90",
+      "Class": "Monitor"
+    },
+    {
+      "FamName": "COR_011",
+      "Length": 0.0,
+      "PassMethod": "ThinMPolePass",
+      "UUID": "COR_011_9c43dd897fac431f",
+      "Class": "Multipole",
+      "MaxOrder": 0,
+      "NumIntSteps": 1,
+      "PolynomA": [
+        0.0
+      ],
+      "PolynomB": [
+        -0.0
+      ]
+    },
+    {
+      "FamName": "DRs_021",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_021",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_021_a325cec6f15d4836",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_021",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QD_011",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        -1.3094253462460304
+      ],
+      "UUID": "QD_011_a43c3d78c9c44a3c",
+      "K": -1.3094253462460304,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SD_011",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        -3.4137638639939585
+      ],
+      "UUID": "SD_011_ba88cba809374b3b",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "DRs_022",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_022",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_022_82734024efc24119",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_022",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QF_012",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        1.2580503144087112
+      ],
+      "UUID": "QF_012_bf99c63cf126498e",
+      "K": 1.2580503144087112,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SF_012",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        2.1149384071729247
+      ],
+      "UUID": "SF_012_cfb308c45f9b465f",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "BPM_012",
+      "Length": 0.0,
+      "PassMethod": "IdentityPass",
+      "UUID": "BPM_012_2422ef8fcfc24691",
+      "Class": "Monitor"
+    },
+    {
+      "FamName": "COR_012",
+      "Length": 0.0,
+      "PassMethod": "ThinMPolePass",
+      "UUID": "COR_012_0fcbaaf1028c452e",
+      "Class": "Multipole",
+      "MaxOrder": 0,
+      "NumIntSteps": 1,
+      "PolynomA": [
+        0.0
+      ],
+      "PolynomB": [
+        -0.0
+      ]
+    },
+    {
+      "FamName": "DRs_023",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_023",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_023_49a142437ee64856",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_023",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QD_012",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        -1.3094253462460304
+      ],
+      "UUID": "QD_012_e6ec59256b734974",
+      "K": -1.3094253462460304,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SD_012",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        -3.4137638639939585
+      ],
+      "UUID": "SD_012_a30bcdb9f573401d",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "DRs_024",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_024",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_024_5d7fc585011e44c6",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_024",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QF_013",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        1.2580503144087112
+      ],
+      "UUID": "QF_013_8d185c5d960945f9",
+      "K": 1.2580503144087112,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SF_013",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        2.1149384071729247
+      ],
+      "UUID": "SF_013_06d473a9d99945ae",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "BPM_013",
+      "Length": 0.0,
+      "PassMethod": "IdentityPass",
+      "UUID": "BPM_013_33430b62f88b401e",
+      "Class": "Monitor"
+    },
+    {
+      "FamName": "COR_013",
+      "Length": 0.0,
+      "PassMethod": "ThinMPolePass",
+      "UUID": "COR_013_75ec65eca2b74a98",
+      "Class": "Multipole",
+      "MaxOrder": 0,
+      "NumIntSteps": 1,
+      "PolynomA": [
+        0.0
+      ],
+      "PolynomB": [
+        -0.0
+      ]
+    },
+    {
+      "FamName": "DRs_025",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_025",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_025_76439f542aaa4a4d",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_025",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QD_013",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        -1.3094253462460304
+      ],
+      "UUID": "QD_013_a60f228881294148",
+      "K": -1.3094253462460304,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SD_013",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        -3.4137638639939585
+      ],
+      "UUID": "SD_013_70f532ea96d04d35",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "DRs_026",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_026",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_026_0fc7dbf92c3a4793",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_026",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QF_014",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        1.2580503144087112
+      ],
+      "UUID": "QF_014_6b3c29fcf77a48b6",
+      "K": 1.2580503144087112,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SF_014",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        2.1149384071729247
+      ],
+      "UUID": "SF_014_476143f7c68e48b3",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "BPM_014",
+      "Length": 0.0,
+      "PassMethod": "IdentityPass",
+      "UUID": "BPM_014_942374d7381d4683",
+      "Class": "Monitor"
+    },
+    {
+      "FamName": "COR_014",
+      "Length": 0.0,
+      "PassMethod": "ThinMPolePass",
+      "UUID": "COR_014_1041dd109c4c4b1e",
+      "Class": "Multipole",
+      "MaxOrder": 0,
+      "NumIntSteps": 1,
+      "PolynomA": [
+        0.0
+      ],
+      "PolynomB": [
+        -0.0
+      ]
+    },
+    {
+      "FamName": "DRs_027",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_027",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_027_6d150ae5dc37451b",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_027",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QD_014",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        -1.3094253462460304
+      ],
+      "UUID": "QD_014_5c97788060d141fa",
+      "K": -1.3094253462460304,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SD_014",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        -3.4137638639939585
+      ],
+      "UUID": "SD_014_2d9751d7e0a54092",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "DRs_028",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_028",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_028_a9303ce9a1a740b9",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_028",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QF_015",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        1.2580503144087112
+      ],
+      "UUID": "QF_015_1471d44e166146e1",
+      "K": 1.2580503144087112,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SF_015",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        2.1149384071729247
+      ],
+      "UUID": "SF_015_eb58dc186ce343eb",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "BPM_015",
+      "Length": 0.0,
+      "PassMethod": "IdentityPass",
+      "UUID": "BPM_015_78645ed8259d4bcb",
+      "Class": "Monitor"
+    },
+    {
+      "FamName": "COR_015",
+      "Length": 0.0,
+      "PassMethod": "ThinMPolePass",
+      "UUID": "COR_015_f386ead7438a4d24",
+      "Class": "Multipole",
+      "MaxOrder": 0,
+      "NumIntSteps": 1,
+      "PolynomA": [
+        0.0
+      ],
+      "PolynomB": [
+        -0.0
+      ]
+    },
+    {
+      "FamName": "DRs_029",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_029",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_029_9908d63194b54e1d",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_029",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QD_015",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        -1.3094253462460304
+      ],
+      "UUID": "QD_015_374a315b60854bb6",
+      "K": -1.3094253462460304,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SD_015",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        -3.4137638639939585
+      ],
+      "UUID": "SD_015_3c0aee9958974c00",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "DRs_030",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_030",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_030_a89961119fbd47e1",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_030",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QF_016",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        1.2580503144087112
+      ],
+      "UUID": "QF_016_728ed73c842141f7",
+      "K": 1.2580503144087112,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SF_016",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        2.1149384071729247
+      ],
+      "UUID": "SF_016_fadc3f0ba9e74039",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "BPM_016",
+      "Length": 0.0,
+      "PassMethod": "IdentityPass",
+      "UUID": "BPM_016_9a07fd137b294cfc",
+      "Class": "Monitor"
+    },
+    {
+      "FamName": "COR_016",
+      "Length": 0.0,
+      "PassMethod": "ThinMPolePass",
+      "UUID": "COR_016_5dea0eada2984432",
+      "Class": "Multipole",
+      "MaxOrder": 0,
+      "NumIntSteps": 1,
+      "PolynomA": [
+        0.0
+      ],
+      "PolynomB": [
+        -0.0
+      ]
+    },
+    {
+      "FamName": "DRs_031",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_031",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_031_f2431d5924d34407",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_031",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "QD_016",
+      "Length": 0.4,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        -1.3094253462460304
+      ],
+      "UUID": "QD_016_5728a761514042e2",
+      "K": -1.3094253462460304,
+      "Class": "Quadrupole"
+    },
+    {
+      "FamName": "SD_016",
+      "Length": 0.1,
+      "PassMethod": "StrMPoleSymplectic4Pass",
+      "MaxOrder": 2,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0,
+        -3.4137638639939585
+      ],
+      "UUID": "SD_016_f9ef0fa336aa48a0",
+      "Class": "Sextupole"
+    },
+    {
+      "FamName": "DRs_032",
+      "Length": 0.4,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    },
+    {
+      "FamName": "B_032",
+      "Length": 1.0,
+      "PassMethod": "BndMPoleSymplectic4Pass",
+      "BendingAngle": 0.19634954084936207,
+      "EntranceAngle": 0.0,
+      "ExitAngle": 0.0,
+      "MaxOrder": 1,
+      "NumIntSteps": 10,
+      "PolynomA": [
+        0.0,
+        0.0
+      ],
+      "PolynomB": [
+        0.0,
+        0.0
+      ],
+      "UUID": "B_032_f3576e7be1b74b39",
+      "K": 0.0,
+      "Class": "Bend"
+    },
+    {
+      "FamName": "DR_032",
+      "Length": 0.5,
+      "PassMethod": "DriftPass",
+      "Class": "Drift"
+    }
+  ],
+  "properties": {
+    "name": "FODO_1GeV_6D",
+    "energy": 1000000000.0,
+    "particle": {
+      "name": "relativistic",
+      "rest_energy": 0.0,
+      "charge": -1.0
+    },
+    "periodicity": 1,
+    "harmonic_number": 90,
+    "beam_current": 0.0,
+    "nbunch": 1
+  }
+}
