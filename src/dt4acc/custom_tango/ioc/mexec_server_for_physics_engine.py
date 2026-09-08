@@ -9,7 +9,7 @@ import time
 from collections import defaultdict
 
 from dt4acc.core.utils.logger import get_logger
-from dt4acc.custom_tango.ioc.handle_lattice import lattice_loader
+from dt4acc.core.bl.handle_lattice import lattice_loader
 from dt4acc.custom_tango.ioc import mexec_config
 from dt4acc.custom_tango.ioc.sync_mexec_proxy import SyncMexecProxy
 from dt4acc.custom_tango.ioc.virtual_pass_through_command_rewriter import VirtualPassthroughCommandRewriter

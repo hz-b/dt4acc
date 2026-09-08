@@ -6,7 +6,7 @@ from dt4acc.custom_facility.soleil.utils.command_line_interface import (
     display_setup_from_args,
     build_args_parser,
 )
-from dt4acc.custom_tango.ioc import handle_lattice
+from dt4acc.core.bl import handle_lattice
 from dt4acc.custom_tango.ioc.devices.tango_device_setup import (
     register_all_devices,
     check_devices,

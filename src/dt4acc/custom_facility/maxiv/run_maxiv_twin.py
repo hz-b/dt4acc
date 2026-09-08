@@ -35,7 +35,8 @@ import os
 import sys
 from pathlib import Path
 
-from dt4acc.custom_tango.ioc import handle_lattice, mexec_config, mexec_server_for_physics_engine
+from dt4acc.core.bl import handle_lattice
+from dt4acc.custom_tango.ioc import mexec_config, mexec_server_for_physics_engine
 
 # ---------------------------------------------------------------------------
 # Defaults
