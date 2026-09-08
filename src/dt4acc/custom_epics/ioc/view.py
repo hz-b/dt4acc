@@ -200,6 +200,7 @@ class View(ViewInterface):
 
         (single_reading,) = pkg.readings
         value = single_reading.payload
+        assert value is not None
         for plane in ("x", "y"):
 
             rw = self.process_variables.get(ReadCommand("twiss", f"{plane}:nu"))

@@ -22,6 +22,7 @@ from dt4acc.custom_epics.ioc.pv_setup import (
     initialize_twiss_pvs,
     initialize_tune_pvs,
     initialize_other_pvs,
+    initialize_reset_pvs,
 )
 from dt4acc.core.bl.controller import Controller
 from dt4acc_lib.pyat_simulator.accelerator_simulator import PyATAcceleratorSimulator
@@ -138,6 +139,7 @@ async def initialise_pvs(
         **initialize_twiss_pvs(builder),
         **initialize_tune_pvs(builder),
         **initialize_other_pvs(builder),
+        **await initialize_reset_pvs(builder, controller=controller),
     }
 
 

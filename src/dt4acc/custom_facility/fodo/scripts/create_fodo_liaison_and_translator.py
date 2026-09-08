@@ -120,6 +120,10 @@ def build_liaison_manager_lut(magnets, yp: YellowPages):
             inv_d[pc_dev_p].append(lat_p)
             inv_d[mag_dev_p].append(lat_p)
             inv_d[DevicePropertyID(device_name=dev_name, property="rdbk_current")].append(lat_p)
+            # Steerers also need main_strength_rdbk (pv_setup.py builds a
+            # readback PV for every magnet type, quad/sext/steerer alike —
+            # this was missing here even though quad/sext have it below).
+            inv_d[DevicePropertyID(device_name=name, property="main_strength_rdbk")].append(lat_p)
 
     lut_fwd += [LiaisonManagerForwardLookupElement(lat_id=k, dev_ids=v) for k, v in fwd_d.items()]
     lut_inv += [LiaisonManagerInverseLookupElement(dev_id=k, lat_ids=v) for k, v in inv_d.items()]
@@ -261,7 +265,7 @@ def build_translator_manager_lut(magnets, yp: YellowPages, lm_inv: LiaisonManage
 
     all_keys, unhandled = unhandled, []
     for dev_p in all_keys:
-        if dev_p.device_name in steerers and dev_p.property == "main_strength":
+        if dev_p.device_name in steerers and dev_p.property in ("main_strength", "main_strength_rdbk"):
             (lat_p,) = lm_inv.get(dev_p)
             assert lat_p.property in ("B1", "A1")
             lut.append(

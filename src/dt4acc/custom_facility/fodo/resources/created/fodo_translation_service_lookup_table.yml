@@ -1,5 +1,5 @@
 # 
-# FODO Translation service table: 2026-09-07 15:00:25.395398
+# FODO Translation service table: 2026-09-08 11:19:26.740889
 # WARNING: automatically generated data
 #          please check when it is updated if you edit it by hand!
 lut:
@@ -3225,8 +3225,28 @@ lut:
     energy_dependent: false
 - conversion_id:
     device_property_id:
+      device_name: HCOR_001
+      property: main_strength_rdbk
+    lattice_property_id:
+      element_name: COR_001
+      property: B1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
       device_name: HCOR_002
       property: main_strength
+    lattice_property_id:
+      element_name: COR_002
+      property: B1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
+      device_name: HCOR_002
+      property: main_strength_rdbk
     lattice_property_id:
       element_name: COR_002
       property: B1
@@ -3245,8 +3265,28 @@ lut:
     energy_dependent: false
 - conversion_id:
     device_property_id:
+      device_name: HCOR_003
+      property: main_strength_rdbk
+    lattice_property_id:
+      element_name: COR_003
+      property: B1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
       device_name: HCOR_004
       property: main_strength
+    lattice_property_id:
+      element_name: COR_004
+      property: B1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
+      device_name: HCOR_004
+      property: main_strength_rdbk
     lattice_property_id:
       element_name: COR_004
       property: B1
@@ -3265,8 +3305,28 @@ lut:
     energy_dependent: false
 - conversion_id:
     device_property_id:
+      device_name: HCOR_005
+      property: main_strength_rdbk
+    lattice_property_id:
+      element_name: COR_005
+      property: B1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
       device_name: HCOR_006
       property: main_strength
+    lattice_property_id:
+      element_name: COR_006
+      property: B1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
+      device_name: HCOR_006
+      property: main_strength_rdbk
     lattice_property_id:
       element_name: COR_006
       property: B1
@@ -3285,8 +3345,28 @@ lut:
     energy_dependent: false
 - conversion_id:
     device_property_id:
+      device_name: HCOR_007
+      property: main_strength_rdbk
+    lattice_property_id:
+      element_name: COR_007
+      property: B1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
       device_name: HCOR_008
       property: main_strength
+    lattice_property_id:
+      element_name: COR_008
+      property: B1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
+      device_name: HCOR_008
+      property: main_strength_rdbk
     lattice_property_id:
       element_name: COR_008
       property: B1
@@ -3305,8 +3385,28 @@ lut:
     energy_dependent: false
 - conversion_id:
     device_property_id:
+      device_name: HCOR_009
+      property: main_strength_rdbk
+    lattice_property_id:
+      element_name: COR_009
+      property: B1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
       device_name: HCOR_010
       property: main_strength
+    lattice_property_id:
+      element_name: COR_010
+      property: B1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
+      device_name: HCOR_010
+      property: main_strength_rdbk
     lattice_property_id:
       element_name: COR_010
       property: B1
@@ -3325,8 +3425,28 @@ lut:
     energy_dependent: false
 - conversion_id:
     device_property_id:
+      device_name: HCOR_011
+      property: main_strength_rdbk
+    lattice_property_id:
+      element_name: COR_011
+      property: B1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
       device_name: HCOR_012
       property: main_strength
+    lattice_property_id:
+      element_name: COR_012
+      property: B1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
+      device_name: HCOR_012
+      property: main_strength_rdbk
     lattice_property_id:
       element_name: COR_012
       property: B1
@@ -3345,8 +3465,28 @@ lut:
     energy_dependent: false
 - conversion_id:
     device_property_id:
+      device_name: HCOR_013
+      property: main_strength_rdbk
+    lattice_property_id:
+      element_name: COR_013
+      property: B1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
       device_name: HCOR_014
       property: main_strength
+    lattice_property_id:
+      element_name: COR_014
+      property: B1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
+      device_name: HCOR_014
+      property: main_strength_rdbk
     lattice_property_id:
       element_name: COR_014
       property: B1
@@ -3365,8 +3505,28 @@ lut:
     energy_dependent: false
 - conversion_id:
     device_property_id:
+      device_name: HCOR_015
+      property: main_strength_rdbk
+    lattice_property_id:
+      element_name: COR_015
+      property: B1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
       device_name: HCOR_016
       property: main_strength
+    lattice_property_id:
+      element_name: COR_016
+      property: B1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
+      device_name: HCOR_016
+      property: main_strength_rdbk
     lattice_property_id:
       element_name: COR_016
       property: B1
@@ -3385,8 +3545,28 @@ lut:
     energy_dependent: false
 - conversion_id:
     device_property_id:
+      device_name: VCOR_001
+      property: main_strength_rdbk
+    lattice_property_id:
+      element_name: COR_001
+      property: A1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
       device_name: VCOR_002
       property: main_strength
+    lattice_property_id:
+      element_name: COR_002
+      property: A1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
+      device_name: VCOR_002
+      property: main_strength_rdbk
     lattice_property_id:
       element_name: COR_002
       property: A1
@@ -3405,8 +3585,28 @@ lut:
     energy_dependent: false
 - conversion_id:
     device_property_id:
+      device_name: VCOR_003
+      property: main_strength_rdbk
+    lattice_property_id:
+      element_name: COR_003
+      property: A1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
       device_name: VCOR_004
       property: main_strength
+    lattice_property_id:
+      element_name: COR_004
+      property: A1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
+      device_name: VCOR_004
+      property: main_strength_rdbk
     lattice_property_id:
       element_name: COR_004
       property: A1
@@ -3425,8 +3625,28 @@ lut:
     energy_dependent: false
 - conversion_id:
     device_property_id:
+      device_name: VCOR_005
+      property: main_strength_rdbk
+    lattice_property_id:
+      element_name: COR_005
+      property: A1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
       device_name: VCOR_006
       property: main_strength
+    lattice_property_id:
+      element_name: COR_006
+      property: A1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
+      device_name: VCOR_006
+      property: main_strength_rdbk
     lattice_property_id:
       element_name: COR_006
       property: A1
@@ -3445,8 +3665,28 @@ lut:
     energy_dependent: false
 - conversion_id:
     device_property_id:
+      device_name: VCOR_007
+      property: main_strength_rdbk
+    lattice_property_id:
+      element_name: COR_007
+      property: A1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
       device_name: VCOR_008
       property: main_strength
+    lattice_property_id:
+      element_name: COR_008
+      property: A1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
+      device_name: VCOR_008
+      property: main_strength_rdbk
     lattice_property_id:
       element_name: COR_008
       property: A1
@@ -3465,8 +3705,28 @@ lut:
     energy_dependent: false
 - conversion_id:
     device_property_id:
+      device_name: VCOR_009
+      property: main_strength_rdbk
+    lattice_property_id:
+      element_name: COR_009
+      property: A1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
       device_name: VCOR_010
       property: main_strength
+    lattice_property_id:
+      element_name: COR_010
+      property: A1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
+      device_name: VCOR_010
+      property: main_strength_rdbk
     lattice_property_id:
       element_name: COR_010
       property: A1
@@ -3485,8 +3745,28 @@ lut:
     energy_dependent: false
 - conversion_id:
     device_property_id:
+      device_name: VCOR_011
+      property: main_strength_rdbk
+    lattice_property_id:
+      element_name: COR_011
+      property: A1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
       device_name: VCOR_012
       property: main_strength
+    lattice_property_id:
+      element_name: COR_012
+      property: A1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
+      device_name: VCOR_012
+      property: main_strength_rdbk
     lattice_property_id:
       element_name: COR_012
       property: A1
@@ -3505,8 +3785,28 @@ lut:
     energy_dependent: false
 - conversion_id:
     device_property_id:
+      device_name: VCOR_013
+      property: main_strength_rdbk
+    lattice_property_id:
+      element_name: COR_013
+      property: A1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
       device_name: VCOR_014
       property: main_strength
+    lattice_property_id:
+      element_name: COR_014
+      property: A1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
+      device_name: VCOR_014
+      property: main_strength_rdbk
     lattice_property_id:
       element_name: COR_014
       property: A1
@@ -3525,8 +3825,28 @@ lut:
     energy_dependent: false
 - conversion_id:
     device_property_id:
+      device_name: VCOR_015
+      property: main_strength_rdbk
+    lattice_property_id:
+      element_name: COR_015
+      property: A1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
       device_name: VCOR_016
       property: main_strength
+    lattice_property_id:
+      element_name: COR_016
+      property: A1
+  conversion_info:
+    coeffs: [0.0, 1.0]
+    energy_dependent: false
+- conversion_id:
+    device_property_id:
+      device_name: VCOR_016
+      property: main_strength_rdbk
     lattice_property_id:
       element_name: COR_016
       property: A1

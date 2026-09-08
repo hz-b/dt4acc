@@ -1,5 +1,5 @@
 # 
-# FODO Liaison manager inverse table: 2026-09-07 15:00:25.395398
+# FODO Liaison manager inverse table: 2026-09-08 11:19:26.740889
 # WARNING: automatically generated data
 #          please check when it is updated if you edit it by hand!
 lut:
@@ -1040,6 +1040,10 @@ lut:
     property: rdbk_current
   lat_ids: [{element_name: COR_001, property: B1}]
 - dev_id:
+    device_name: HCOR_001
+    property: main_strength_rdbk
+  lat_ids: [{element_name: COR_001, property: B1}]
+- dev_id:
     device_name: HCOR_002_PC
     property: set_current
   lat_ids: [{element_name: COR_002, property: B1}]
@@ -1050,6 +1054,10 @@ lut:
 - dev_id:
     device_name: HCOR_002_PC
     property: rdbk_current
+  lat_ids: [{element_name: COR_002, property: B1}]
+- dev_id:
+    device_name: HCOR_002
+    property: main_strength_rdbk
   lat_ids: [{element_name: COR_002, property: B1}]
 - dev_id:
     device_name: HCOR_003_PC
@@ -1064,6 +1072,10 @@ lut:
     property: rdbk_current
   lat_ids: [{element_name: COR_003, property: B1}]
 - dev_id:
+    device_name: HCOR_003
+    property: main_strength_rdbk
+  lat_ids: [{element_name: COR_003, property: B1}]
+- dev_id:
     device_name: HCOR_004_PC
     property: set_current
   lat_ids: [{element_name: COR_004, property: B1}]
@@ -1074,6 +1086,10 @@ lut:
 - dev_id:
     device_name: HCOR_004_PC
     property: rdbk_current
+  lat_ids: [{element_name: COR_004, property: B1}]
+- dev_id:
+    device_name: HCOR_004
+    property: main_strength_rdbk
   lat_ids: [{element_name: COR_004, property: B1}]
 - dev_id:
     device_name: HCOR_005_PC
@@ -1088,6 +1104,10 @@ lut:
     property: rdbk_current
   lat_ids: [{element_name: COR_005, property: B1}]
 - dev_id:
+    device_name: HCOR_005
+    property: main_strength_rdbk
+  lat_ids: [{element_name: COR_005, property: B1}]
+- dev_id:
     device_name: HCOR_006_PC
     property: set_current
   lat_ids: [{element_name: COR_006, property: B1}]
@@ -1098,6 +1118,10 @@ lut:
 - dev_id:
     device_name: HCOR_006_PC
     property: rdbk_current
+  lat_ids: [{element_name: COR_006, property: B1}]
+- dev_id:
+    device_name: HCOR_006
+    property: main_strength_rdbk
   lat_ids: [{element_name: COR_006, property: B1}]
 - dev_id:
     device_name: HCOR_007_PC
@@ -1112,6 +1136,10 @@ lut:
     property: rdbk_current
   lat_ids: [{element_name: COR_007, property: B1}]
 - dev_id:
+    device_name: HCOR_007
+    property: main_strength_rdbk
+  lat_ids: [{element_name: COR_007, property: B1}]
+- dev_id:
     device_name: HCOR_008_PC
     property: set_current
   lat_ids: [{element_name: COR_008, property: B1}]
@@ -1122,6 +1150,10 @@ lut:
 - dev_id:
     device_name: HCOR_008_PC
     property: rdbk_current
+  lat_ids: [{element_name: COR_008, property: B1}]
+- dev_id:
+    device_name: HCOR_008
+    property: main_strength_rdbk
   lat_ids: [{element_name: COR_008, property: B1}]
 - dev_id:
     device_name: HCOR_009_PC
@@ -1136,6 +1168,10 @@ lut:
     property: rdbk_current
   lat_ids: [{element_name: COR_009, property: B1}]
 - dev_id:
+    device_name: HCOR_009
+    property: main_strength_rdbk
+  lat_ids: [{element_name: COR_009, property: B1}]
+- dev_id:
     device_name: HCOR_010_PC
     property: set_current
   lat_ids: [{element_name: COR_010, property: B1}]
@@ -1146,6 +1182,10 @@ lut:
 - dev_id:
     device_name: HCOR_010_PC
     property: rdbk_current
+  lat_ids: [{element_name: COR_010, property: B1}]
+- dev_id:
+    device_name: HCOR_010
+    property: main_strength_rdbk
   lat_ids: [{element_name: COR_010, property: B1}]
 - dev_id:
     device_name: HCOR_011_PC
@@ -1160,6 +1200,10 @@ lut:
     property: rdbk_current
   lat_ids: [{element_name: COR_011, property: B1}]
 - dev_id:
+    device_name: HCOR_011
+    property: main_strength_rdbk
+  lat_ids: [{element_name: COR_011, property: B1}]
+- dev_id:
     device_name: HCOR_012_PC
     property: set_current
   lat_ids: [{element_name: COR_012, property: B1}]
@@ -1170,6 +1214,10 @@ lut:
 - dev_id:
     device_name: HCOR_012_PC
     property: rdbk_current
+  lat_ids: [{element_name: COR_012, property: B1}]
+- dev_id:
+    device_name: HCOR_012
+    property: main_strength_rdbk
   lat_ids: [{element_name: COR_012, property: B1}]
 - dev_id:
     device_name: HCOR_013_PC
@@ -1184,6 +1232,10 @@ lut:
     property: rdbk_current
   lat_ids: [{element_name: COR_013, property: B1}]
 - dev_id:
+    device_name: HCOR_013
+    property: main_strength_rdbk
+  lat_ids: [{element_name: COR_013, property: B1}]
+- dev_id:
     device_name: HCOR_014_PC
     property: set_current
   lat_ids: [{element_name: COR_014, property: B1}]
@@ -1194,6 +1246,10 @@ lut:
 - dev_id:
     device_name: HCOR_014_PC
     property: rdbk_current
+  lat_ids: [{element_name: COR_014, property: B1}]
+- dev_id:
+    device_name: HCOR_014
+    property: main_strength_rdbk
   lat_ids: [{element_name: COR_014, property: B1}]
 - dev_id:
     device_name: HCOR_015_PC
@@ -1208,6 +1264,10 @@ lut:
     property: rdbk_current
   lat_ids: [{element_name: COR_015, property: B1}]
 - dev_id:
+    device_name: HCOR_015
+    property: main_strength_rdbk
+  lat_ids: [{element_name: COR_015, property: B1}]
+- dev_id:
     device_name: HCOR_016_PC
     property: set_current
   lat_ids: [{element_name: COR_016, property: B1}]
@@ -1218,6 +1278,10 @@ lut:
 - dev_id:
     device_name: HCOR_016_PC
     property: rdbk_current
+  lat_ids: [{element_name: COR_016, property: B1}]
+- dev_id:
+    device_name: HCOR_016
+    property: main_strength_rdbk
   lat_ids: [{element_name: COR_016, property: B1}]
 - dev_id:
     device_name: VCOR_001_PC
@@ -1232,6 +1296,10 @@ lut:
     property: rdbk_current
   lat_ids: [{element_name: COR_001, property: A1}]
 - dev_id:
+    device_name: VCOR_001
+    property: main_strength_rdbk
+  lat_ids: [{element_name: COR_001, property: A1}]
+- dev_id:
     device_name: VCOR_002_PC
     property: set_current
   lat_ids: [{element_name: COR_002, property: A1}]
@@ -1242,6 +1310,10 @@ lut:
 - dev_id:
     device_name: VCOR_002_PC
     property: rdbk_current
+  lat_ids: [{element_name: COR_002, property: A1}]
+- dev_id:
+    device_name: VCOR_002
+    property: main_strength_rdbk
   lat_ids: [{element_name: COR_002, property: A1}]
 - dev_id:
     device_name: VCOR_003_PC
@@ -1256,6 +1328,10 @@ lut:
     property: rdbk_current
   lat_ids: [{element_name: COR_003, property: A1}]
 - dev_id:
+    device_name: VCOR_003
+    property: main_strength_rdbk
+  lat_ids: [{element_name: COR_003, property: A1}]
+- dev_id:
     device_name: VCOR_004_PC
     property: set_current
   lat_ids: [{element_name: COR_004, property: A1}]
@@ -1266,6 +1342,10 @@ lut:
 - dev_id:
     device_name: VCOR_004_PC
     property: rdbk_current
+  lat_ids: [{element_name: COR_004, property: A1}]
+- dev_id:
+    device_name: VCOR_004
+    property: main_strength_rdbk
   lat_ids: [{element_name: COR_004, property: A1}]
 - dev_id:
     device_name: VCOR_005_PC
@@ -1280,6 +1360,10 @@ lut:
     property: rdbk_current
   lat_ids: [{element_name: COR_005, property: A1}]
 - dev_id:
+    device_name: VCOR_005
+    property: main_strength_rdbk
+  lat_ids: [{element_name: COR_005, property: A1}]
+- dev_id:
     device_name: VCOR_006_PC
     property: set_current
   lat_ids: [{element_name: COR_006, property: A1}]
@@ -1290,6 +1374,10 @@ lut:
 - dev_id:
     device_name: VCOR_006_PC
     property: rdbk_current
+  lat_ids: [{element_name: COR_006, property: A1}]
+- dev_id:
+    device_name: VCOR_006
+    property: main_strength_rdbk
   lat_ids: [{element_name: COR_006, property: A1}]
 - dev_id:
     device_name: VCOR_007_PC
@@ -1304,6 +1392,10 @@ lut:
     property: rdbk_current
   lat_ids: [{element_name: COR_007, property: A1}]
 - dev_id:
+    device_name: VCOR_007
+    property: main_strength_rdbk
+  lat_ids: [{element_name: COR_007, property: A1}]
+- dev_id:
     device_name: VCOR_008_PC
     property: set_current
   lat_ids: [{element_name: COR_008, property: A1}]
@@ -1314,6 +1406,10 @@ lut:
 - dev_id:
     device_name: VCOR_008_PC
     property: rdbk_current
+  lat_ids: [{element_name: COR_008, property: A1}]
+- dev_id:
+    device_name: VCOR_008
+    property: main_strength_rdbk
   lat_ids: [{element_name: COR_008, property: A1}]
 - dev_id:
     device_name: VCOR_009_PC
@@ -1328,6 +1424,10 @@ lut:
     property: rdbk_current
   lat_ids: [{element_name: COR_009, property: A1}]
 - dev_id:
+    device_name: VCOR_009
+    property: main_strength_rdbk
+  lat_ids: [{element_name: COR_009, property: A1}]
+- dev_id:
     device_name: VCOR_010_PC
     property: set_current
   lat_ids: [{element_name: COR_010, property: A1}]
@@ -1338,6 +1438,10 @@ lut:
 - dev_id:
     device_name: VCOR_010_PC
     property: rdbk_current
+  lat_ids: [{element_name: COR_010, property: A1}]
+- dev_id:
+    device_name: VCOR_010
+    property: main_strength_rdbk
   lat_ids: [{element_name: COR_010, property: A1}]
 - dev_id:
     device_name: VCOR_011_PC
@@ -1352,6 +1456,10 @@ lut:
     property: rdbk_current
   lat_ids: [{element_name: COR_011, property: A1}]
 - dev_id:
+    device_name: VCOR_011
+    property: main_strength_rdbk
+  lat_ids: [{element_name: COR_011, property: A1}]
+- dev_id:
     device_name: VCOR_012_PC
     property: set_current
   lat_ids: [{element_name: COR_012, property: A1}]
@@ -1362,6 +1470,10 @@ lut:
 - dev_id:
     device_name: VCOR_012_PC
     property: rdbk_current
+  lat_ids: [{element_name: COR_012, property: A1}]
+- dev_id:
+    device_name: VCOR_012
+    property: main_strength_rdbk
   lat_ids: [{element_name: COR_012, property: A1}]
 - dev_id:
     device_name: VCOR_013_PC
@@ -1376,6 +1488,10 @@ lut:
     property: rdbk_current
   lat_ids: [{element_name: COR_013, property: A1}]
 - dev_id:
+    device_name: VCOR_013
+    property: main_strength_rdbk
+  lat_ids: [{element_name: COR_013, property: A1}]
+- dev_id:
     device_name: VCOR_014_PC
     property: set_current
   lat_ids: [{element_name: COR_014, property: A1}]
@@ -1386,6 +1502,10 @@ lut:
 - dev_id:
     device_name: VCOR_014_PC
     property: rdbk_current
+  lat_ids: [{element_name: COR_014, property: A1}]
+- dev_id:
+    device_name: VCOR_014
+    property: main_strength_rdbk
   lat_ids: [{element_name: COR_014, property: A1}]
 - dev_id:
     device_name: VCOR_015_PC
@@ -1400,6 +1520,10 @@ lut:
     property: rdbk_current
   lat_ids: [{element_name: COR_015, property: A1}]
 - dev_id:
+    device_name: VCOR_015
+    property: main_strength_rdbk
+  lat_ids: [{element_name: COR_015, property: A1}]
+- dev_id:
     device_name: VCOR_016_PC
     property: set_current
   lat_ids: [{element_name: COR_016, property: A1}]
@@ -1410,6 +1534,10 @@ lut:
 - dev_id:
     device_name: VCOR_016_PC
     property: rdbk_current
+  lat_ids: [{element_name: COR_016, property: A1}]
+- dev_id:
+    device_name: VCOR_016
+    property: main_strength_rdbk
   lat_ids: [{element_name: COR_016, property: A1}]
 - dev_id:
     device_name: QF_001

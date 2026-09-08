@@ -10,6 +10,7 @@ from ..data.constants import config, special_pvs, cavity_names
 from ..data.querries import (
     get_unique_magnet_power_converters,
     get_elements_per_power_converter,
+    get_controlled_elements,
 )
 from ...core.utils.logger import get_logger
 
@@ -341,6 +342,57 @@ async def initialize_master_clock_pvs(
         "lattice_info:ref_freq:khz:frac", initial_value=int(frac), EGU="mHz"
     )
     return d
+
+
+async def initialize_reset_pvs(
+    builder, controller: ControllerInterface
+) -> Dict[ReadCommand, RecordWrapper]:
+    """Reset/Reinit PVs — EPICS equivalents of the Tango twin's
+    RingSimulatorDevice.Reset/Reinit commands
+    (custom_tango/ioc/devices/virtual_devices.py).
+
+    Write any value to `ring:reset` to clear a beam-loss / error / fault
+    backend state and re-queue a fresh calculation, without perturbing
+    magnet settings. `ring:reinit` is the more drastic recovery: it also
+    reloads the lattice to its nominal state, discarding magnet changes.
+
+    Either way, every magnet/PC setpoint and readback PV is re-read from
+    the backend afterwards, so displayed values don't go stale relative
+    to a reinit-restored (or reset) backend — reinit in particular can
+    silently change every magnet's value without any of them having been
+    individually written to.
+    """
+    magnet_reads = []
+    for magnet in get_controlled_elements():
+        name = magnet["name"]
+        magnet_reads.append(ReadCommand(id=name, property="main_strength"))
+        magnet_reads.append(ReadCommand(id=name, property="main_strength_rdbk"))
+    for pc_name in get_unique_magnet_power_converters():
+        magnet_reads.append(ReadCommand(id=pc_name, property="set_current"))
+        magnet_reads.append(ReadCommand(id=pc_name, property="rdbk_current"))
+
+    async def do_reset(val):
+        await controller.reset()
+        await controller.refresh_reads(magnet_reads)
+
+    async def do_reinit(val):
+        await controller.reinit()
+        await controller.refresh_reads(magnet_reads)
+
+    return {
+        ReadCommand(id="ring", property="reset"): builder.boolOut(
+            "ring:reset",
+            initial_value=0,
+            always_update=True,
+            on_update=do_reset,
+        ),
+        ReadCommand(id="ring", property="reinit"): builder.boolOut(
+            "ring:reinit",
+            initial_value=0,
+            always_update=True,
+            on_update=do_reinit,
+        ),
+    }
 
 
 def initialize_other_pvs(builder) -> Dict[ReadCommand, RecordWrapper]:

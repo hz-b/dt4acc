@@ -126,6 +126,47 @@ class Controller(ControllerInterface):
         assert self.default_delayed_reads, "No delayed reads were provided"
         await self._enqueue(self.default_delayed_reads)
 
+    async def refresh_reads(self, reads: Sequence[ReadCommand]) -> None:
+        """Re-read the given properties from the backend and push them to
+        the view immediately (not via the delayed queue).
+
+        Used after reset()/reinit() to resynchronise PVs — e.g. magnet
+        setpoints/readbacks — whose displayed value would otherwise stay
+        stale relative to the backend (reinit() in particular can change
+        every magnet's value without any of them having been written to).
+        """
+        if not reads:
+            return
+        read_result = await self.mexec.trigger_read(reads)
+        for rcmd, translated in zip(reads, read_result.data):
+            await self.view.dispatch(rcmd, translated)
+
+    async def reset(self) -> None:
+        """Clear a beam-loss/error/fault backend state and re-queue a fresh
+        calculation, without perturbing the current magnet settings.
+
+        EPICS equivalent of RingSimulatorDevice.Reset in the Tango twin
+        (custom_tango/ioc/devices/virtual_devices.py) — the Tango side
+        additionally fans this out across separate device-server processes
+        via a sync proxy, which isn't needed here since the EPICS twin runs
+        backend and view in a single process.
+        """
+        logger.warning("%s: Reset — clearing backend state...", self.name)
+        await self.mexec.backend.reset()
+        await self.reread_default_readings()
+
+    async def reinit(self) -> None:
+        """Reload the lattice to its nominal state, discarding any magnet
+        changes, then re-queue a fresh calculation.
+
+        EPICS equivalent of RingSimulatorDevice.Reinit in the Tango twin —
+        a more drastic recovery than reset() for when the backend needs to
+        be brought back to a known-good state after beam loss.
+        """
+        logger.warning("%s: Reinit — reloading nominal lattice...", self.name)
+        await self.mexec.backend.reinit()
+        await self.reread_default_readings()
+
     async def _push_invalid(self) -> None:
         """
         Push NaN arrays to all virtual devices when backend calculation fails.
