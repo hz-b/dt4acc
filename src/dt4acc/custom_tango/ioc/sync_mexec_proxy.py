@@ -5,7 +5,7 @@ import traceback
 from typing import Sequence
 
 from dt4acc.core.utils.logger import get_logger
-from dt4acc.custom_tango.ioc.handle_lattice import lattice_loader
+from dt4acc.core.bl.handle_lattice import lattice_loader
 from dt4acc_lib.interfaces.backend.calculation_states import CalculationStates
 from dt4acc_lib.interfaces.utils.command_execution_engine import CommandExecutionEngine
 from dt4acc_lib.model.utils.command import Command, BehaviourOnError, ReadCommand

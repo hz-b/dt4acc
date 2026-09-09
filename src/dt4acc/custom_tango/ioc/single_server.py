@@ -30,7 +30,10 @@ from dt4acc.config.data.querries import get_controlled_elements, get_unique_magn
 from dt4acc.config.data.querries import get_rf_cavity_uuids
 from dt4acc.core.bl.controller import Controller
 from dt4acc.custom_tango.views.view import TangoView
-from dt4acc.custom_tango.ioc.mexec_server_for_physics_engine import _connect_to_mexec_service
+from dt4acc.custom_tango.ioc.mexec_server_for_physics_engine import (
+    _connect_to_mexec_service,
+    lattice_properties_for_device,
+)
 from dt4acc_lib.model.output.result import TranslatedReading, ReadTogetherAndTranslated, SingleReading
 from dt4acc_lib.model.utils.command import ReadCommand, Command
 from tango.server import run
@@ -172,16 +175,6 @@ def peek_from_lattice(element_id: str, prop: str) -> float:
         return 0.0
 
 
-def _steerer_lattice_property(name: str, subtype: str = "") -> str:
-    if subtype == "H":
-        return "B1"
-    if subtype == "V":
-        return "A1"
-    if "CDLV" in name or "CDRV" in name or "CRFCY" in name or "CRCOY" in name or "EM-COR/CV" in name:
-        return "A1"
-    return "B1"
-
-
 def _properties_for_uuid(uuid: str, uuid_to_prop: dict = None) -> list:
     value = (uuid_to_prop or {}).get(uuid, "main_strength")
     if isinstance(value, (set, list, tuple)):
@@ -201,23 +194,16 @@ def _properties_for_uuid_or_spec(uuid: str, prop_spec=None) -> list:
     return ["main_strength"]
 
 
-def _properties_for_element(name: str, mtype: str, subtype: str = "") -> list:
-    if mtype == "RFCavity":
-        return ["frequency", "voltage"]
-    if mtype == "Steerer":
-        return [_steerer_lattice_property(name, subtype=subtype)]
+def _properties_for_element(name: str, mtype: str = "", subtype: str = "") -> list:
+    """Which AT lattice-element properties this device controls.
 
-    subtype_to_prop = {
-        "Quad": "main_strength",
-        "Sext": "main_strength",
-        "SkewSext": "main_strength",
-        "Oct": "B4",
-    }
-    type_to_prop = {
-        "QuadrupoleCorrector": "B2",
-        "SkewQuadrupoleCorrector": "A2",
-    }
-    return [type_to_prop.get(mtype) or subtype_to_prop.get(subtype, "main_strength")]
+    Sourced from the active facility's liaison manager (via
+    lattice_properties_for_device) instead of re-derived from device-name
+    patterns or magnet type/subtype — that used to duplicate (and drift out
+    of sync with) what liasion_translator_setup.py already computes
+    correctly for each facility.
+    """
+    return lattice_properties_for_device(name)
 
 
 def _add_cache_element(
