@@ -194,7 +194,7 @@ def build_device_plan() -> DevicePlan:
     bpm_index_map: dict = {}
     try:
         import at as _at  # noqa: F401
-        from dt4acc.custom_tango.ioc.handle_lattice import lattice_loader
+        from dt4acc.core.bl.handle_lattice import lattice_loader
 
         lattice = lattice_loader.load()
         for i, elem in enumerate(lattice):
@@ -532,7 +532,7 @@ def _register_bpms(db: Database, unique_servers: set[tuple[str, str]]):
     bpm_index_map: dict = {}  # uuid → AT element index
     try:
         import at as _at
-        from dt4acc.custom_tango.ioc.handle_lattice import lattice_loader
+        from dt4acc.core.bl.handle_lattice import lattice_loader
 
         lattice = lattice_loader.load()
         for i, elem in enumerate(lattice):

@@ -1,13 +1,15 @@
 import asyncio
+import functools
 import importlib
 import logging
 import multiprocessing.managers
 import os
 import threading
 import time
+from collections import defaultdict
 
 from dt4acc.core.utils.logger import get_logger
-from dt4acc.custom_tango.ioc.handle_lattice import lattice_loader
+from dt4acc.core.bl.handle_lattice import lattice_loader
 from dt4acc.custom_tango.ioc import mexec_config
 from dt4acc.custom_tango.ioc.sync_mexec_proxy import SyncMexecProxy
 from dt4acc.custom_tango.ioc.virtual_pass_through_command_rewriter import VirtualPassthroughCommandRewriter
@@ -47,6 +49,41 @@ def _get_load_managers():
             f"LOAD_MANAGERS_FN not set — set {__name__}.LOAD_MANAGERS_FN "
             "in the launch script before calling main(), or set DT4ACC_LOAD_MANAGERS"
         )
+
+
+@functools.lru_cache(maxsize=1)
+def _device_to_lattice_properties() -> dict:
+    """device_name -> sorted list of AT lattice-element properties it controls.
+
+    Read straight from the active facility's liaison manager inverse table
+    (LOAD_MANAGERS_FN, set by the facility's run_*_twin.py) — the single
+    source of truth for how a Tango device name maps onto the AT lattice.
+    load_managers() is a pure function (it just parses static facility
+    config), so calling it again here in the Tango device-server process is
+    safe and yields the identical mapping the mexec service process built,
+    without needing any IPC.
+
+    Use this instead of re-deriving the mapping from device-name patterns
+    (e.g. "CDLV"/"CRFCY" substrings) or magnet type/subtype heuristics —
+    those duplicate what the facility's liasion_translator_setup.py already
+    computes correctly, and can drift out of sync with it.
+    """
+    _, lm, _ = _get_load_managers()()
+    by_device = defaultdict(set)
+    for elem in lm.inverse_lut.lut:
+        for lat_p in elem.lat_ids:
+            by_device[elem.dev_id.device_name].add(lat_p.property)
+    return {name: sorted(props) for name, props in by_device.items()}
+
+
+def lattice_properties_for_device(device_name: str, default=("main_strength",)) -> list:
+    """Return the AT lattice-element properties the given Tango device name
+    controls (e.g. ["main_strength"], ["B1"], ["A1"], ["frequency", "voltage"]),
+    per the active facility's liaison manager. Falls back to `default` if the
+    device has no liaison entry (shouldn't normally happen for a registered
+    controlled element).
+    """
+    return _device_to_lattice_properties().get(device_name, list(default))
 
 
 def _build_mexec():

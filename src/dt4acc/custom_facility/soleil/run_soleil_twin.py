@@ -37,7 +37,8 @@ from pathlib import Path
 
 
 from dt4acc.custom_facility.soleil.utils.command_line_interface import display_setup_from_args, parse_args
-from dt4acc.custom_tango.ioc import handle_lattice, mexec_config, mexec_server_for_physics_engine
+from dt4acc.core.bl import handle_lattice
+from dt4acc.custom_tango.ioc import mexec_config, mexec_server_for_physics_engine
 from dt4acc.custom_tango.ioc import server_manager
 
 # ---------------------------------------------------------------------------

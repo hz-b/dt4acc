@@ -10,6 +10,25 @@ from dt4acc_lib.model.utils.command import ReadCommand
 
 logger = get_logger()
 
+#: EPICS string PVs (DBF_STRING) cannot hold more than 39 characters.
+MAX_EPICS_STRING_LENGTH = 39
+
+
+def assert_epics_string_lengths(values, *, context: str) -> None:
+    """Raise a clear error if any string exceeds the EPICS PV limit.
+
+    Silently truncating (the previous behaviour) risks turning distinct
+    uids into duplicates and hides a data problem that should be fixed
+    at the source instead.
+    """
+    too_long = [v for v in values if len(v) > MAX_EPICS_STRING_LENGTH]
+    if too_long:
+        raise ValueError(
+            f"{context}: {len(too_long)} value(s) exceed the EPICS string "
+            f"limit of {MAX_EPICS_STRING_LENGTH} characters: {too_long}. "
+            "Fix the source lattice/element data instead of truncating."
+        )
+
 
 class View(ViewInterface):
     """Key/value interface to process variables.
@@ -80,7 +99,9 @@ class View(ViewInterface):
 
         rec_uid = self.process_variables.get(ReadCommand(id="survey", property="uids"))
         assert rec_uid
-        rec_uid.set([datum.uid for datum in single_reading.payload])
+        uids = [datum.uid for datum in single_reading.payload]
+        assert_epics_string_lengths(uids, context="survey uids")
+        rec_uid.set(uids)
 
     def update_track(self, var: ReadCommand, pkg):
         assert var.id == "track", f"Only prepared to process 'track' but got {var}"
@@ -110,6 +131,7 @@ class View(ViewInterface):
                 ReadCommand(id="beam", property="uids")
             )
             if rw_uids is not None:
+                assert_epics_string_lengths(uids, context="track uids")
                 rw_uids.set(uids)
 
             rw_found = self.process_variables.get(
@@ -197,7 +219,9 @@ class View(ViewInterface):
 
         rw_names = self.process_variables.get(ReadCommand("twiss", "uids"))
         assert rw_names is not None
-        rw_names.set([pos.uid for pos in value.twiss])
+        twiss_uids = [pos.uid for pos in value.twiss]
+        assert_epics_string_lengths(twiss_uids, context="twiss uids")
+        rw_names.set(twiss_uids)
 
         pi2 = 2 * math.pi
 
